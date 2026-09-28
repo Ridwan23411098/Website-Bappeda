@@ -1,0 +1,2602 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="SIP-KOMPETENSI — Sistem Individual Development Plan (IDP) Badan Perencanaan Pembangunan Daerah (Bappeda) Provinsi Lampung.">
+  <title>SIP-KOMPETENSI — Bappeda Provinsi Lampung</title>
+
+  <!-- Google Fonts: Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Core Stylesheet -->
+  <link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+
+  <!-- ========================================================================
+       01 — LOGIN SCREEN RESMI PEMERINTAH PROVINSI LAMPUNG
+       ======================================================================== -->
+  <div id="loginScreen" class="login-screen">
+    <!-- LEFT HERO 55% -->
+    <div class="login-hero">
+      <div class="login-brand-header">
+        <div class="official-lampung-logo" data-logo-size="52"><img src="Gambar/Lambang%20Lampung.png" alt="Lambang Provinsi Lampung" width="52" height="52" style="object-fit: contain; flex-shrink: 0;"></div>
+        <div>
+          <div class="login-brand-title">SIP-KOMPETENSI</div>
+          <div class="login-brand-sub">PEMERINTAH PROVINSI LAMPUNG</div>
+          <div style="font-size: 10px; color: #8BA8BD; font-weight: 600;">BADAN PERENCANAAN PEMBANGUNAN DAERAH</div>
+        </div>
+      </div>
+
+      <div class="login-hero-content">
+        <h1 class="login-headline">
+          Bangun Kompetensi.<br>
+          <span>Wujudkan Perencanaan Berkelanjutan.</span>
+        </h1>
+        <p class="login-subheadline">
+          Portal manajemen kompetensi terpadu ASN Bappeda Provinsi Lampung untuk pemetaan kesenjangan kualifikasi, perencanaan pengembangan karier jabatan, serta pengendalian mutu SDM aparatur perencana pembangunan daerah.
+        </p>
+
+        <!-- Official Statistics Panel -->
+        <div class="login-mockup-card">
+          <div class="mockup-stat-item">
+            <div class="mockup-stat-val">100</div>
+            <div class="mockup-stat-lbl">Aparatur Sipil Negara</div>
+          </div>
+          <div style="width: 1px; height: 36px; background: rgba(255,255,255,0.15);"></div>
+          <div class="mockup-stat-item">
+            <div class="mockup-stat-val">89%</div>
+            <div class="mockup-stat-lbl">IDP Terverifikasi</div>
+          </div>
+          <div style="width: 1px; height: 36px; background: rgba(255,255,255,0.15);"></div>
+          <div class="mockup-stat-item">
+            <div class="mockup-stat-val">74%</div>
+            <div class="mockup-stat-lbl">Capaian Realisasi</div>
+          </div>
+        </div>
+      </div>
+
+      <div style="font-size: 12px; color: #E2EAF1; line-height: 1.6; text-shadow: 0 1px 3px rgba(0,0,0,0.5);">
+        <b style="color: #FFFFFF;">Badan Perencanaan Pembangunan Daerah Provinsi Lampung</b><br>
+        Jl. Wolter Monginsidi No. 222, Telukbetung, Bandar Lampung (Kode Pos 35215)
+      </div>
+    </div>
+
+    <!-- RIGHT AUTH CARD 45% -->
+    <div class="login-auth-pane">
+      <div class="login-card">
+        <div class="login-card-head">
+          <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+            <div class="official-lampung-logo" data-logo-size="34"><img src="Gambar/Lambang%20Lampung.png" alt="Lambang Provinsi Lampung" width="34" height="34" style="object-fit: contain; flex-shrink: 0;"></div>
+            <div>
+              <div style="font-size: 11px; font-weight: 750; color: #1F6FAE; text-transform: uppercase;">Portal Layanan ASN</div>
+              <h2 style="font-size: 21px; font-weight: 800; color: #123B5D; margin: 0;">Masuk ke Sistem</h2>
+            </div>
+          </div>
+          <p style="font-size: 12.5px; color: #5F6B76;">Gunakan Nomor Induk Pegawai (NIP) dan kata sandi kedinasan Anda.</p>
+        </div>
+
+        <!-- Error Alert Container -->
+        <div id="loginErrorAlert" style="display: none; padding: 10px 14px; background: var(--color-danger-light); border: 1px solid rgba(180,35,24,0.3); border-radius: var(--radius-md); font-size: 12px; color: var(--color-danger); font-weight: 600; margin-bottom: 16px;"></div>
+
+        <form id="loginForm" onsubmit="event.preventDefault(); App.login();">
+          <div class="form-group">
+            <label class="form-label" for="loginNip">Nomor Induk Pegawai (NIP) <span class="required">*</span></label>
+            <div class="input-icon-wrapper">
+              <span class="input-icon-left" data-icon="UserRound" data-icon-size="16"></span>
+              <input type="text" id="loginNip" class="form-control" value="198701012010011001" placeholder="Masukkan 18 digit NIP resmi" required autocomplete="username">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="loginPassword">Kata Sandi Kedinasan <span class="required">*</span></label>
+            <div class="input-icon-wrapper">
+              <span class="input-icon-left" data-icon="ShieldCheck" data-icon-size="16"></span>
+              <input type="password" id="loginPassword" class="form-control has-right" value="password" placeholder="Masukkan kata sandi" required autocomplete="current-password">
+              <span class="input-icon-right" id="togglePasswordBtn" onclick="const p = document.getElementById('loginPassword'); p.type = p.type === 'password' ? 'text' : 'password';">
+                <span data-icon="Eye" data-icon-size="16"></span>
+              </span>
+            </div>
+          </div>
+
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 22px;">
+            <label class="custom-checkbox">
+              <input type="checkbox" checked>
+              <span>Ingat sesi perangkat ini</span>
+            </label>
+            <a href="javascript:void(0)" onclick="App.showAccountHelper()" style="font-size: 11.5px; font-weight: 600; color: var(--color-secondary-blue);">Daftar Akun Kedinasan</a>
+          </div>
+
+          <button type="submit" class="btn btn-primary btn-block btn-lg">
+            <span>Masuk ke Akun ASN</span>
+            <span data-icon="ArrowRight" data-icon-size="16"></span>
+          </button>
+        </form>
+
+        <div style="margin-top: 22px; padding-top: 18px; border-top: 1px solid var(--color-border-subtle);">
+          <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
+            <span data-icon="ShieldCheck" data-icon-size="14"></span>
+            <span style="font-size: 12px; font-weight: 700; color: var(--color-text-primary);">Akses Cepat — Pilih Hak Akses</span>
+          </div>
+          <p style="font-size: 11px; color: var(--color-text-muted); margin-bottom: 14px; line-height: 1.5;">Setiap hak akses memiliki <b>dashboard dan menu yang berbeda</b>. Klik salah satu untuk langsung masuk:</p>
+          <div style="display: flex; flex-direction: column; gap: 10px;">
+            <!-- 1. Pegawai ASN: Andi Arafat, S.T., M.E. -->
+            <button type="button" onclick="App.quickLogin('pegawai')" style="display:flex;align-items:center;gap:14px;width:100%;padding:13px 16px;background:linear-gradient(135deg,rgba(37,99,235,0.06),rgba(37,99,235,0.02));border:1.5px solid rgba(37,99,235,0.2);border-radius:12px;cursor:pointer;text-align:left;transition:all 200ms ease;">
+              <div style="width:42px;height:42px;border-radius:10px;background:linear-gradient(135deg,#2563EB,#3B82F6);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#fff;"><span data-icon="UserRound" data-icon-size="20"></span></div>
+              <div style="flex:1;">
+                <div style="font-weight:700;font-size:12.5px;color:var(--color-text-primary);margin-bottom:2px;">Pegawai ASN: ANDI ARAFAT, S.T., M.E.</div>
+                <div style="font-size:10px;color:var(--color-text-muted);line-height:1.4;">Sekretaris Bappeda • Pembina Tk. I / IV-b • NIP: 197407072002121008</div>
+              </div>
+              <span data-icon="ArrowRight" data-icon-size="16" style="color:#2563EB;flex-shrink:0;"></span>
+            </button>
+
+            <!-- 2. Admin / SDM: Cik Marya, S.E., M.M. -->
+            <button type="button" onclick="App.quickLogin('admin')" style="display:flex;align-items:center;gap:14px;width:100%;padding:13px 16px;background:linear-gradient(135deg,rgba(217,119,6,0.06),rgba(217,119,6,0.02));border:1.5px solid rgba(217,119,6,0.2);border-radius:12px;cursor:pointer;text-align:left;transition:all 200ms ease;">
+              <div style="width:42px;height:42px;border-radius:10px;background:linear-gradient(135deg,#D97706,#F59E0B);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#fff;"><span data-icon="Settings2" data-icon-size="20"></span></div>
+              <div style="flex:1;">
+                <div style="font-weight:700;font-size:12.5px;color:var(--color-text-primary);margin-bottom:2px;">Admin / Pengelola SDM: CIK MARYA, S.E., M.M.</div>
+                <div style="font-size:10px;color:var(--color-text-muted);line-height:1.4;">Kasubbag Umum & Kepegawaian • Sekretariat • NIP: 196910261992032002</div>
+              </div>
+              <span data-icon="ArrowRight" data-icon-size="16" style="color:#D97706;flex-shrink:0;"></span>
+            </button>
+
+            <!-- 3. Pimpinan: Dr. Anang Risgiyanto, S.K.M., M.Kes. -->
+            <button type="button" onclick="App.quickLogin('pimpinan')" style="display:flex;align-items:center;gap:14px;width:100%;padding:13px 16px;background:linear-gradient(135deg,rgba(5,150,105,0.06),rgba(5,150,105,0.02));border:1.5px solid rgba(5,150,105,0.2);border-radius:12px;cursor:pointer;text-align:left;transition:all 200ms ease;">
+              <div style="width:42px;height:42px;border-radius:10px;background:linear-gradient(135deg,#059669,#10B981);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#fff;"><span data-icon="ChartNoAxesCombined" data-icon-size="20"></span></div>
+              <div style="flex:1;">
+                <div style="font-weight:700;font-size:12.5px;color:var(--color-text-primary);margin-bottom:2px;">Pimpinan: Dr. ANANG RISGIYANTO, S.K.M., M.Kes.</div>
+                <div style="font-size:10px;color:var(--color-text-muted);line-height:1.4;">Kepala Badan Perencanaan Pembangunan Daerah • NIP: 197507312000031002</div>
+              </div>
+              <span data-icon="ArrowRight" data-icon-size="16" style="color:#059669;flex-shrink:0;"></span>
+            </button>
+          </div>
+        </div>
+        <div style="margin-top: 14px; padding-top: 10px; border-top: 1px solid var(--color-border-subtle); display: flex; justify-content: space-between; align-items: center; font-size: 10px; color: var(--color-text-muted);">
+          <span>Subbagian Umum & Kepegawaian</span>
+          <a href="javascript:void(0)" onclick="App.showAccountHelper()" style="font-weight: 600;">Daftar Akun NIP</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================
+       02 — APP SHELL (SIDEBAR, TOPBAR, MAIN CONTENT)
+       ======================================================================== -->
+  <div id="appShell" class="app-shell" style="display: none;">
+
+    <!-- FIXED SIDEBAR RESMI -->
+    <aside id="appSidebar" class="sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-brand">
+          <div class="official-lampung-logo" data-logo-size="44"><img src="Gambar/Lambang%20Lampung.png" alt="Lambang Provinsi Lampung" width="44" height="44" style="object-fit: contain; flex-shrink: 0;"></div>
+          <div class="sidebar-brand-text">
+            <h1>SIP-KOMPETENSI</h1>
+            <span class="org">BAPPEDA PROV. LAMPUNG</span>
+            <span class="subtext">Sistem Individual Development Plan</span>
+          </div>
+        </div>
+        <div class="sidebar-role-badge" id="sidebarRoleBadge">
+          <span class="role-dot"></span>Pegawai ASN
+        </div>
+      </div>
+
+      <!-- Navigation Menus (Grouped & Strictly Role-Segregated) -->
+      <nav class="sidebar-nav" id="sidebarNavContainer">
+        <!-- Rendered dynamically by App.renderSidebarNav() -->
+      </nav>
+
+      <!-- Sidebar Footer -->
+      <div class="sidebar-footer">
+        <div class="sidebar-user-card">
+          <div class="sidebar-user-info">
+            <div class="sidebar-user-name" id="sidebarUserName">Rizky Aditya Pratama</div>
+            <div class="sidebar-user-role" id="sidebarUserRole">Analis Perencanaan Ahli Muda</div>
+          </div>
+        </div>
+        <button class="btn-sidebar-logout" onclick="App.logout()">
+          <span data-icon="LogOut" data-icon-size="14"></span>
+          <span>Keluar Sesi</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- MAIN APPLICATION WRAPPER -->
+    <div class="main-wrapper">
+
+      <!-- STICKY TOPBAR -->
+      <header class="topbar">
+        <div class="topbar-left">
+          <button class="mobile-nav-toggle" onclick="App.toggleMobileSidebar()">
+            <span data-icon="Menu" data-icon-size="20"></span>
+          </button>
+          <div class="breadcrumb-nav">
+            <span class="brand-name">SIP-KOMPETENSI</span>
+            <span class="separator">/</span>
+            <span class="current-page" id="topbarBreadcrumbCurrent">Dashboard</span>
+          </div>
+        </div>
+
+        <!-- Desktop Search Bar (Ctrl+K) -->
+        <div class="topbar-center">
+          <div class="topbar-search">
+            <span class="search-icon" data-icon="Search" data-icon-size="15"></span>
+            <input type="text" id="topbarSearchInput" placeholder="Cari data pegawai, formulir IDP, atau diklat..." onkeydown="if(event.key==='Enter') App.toast('Mencari data: ' + this.value, 'info')">
+            <span class="shortcut-badge">Ctrl K</span>
+          </div>
+        </div>
+
+        <!-- Topbar Right Actions -->
+        <div class="topbar-right">
+          <div class="topbar-actions">
+            <!-- Dark Mode Toggle -->
+            <button class="btn-icon" id="themeToggleBtn" onclick="App.toggleTheme()" title="Ubah Mode Tampilan">
+              <span data-icon="Moon" data-icon-size="18"></span>
+            </button>
+
+            <!-- Help Icon -->
+            <button class="btn-icon" onclick="App.showAccountHelper()" title="Bantuan & Petunjuk">
+              <span data-icon="HelpCircle" data-icon-size="18"></span>
+            </button>
+
+            <!-- Notification Bell with Dropdown -->
+            <div class="notification-container">
+              <button class="btn-icon" id="notificationBtn" onclick="App.toggleNotificationDropdown()" title="Notifikasi">
+                <span data-icon="Bell" data-icon-size="18"></span>
+                <span class="notification-badge"></span>
+              </button>
+
+              <!-- Dropdown -->
+              <div class="notification-dropdown" id="notificationDropdown">
+                <div class="notification-header">
+                  <h3>Notifikasi Kedinasan</h3>
+                  <span class="notification-unread-count">3 belum dibaca</span>
+                </div>
+                <div class="notification-list">
+                  <div class="notification-item unread" onclick="App.toast('IDP Anda telah disetujui Pengelola SDM', 'info')">
+                    <div class="notification-icon"><span data-icon="CircleCheck" data-icon-size="16"></span></div>
+                    <div class="notification-content">
+                      <div class="notification-text">IDP Anda telah disetujui resmi oleh Pengelola SDM</div>
+                      <div class="notification-time">5 menit lalu</div>
+                    </div>
+                  </div>
+                  <div class="notification-item unread" onclick="App.toast('Sertifikat Analisis Data terverifikasi', 'info')">
+                    <div class="notification-icon"><span data-icon="ShieldCheck" data-icon-size="16"></span></div>
+                    <div class="notification-content">
+                      <div class="notification-text">Program Pelatihan Analisis Data berhasil diverifikasi</div>
+                      <div class="notification-time">1 jam lalu</div>
+                    </div>
+                  </div>
+                  <div class="notification-item unread" onclick="App.toast('Pengingat jadwal coaching', 'warning')">
+                    <div class="notification-icon"><span data-icon="AlertTriangle" data-icon-size="16"></span></div>
+                    <div class="notification-content">
+                      <div class="notification-text">Jadwal Coaching Service Excellence direncanakan Oktober 2026</div>
+                      <div class="notification-time">Kemarin</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- User Badge -->
+          <div class="topbar-user-badge" onclick="App.navigate('eprofil')">
+            <div style="font-size: 12.5px; font-weight: 650; margin-right: 4px;" id="topbarUserName">Rizky Aditya</div>
+            <span class="badge badge-blue" id="topbarRoleText" style="font-size: 10px; padding: 2px 7px;">Pegawai</span>
+          </div>
+        </div>
+      </header>
+
+      <!-- MAIN CONTENT VIEW CONTAINER -->
+      <main class="main-content">
+
+        <!-- ====================================================================
+             ROLE 1: PEGAWAI PAGES
+             ==================================================================== -->
+
+        <!-- 1. DASHBOARD PEGAWAI (edash) -->
+        <section id="page-edash" class="page-view active">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; flex-wrap: wrap; gap: 12px;">
+            <div>
+              <h1 class="page-title">Selamat datang kembali, <span id="edashUserGreeting">Andi Arafat</span> 👋</h1>
+              <p class="page-subtitle" style="margin-bottom: 0;">Pantau perkembangan Individual Development Plan dan rencana pengembangan kompetensi Anda.</p>
+            </div>
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <select class="form-select" style="width: 110px;">
+                <option selected>2026</option>
+                <option>2025</option>
+              </select>
+              <button class="btn btn-primary btn-sm" onclick="App.navigate('eidp')">
+                <span data-icon="Plus" data-icon-size="14"></span> Kelola IDP
+              </button>
+            </div>
+          </div>
+
+          <!-- Row 1: 4 Stat Cards -->
+          <div class="grid grid-cols-4" style="margin-bottom: 24px;">
+            <div class="stat-card">
+              <div class="stat-card-inner">
+                <div class="stat-card-info">
+                  <div class="stat-card-label">Status IDP</div>
+                  <div class="stat-card-value" id="edashIdpStatusVal">85%</div>
+                  <div class="stat-card-desc" id="edashIdpStatusDesc">Formulir sudah terisi</div>
+                </div>
+                <div class="stat-card-icon"><span data-icon="ClipboardCheck" data-icon-size="22"></span></div>
+              </div>
+              <div class="stat-card-mini-progress"><div class="fill" style="width: 85%;"></div></div>
+            </div>
+
+            <div class="stat-card">
+              <div class="stat-card-inner">
+                <div class="stat-card-info">
+                  <div class="stat-card-label">Rencana Pengembangan</div>
+                  <div class="stat-card-value" id="edashRencanaVal">4</div>
+                  <div class="stat-card-desc">Program prioritas tahun ini</div>
+                </div>
+                <div class="stat-card-icon"><span data-icon="Target" data-icon-size="22"></span></div>
+              </div>
+              <div class="stat-card-mini-progress"><div class="fill" style="width: 100%;"></div></div>
+            </div>
+
+            <div class="stat-card success">
+              <div class="stat-card-inner">
+                <div class="stat-card-info">
+                  <div class="stat-card-label">Sudah Dilaksanakan</div>
+                  <div class="stat-card-value" id="edashTerlaksanaVal">2</div>
+                  <div class="stat-card-desc">Dari 4 rencana program</div>
+                </div>
+                <div class="stat-card-icon"><span data-icon="CircleCheck" data-icon-size="22"></span></div>
+              </div>
+              <div class="stat-card-mini-progress"><div class="fill" style="width: 50%; background: var(--color-success);"></div></div>
+            </div>
+
+            <div class="stat-card warning">
+              <div class="stat-card-inner">
+                <div class="stat-card-info">
+                  <div class="stat-card-label">Belum Dilaksanakan</div>
+                  <div class="stat-card-value" id="edashBelumVal">2</div>
+                  <div class="stat-card-desc">Perlu segera ditindaklanjuti</div>
+                </div>
+                <div class="stat-card-icon"><span data-icon="Clock3" data-icon-size="22"></span></div>
+              </div>
+              <div class="stat-card-mini-progress"><div class="fill" style="width: 50%; background: var(--color-warning);"></div></div>
+            </div>
+          </div>
+
+          <!-- Row 2: Progress IDP 2026 (60%) + Rencana Terdekat (40%) -->
+          <div class="grid grid-cols-12" style="margin-bottom: 24px;">
+            <div class="col-span-7 card">
+              <div class="card-header">
+                <div>
+                  <h3 class="card-title">Progress IDP 2026</h3>
+                  <div style="font-size: 11.5px; color: var(--color-text-muted);">Kelengkapan formulir penyusunan rencana individu</div>
+                </div>
+                <button class="btn btn-outline btn-sm" onclick="App.navigate('ereview')">Review IDP</button>
+              </div>
+
+              <div style="display: flex; align-items: center; gap: 32px; flex-wrap: wrap;">
+                <div id="pegawaiCircularProgress" style="width: 170px; flex-shrink: 0;"></div>
+
+                <div style="flex: 1; display: flex; flex-direction: column; gap: 14px;">
+                  <div class="progress-bar-container">
+                    <div class="progress-bar-label"><span>Identitas Pegawai</span><b>100%</b></div>
+                    <div class="progress-track"><div class="progress-fill success" style="width: 100%;"></div></div>
+                  </div>
+                  <div class="progress-bar-container">
+                    <div class="progress-bar-label"><span>Rencana Karier</span><b>100%</b></div>
+                    <div class="progress-track"><div class="progress-fill success" style="width: 100%;"></div></div>
+                  </div>
+                  <div class="progress-bar-container">
+                    <div class="progress-bar-label"><span>Pemetaan Kompetensi</span><b>100%</b></div>
+                    <div class="progress-track"><div class="progress-fill success" style="width: 100%;"></div></div>
+                  </div>
+                  <div class="progress-bar-container">
+                    <div class="progress-bar-label"><span>Program Pengembangan</span><b>75%</b></div>
+                    <div class="progress-track"><div class="progress-fill" style="width: 75%;"></div></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Rencana Terdekat 40% -->
+            <div class="col-span-5 card">
+              <div class="card-header">
+                <h3 class="card-title">Rencana Terdekat</h3>
+                <span class="badge badge-neutral">Tahun 2026</span>
+              </div>
+              <div class="timeline-list">
+                <div class="timeline-item">
+                  <div class="timeline-dot warning"></div>
+                  <div class="timeline-title">Coaching — Service Excellence</div>
+                  <div class="timeline-meta">Oktober 2026 • Internal Bappeda</div>
+                  <span class="badge badge-warning">Direncanakan</span>
+                </div>
+                <div class="timeline-item">
+                  <div class="timeline-dot success"></div>
+                  <div class="timeline-title">Pelatihan Analisis Data Perencanaan</div>
+                  <div class="timeline-meta">November 2026 • Eksternal (BPSDMD)</div>
+                  <span class="badge badge-success">Terlaksana</span>
+                </div>
+                <div class="timeline-item">
+                  <div class="timeline-dot warning"></div>
+                  <div class="timeline-title">Mentoring Manajemen Waktu</div>
+                  <div class="timeline-meta">Desember 2026 • Internal Bappeda</div>
+                  <span class="badge badge-warning">Direncanakan</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Row 3: Progress Pengembangan Kompetensi + Action Cards -->
+          <div class="grid grid-cols-12">
+            <div class="col-span-7 card">
+              <div class="card-header">
+                <div>
+                  <h3 class="card-title">Progress Pengembangan Kompetensi</h3>
+                  <div style="font-size: 11.5px; color: var(--color-text-muted);">Capaian per kategori kompetensi ASN</div>
+                </div>
+                <button class="btn btn-outline btn-sm" onclick="App.navigate('ekompetensi')">Lihat Detail</button>
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 16px; margin-top: 8px;">
+                <div>
+                  <div style="display: flex; justify-content: space-between; font-size: 12.5px; font-weight: 600; margin-bottom: 6px;">
+                    <span>Kompetensi Teknis (Perencanaan & Analisis)</span>
+                    <span class="text-primary">67% (2 / 3 Selesai)</span>
+                  </div>
+                  <div class="progress-track lg"><div class="progress-fill" style="width: 67%;"></div></div>
+                </div>
+                <div>
+                  <div style="display: flex; justify-content: space-between; font-size: 12.5px; font-weight: 600; margin-bottom: 6px;">
+                    <span>Kompetensi Manajerial (Kepemimpinan & Pelayanan)</span>
+                    <span class="text-primary">50% (4 / 8 Selesai)</span>
+                  </div>
+                  <div class="progress-track lg"><div class="progress-fill warning" style="width: 50%;"></div></div>
+                </div>
+                <div>
+                  <div style="display: flex; justify-content: space-between; font-size: 12.5px; font-weight: 600; margin-bottom: 6px;">
+                    <span>Kompetensi Sosial Kultural (Perekat Bangsa)</span>
+                    <span class="text-primary">100% (Terpenuhi)</span>
+                  </div>
+                  <div class="progress-track lg"><div class="progress-fill success" style="width: 100%;"></div></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Action Required Cards -->
+            <div class="col-span-5 card">
+              <div class="card-header">
+                <h3 class="card-title">Yang Perlu Anda Lakukan</h3>
+                <span class="badge badge-warning">Tindak Lanjut</span>
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 12px;">
+                <div style="display: flex; align-items: center; justify-content: space-between; padding: 12px 14px; background: var(--color-surface-subtle); border: 1px solid var(--color-border); border-radius: var(--radius-md);">
+                  <div style="display: flex; align-items: center; gap: 12px;">
+                    <div style="color: var(--color-accent);"><span data-icon="ClipboardCheck" data-icon-size="20"></span></div>
+                    <div>
+                      <div style="font-weight: 650; font-size: 13px;">Lengkapi Program Pengembangan</div>
+                      <div style="font-size: 11px; color: var(--color-text-muted);">Tuntaskan program coaching & mentoring</div>
+                    </div>
+                  </div>
+                  <button class="btn btn-outline btn-sm" onclick="App.navigate('eidp')">Buka</button>
+                </div>
+
+                <div style="display: flex; align-items: center; justify-content: space-between; padding: 12px 14px; background: var(--color-surface-subtle); border: 1px solid var(--color-border); border-radius: var(--radius-md);">
+                  <div style="display: flex; align-items: center; gap: 12px;">
+                    <div style="color: var(--color-success);"><span data-icon="Upload" data-icon-size="20"></span></div>
+                    <div>
+                      <div style="font-weight: 650; font-size: 13px;">Upload Bukti Kegiatan</div>
+                      <div style="font-size: 11px; color: var(--color-text-muted);">Sertifikat pelatihan analisis data siap unggah</div>
+                    </div>
+                  </div>
+                  <button class="btn btn-outline btn-sm" onclick="App.openInputRealizationDrawer()">Unggah</button>
+                </div>
+
+                <div style="display: flex; align-items: center; justify-content: space-between; padding: 12px 14px; background: var(--color-surface-subtle); border: 1px solid var(--color-border); border-radius: var(--radius-md);">
+                  <div style="display: flex; align-items: center; gap: 12px;">
+                    <div style="color: var(--color-secondary-blue);"><span data-icon="TrendingUp" data-icon-size="20"></span></div>
+                    <div>
+                      <div style="font-weight: 650; font-size: 13px;">Review Target Karier</div>
+                      <div style="font-size: 11px; color: var(--color-text-muted);">Pastikan keselarasan target JFT Muda Level 3</div>
+                    </div>
+                  </div>
+                  <button class="btn btn-outline btn-sm" onclick="App.navigate('ekarier')">Lihat</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 2. PROFIL PEGAWAI (eprofil) -->
+        <section id="page-eprofil" class="page-view">
+          <h1 class="page-title">Profil Pegawai ASN</h1>
+          <p class="page-subtitle">Informasi kepegawaian resmi Bappeda Provinsi Lampung yang menjadi dasar penyusunan IDP.</p>
+
+          <!-- Profile Header Card -->
+          <div class="card" style="margin-bottom: 22px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 20px;">
+            <div style="display: flex; align-items: center; gap: 20px;">
+              <div>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                  <h2 style="font-size: 20px; font-weight: 750;">Rizky Aditya Pratama, S.Kom., M.Si.</h2>
+                  <span class="badge badge-success">Aktif</span>
+                </div>
+                <div style="font-size: 13.5px; color: var(--color-text-secondary); margin: 3px 0;">Analis Perencanaan Ahli Muda • Bappeda Provinsi Lampung</div>
+                <div style="font-size: 12px; color: var(--color-text-muted);">NIP: 198701012010011001</div>
+              </div>
+            </div>
+            <button class="btn btn-outline" onclick="App.saveProfile()">
+              <span data-icon="Edit3" data-icon-size="16"></span> Simpan Perubahan Profil
+            </button>
+          </div>
+
+          <!-- Section Data Identitas (2 columns) -->
+          <div class="card" style="margin-bottom: 22px;">
+            <div class="card-header">
+              <h3 class="card-title">Data Identitas Pegawai</h3>
+              <span class="badge badge-neutral">Data Kedinasan Bappeda</span>
+            </div>
+            <div class="grid grid-cols-2">
+              <div class="form-group">
+                <label class="form-label">Nama Lengkap & Gelar</label>
+                <input type="text" id="profNama" class="form-control" value="Rizky Aditya Pratama, S.Kom., M.Si.">
+              </div>
+              <div class="form-group">
+                <label class="form-label">NIP (18 Digit)</label>
+                <input type="text" id="profNip" class="form-control" value="198701012010011001" disabled>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Pangkat / Golongan Ruang</label>
+                <input type="text" id="profPangkat" class="form-control" value="Penata / III-c">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Pendidikan Terakhir</label>
+                <input type="text" id="profPendidikan" class="form-control" value="S1 Sistem Informasi • S2 Perencanaan Wilayah">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Masa Kerja</label>
+                <input type="text" id="profMasaKerja" class="form-control" value="15 Tahun 6 Bulan">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Jabatan Saat Ini</label>
+                <input type="text" id="profJabatan" class="form-control" value="Analis Perencanaan Ahli Muda">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Unit Kerja</label>
+                <input type="text" id="profUnit" class="form-control" value="Bidang Perencanaan Makro & Pendanaan Pembangunan" disabled>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Jenis Jabatan</label>
+                <select id="profJenisJabatan" class="form-select">
+                  <option selected>JFT (Jabatan Fungsional Tertentu)</option>
+                  <option>Pelaksana</option>
+                  <option>Struktural</option>
+                </select>
+              </div>
+            </div>
+            <div style="display: flex; justify-content: flex-end; margin-top: 10px;">
+              <button class="btn btn-primary" onclick="App.saveProfile()">Simpan Data Identitas</button>
+            </div>
+          </div>
+
+          <!-- Section Nine Box Matrix -->
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <h3 class="card-title">Posisi Nine Box (Talent Matrix Pemetaan ASN)</h3>
+                <p style="font-size: 12px; color: var(--color-text-muted); margin-top: 2px;">Posisi berdasarkan hasil profiling pemetaan potensi dan kinerja MyASN / BKN Pro ASN.</p>
+              </div>
+              <span class="badge badge-blue">Box 6: Current Position</span>
+            </div>
+
+            <div style="display: flex; align-items: center; gap: 40px; flex-wrap: wrap;">
+              <div class="nine-box-container">
+                <div class="nine-box-y-axis">
+                  <span>High</span>
+                  <span>Med</span>
+                  <span>Low</span>
+                </div>
+                <div class="nine-box-grid">
+                  <div class="nine-box-cell" data-box="1" onclick="App.selectNineBox(1)">1</div>
+                  <div class="nine-box-cell" data-box="2" onclick="App.selectNineBox(2)">2</div>
+                  <div class="nine-box-cell" data-box="3" onclick="App.selectNineBox(3)">3</div>
+                  <div class="nine-box-cell" data-box="4" onclick="App.selectNineBox(4)">4</div>
+                  <div class="nine-box-cell" data-box="5" onclick="App.selectNineBox(5)">5</div>
+                  <div class="nine-box-cell selected" data-box="6" onclick="App.selectNineBox(6)">
+                    6
+                    <span class="cell-tag">Current</span>
+                  </div>
+                  <div class="nine-box-cell" data-box="7" onclick="App.selectNineBox(7)">7</div>
+                  <div class="nine-box-cell" data-box="8" onclick="App.selectNineBox(8)">8</div>
+                  <div class="nine-box-cell" data-box="9" onclick="App.selectNineBox(9)">9</div>
+                </div>
+                <div class="nine-box-x-axis">
+                  <span>Low</span>
+                  <span>Med</span>
+                  <span>High</span>
+                </div>
+              </div>
+
+              <!-- Nine Box Details Card -->
+              <div style="flex: 1; min-width: 260px; background: var(--color-light-blue); padding: 22px; border-radius: var(--radius-lg); border: 1px solid rgba(47, 128, 237, 0.2);">
+                <div style="font-size: 12px; font-weight: 700; color: var(--color-secondary-blue); text-transform: uppercase;">Hasil Pemetaan Talent Bappeda</div>
+                <div style="font-size: 22px; font-weight: 800; color: var(--color-primary); margin: 6px 0 10px;">Box 6 — High Performer</div>
+                <div style="font-size: 13px; color: var(--color-text-secondary); line-height: 1.6; margin-bottom: 16px;">
+                  <b>Kinerja:</b> <span class="badge badge-success">High (Tinggi)</span><br>
+                  <b>Potensi:</b> <span class="badge badge-blue">Medium (Sedang)</span><br>
+                  Pegawai berada pada kuadran siap akselerasi melalui penguatan kompetensi manajerial dan kepemimpinan perubahan.
+                </div>
+                <div style="font-size: 11.5px; color: var(--color-text-muted);">Sumber data: Integrasi SIASN / BKN Pro ASN Bappeda Lampung</div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 3. RENCANA KARIER (ekarier) -->
+        <section id="page-ekarier" class="page-view">
+          <h1 class="page-title">Rencana Karier Jabatan</h1>
+          <p class="page-subtitle">Rencanakan arah dan proyeksi pengembangan karier jabatan untuk periode berikutnya.</p>
+
+          <!-- Stepper -->
+          <div class="stepper-nav">
+            <div class="step-item active">
+              <div class="step-number">01</div>
+              <div class="step-label">Periode</div>
+            </div>
+            <div class="step-divider active"></div>
+            <div class="step-item active">
+              <div class="step-number">02</div>
+              <div class="step-label">Target Karier</div>
+            </div>
+            <div class="step-divider active"></div>
+            <div class="step-item active">
+              <div class="step-number">03</div>
+              <div class="step-label">Rumpun Target</div>
+            </div>
+            <div class="step-divider"></div>
+            <div class="step-item">
+              <div class="step-number">04</div>
+              <div class="step-label">Review</div>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2" style="margin-bottom: 22px;">
+            <div class="card">
+              <h3 class="card-title" style="margin-bottom: 16px;">Periode & Target Jabatan</h3>
+              <div class="form-group">
+                <label class="form-label">Periode Rencana IDP</label>
+                <select id="careerPeriode" class="form-select">
+                  <option selected>2026</option>
+                  <option>2027</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label" style="display: flex; justify-content: space-between; align-items: center;">
+                  <span>Jenjang Target yang Diharapkan</span>
+                  <span class="badge badge-primary" style="font-size: 11px;">14 Standar IDP</span>
+                </label>
+                <select id="careerJenjangTarget" class="form-select" onchange="App.onCareerJenjangTargetChange(this.value)">
+                  <optgroup label="Jabatan Pimpinan Tinggi (JPT) & Administrator">
+                    <option value="JPT Utama — Level 5">01 — JPT Utama — Level 5</option>
+                    <option value="JPT Madya — Level 4">02 — JPT Madya — Level 4</option>
+                    <option value="JPT Pratama — Level 4">03 — JPT Pratama — Level 4</option>
+                    <option value="Administrator — Level 3">04 — Administrator — Level 3</option>
+                    <option value="Pengawas — Level 2">05 — Pengawas — Level 2</option>
+                  </optgroup>
+                  <optgroup label="Jabatan Pelaksana">
+                    <option value="Pelaksana — Level 1">06 — Pelaksana — Level 1</option>
+                  </optgroup>
+                  <optgroup label="Jabatan Fungsional Tertentu (JFT) — Keterampilan">
+                    <option value="JFT Pemula — Level 1">11 — JFT Pemula — Level 1</option>
+                    <option value="JFT Terampil — Level 2">12 — JFT Terampil — Level 2</option>
+                    <option value="JFT Mahir — Level 2">13 — JFT Mahir — Level 2</option>
+                    <option value="JFT Penyelia — Level 3">14 — JFT Penyelia — Level 3</option>
+                  </optgroup>
+                  <optgroup label="Jabatan Fungsional Tertentu (JFT) — Keahlian">
+                    <option value="JFT Pertama — Level 2">21 — JFT Pertama — Level 2</option>
+                    <option value="JFT Muda — Level 3">22 — JFT Muda — Level 3</option>
+                    <option value="JFT Madya — Level 4" selected>23 — JFT Madya — Level 4</option>
+                    <option value="JFT Utama — Level 5">24 — JFT Utama — Level 5</option>
+                  </optgroup>
+                </select>
+                <div class="form-hint" style="display: flex; justify-content: space-between; align-items: center; margin-top: 6px;">
+                  <span>Sesuai dengan peta jabatan dan formasi Bappeda Provinsi Lampung.</span>
+                  <a href="#tableJenjangRef" onclick="document.getElementById('tableJenjangRef').scrollIntoView({behavior: 'smooth'})" style="font-size: 11.5px; color: var(--color-primary); text-decoration: underline; cursor: pointer;">Lihat Tabel Referensi ↓</a>
+                </div>
+              </div>
+            </div>
+
+            <div class="card">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                <h3 class="card-title">Rencana & Harapan Karier</h3>
+                <span id="careerCharCount" style="font-size: 11px; color: var(--color-text-muted);">138 karakter</span>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Deskripsi Rencana Karier Kedinasan</label>
+                <textarea id="careerRencanaText" class="form-textarea" style="min-height: 120px;" oninput="document.getElementById('careerCharCount').textContent = this.value.length + ' karakter';">Mengembangkan kompetensi manajerial dan pelayanan publik untuk mendukung peningkatan kualitas perencanaan pembangunan daerah.</textarea>
+                <div class="form-hint">Diisi dengan komitmen penguatan kapasitas diri dan arahan atasan langsung.</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card" style="margin-bottom: 22px;">
+            <div class="card-header">
+              <div>
+                <h3 class="card-title">Rumpun Target Keahlian</h3>
+                <p style="font-size: 12px; color: var(--color-text-muted); margin-top: 2px;">Pilih satu atau lebih rumpun jabatan yang relevan dengan tugas fungsi perencanaan.</p>
+              </div>
+              <span class="badge badge-blue">Multi-Select</span>
+            </div>
+            <div class="chips-group" id="careerRumpunChips"></div>
+          </div>
+
+          <div class="card" style="margin-bottom: 22px;">
+            <div class="card-header">
+              <h3 class="card-title">Visualisasi Career Roadmap</h3>
+              <span class="badge badge-success">Proyeksi 1 Tahun</span>
+            </div>
+            <div class="career-roadmap">
+              <div class="roadmap-card">
+                <div class="roadmap-card-header"><span data-icon="UserRound" data-icon-size="14"></span> Posisi Saat Ini</div>
+                <div class="roadmap-card-title">Analis Perencanaan Ahli Muda</div>
+                <div class="roadmap-card-desc">Golongan Penata (III-c) • Level 2 Teknis</div>
+              </div>
+
+              <div class="roadmap-arrow"><span data-icon="ArrowRight" data-icon-size="24"></span></div>
+
+              <div class="roadmap-card active">
+                <div class="roadmap-card-header"><span data-icon="Target" data-icon-size="14"></span> Pengembangan Kompetensi</div>
+                <div class="roadmap-card-title">4 Program Prioritas</div>
+                <div class="roadmap-card-desc">Manajerial • Pelayanan Publik • Analisis Data</div>
+              </div>
+
+              <div class="roadmap-arrow"><span data-icon="ArrowRight" data-icon-size="24"></span></div>
+
+              <div class="roadmap-card">
+                <div class="roadmap-card-header"><span data-icon="TrendingUp" data-icon-size="14"></span> Target Karier</div>
+                <div class="roadmap-card-title" id="careerRoadmapTargetTitle">JFT Madya — Level 4</div>
+                <div class="roadmap-card-desc" id="careerRoadmapTargetDesc">Perencana Ahli Madya Bappeda Prov. Lampung</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- REFERENSI RESMI JENJANG TARGET DAN LEVEL (LAMPIRAN IDP) -->
+          <div class="card" id="tableJenjangRef" style="margin-bottom: 22px;">
+            <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+              <div>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <h3 class="card-title">Referensi Jenjang Target & Level Jabatan</h3>
+                  <span class="badge badge-blue">Lampiran IDP Bappeda</span>
+                </div>
+                <p style="font-size: 12px; color: var(--color-text-muted); margin-top: 3px;">
+                  Sesuai dokumen resmi Lampiran Individual Development Plan Bappeda Provinsi Lampung (Kode 01 s/d 24 hingga JFT Utama Level 5).
+                </p>
+              </div>
+              <span class="badge badge-neutral" style="font-size: 11px;">14 Standar Jenjang Resmi</span>
+            </div>
+
+            <div class="table-responsive" style="margin-top: 8px;">
+              <table class="data-table" style="width: 100%;">
+                <thead>
+                  <tr>
+                    <th style="width: 60px; text-align: center;">Kode</th>
+                    <th>Jenjang Target</th>
+                    <th>Kategori Jabatan</th>
+                    <th style="width: 130px; text-align: center;">Level Target</th>
+                    <th>Deskripsi Peran</th>
+                    <th style="width: 140px; text-align: center;">Status / Aksi</th>
+                  </tr>
+                </thead>
+                <tbody id="careerJenjangTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div style="display: flex; justify-content: flex-end; gap: 12px;">
+            <button class="btn btn-outline" onclick="App.saveCareerPlan(true)">Simpan Draft</button>
+            <button class="btn btn-primary" onclick="App.saveCareerPlan(false)">
+              <span>Simpan & Lanjut ke Kompetensi</span>
+              <span data-icon="ChevronRight" data-icon-size="16"></span>
+            </button>
+          </div>
+        </section>
+
+        <!-- 4. KOMPETENSI (ekompetensi) -->
+        <section id="page-ekompetensi" class="page-view">
+          <h1 class="page-title">Pemetaan Kompetensi ASN</h1>
+          <p class="page-subtitle">Identifikasi kesenjangan kompetensi untuk menentukan prioritas program pengembangan individu.</p>
+
+          <div class="grid grid-cols-3" style="margin-bottom: 24px;">
+            <div class="stat-card">
+              <div class="stat-card-inner">
+                <div class="stat-card-info">
+                  <div class="stat-card-label">Current Average</div>
+                  <div class="stat-card-value">2.1</div>
+                  <div class="stat-card-desc">Level kompetensi rata-rata saat ini</div>
+                </div>
+                <div class="stat-card-icon"><span data-icon="Target" data-icon-size="22"></span></div>
+              </div>
+            </div>
+
+            <div class="stat-card">
+              <div class="stat-card-inner">
+                <div class="stat-card-info">
+                  <div class="stat-card-label">Target Rata-rata</div>
+                  <div class="stat-card-value">3.0</div>
+                  <div class="stat-card-desc">Standar kompetensi jabatan target</div>
+                </div>
+                <div class="stat-card-icon"><span data-icon="TrendingUp" data-icon-size="22"></span></div>
+              </div>
+            </div>
+
+            <div class="stat-card warning">
+              <div class="stat-card-inner">
+                <div class="stat-card-info">
+                  <div class="stat-card-label">Kesenjangan (Gap)</div>
+                  <div class="stat-card-value text-warning">0.9</div>
+                  <div class="stat-card-desc"><span class="badge badge-warning">Needs Development</span></div>
+                </div>
+                <div class="stat-card-icon"><span data-icon="AlertTriangle" data-icon-size="22"></span></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-12" style="margin-bottom: 24px;">
+            <div class="col-span-7 card">
+              <div class="card-header">
+                <div>
+                  <h3 class="card-title">Profil Radar Kompetensi ASN</h3>
+                  <div style="font-size: 11.5px; color: var(--color-text-muted);">Perbandingan skor saat ini vs target level jabatan</div>
+                </div>
+                <div style="display: flex; align-items: center; gap: 12px; font-size: 11px;">
+                  <span style="display: flex; align-items: center; gap: 5px;"><span style="width: 10px; height: 10px; background: var(--color-accent); border-radius: 2px;"></span> Saat Ini</span>
+                  <span style="display: flex; align-items: center; gap: 5px;"><span style="width: 10px; height: 2px; background: var(--color-primary); border-top: 2px dashed var(--color-primary);"></span> Target</span>
+                </div>
+              </div>
+              <div id="competencyRadarChart"></div>
+            </div>
+
+            <div class="col-span-5 card">
+              <div class="card-header">
+                <h3 class="card-title">Prioritas Pengembangan</h3>
+                <span class="badge badge-danger">High Priority</span>
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 12px;">
+                <div style="padding: 14px; background: var(--color-danger-light); border-left: 4px solid var(--color-danger); border-radius: var(--radius-sm);">
+                  <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <b style="color: var(--color-danger); font-size: 13px;">1. Pengembangan Diri & Orang Lain</b>
+                    <span class="badge badge-danger">Gap 2 Level</span>
+                  </div>
+                  <p style="font-size: 11.5px; color: var(--color-text-secondary); margin-top: 4px;">Rekomendasi metode: Mentoring intensif & penugasan tim ad-hoc.</p>
+                </div>
+
+                <div style="padding: 14px; background: var(--color-danger-light); border-left: 4px solid var(--color-danger); border-radius: var(--radius-sm);">
+                  <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <b style="color: var(--color-danger); font-size: 13px;">2. Mengelola Perubahan</b>
+                    <span class="badge badge-danger">Gap 2 Level</span>
+                  </div>
+                  <p style="font-size: 11.5px; color: var(--color-text-secondary); margin-top: 4px;">Rekomendasi metode: Workshop manajemen inovasi daerah.</p>
+                </div>
+
+                <div style="padding: 14px; background: var(--color-warning-light); border-left: 4px solid var(--color-warning); border-radius: var(--radius-sm);">
+                  <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <b style="color: var(--color-warning); font-size: 13px;">3. Integritas & Pelayanan Publik</b>
+                    <span class="badge badge-warning">Gap 1 Level</span>
+                  </div>
+                  <p style="font-size: 11.5px; color: var(--color-text-secondary); margin-top: 4px;">Rekomendasi metode: Coaching Service Excellence.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="tab-nav">
+              <button class="tab-btn active" onclick="document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active')); this.classList.add('active'); document.getElementById('tabPaneTeknis').style.display='block'; document.getElementById('tabPaneManajerial').style.display='none'; document.getElementById('tabPaneSosial').style.display='none';">Kompetensi Teknis</button>
+              <button class="tab-btn" onclick="document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active')); this.classList.add('active'); document.getElementById('tabPaneTeknis').style.display='none'; document.getElementById('tabPaneManajerial').style.display='block'; document.getElementById('tabPaneSosial').style.display='none';">Kompetensi Manajerial</button>
+              <button class="tab-btn" onclick="document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active')); this.classList.add('active'); document.getElementById('tabPaneTeknis').style.display='none'; document.getElementById('tabPaneManajerial').style.display='none'; document.getElementById('tabPaneSosial').style.display='block';">Sosial Kultural</button>
+            </div>
+
+            <div id="tabPaneTeknis">
+              <div class="table-responsive">
+                <table class="data-table">
+                  <thead>
+                    <tr>
+                      <th>Kompetensi</th>
+                      <th>Saat Ini</th>
+                      <th>Target</th>
+                      <th>Gap</th>
+                      <th>Prioritas</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody id="kompTeknisTableBody"></tbody>
+                </table>
+              </div>
+            </div>
+
+            <div id="tabPaneManajerial" style="display: none;">
+              <div class="table-responsive">
+                <table class="data-table">
+                  <thead>
+                    <tr>
+                      <th>Kompetensi</th>
+                      <th>Saat Ini</th>
+                      <th>Target</th>
+                      <th>Gap</th>
+                      <th>Prioritas</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody id="kompManajerialTableBody"></tbody>
+                </table>
+              </div>
+            </div>
+
+            <div id="tabPaneSosial" style="display: none;">
+              <div class="table-responsive">
+                <table class="data-table">
+                  <thead>
+                    <tr>
+                      <th>Kompetensi</th>
+                      <th>Saat Ini</th>
+                      <th>Target</th>
+                      <th>Gap</th>
+                      <th>Prioritas</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody id="kompSosialTableBody"></tbody>
+                </table>
+              </div>
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; margin-top: 18px;">
+              <button class="btn btn-primary" onclick="App.navigate('eidp')">
+                <span>Lanjut ke Penyusunan IDP</span>
+                <span data-icon="ChevronRight" data-icon-size="16"></span>
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <!-- 5. IDP SAYA (eidp) -->
+        <section id="page-eidp" class="page-view">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 22px; flex-wrap: wrap; gap: 12px;">
+            <div>
+              <h1 class="page-title">Formulir IDP Saya — Individual Development Plan</h1>
+              <p class="page-subtitle" style="margin-bottom: 0;">Rencana program pengembangan kompetensi prioritas resmi Bappeda Provinsi Lampung.</p>
+            </div>
+            <div style="display: flex; gap: 10px;">
+              <button class="btn btn-outline" onclick="ExportService.printOfficialIdp()">
+                <span data-icon="Download" data-icon-size="16"></span> Cetak Dokumen Resmi
+              </button>
+              <button class="btn btn-primary" onclick="App.openAddProgramModal()">
+                <span data-icon="Plus" data-icon-size="16"></span> Tambah Program
+              </button>
+            </div>
+          </div>
+
+          <!-- Stepper: 1 Identitas, 2 Karier, 3 Kompetensi, 4 Program (active), 5 Review -->
+          <div class="stepper-nav">
+            <div class="step-item completed" onclick="App.navigate('eprofil')" style="cursor: pointer;">
+              <div class="step-number"><span data-icon="CircleCheck" data-icon-size="14"></span></div>
+              <div class="step-label">1. Identitas</div>
+            </div>
+            <div class="step-divider active"></div>
+            <div class="step-item completed" onclick="App.navigate('ekarier')" style="cursor: pointer;">
+              <div class="step-number"><span data-icon="CircleCheck" data-icon-size="14"></span></div>
+              <div class="step-label">2. Karier</div>
+            </div>
+            <div class="step-divider active"></div>
+            <div class="step-item completed" onclick="App.navigate('ekompetensi')" style="cursor: pointer;">
+              <div class="step-number"><span data-icon="CircleCheck" data-icon-size="14"></span></div>
+              <div class="step-label">3. Kompetensi</div>
+            </div>
+            <div class="step-divider active"></div>
+            <div class="step-item active">
+              <div class="step-number">4</div>
+              <div class="step-label">4. Program Pengembangan</div>
+            </div>
+            <div class="step-divider"></div>
+            <div class="step-item" onclick="App.navigate('ereview')" style="cursor: pointer;">
+              <div class="step-number">5</div>
+              <div class="step-label">5. Review & Submit</div>
+            </div>
+          </div>
+
+          <!-- Summary Bar -->
+          <div class="summary-bar">
+            <div class="summary-metric">
+              <div class="label">Status Resmi</div>
+              <div class="value" id="idpSummaryStatus">Draft</div>
+            </div>
+            <div class="summary-metric">
+              <div class="label">Kelengkapan</div>
+              <div class="value" id="idpSummaryProgress">75%</div>
+            </div>
+            <div class="summary-metric">
+              <div class="label">Total Program</div>
+              <div class="value" id="idpSummaryCount">4</div>
+            </div>
+            <div class="summary-metric">
+              <div class="label">Total Jam Pelajaran (JP)</div>
+              <div class="value" id="idpSummaryJp">32 JP</div>
+            </div>
+            <div class="summary-metric">
+              <div class="label">Estimasi Anggaran</div>
+              <div class="value" id="idpSummaryCost">Rp2.250.000</div>
+            </div>
+          </div>
+
+          <!-- Program Table Card -->
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <h3 class="card-title">Program Pengembangan Prioritas Tahun 2026</h3>
+                <div style="font-size: 11.5px; color: var(--color-text-muted);">Daftar rencana kegiatan diklat, bimbingan, maupun non-klasikal</div>
+              </div>
+              <button class="btn btn-primary btn-sm" onclick="App.openAddProgramModal()">
+                <span data-icon="Plus" data-icon-size="14"></span> Tambah Program
+              </button>
+            </div>
+
+            <div class="table-responsive">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>No</th>
+                    <th>Kompetensi</th>
+                    <th>Metode</th>
+                    <th>Topik / Substansi</th>
+                    <th>Jenis Diklat</th>
+                    <th>JP</th>
+                    <th>Penyelenggara</th>
+                    <th>Periode</th>
+                    <th>Estimasi</th>
+                    <th>Status</th>
+                    <th>Aksi</th>
+                  </tr>
+                </thead>
+                <tbody id="idpProgramTableBody"></tbody>
+              </table>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px;">
+              <button class="btn btn-outline" onclick="App.navigate('ekompetensi')">
+                <span data-icon="ChevronRight" style="transform: rotate(180deg);" data-icon-size="16"></span> Kembali ke Kompetensi
+              </button>
+              <button class="btn btn-primary" onclick="App.navigate('ereview')">
+                <span>Lanjut ke Review & Ajukan IDP</span>
+                <span data-icon="ChevronRight" data-icon-size="16"></span>
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <!-- 6. REVIEW & SUBMIT IDP (ereview) -->
+        <section id="page-ereview" class="page-view">
+          <h1 class="page-title">Review & Pengajuan IDP Kedinasan</h1>
+          <p class="page-subtitle">Periksa kelengkapan seluruh data sebelum diajukan ke Pengelola SDM Bappeda Provinsi Lampung.</p>
+
+          <div class="grid grid-cols-12" style="margin-bottom: 24px;">
+            <div class="col-span-7 card">
+              <h3 class="card-title" style="margin-bottom: 18px;">Checklist Kelengkapan Formulir</h3>
+
+              <div style="display: flex; flex-direction: column; gap: 14px;">
+                <div style="display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; background: var(--color-success-light); border: 1px solid rgba(24, 134, 75, 0.2); border-radius: var(--radius-md);">
+                  <div style="display: flex; align-items: center; gap: 12px;">
+                    <div style="color: var(--color-success);"><span data-icon="CircleCheck" data-icon-size="20"></span></div>
+                    <div>
+                      <b style="font-size: 13px; color: var(--color-success);">IDENTITAS PEGAWAI</b>
+                      <div style="font-size: 11.5px; color: var(--color-text-secondary);">Rizky Aditya Pratama • NIP 198701012010011001 • Box 6</div>
+                    </div>
+                  </div>
+                  <span class="badge badge-success">Lengkap</span>
+                </div>
+
+                <div style="display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; background: var(--color-success-light); border: 1px solid rgba(24, 134, 75, 0.2); border-radius: var(--radius-md);">
+                  <div style="display: flex; align-items: center; gap: 12px;">
+                    <div style="color: var(--color-success);"><span data-icon="CircleCheck" data-icon-size="20"></span></div>
+                    <div>
+                      <b style="font-size: 13px; color: var(--color-success);">RENCANA KARIER</b>
+                      <div style="font-size: 11.5px; color: var(--color-text-secondary);">Target: JFT Muda — Level 3 • 2 Rumpun Terpilih</div>
+                    </div>
+                  </div>
+                  <span class="badge badge-success">Lengkap</span>
+                </div>
+
+                <div style="display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; background: var(--color-success-light); border: 1px solid rgba(24, 134, 75, 0.2); border-radius: var(--radius-md);">
+                  <div style="display: flex; align-items: center; gap: 12px;">
+                    <div style="color: var(--color-success);"><span data-icon="CircleCheck" data-icon-size="20"></span></div>
+                    <div>
+                      <b style="font-size: 13px; color: var(--color-success);">PEMETAAN KOMPETENSI</b>
+                      <div style="font-size: 11.5px; color: var(--color-text-secondary);">Teknis, Manajerial, Sosial Kultural & Radar Profiling</div>
+                    </div>
+                  </div>
+                  <span class="badge badge-success">Lengkap</span>
+                </div>
+
+                <div style="display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; background: var(--color-success-light); border: 1px solid rgba(24, 134, 75, 0.2); border-radius: var(--radius-md);">
+                  <div style="display: flex; align-items: center; gap: 12px;">
+                    <div style="color: var(--color-success);"><span data-icon="CircleCheck" data-icon-size="20"></span></div>
+                    <div>
+                      <b style="font-size: 13px; color: var(--color-success);">PROGRAM PENGEMBANGAN</b>
+                      <div style="font-size: 11.5px; color: var(--color-text-secondary);">4 Program prioritas telah ditentukan</div>
+                    </div>
+                  </div>
+                  <span class="badge badge-success">4 Program</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-span-5 card">
+              <h3 class="card-title" style="margin-bottom: 16px;">Ringkasan Pengajuan Resmi</h3>
+              <div style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px;">
+                <div style="display: flex; justify-content: space-between; font-size: 13px;">
+                  <span class="text-secondary">Total Program Pengembangan:</span>
+                  <b id="revTotalProgram">4 Program</b>
+                </div>
+                <div style="display: flex; justify-content: space-between; font-size: 13px;">
+                  <span class="text-secondary">Akumulasi Jam Pelajaran (JP):</span>
+                  <b id="revTotalJp">32 JP</b>
+                </div>
+                <div style="display: flex; justify-content: space-between; font-size: 13px;">
+                  <span class="text-secondary">Estimasi Kebutuhan Anggaran:</span>
+                  <b id="revTotalCost">Rp2.250.000</b>
+                </div>
+                <div style="display: flex; justify-content: space-between; font-size: 13px;">
+                  <span class="text-secondary">Periode Realisasi:</span>
+                  <b>Tahun Anggaran 2026</b>
+                </div>
+              </div>
+
+              <div style="padding: 14px; background: var(--color-surface-subtle); border: 1px solid var(--color-border); border-radius: var(--radius-md); margin-bottom: 20px;">
+                <label class="custom-checkbox" style="align-items: flex-start;">
+                  <input type="checkbox" id="reviewDisclaimerCheck" checked style="margin-top: 3px;">
+                  <span style="font-size: 12px; line-height: 1.5; color: var(--color-text-secondary);">
+                    Saya menyatakan bahwa seluruh data rencana pengembangan individu yang saya masukkan adalah benar, telah dikoordinasikan dengan atasan langsung, dan siap diverifikasi oleh Pengelola SDM Bappeda.
+                  </span>
+                </label>
+              </div>
+
+              <div style="display: flex; gap: 10px;">
+                <button class="btn btn-outline" style="flex: 1;" onclick="ExportService.printOfficialIdp()">
+                  <span data-icon="Download" data-icon-size="14"></span> Cetak PDF
+                </button>
+                <button class="btn btn-primary" style="flex: 2;" onclick="App.openSubmitIdpModal()">
+                  <span data-icon="ShieldCheck" data-icon-size="16"></span> Ajukan IDP
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 7. PELAKSANAAN SDM (epelaksanaan) -->
+        <section id="page-epelaksanaan" class="page-view">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 22px; flex-wrap: wrap; gap: 12px;">
+            <div>
+              <h1 class="page-title">Pelaksanaan Pengembangan SDM</h1>
+              <p class="page-subtitle" style="margin-bottom: 0;">Pencatatan riwayat realisasi kegiatan pelatihan dan pengembangan kompetensi.</p>
+            </div>
+            <button class="btn btn-primary" onclick="App.openInputRealizationDrawer()">
+              <span data-icon="Plus" data-icon-size="16"></span> Input Realisasi Kegiatan
+            </button>
+          </div>
+
+          <div class="grid grid-cols-4" style="margin-bottom: 24px;">
+            <div class="stat-card">
+              <div class="stat-card-inner">
+                <div class="stat-card-info">
+                  <div class="stat-card-label">Total Rencana</div>
+                  <div class="stat-card-value">150</div>
+                  <div class="stat-card-desc">Target pengembangan seluruh ASN</div>
+                </div>
+                <div class="stat-card-icon"><span data-icon="Target" data-icon-size="22"></span></div>
+              </div>
+            </div>
+
+            <div class="stat-card success">
+              <div class="stat-card-inner">
+                <div class="stat-card-info">
+                  <div class="stat-card-label">Terlaksana</div>
+                  <div class="stat-card-value text-success">98</div>
+                  <div class="stat-card-desc">Sertifikat terverifikasi (65%)</div>
+                </div>
+                <div class="stat-card-icon"><span data-icon="CircleCheck" data-icon-size="22"></span></div>
+              </div>
+            </div>
+
+            <div class="stat-card warning">
+              <div class="stat-card-inner">
+                <div class="stat-card-info">
+                  <div class="stat-card-label">Dalam Proses</div>
+                  <div class="stat-card-value text-warning">17</div>
+                  <div class="stat-card-desc">Sedang berlangsung (11%)</div>
+                </div>
+                <div class="stat-card-icon"><span data-icon="Clock3" data-icon-size="22"></span></div>
+              </div>
+            </div>
+
+            <div class="stat-card danger">
+              <div class="stat-card-inner">
+                <div class="stat-card-info">
+                  <div class="stat-card-label">Belum Terlaksana</div>
+                  <div class="stat-card-value text-danger">35</div>
+                  <div class="stat-card-desc">Perlu penjadwalan (24%)</div>
+                </div>
+                <div class="stat-card-icon"><span data-icon="AlertCircle" data-icon-size="22"></span></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-12" style="margin-bottom: 24px;">
+            <div class="col-span-4 card">
+              <div class="card-header">
+                <h3 class="card-title">Proporsi Capaian Realisasi</h3>
+                <span class="badge badge-neutral">Tahun 2026</span>
+              </div>
+              <div id="realizationDonutChart"></div>
+            </div>
+
+            <div class="col-span-8 card">
+              <div class="card-header">
+                <div>
+                  <h3 class="card-title">Daftar Realisasi Kegiatan Terverifikasi</h3>
+                  <div style="font-size: 11.5px; color: var(--color-text-muted);">Bukti kelulusan dan dokumen hasil pengembangan</div>
+                </div>
+                <button class="btn btn-outline btn-sm" onclick="App.openInputRealizationDrawer()">+ Realisasi Baru</button>
+              </div>
+
+              <div class="table-responsive">
+                <table class="data-table">
+                  <thead>
+                    <tr>
+                      <th>Pegawai</th>
+                      <th>Program IDP</th>
+                      <th>Metode</th>
+                      <th>Tanggal</th>
+                      <th>JP</th>
+                      <th>Bukti</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody id="realizationTableBody"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ====================================================================
+             ROLE 2: ADMIN / PENGELOLA SDM PAGES
+             ==================================================================== -->
+
+        <!-- 8. DASHBOARD ADMIN (adash) -->
+        <section id="page-adash" class="page-view">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 12px;">
+            <div>
+              <h1 class="page-title">Dashboard Pengelola SDM Aparatur</h1>
+              <p class="page-subtitle" style="margin-bottom: 0;">Pusat pengelolaan dan verifikasi Individual Development Plan ASN Bappeda Provinsi Lampung.</p>
+            </div>
+            <div style="display: flex; gap: 10px;">
+              <button class="btn btn-outline btn-sm" onclick="App.navigate('averif')">
+                <span data-icon="ShieldCheck" data-icon-size="14"></span> Verifikasi IDP (12)
+              </button>
+              <button class="btn btn-primary btn-sm" onclick="App.navigate('apegawai')">
+                <span data-icon="Users" data-icon-size="14"></span> Data Pegawai
+              </button>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-4" style="margin-bottom: 24px;">
+            <div class="stat-card warning">
+              <div class="stat-card-inner">
+                <div class="stat-card-info">
+                  <div class="stat-card-label">Menunggu Verifikasi</div>
+                  <div class="stat-card-value text-warning">12</div>
+                  <div class="stat-card-desc">IDP pegawai perlu diperiksa</div>
+                </div>
+                <div class="stat-card-icon"><span data-icon="Clock3" data-icon-size="22"></span></div>
+              </div>
+            </div>
+
+            <div class="stat-card success">
+              <div class="stat-card-inner">
+                <div class="stat-card-info">
+                  <div class="stat-card-label">IDP Disetujui</div>
+                  <div class="stat-card-value text-success">72</div>
+                  <div class="stat-card-desc">Periode 2026 berjalan</div>
+                </div>
+                <div class="stat-card-icon"><span data-icon="CircleCheck" data-icon-size="22"></span></div>
+              </div>
+            </div>
+
+            <div class="stat-card danger">
+              <div class="stat-card-inner">
+                <div class="stat-card-info">
+                  <div class="stat-card-label">Perlu Revisi</div>
+                  <div class="stat-card-value text-danger">5</div>
+                  <div class="stat-card-desc">Menunggu perbaikan pegawai</div>
+                </div>
+                <div class="stat-card-icon"><span data-icon="AlertTriangle" data-icon-size="22"></span></div>
+              </div>
+            </div>
+
+            <div class="stat-card">
+              <div class="stat-card-inner">
+                <div class="stat-card-info">
+                  <div class="stat-card-label">Belum Mengisi</div>
+                  <div class="stat-card-value">11</div>
+                  <div class="stat-card-desc">Perlu diingatkan Pengelola SDM</div>
+                </div>
+                <div class="stat-card-icon"><span data-icon="Users" data-icon-size="22"></span></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-12" style="margin-bottom: 24px;">
+            <div class="col-span-7 card">
+              <div class="card-header">
+                <div>
+                  <h3 class="card-title">Status IDP Pegawai (Total 99 ASN)</h3>
+                  <div style="font-size: 11.5px; color: var(--color-text-muted);">Progres kepatuhan pengisian dan kelulusan verifikasi</div>
+                </div>
+                <button class="btn btn-outline btn-sm" onclick="App.navigate('averif')">Kelola Verifikasi</button>
+              </div>
+              <div id="adminIdpStatusDonut"></div>
+            </div>
+
+            <div class="col-span-5 card">
+              <div class="card-header">
+                <h3 class="card-title">Aktivitas Administrasi Terbaru</h3>
+                <span class="badge badge-neutral">Log Kedinasan</span>
+              </div>
+              <div class="timeline-list">
+                <div class="timeline-item">
+                  <div class="timeline-dot"></div>
+                  <div class="timeline-title">IDP baru diajukan</div>
+                  <div class="timeline-meta">Rizky Aditya Pratama • 5 menit lalu</div>
+                  <span class="badge badge-warning">Menunggu</span>
+                </div>
+                <div class="timeline-item">
+                  <div class="timeline-dot success"></div>
+                  <div class="timeline-title">IDP disetujui Pengelola SDM</div>
+                  <div class="timeline-meta">Siti Rahma • 1 jam lalu</div>
+                  <span class="badge badge-success">Disetujui</span>
+                </div>
+                <div class="timeline-item">
+                  <div class="timeline-dot warning"></div>
+                  <div class="timeline-title">IDP dikembalikan untuk revisi</div>
+                  <div class="timeline-meta">Agus Setiawan • Kemarin</div>
+                  <span class="badge badge-danger">Revisi</span>
+                </div>
+                <div class="timeline-item">
+                  <div class="timeline-dot success"></div>
+                  <div class="timeline-title">Sertifikat pelatihan diverifikasi</div>
+                  <div class="timeline-meta">Rina Kusuma • 2 hari lalu</div>
+                  <span class="badge badge-success">Terverifikasi</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">Akses Pengelolaan SDM</h3>
+              <span class="badge badge-blue">Quick Actions</span>
+            </div>
+            <div style="display: flex; gap: 14px; flex-wrap: wrap;">
+              <button class="btn btn-secondary" onclick="App.navigate('averif')">
+                <span data-icon="ShieldCheck" data-icon-size="16"></span> Verifikasi IDP Pegawai
+              </button>
+              <button class="btn btn-secondary" onclick="App.navigate('apegawai')">
+                <span data-icon="Users" data-icon-size="16"></span> Kelola Data Pegawai
+              </button>
+              <button class="btn btn-secondary" onclick="App.navigate('apelaksanaan')">
+                <span data-icon="CircleCheck" data-icon-size="16"></span> Verifikasi Realisasi Diklat
+              </button>
+              <button class="btn btn-secondary" onclick="App.navigate('amaster')">
+                <span data-icon="Settings2" data-icon-size="16"></span> Kelola Master Referensi
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <!-- 9. VERIFIKASI IDP (averif) -->
+        <section id="page-averif" class="page-view">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 22px; flex-wrap: wrap; gap: 12px;">
+            <div>
+              <h1 class="page-title">Verifikasi IDP Pegawai</h1>
+              <p class="page-subtitle" style="margin-bottom: 0;">Pemeriksaan keselarasan antara kesenjangan kompetensi, rencana karier, dan program pengembangan.</p>
+            </div>
+          </div>
+
+          <div class="card" style="margin-bottom: 20px; padding: 16px 20px;">
+            <div class="table-toolbar" style="margin-bottom: 0;">
+              <div class="table-filter-group">
+                <input type="text" class="form-control" style="width: 240px;" placeholder="Cari nama / NIP...">
+                <select class="form-select" style="width: 170px;">
+                  <option selected>Semua Status</option>
+                  <option>Menunggu Verifikasi</option>
+                  <option>Disetujui</option>
+                  <option>Perlu Revisi</option>
+                </select>
+                <select class="form-select" style="width: 170px;">
+                  <option selected>Semua Unit Kerja</option>
+                  <option>Bidang Perencanaan</option>
+                  <option>Bidang Pemerintahan</option>
+                  <option>Bidang Ekonomi</option>
+                  <option>Sekretariat</option>
+                </select>
+              </div>
+              <div>
+                <select class="form-select" style="width: 100px;">
+                  <option selected>2026</option>
+                  <option>2025</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="table-responsive">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Pegawai</th>
+                    <th>Jabatan</th>
+                    <th>Target Karier</th>
+                    <th>Program</th>
+                    <th>Tanggal Pengajuan</th>
+                    <th>Status</th>
+                    <th>Aksi</th>
+                  </tr>
+                </thead>
+                <tbody id="verifTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- 10. DATA PEGAWAI (apegawai) -->
+        <section id="page-apegawai" class="page-view">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 22px; flex-wrap: wrap; gap: 12px;">
+            <div>
+              <h1 class="page-title">Data Pegawai Bappeda</h1>
+              <p class="page-subtitle" style="margin-bottom: 0;">Master basis data kepegawaian Bappeda yang menjadi sumber data profil IDP.</p>
+            </div>
+            <div style="display: flex; gap: 10px;">
+              <button class="btn btn-outline" onclick="ExportService.exportEmployees()">
+                <span data-icon="Download" data-icon-size="16"></span> Unduh Excel (.csv)
+              </button>
+              <button class="btn btn-primary" onclick="App.openAddEmployeeModal()">
+                <span data-icon="Plus" data-icon-size="16"></span> Tambah Pegawai
+              </button>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="table-toolbar">
+              <div class="table-filter-group" style="flex-wrap: wrap; gap: 10px;">
+                <input type="text" id="empSearchInput" class="form-control" style="width: 250px;" placeholder="Cari nama atau NIP..." oninput="App.onEmployeeFilterChange()">
+                <select id="empUnitFilter" class="form-select" style="width: 260px;" onchange="App.onEmployeeFilterChange()">
+                  <option value="" selected>Semua Bidang (99 ASN)</option>
+                  <option value="Sekretariat">Sekretariat (23 ASN)</option>
+                  <option value="Bidang PPEPD (Rendalev)">Bidang PPEPD (Rendalev) (9 ASN)</option>
+                  <option value="Bidang Perekonomian">Bidang Perekonomian (19 ASN)</option>
+                  <option value="Bidang Infrastruktur & Kewilayahan">Bidang Infrastruktur & Kewilayahan (9 ASN)</option>
+                  <option value="Bidang Pemerintahan & PM">Bidang Pemerintahan & PM (28 ASN)</option>
+                  <option value="UPTD Pusat Data & Informasi">UPTD Pusat Data & Informasi (10 ASN)</option>
+                  <option value="Pimpinan">Pimpinan (1 ASN)</option>
+                </select>
+                <select id="empStatusFilter" class="form-select" style="width: 170px;" onchange="App.onEmployeeFilterChange()">
+                  <option value="" selected>Semua Status IDP</option>
+                  <option value="Disetujui">Disetujui</option>
+                  <option value="Menunggu Verifikasi">Menunggu Verifikasi</option>
+                  <option value="Perlu Revisi">Perlu Revisi</option>
+                  <option value="Belum">Belum Mengisi</option>
+                </select>
+                <button class="btn btn-outline btn-sm" onclick="App.resetEmployeeFilter()">Reset</button>
+              </div>
+            </div>
+
+            <div class="table-responsive">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>No</th>
+                    <th>Nama / NIP</th>
+                    <th>Pangkat / Gol.</th>
+                    <th>Jabatan</th>
+                    <th>Bidang / Unit</th>
+                    <th>Status IDP</th>
+                    <th>Progress Bangkom</th>
+                    <th>Aksi</th>
+                  </tr>
+                </thead>
+                <tbody id="adminEmployeeTableBody"></tbody>
+              </table>
+            </div>
+
+            <div class="pagination-wrapper">
+              <div id="empPaginationText">Menampilkan <b>1–15</b> dari <b>100</b> pegawai aktif Bappeda Lampung</div>
+              <div class="pagination-controls" id="empPaginationControls"></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 11. PELAKSANAAN SDM ADMIN (apelaksanaan) -->
+        <section id="page-apelaksanaan" class="page-view">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 22px; flex-wrap: wrap; gap: 12px;">
+            <div>
+              <h1 class="page-title">Pelaksanaan Pengembangan SDM (Admin)</h1>
+              <p class="page-subtitle" style="margin-bottom: 0;">Monitoring verifikasi sertifikat diklat, bukti kegiatan, dan pencatatan JP seluruh pegawai.</p>
+            </div>
+            <button class="btn btn-primary" onclick="App.openInputRealizationDrawer()">
+              <span data-icon="Plus" data-icon-size="16"></span> Input Realisasi Kegiatan
+            </button>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">Daftar Realisasi Pegawai Seluruh Unit</h3>
+              <button class="btn btn-outline btn-sm" onclick="ExportService.exportMonitoring()">
+                <span data-icon="Download" data-icon-size="14"></span> Unduh Rekap Excel
+              </button>
+            </div>
+            <div class="table-responsive">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Pegawai</th>
+                    <th>Program IDP</th>
+                    <th>Metode</th>
+                    <th>Tanggal</th>
+                    <th>JP</th>
+                    <th>Bukti</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody id="adminRealizationTableBody">
+                  <tr>
+                    <td class="font-semibold">Rizky Aditya Pratama, S.Kom., M.Si.</td>
+                    <td>Pelatihan Analisis Data Perencanaan dengan Python & PowerBI</td>
+                    <td><span class="badge badge-blue">Diklat Teknis</span></td>
+                    <td>15 Nov 2026</td>
+                    <td>20 JP</td>
+                    <td><span class="badge badge-neutral">Sertifikat_Analisis_Data_Bappeda.pdf</span></td>
+                    <td><span class="badge badge-success">Terverifikasi</span></td>
+                  </tr>
+                  <tr>
+                    <td class="font-semibold">Siti Rahma, S.E., M.E.</td>
+                    <td>Coaching Public Service</td>
+                    <td><span class="badge badge-blue">Coaching</span></td>
+                    <td>12 Okt 2026</td>
+                    <td>2 JP</td>
+                    <td><span class="badge badge-neutral">Form_Coaching_Siti_Rahma.pdf</span></td>
+                    <td><span class="badge badge-success">Terverifikasi</span></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- 12. MASTER DATA (amaster) -->
+        <section id="page-amaster" class="page-view">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 22px; flex-wrap: wrap; gap: 12px;">
+            <div>
+              <h1 class="page-title">Master Data Referensi</h1>
+              <p class="page-subtitle" style="margin-bottom: 0;">Referensi resmi metode pengembangan, rumpun keahlian, dan jenjang jabatan ASN.</p>
+            </div>
+            <button class="btn btn-primary" onclick="App.toast('Form penambahan data master dibuka', 'info')">
+              <span data-icon="Plus" data-icon-size="16"></span> Tambah Data
+            </button>
+          </div>
+
+          <div class="card">
+            <div class="tab-nav">
+              <button class="tab-btn active" onclick="document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active')); this.classList.add('active'); document.getElementById('masterPaneMetode').style.display='block'; document.getElementById('masterPaneRumpun').style.display='none'; document.getElementById('masterPaneJenjang').style.display='none';">Metode Pengembangan</button>
+              <button class="tab-btn" onclick="document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active')); this.classList.add('active'); document.getElementById('masterPaneMetode').style.display='none'; document.getElementById('masterPaneRumpun').style.display='block'; document.getElementById('masterPaneJenjang').style.display='none';">Rumpun Target Keahlian</button>
+              <button class="tab-btn" onclick="document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active')); this.classList.add('active'); document.getElementById('masterPaneMetode').style.display='none'; document.getElementById('masterPaneRumpun').style.display='none'; document.getElementById('masterPaneJenjang').style.display='block';">Jenjang Target & Level Jabatan</button>
+            </div>
+
+            <div id="masterPaneMetode">
+              <div class="table-responsive">
+                <table class="data-table">
+                  <thead>
+                    <tr>
+                      <th>Metode Pengembangan</th>
+                      <th>Kategori</th>
+                      <th>Deskripsi</th>
+                      <th>Aksi</th>
+                    </tr>
+                  </thead>
+                  <tbody id="masterMetodeTableBody"></tbody>
+                </table>
+              </div>
+            </div>
+
+            <div id="masterPaneRumpun" style="display: none;">
+              <div class="table-responsive">
+                <table class="data-table">
+                  <thead>
+                    <tr>
+                      <th>Kode</th>
+                      <th>Rumpun Target Keahlian</th>
+                      <th>Aksi</th>
+                    </tr>
+                  </thead>
+                  <tbody id="masterRumpunTableBody"></tbody>
+                </table>
+              </div>
+            </div>
+
+            <div id="masterPaneJenjang" style="display: none;">
+              <div class="table-responsive">
+                <table class="data-table">
+                  <thead>
+                    <tr>
+                      <th style="width: 70px; text-align: center;">Kode</th>
+                      <th>Jenjang Target</th>
+                      <th>Kategori Jabatan</th>
+                      <th style="width: 130px; text-align: center;">Level Standar</th>
+                      <th>Deskripsi / Formasi</th>
+                      <th style="width: 100px; text-align: center;">Aksi</th>
+                    </tr>
+                  </thead>
+                  <tbody id="masterJenjangTableBody"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ====================================================================
+             ROLE 3: PIMPINAN PAGES (READ ONLY)
+             ==================================================================== -->
+
+        <!-- 13. DASHBOARD PIMPINAN (pdash) -->
+        <section id="page-pdash" class="page-view">
+          <div style="margin-bottom: 24px;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <h1 class="page-title">Dashboard Pimpinan</h1>
+              <span class="badge badge-neutral" style="font-size: 10px;">Executive Mode (Read Only)</span>
+            </div>
+            <p class="page-subtitle">Ringkasan strategis perkembangan dan capaian pengembangan kompetensi seluruh pegawai Bappeda.</p>
+          </div>
+
+          <div class="grid grid-cols-4" style="margin-bottom: 24px;">
+            <div class="stat-card">
+              <div class="stat-card-inner">
+                <div class="stat-card-info">
+                  <div class="stat-card-label">Total Pegawai</div>
+                  <div class="stat-card-value">100</div>
+                  <div class="stat-card-desc">ASN Bappeda aktif</div>
+                </div>
+                <div class="stat-card-icon"><span data-icon="Users" data-icon-size="22"></span></div>
+              </div>
+            </div>
+
+            <div class="stat-card success">
+              <div class="stat-card-inner">
+                <div class="stat-card-info">
+                  <div class="stat-card-label">IDP Terisi</div>
+                  <div class="stat-card-value text-success">89%</div>
+                  <div class="stat-card-desc">89 pegawai telah menyusun IDP</div>
+                </div>
+                <div class="stat-card-icon"><span data-icon="ClipboardCheck" data-icon-size="22"></span></div>
+              </div>
+            </div>
+
+            <div class="stat-card success">
+              <div class="stat-card-inner">
+                <div class="stat-card-info">
+                  <div class="stat-card-label">Ada Realisasi</div>
+                  <div class="stat-card-value text-success">74%</div>
+                  <div class="stat-card-desc">74 pegawai telah berkegiatan</div>
+                </div>
+                <div class="stat-card-icon"><span data-icon="CircleCheck" data-icon-size="22"></span></div>
+              </div>
+            </div>
+
+            <div class="stat-card warning">
+              <div class="stat-card-inner">
+                <div class="stat-card-info">
+                  <div class="stat-card-label">Perlu Tindak Lanjut</div>
+                  <div class="stat-card-value text-warning">26</div>
+                  <div class="stat-card-desc">Memerlukan atensi pimpinan</div>
+                </div>
+                <div class="stat-card-icon"><span data-icon="AlertCircle" data-icon-size="22"></span></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-12" style="margin-bottom: 24px;">
+            <div class="col-span-7 card">
+              <div class="card-header">
+                <div>
+                  <h3 class="card-title">Perbandingan Rencana vs Realisasi per Bidang</h3>
+                  <div style="font-size: 11.5px; color: var(--color-text-muted);">Jumlah kegiatan per unit kerja tahun 2026</div>
+                </div>
+              </div>
+              <div id="executiveGroupedBar"></div>
+            </div>
+
+            <div class="col-span-5 card">
+              <div class="card-header">
+                <h3 class="card-title">Status Penyelesaian Pegawai</h3>
+                <span class="badge badge-neutral">99 ASN</span>
+              </div>
+              <div id="executiveDonutChart"></div>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-12">
+            <div class="col-span-7 card">
+              <div class="card-header">
+                <div>
+                  <h3 class="card-title">Trend Kumulatif Pengembangan Kompetensi</h3>
+                  <div style="font-size: 11.5px; color: var(--color-text-muted);">Progres bulanan Jan – Des 2026</div>
+                </div>
+                <span class="badge badge-success">+14% vs 2025</span>
+              </div>
+              <div id="executiveTrendChart"></div>
+            </div>
+
+            <div class="col-span-5 card">
+              <div class="card-header">
+                <h3 class="card-title">Executive Strategic Insights</h3>
+                <span class="badge badge-blue">Ringkasan Eksekutif</span>
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 14px;">
+                <div style="padding: 14px; background: var(--color-surface-subtle); border-radius: var(--radius-md); border: 1px solid var(--color-border);">
+                  <div style="font-weight: 700; color: var(--color-primary); font-size: 13.5px;">Tingkat Kepatuhan Pengisian IDP 92%</div>
+                  <p style="font-size: 12px; color: var(--color-text-secondary); margin-top: 4px; line-height: 1.5;">
+                    91 dari 99 pegawai telah mengisi rencana IDP secara mandiri. Bidang Perencanaan Makro & PPEPD memimpin dengan kepatuhan 100%.
+                  </p>
+                </div>
+
+                <div style="padding: 14px; background: var(--color-surface-subtle); border-radius: var(--radius-md); border: 1px solid var(--color-border);">
+                  <div style="font-weight: 700; color: var(--color-success); font-size: 13.5px;">Realisasi Pelatihan Mencapai 74%</div>
+                  <p style="font-size: 12px; color: var(--color-text-secondary); margin-top: 4px; line-height: 1.5;">
+                    74 pegawai telah memiliki realisasi bersertifikat. Metode coaching dan diklat teknis mendominasi kegiatan efektif.
+                  </p>
+                </div>
+
+                <div style="padding: 14px; background: var(--color-surface-subtle); border-radius: var(--radius-md); border: 1px solid var(--color-border);">
+                  <div style="font-weight: 700; color: var(--color-warning); font-size: 13.5px;">26 Pegawai Butuh Tindak Lanjut</div>
+                  <p style="font-size: 12px; color: var(--color-text-secondary); margin-top: 4px; line-height: 1.5;">
+                    Disarankan menerbitkan arahan percepatan pelaksanaan pengembangan kompetensi pada triwulan berjalan.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 14. MONITORING PIMPINAN (pmonitoring) -->
+        <section id="page-pmonitoring" class="page-view">
+          <div style="margin-bottom: 22px;">
+            <h1 class="page-title">Monitoring Pengembangan Kompetensi</h1>
+            <p class="page-subtitle">Perbandingan rencana dan realisasi pengembangan per unit kerja secara terperinci.</p>
+          </div>
+
+          <div class="card" style="margin-bottom: 20px;">
+            <div class="grid grid-cols-4">
+              <div class="form-group" style="margin-bottom: 0;">
+                <label class="form-label">Tahun Anggaran</label>
+                <select class="form-select"><option selected>2026</option><option>2025</option></select>
+              </div>
+              <div class="form-group" style="margin-bottom: 0;">
+                <label class="form-label">Unit Kerja</label>
+                <select id="monUnitFilter" class="form-select" onchange="App.filterMonitoring()">
+                  <option value="" selected>Semua Bidang (99 ASN)</option>
+                  <option value="Sekretariat">Sekretariat (23 ASN)</option>
+                  <option value="Bidang PPEPD (Rendalev)">Bidang PPEPD (Rendalev) (9 ASN)</option>
+                  <option value="Bidang Perekonomian">Bidang Perekonomian (19 ASN)</option>
+                  <option value="Bidang Infrastruktur & Kewilayahan">Bidang Infrastruktur & Kewilayahan (9 ASN)</option>
+                  <option value="Bidang Pemerintahan & PM">Bidang Pemerintahan & PM (28 ASN)</option>
+                  <option value="UPTD Pusat Data & Informasi">UPTD Pusat Data & Informasi (10 ASN)</option>
+                  <option value="Pimpinan">Pimpinan (1 ASN)</option>
+                </select>
+              </div>
+              <div class="form-group" style="margin-bottom: 0;">
+                <label class="form-label">Status Capaian</label>
+                <select class="form-select"><option selected>Semua Status</option><option>Selesai</option><option>Berjalan</option><option>Belum</option></select>
+              </div>
+              <div class="form-group" style="margin-bottom: 0; display: flex; align-items: flex-end;">
+                <button class="btn btn-outline btn-block" onclick="App.toast('Filter monitoring direset', 'info')">Reset Filter</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">Dokumen Pengendalian per Unit Kerja</h3>
+              <span class="badge badge-neutral">Klik baris untuk melihat detail</span>
+            </div>
+            <div class="table-responsive">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>No</th>
+                    <th>Unit Kerja</th>
+                    <th>Total Pegawai</th>
+                    <th>IDP Terisi</th>
+                    <th>Realisasi</th>
+                    <th>Tindak Lanjut</th>
+                  </tr>
+                </thead>
+                <tbody id="monitoringTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- 15. LAPORAN PIMPINAN (plaporan) -->
+        <section id="page-plaporan" class="page-view">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 22px; flex-wrap: wrap; gap: 12px;">
+            <div>
+              <h1 class="page-title">Laporan Pengembangan SDM</h1>
+              <p class="page-subtitle" style="margin-bottom: 0;">Rekapitulasi resmi sebagai bahan evaluasi dan pelaporan ke BKD Provinsi Lampung.</p>
+            </div>
+            <div style="display: flex; gap: 10px;">
+              <button class="btn btn-outline" onclick="ExportService.exportMonitoring()">
+                <span data-icon="Download" data-icon-size="16"></span> Unduh Excel (.csv)
+              </button>
+              <button class="btn btn-primary" onclick="ExportService.printOfficialIdp()">
+                <span data-icon="FileText" data-icon-size="16"></span> Cetak PDF Ber-KOP
+              </button>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-3" style="margin-bottom: 24px;">
+            <div class="stat-card">
+              <div class="stat-card-inner">
+                <div class="stat-card-info">
+                  <div class="stat-card-label">Total ASN Terdaftar</div>
+                  <div class="stat-card-value">100</div>
+                  <div class="stat-card-desc">Bappeda Provinsi Lampung</div>
+                </div>
+                <div class="stat-card-icon"><span data-icon="Users" data-icon-size="22"></span></div>
+              </div>
+            </div>
+
+            <div class="stat-card success">
+              <div class="stat-card-inner">
+                <div class="stat-card-info">
+                  <div class="stat-card-label">Total Program Direncanakan</div>
+                  <div class="stat-card-value text-success">150</div>
+                  <div class="stat-card-desc">Target pengembangan IDP</div>
+                </div>
+                <div class="stat-card-icon"><span data-icon="Target" data-icon-size="22"></span></div>
+              </div>
+            </div>
+
+            <div class="stat-card warning">
+              <div class="stat-card-inner">
+                <div class="stat-card-info">
+                  <div class="stat-card-label">Program Terlaksana</div>
+                  <div class="stat-card-value text-warning">98</div>
+                  <div class="stat-card-desc">Capaian realisasi 65.3%</div>
+                </div>
+                <div class="stat-card-icon"><span data-icon="CircleCheck" data-icon-size="22"></span></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card" style="margin-bottom: 22px;">
+            <div class="card-header">
+              <h3 class="card-title">Rekapitulasi Berdasarkan Jenis Pengembangan</h3>
+              <span class="badge badge-blue">Tahun 2026</span>
+            </div>
+            <div class="table-responsive">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Jenis Pengembangan</th>
+                    <th>Rencana (Kegiatan)</th>
+                    <th>Terlaksana</th>
+                    <th>Belum</th>
+                    <th>Persentase Capaian</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="font-semibold">Diklat Teknis</td>
+                    <td>42</td>
+                    <td>30</td>
+                    <td>12</td>
+                    <td><b>71.4%</b></td>
+                  </tr>
+                  <tr>
+                    <td class="font-semibold">Coaching</td>
+                    <td>30</td>
+                    <td>24</td>
+                    <td>6</td>
+                    <td><b>80.0%</b></td>
+                  </tr>
+                  <tr>
+                    <td class="font-semibold">Mentoring</td>
+                    <td>28</td>
+                    <td>20</td>
+                    <td>8</td>
+                    <td><b>71.4%</b></td>
+                  </tr>
+                  <tr>
+                    <td class="font-semibold">Workshop</td>
+                    <td>25</td>
+                    <td>16</td>
+                    <td>9</td>
+                    <td><b>64.0%</b></td>
+                  </tr>
+                  <tr>
+                    <td class="font-semibold">E-Learning</td>
+                    <td>25</td>
+                    <td>8</td>
+                    <td>17</td>
+                    <td><b>32.0%</b></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="card" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px;">
+            <div>
+              <h3 class="card-title">Laporan Tindak Lanjut Rencana Pengembangan</h3>
+              <p style="font-size: 12.5px; color: var(--color-text-secondary); margin-top: 3px;">
+                Pegawai yang telah menyelesaikan IDP diarahkan untuk menyusun Laporan Tindak Lanjut Rencana Pengembangan Individu.
+              </p>
+            </div>
+            <button class="btn btn-outline" onclick="App.toast('Daftar Laporan Tindak Lanjut dibuka', 'info')">
+              Lihat Laporan Tindak Lanjut
+            </button>
+          </div>
+        </section>
+
+      </main>
+    </div>
+  </div>
+
+  <!-- ========================================================================
+       03 — MODALS, DRAWERS & OFFICIAL PRINT PAPER
+       ======================================================================== -->
+
+  <!-- OFFICIAL PRINT CONTAINER (RENDERED NATIVELY FOR PRINT / PDF) -->
+  <div id="officialPrintContainer"></div>
+
+  <!-- MODAL: Tambah / Edit Program Pengembangan (720px) with Conditional Forms -->
+  <div class="modal-overlay" id="programModal">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <div>
+          <h3 id="programModalTitle">Tambah Program Pengembangan</h3>
+          <p id="programModalSub">Tambahkan rencana pengembangan baru.</p>
+        </div>
+        <button class="btn-icon" onclick="App.closeModal('programModal')"><span data-icon="X" data-icon-size="18"></span></button>
+      </div>
+      <div class="modal-body">
+        <form id="programForm" onsubmit="event.preventDefault(); App.saveProgramForm();">
+          <input type="hidden" id="formProgramId">
+
+          <div class="grid grid-cols-3">
+            <div class="form-group">
+              <label class="form-label">Jenis Kompetensi <span class="required">*</span></label>
+              <select id="progKompetensi" class="form-select">
+                <option selected>Pelayanan Publik</option>
+                <option>Komunikasi</option>
+                <option>Integritas</option>
+                <option>Analisis Data</option>
+                <option>Pengembangan Diri</option>
+                <option>Mengelola Perubahan</option>
+                <option>Pengambilan Keputusan</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Metode Pengembangan <span class="required">*</span></label>
+              <select id="progMetode" class="form-select" onchange="App.onMetodeChange()">
+                <option value="Coaching" selected>Coaching — Non Klasikal</option>
+                <option value="Mentoring">Mentoring — Non Klasikal</option>
+                <option value="Diklat Teknis">Diklat Teknis — Klasikal</option>
+                <option value="Workshop">Workshop — Klasikal</option>
+                <option value="E-Learning">E-Learning — Non Klasikal</option>
+                <option value="Konseling">Konseling — Non Klasikal</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Topik Pengembangan <span class="required">*</span></label>
+              <input type="text" id="progTopik" class="form-control" placeholder="Contoh: Service Excellence" required>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-3">
+            <div class="form-group">
+              <label class="form-label">Jenis Diklat</label>
+              <select id="progJenisDiklat" class="form-select">
+                <option selected>-</option>
+                <option>SEPADA</option>
+                <option>SEPALA / ADUM / DIKLAT PIM TK. IV</option>
+                <option>SEPADYA / SPAMA / DIKLAT PIM TK. III</option>
+                <option>SPAMEN / SESPA / DIKLAT PIM TK. II</option>
+                <option>Diklat Teknis Perencanaan</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Jumlah JP <span class="required">*</span></label>
+              <input type="number" id="progJp" class="form-control" value="2" min="1" required>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Penyelenggara</label>
+              <select id="progPenyelenggara" class="form-select">
+                <option selected>Internal Bappeda</option>
+                <option>Eksternal (BPSDMD)</option>
+                <option>Pusbindiklatren Bappenas</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2">
+            <div class="form-group">
+              <label class="form-label">Periode Pelaksanaan</label>
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <input type="date" id="progPeriodeMulai" class="form-control" value="2026-10-01">
+                <span style="color: var(--color-text-muted); font-size: 13px; font-weight: 600;">s/d</span>
+                <input type="date" id="progPeriodeSelesai" class="form-control" value="2026-12-31">
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Estimasi Biaya (Rp)</label>
+              <input type="number" id="progEstimasi" class="form-control" value="0">
+            </div>
+          </div>
+
+          <!-- CONDITIONAL FORM: Coaching -->
+          <div id="conditionalCoaching" style="display: none; padding: 16px; background: var(--color-surface-subtle); border-radius: var(--radius-md); border: 1px solid var(--color-border); margin-bottom: 16px;">
+            <div style="font-weight: 700; color: var(--color-primary); font-size: 12px; text-transform: uppercase; margin-bottom: 10px;">Formulir Khusus: Coaching</div>
+            <div class="grid grid-cols-2">
+              <div class="form-group"><label class="form-label">Materi Coaching</label><input type="text" class="form-control" placeholder="Materi"></div>
+              <div class="form-group"><label class="form-label">Kondisi Coachee</label><input type="text" class="form-control" placeholder="Kondisi awal"></div>
+              <div class="form-group"><label class="form-label">Bentuk Coaching</label><input type="text" class="form-control" placeholder="Tatap muka / Daring"></div>
+              <div class="form-group"><label class="form-label">Rekomendasi Coach</label><input type="text" class="form-control" placeholder="Rekomendasi"></div>
+            </div>
+          </div>
+
+          <!-- CONDITIONAL FORM: Mentoring -->
+          <div id="conditionalMentoring" style="display: none; padding: 16px; background: var(--color-surface-subtle); border-radius: var(--radius-md); border: 1px solid var(--color-border); margin-bottom: 16px;">
+            <div style="font-weight: 700; color: var(--color-primary); font-size: 12px; text-transform: uppercase; margin-bottom: 10px;">Formulir Khusus: Mentoring</div>
+            <div class="grid grid-cols-2">
+              <div class="form-group"><label class="form-label">Nama Mentee</label><input type="text" class="form-control" value="Rizky Aditya Pratama"></div>
+              <div class="form-group"><label class="form-label">Kondisi / Sasaran Mentoring</label><input type="text" class="form-control" placeholder="Sasaran"></div>
+              <div class="form-group"><label class="form-label">Bentuk Mentoring</label><input type="text" class="form-control" placeholder="Bimbingan teknis berkala"></div>
+              <div class="form-group"><label class="form-label">Hasil yang Diharapkan</label><input type="text" class="form-control" placeholder="Hasil"></div>
+            </div>
+          </div>
+
+          <!-- CONDITIONAL FORM: Konseling -->
+          <div id="conditionalKonseling" style="display: none; padding: 16px; background: var(--color-surface-subtle); border-radius: var(--radius-md); border: 1px solid var(--color-border); margin-bottom: 16px;">
+            <div style="font-weight: 700; color: var(--color-primary); font-size: 12px; text-transform: uppercase; margin-bottom: 10px;">Formulir Khusus: Konseling</div>
+            <div class="grid grid-cols-2">
+              <div class="form-group"><label class="form-label">Uraian Masalah</label><input type="text" class="form-control" placeholder="Uraian"></div>
+              <div class="form-group"><label class="form-label">Komitmen Pengembangan</label><input type="text" class="form-control" placeholder="Komitmen"></div>
+              <div class="form-group"><label class="form-label">Konselor</label><input type="text" class="form-control" placeholder="Nama konselor"></div>
+              <div class="form-group"><label class="form-label">Atasan Langsung</label><input type="text" class="form-control" placeholder="Nama atasan"></div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Keterangan Tambahan</label>
+            <input type="text" id="progKeterangan" class="form-control" placeholder="Catatan opsional">
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline" onclick="App.closeModal('programModal')">Batal</button>
+        <button type="button" class="btn btn-primary" onclick="App.saveProgramForm()">Simpan Program</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: Konfirmasi Pengajuan IDP -->
+  <div class="modal-overlay" id="submitIdpConfirmModal">
+    <div class="modal-dialog modal-sm">
+      <div class="modal-body" style="text-align: center; padding: 32px 24px;">
+        <div style="width: 56px; height: 56px; border-radius: 50%; background: var(--color-success-light); color: var(--color-success); display: grid; place-items: center; margin: 0 auto 16px;">
+          <span data-icon="CircleCheck" data-icon-size="28"></span>
+        </div>
+        <h3 style="font-size: 18px; font-weight: 750; margin-bottom: 8px;">Ajukan IDP untuk Verifikasi?</h3>
+        <p style="font-size: 13px; color: var(--color-text-secondary); line-height: 1.5; margin-bottom: 24px;">
+          Setelah diajukan, dokumen IDP Anda akan masuk ke antrean verifikasi Pengelola SDM Bappeda Provinsi Lampung.
+        </p>
+        <div style="display: flex; gap: 10px;">
+          <button class="btn btn-outline" style="flex: 1;" onclick="App.closeModal('submitIdpConfirmModal')">Batal</button>
+          <button class="btn btn-success" style="flex: 1;" onclick="App.submitIdpConfirmed()">Ya, Ajukan IDP</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: Tambah Pegawai (Admin) -->
+  <div class="modal-overlay" id="addEmployeeModal">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <div>
+          <h3>Tambah Pegawai Baru</h3>
+          <p>Tambahkan data ASN ke dalam sistem IDP Bappeda.</p>
+        </div>
+        <button class="btn-icon" onclick="App.closeModal('addEmployeeModal')"><span data-icon="X" data-icon-size="18"></span></button>
+      </div>
+      <div class="modal-body">
+        <div class="grid grid-cols-2">
+          <div class="form-group">
+            <label class="form-label">Nama Lengkap <span class="required">*</span></label>
+            <input type="text" id="newEmpName" class="form-control" placeholder="Nama tanpa gelar / dengan gelar" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">NIP <span class="required">*</span></label>
+            <input type="text" id="newEmpNip" class="form-control" placeholder="18 digit NIP" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Pangkat / Golongan</label>
+            <input type="text" id="newEmpPangkat" class="form-control" value="Penata Muda / III-a">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Jabatan</label>
+            <input type="text" id="newEmpJabatan" class="form-control" placeholder="Nama Jabatan">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Unit Kerja</label>
+            <select id="newEmpUnit" class="form-select">
+              <option selected>Bidang Perencanaan Makro</option>
+              <option>Bidang Pemerintahan & PM</option>
+              <option>Bidang Perekonomian & SDA</option>
+              <option>Sekretariat</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Jenis Jabatan</label>
+            <select class="form-select">
+              <option selected>JFT</option>
+              <option>Pelaksana</option>
+              <option>Struktural</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline" onclick="App.closeModal('addEmployeeModal')">Batal</button>
+        <button class="btn btn-primary" onclick="App.saveNewEmployee()">Simpan Pegawai</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: Catatan Alasan Revisi (Admin) -->
+  <div class="modal-overlay" id="revisionReasonModal">
+    <div class="modal-dialog modal-sm">
+      <div class="modal-header">
+        <h3>Minta Revisi IDP</h3>
+        <button class="btn-icon" onclick="App.closeModal('revisionReasonModal')"><span data-icon="X" data-icon-size="18"></span></button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="revisionVerifId">
+        <div class="form-group">
+          <label class="form-label">Alasan & Catatan Perbaikan <span class="required">*</span></label>
+          <textarea id="revisionReasonInput" class="form-textarea" placeholder="Tuliskan alasan pengembalian dan bagian yang perlu diperbaiki oleh pegawai..." required></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline" onclick="App.closeModal('revisionReasonModal')">Batal</button>
+        <button class="btn btn-danger-solid" onclick="App.submitRevisionRequest()">Kirim Permintaan Revisi</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: Petunjuk Akun Kedinasan Resmi Bappeda -->
+  <div class="modal-overlay" id="accountHelperModal">
+    <div class="modal-dialog modal-sm">
+      <div class="modal-header">
+        <div>
+          <h3>Daftar Akun Kedinasan Resmi</h3>
+          <p>Kredensial ASN resmi Bappeda Provinsi Lampung</p>
+        </div>
+        <button class="btn-icon" onclick="App.closeModal('accountHelperModal')"><span data-icon="X" data-icon-size="18"></span></button>
+      </div>
+      <div class="modal-body">
+        <div style="display: flex; flex-direction: column; gap: 12px;">
+          <div style="padding: 12px 14px; background: var(--color-surface-subtle); border: 1px solid var(--color-border); border-radius: var(--radius-md); cursor: pointer;" onclick="App.fillTestAccount('198701012010011001', 'password')">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <b>1. Pegawai ASN (Analis Perencanaan)</b>
+              <span class="badge badge-blue">Gunakan</span>
+            </div>
+            <div style="font-size: 11.5px; color: var(--color-text-muted); margin-top: 4px;">
+              NIP: <code>198701012010011001</code><br>
+              Password: <code>password</code>
+            </div>
+          </div>
+
+          <div style="padding: 12px 14px; background: var(--color-surface-subtle); border: 1px solid var(--color-border); border-radius: var(--radius-md); cursor: pointer;" onclick="App.fillTestAccount('198403152008011002', 'admin123')">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <b>2. Pengelola SDM (Admin Kepegawaian)</b>
+              <span class="badge badge-warning">Gunakan</span>
+            </div>
+            <div style="font-size: 11.5px; color: var(--color-text-muted); margin-top: 4px;">
+              NIP: <code>198403152008011002</code><br>
+              Password: <code>admin123</code>
+            </div>
+          </div>
+
+          <div style="padding: 12px 14px; background: var(--color-surface-subtle); border: 1px solid var(--color-border); border-radius: var(--radius-md); cursor: pointer;" onclick="App.fillTestAccount('197206181997031003', 'pimpinan123')">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <b>3. Kepala Bappeda (Pimpinan)</b>
+              <span class="badge badge-success">Gunakan</span>
+            </div>
+            <div style="font-size: 11.5px; color: var(--color-text-muted); margin-top: 4px;">
+              NIP: <code>197206181997031003</code><br>
+              Password: <code>pimpinan123</code>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline" onclick="App.closeModal('accountHelperModal')">Tutup</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: Pratinjau Dokumen Sertifikat -->
+  <div class="modal-overlay" id="docPreviewModal">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <div>
+          <h3 id="previewDocTitle">Pratinjau Dokumen Bukti</h3>
+          <p>Dokumen sertifikat pelatihan / surat tugas resmi</p>
+        </div>
+        <button class="btn-icon" onclick="App.closeModal('docPreviewModal')"><span data-icon="X" data-icon-size="18"></span></button>
+      </div>
+      <div class="modal-body" style="text-align: center; padding: 40px 20px;">
+        <div style="width: 72px; height: 72px; border-radius: 50%; background: var(--color-light-blue); color: var(--color-secondary-blue); display: grid; place-items: center; margin: 0 auto 16px;">
+          <span data-icon="FileText" data-icon-size="36"></span>
+        </div>
+        <h4 style="font-size: 16px; font-weight: 750; margin-bottom: 6px;">Sertifikat Terverifikasi Keasliannya</h4>
+        <p style="font-size: 12.5px; color: var(--color-text-secondary); max-width: 440px; margin: 0 auto 24px; line-height: 1.5;">
+          Berkas digital telah diperiksa dan tervalidasi oleh Subbagian Umum & Kepegawaian Bappeda Provinsi Lampung sebagai pemenuhan target jam pelajaran (JP).
+        </p>
+        <button class="btn btn-primary" onclick="App.toast('Mengunduh salinan berkas...', 'info'); App.closeModal('docPreviewModal');">
+          <span data-icon="Download" data-icon-size="16"></span> Unduh Salinan Berkas
+        </button>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline" onclick="App.closeModal('docPreviewModal')">Tutup</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: Konfirmasi Universal -->
+  <div class="modal-overlay" id="confirmDialogModal">
+    <div class="modal-dialog modal-sm">
+      <div class="modal-body" style="text-align: center; padding: 28px 22px;">
+        <div style="width: 48px; height: 48px; border-radius: 50%; background: var(--color-warning-light); color: var(--color-warning); display: grid; place-items: center; margin: 0 auto 14px;">
+          <span data-icon="AlertTriangle" data-icon-size="24"></span>
+        </div>
+        <h3 id="confirmDialogTitle" style="font-size: 16.5px; font-weight: 750; margin-bottom: 6px;">Konfirmasi</h3>
+        <p id="confirmDialogMessage" style="font-size: 12.5px; color: var(--color-text-secondary); line-height: 1.5; margin-bottom: 20px;"></p>
+        <div style="display: flex; gap: 10px;">
+          <button class="btn btn-outline" style="flex: 1;" onclick="App.closeModal('confirmDialogModal')">Batal</button>
+          <button class="btn btn-danger-solid" style="flex: 1;" id="btnConfirmProceed">Lanjutkan</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DRAWER: Review IDP Pegawai (Admin — 720px Slide-in from Right) -->
+  <div class="drawer-overlay" id="reviewDrawer">
+    <div class="drawer-panel" style="width: 720px;">
+      <div class="drawer-header">
+        <div>
+          <h3 id="reviewDrawerEmployeeName">Rizky Aditya Pratama</h3>
+          <div id="reviewDrawerNip" style="font-size: 12px; color: var(--color-text-muted); margin-top: 3px;">NIP: 198701012010011001</div>
+        </div>
+        <button class="btn-icon" onclick="App.closeDrawer('reviewDrawer')"><span data-icon="X" data-icon-size="20"></span></button>
+      </div>
+      <div class="drawer-body">
+        <div style="padding: 14px 18px; background: var(--color-light-blue); border-radius: var(--radius-md); border: 1px solid rgba(47,128,237,0.25); margin-bottom: 22px;">
+          <div style="font-size: 11.5px; font-weight: 700; color: var(--color-secondary-blue); text-transform: uppercase;">Rangkuman Rencana Karier Pegawai</div>
+          <div id="reviewDrawerTargetKarier" style="font-size: 16px; font-weight: 750; color: var(--color-primary); margin: 4px 0;">JFT Muda — Level 3</div>
+          <div id="reviewDrawerRencanaKarier" style="font-size: 12.5px; color: var(--color-text-secondary); line-height: 1.5;">Pengembangan pelayanan publik dan kapasitas perencanaan pembangunan.</div>
+        </div>
+
+        <h4 style="font-size: 14px; font-weight: 700; margin-bottom: 12px;">Kesenjangan Kompetensi yang Diintervensi</h4>
+        <div class="table-responsive" style="margin-bottom: 22px;">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Kompetensi</th>
+                <th>Level Saat Ini</th>
+                <th>Target</th>
+                <th>Gap</th>
+                <th>Metode Usulan</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="font-semibold">Pengembangan Diri & Orang Lain</td>
+                <td>1</td>
+                <td>3</td>
+                <td><span class="badge badge-danger">2 Level</span></td>
+                <td>Mentoring</td>
+              </tr>
+              <tr>
+                <td class="font-semibold">Mengelola Perubahan</td>
+                <td>1</td>
+                <td>3</td>
+                <td><span class="badge badge-danger">2 Level</span></td>
+                <td>Workshop</td>
+              </tr>
+              <tr>
+                <td class="font-semibold">Pelayanan Publik</td>
+                <td>2</td>
+                <td>3</td>
+                <td><span class="badge badge-warning">1 Level</span></td>
+                <td>Coaching</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div style="display: flex; gap: 20px; margin-bottom: 24px; padding: 14px; background: var(--color-surface-subtle); border-radius: var(--radius-md);">
+          <div><span style="font-size: 11px; color: var(--color-text-muted);">Total Beban Belajar:</span> <b id="reviewDrawerTotalJp" style="color: var(--color-primary);">32 JP</b></div>
+          <div><span style="font-size: 11px; color: var(--color-text-muted);">Estimasi Biaya:</span> <b id="reviewDrawerEstimasiBiaya" style="color: var(--color-primary);">Rp2.250.000</b></div>
+        </div>
+
+        <h4 style="font-size: 14px; font-weight: 700; margin-bottom: 8px;">Keputusan Verifikator Pengelola SDM</h4>
+        <div class="form-group">
+          <label class="form-label">Catatan Rekomendasi / Arahan Perbaikan</label>
+          <textarea id="verifNotesInput" class="form-textarea" placeholder="Tuliskan catatan verifikasi resmi di sini..."></textarea>
+        </div>
+      </div>
+      <div class="drawer-footer">
+        <button class="btn btn-outline" onclick="App.closeDrawer('reviewDrawer')">Tutup</button>
+        <button class="btn btn-danger" id="btnRejectVerif">Minta Revisi</button>
+        <button class="btn btn-success" id="btnApproveVerif">Setujui IDP</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- DRAWER: Input Realisasi Pengembangan (Pegawai & Admin) -->
+  <div class="drawer-overlay" id="realizationDrawer">
+    <div class="drawer-panel">
+      <div class="drawer-header">
+        <div>
+          <h3>Catat Realisasi Pengembangan</h3>
+          <div style="font-size: 12px; color: var(--color-text-muted); margin-top: 2px;">Unggah bukti pelaksanaan kegiatan IDP</div>
+        </div>
+        <button class="btn-icon" onclick="App.closeDrawer('realizationDrawer')"><span data-icon="X" data-icon-size="20"></span></button>
+      </div>
+      <div class="drawer-body">
+        <div class="form-group">
+          <label class="form-label">Program IDP yang Direalisasikan <span class="required">*</span></label>
+          <select id="realizProgram" class="form-select">
+            <option selected>Pelatihan Analisis Data Perencanaan dengan Python & PowerBI (Diklat Teknis)</option>
+            <option>Coaching Service Excellence dalam Perencanaan (Coaching)</option>
+            <option>Workshop Strategic Decision Making Kebijakan Publik (Workshop)</option>
+            <option>Mentoring Manajemen Waktu & Efektivitas Tim Kerja (Mentoring)</option>
+          </select>
+        </div>
+
+        <div class="grid grid-cols-2">
+          <div class="form-group">
+            <label class="form-label">Tanggal Pelaksanaan <span class="required">*</span></label>
+            <input type="date" id="realizTanggal" class="form-control" value="2026-11-15">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Jumlah JP Tercapai <span class="required">*</span></label>
+            <input type="number" id="realizJp" class="form-control" value="20" min="1">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Lembaga Penyelenggara</label>
+          <input type="text" id="realizPenyelenggara" class="form-control" value="BPSDMD Provinsi Lampung">
+        </div>
+
+        <!-- File Upload Dropzone -->
+        <div class="form-group">
+          <label class="form-label">Upload Bukti Sertifikat / Formulir Kegiatan <span class="required">*</span></label>
+          <div class="file-dropzone" onclick="document.getElementById('realizFileInput').click()">
+            <input type="file" id="realizFileInput" style="display: none;" onchange="if(this.files[0]) document.getElementById('dropzoneFileName').textContent = this.files[0].name;">
+            <div class="dropzone-icon"><span data-icon="Upload" data-icon-size="22"></span></div>
+            <div class="dropzone-title" id="dropzoneFileName">Pilih atau letakkan file bukti di sini</div>
+            <div class="dropzone-desc">Format PDF, JPG, PNG maksimal 5 MB</div>
+          </div>
+        </div>
+      </div>
+      <div class="drawer-footer">
+        <button class="btn btn-outline" onclick="App.closeDrawer('realizationDrawer')">Batal</button>
+        <button class="btn btn-primary" onclick="App.saveRealizationForm()">Simpan Realisasi</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- DRAWER: Detail Monitoring Unit (Pimpinan) -->
+  <div class="drawer-overlay" id="monitoringDetailDrawer">
+    <div class="drawer-panel">
+      <div class="drawer-header">
+        <div>
+          <h3 id="monDrawerTitle">Detail Monitoring Unit</h3>
+          <div style="font-size: 12px; color: var(--color-text-muted); margin-top: 2px;">Dokumen Pengendalian Eksekutif</div>
+        </div>
+        <button class="btn-icon" onclick="App.closeDrawer('monitoringDetailDrawer')"><span data-icon="X" data-icon-size="20"></span></button>
+      </div>
+      <div class="drawer-body">
+        <p style="font-size: 13px; color: var(--color-text-secondary); line-height: 1.6; margin-bottom: 20px;">
+          Rincian dokumen pengendali realisasi kompetensi pada bidang ini menunjukkan progres kepatuhan di atas 85%. Seluruh ASN telah terpetakan dalam matriks gap kompetensi.
+        </p>
+        <div class="table-responsive">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Pegawai</th>
+                <th>Jabatan</th>
+                <th>Rencana</th>
+                <th>Realisasi</th>
+                <th>Capaian</th>
+              </tr>
+            </thead>
+            <tbody id="monitoringDrawerTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="drawer-footer">
+        <button class="btn btn-outline" onclick="App.closeDrawer('monitoringDetailDrawer')">Tutup</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: BANTUAN AKUN RESMI NIP BAPPEDA -->
+  <div class="modal-overlay" id="accountHelperModal">
+    <div class="modal-card" style="max-width: 580px;">
+      <div class="modal-header">
+        <div>
+          <h3 style="margin: 0; font-size: 16px; font-weight: 700;">Daftar Akun Resmi ASN Bappeda</h3>
+          <p style="margin: 2px 0 0; font-size: 12px; color: var(--color-text-muted);">Gunakan kredensial resmi berikut untuk masuk ke sistem sesuai hak akses:</p>
+        </div>
+        <button class="btn-icon" onclick="App.closeModal('accountHelperModal')"><span data-icon="X" data-icon-size="18"></span></button>
+      </div>
+      <div class="modal-body" style="padding: 18px 24px;">
+        <div style="display: flex; flex-direction: column; gap: 12px;">
+          <!-- 1. Pegawai -->
+          <div style="padding: 12px 16px; border: 1.5px solid rgba(37,99,235,0.25); background: rgba(37,99,235,0.03); border-radius: 10px; display: flex; justify-content: space-between; align-items: center;">
+            <div>
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <span class="badge badge-blue">Pegawai ASN</span>
+                <span style="font-size: 11px; color: var(--color-text-muted);">Sekretaris Bappeda</span>
+              </div>
+              <div style="font-weight: 700; font-size: 13px; color: var(--color-text-primary); margin-top: 4px;">ANDI ARAFAT S.T., M.E.</div>
+              <div style="font-size: 11px; color: var(--color-text-secondary); margin-top: 2px;">
+                NIP: <code style="background: rgba(0,0,0,0.06); padding: 1px 5px; border-radius: 4px;">197407072002121008</code> • Sandi: <code style="background: rgba(0,0,0,0.06); padding: 1px 5px; border-radius: 4px;">password</code>
+              </div>
+            </div>
+            <button class="btn btn-primary btn-sm" onclick="App.fillTestAccount('197407072002121008', 'password')">Gunakan</button>
+          </div>
+
+          <!-- 2. Admin SDM -->
+          <div style="padding: 12px 16px; border: 1.5px solid rgba(217,119,6,0.25); background: rgba(217,119,6,0.03); border-radius: 10px; display: flex; justify-content: space-between; align-items: center;">
+            <div>
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <span class="badge badge-warning">Admin / SDM</span>
+                <span style="font-size: 11px; color: var(--color-text-muted);">Subbagian Umum & Kepegawaian</span>
+              </div>
+              <div style="font-weight: 700; font-size: 13px; color: var(--color-text-primary); margin-top: 4px;">CIK MARYA S.E.,M.M.</div>
+              <div style="font-size: 11px; color: var(--color-text-secondary); margin-top: 2px;">
+                NIP: <code style="background: rgba(0,0,0,0.06); padding: 1px 5px; border-radius: 4px;">196910261992032002</code> • Sandi: <code style="background: rgba(0,0,0,0.06); padding: 1px 5px; border-radius: 4px;">admin123</code>
+              </div>
+            </div>
+            <button class="btn btn-warning btn-sm" onclick="App.fillTestAccount('196910261992032002', 'admin123')">Gunakan</button>
+          </div>
+
+          <!-- 3. Pimpinan -->
+          <div style="padding: 12px 16px; border: 1.5px solid rgba(5,150,105,0.25); background: rgba(5,150,105,0.03); border-radius: 10px; display: flex; justify-content: space-between; align-items: center;">
+            <div>
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <span class="badge badge-success">Pimpinan</span>
+                <span style="font-size: 11px; color: var(--color-text-muted);">Kepala Badan Prov. Lampung</span>
+              </div>
+              <div style="font-weight: 700; font-size: 13px; color: var(--color-text-primary); margin-top: 4px;">Dr. ANANG RISGIYANTO S.K.M., M.Kes.</div>
+              <div style="font-size: 11px; color: var(--color-text-secondary); margin-top: 2px;">
+                NIP: <code style="background: rgba(0,0,0,0.06); padding: 1px 5px; border-radius: 4px;">197507312000031002</code> • Sandi: <code style="background: rgba(0,0,0,0.06); padding: 1px 5px; border-radius: 4px;">pimpinan123</code>
+              </div>
+            </div>
+            <button class="btn btn-success btn-sm" onclick="App.fillTestAccount('197507312000031002', 'pimpinan123')">Gunakan</button>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer" style="display: flex; justify-content: space-between; align-items: center;">
+        <span style="font-size: 11px; color: var(--color-text-muted);">Total 99 ASN Bappeda aktif terdaftar di sistem (DUK 2026)</span>
+        <button class="btn btn-outline" onclick="App.closeModal('accountHelperModal')">Tutup</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: DETAIL PEGAWAI BAPPEDA -->
+  <div class="modal-overlay" id="empDetailModal">
+    <div class="modal-card" style="max-width: 520px;">
+      <div class="modal-header">
+        <div>
+          <h3 style="margin: 0; font-size: 16px; font-weight: 700;" id="modalEmpName">Detail Pegawai Bappeda</h3>
+          <p style="margin: 2px 0 0; font-size: 12px; color: var(--color-text-muted);" id="modalEmpNip">NIP: -</p>
+        </div>
+        <button class="btn-icon" onclick="App.closeModal('empDetailModal')"><span data-icon="X" data-icon-size="18"></span></button>
+      </div>
+      <div class="modal-body" style="padding: 18px 24px; max-height: 75vh; overflow-y: auto;">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; font-size: 12.5px;">
+          <div>
+            <div style="color: var(--color-text-muted); font-size: 11px;">Unit Kerja / Bidang</div>
+            <div id="modalEmpUnit" style="font-weight: 600; color: var(--color-text-primary);">-</div>
+          </div>
+          <div>
+            <div style="color: var(--color-text-muted); font-size: 11px;">Jenis Jabatan</div>
+            <div id="modalEmpJenis" style="font-weight: 600; color: var(--color-text-primary);">-</div>
+          </div>
+          <div style="grid-column: span 2;">
+            <div style="color: var(--color-text-muted); font-size: 11px;">Jabatan Resmi & TMT</div>
+            <div id="modalEmpJabatan" style="font-weight: 600; color: var(--color-text-primary);">-</div>
+          </div>
+          <div>
+            <div style="color: var(--color-text-muted); font-size: 11px;">Pangkat / Golongan</div>
+            <div id="modalEmpPangkat" style="font-weight: 600; color: var(--color-text-primary);">-</div>
+          </div>
+          <div>
+            <div style="color: var(--color-text-muted); font-size: 11px;">TMT Pangkat</div>
+            <div id="modalEmpTmtPangkat" style="font-weight: 600; color: var(--color-text-primary);">-</div>
+          </div>
+          <div>
+            <div style="color: var(--color-text-muted); font-size: 11px;">Tempat, Tanggal Lahir</div>
+            <div id="modalEmpTtl" style="font-weight: 600; color: var(--color-text-primary);">-</div>
+          </div>
+          <div>
+            <div style="color: var(--color-text-muted); font-size: 11px;">Usia & Masa Kerja</div>
+            <div id="modalEmpUsiaMasaKerja" style="font-weight: 600; color: var(--color-text-primary);">-</div>
+          </div>
+          <div style="grid-column: span 2;">
+            <div style="color: var(--color-text-muted); font-size: 11px;">Pendidikan Umum Terakhir</div>
+            <div id="modalEmpPendidikan" style="font-weight: 600; color: var(--color-text-primary);">-</div>
+          </div>
+          <div style="grid-column: span 2;">
+            <div style="color: var(--color-text-muted); font-size: 11px;">Diklat Struktural</div>
+            <div id="modalEmpDiklat" style="font-weight: 600; color: var(--color-text-primary);">-</div>
+          </div>
+          <div>
+            <div style="color: var(--color-text-muted); font-size: 11px;">Status Formulir IDP</div>
+            <div id="modalEmpStatusIdp">-</div>
+          </div>
+          <div>
+            <div style="color: var(--color-text-muted); font-size: 11px;">Realisasi Bangkom (Target 20 JP)</div>
+            <div id="modalEmpProgress" style="font-weight: 700; color: var(--color-primary);">-</div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer" style="display: flex; justify-content: flex-end;">
+        <button class="btn btn-primary" onclick="App.closeModal('empDetailModal')">Tutup</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST CONTAINER -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- Core Scripts -->
+  <script src="assets/lambang-lampung.js"></script>
+  <script src="js/icons.js"></script>
+  <script src="js/charts.js"></script>
+  <script src="js/bappeda_data.js"></script>
+  <script src="js/store.js"></script>
+  <script src="js/export.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
