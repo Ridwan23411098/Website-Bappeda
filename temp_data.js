@@ -4245,3 +4245,5 @@ const BAPPEDA_DATA = {
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = BAPPEDA_DATA;
 }
+
+module.exports = BAPPEDA_DATA;

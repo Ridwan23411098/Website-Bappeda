@@ -53,7 +53,7 @@ new_acc = """  // Official ASN Accounts Directory of Bappeda Lampung
       name: 'ANDI ARAFAT S.T., M.E.',
       pangkat: 'Penata Tk. I / III-d',
       jabatan: 'Perencana Ahli Muda / Subkoordinator Rendalev',
-      unitKerja: 'Bidang PPEPD (Rendalev)',
+      unitKerja: 'Bidang PMPE (Rendalev)',
       role: 'pegawai',
       avatarInitial: 'AA'
     },
@@ -109,7 +109,7 @@ new_user = """    // Active ASN Profile (Official Pegawai: Andi Arafat, S.T., M.
       pendidikan: 'S1 Teknik Sipil • S2 Magister Ekonomika Pembangunan',
       masaKerja: '23 Tahun 9 Bulan',
       jabatan: 'Perencana Ahli Muda / Subkoordinator Rendalev',
-      unitKerja: 'Bidang PPEPD (Rendalev)',
+      unitKerja: 'Bidang PMPE (Rendalev)',
       jenisJabatan: 'JFT',
       status: 'Aktif',
       avatarInitial: 'AA',
@@ -229,7 +229,7 @@ new_block = """    // Official Employee List (100 ASN Lengkap Bappeda Provinsi L
       perluTindakLanjut: 14,
       rencanaVsRealisasi: [
         { label: 'Sekretariat', rencana: 23, realisasi: 18 },
-        { label: 'Bidang PPEPD', rencana: 11, realisasi: 9 },
+        { label: 'Bidang PMPE', rencana: 11, realisasi: 9 },
         { label: 'Bidang Perekonomian', rencana: 19, realisasi: 14 },
         { label: 'Infrastruktur & Kewilayahan', rencana: 12, realisasi: 9 },
         { label: 'Pemerintahan & PM', rencana: 18, realisasi: 13 },

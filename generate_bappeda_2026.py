@@ -25,7 +25,7 @@ def determine_unit(no, jabatan):
     if 'INFRASTRUKTUR' in jab_upper:
         return 'Bidang Infrastruktur & Kewilayahan'
     if 'MAKRO' in jab_upper or 'RENDALEV' in jab_upper or 'EVALUASI PEMBANGUNAN' in jab_upper:
-        return 'Bidang PPEPD (Rendalev)'
+        return 'Bidang PMPE (Rendalev)'
     if 'PEREKONOMIAN' in jab_upper:
         return 'Bidang Perekonomian'
     if 'PEMERINTAHAN DAN PEMBANGUNAN MANUSIA' in jab_upper:
@@ -42,9 +42,9 @@ def determine_unit(no, jabatan):
     if no in [8, 22, 24, 33, 35, 54, 57, 65]:
         return 'Bidang Infrastruktur & Kewilayahan'
         
-    # Bidang PPEPD (Makro & Evaluasi)
+    # Bidang PMPE (Makro & Evaluasi)
     if no in [11, 14, 17, 42, 61, 74, 80, 83]:
-        return 'Bidang PPEPD (Rendalev)'
+        return 'Bidang PMPE (Rendalev)'
         
     # Bidang Perekonomian
     if no in [5, 9, 10, 12, 13, 25, 26, 27, 30, 38, 40, 41, 43, 44, 45, 63, 72, 75]:
@@ -222,8 +222,8 @@ monitoring_units = [
         "kabid": "ANDI ARAFAT S.T., M.E."
     },
     {
-        "unit": "Bidang PPEPD (Rendalev)",
-        "pegawai": unit_counts.get("Bidang PPEPD (Rendalev)", 0),
+        "unit": "Bidang PMPE (Rendalev)",
+        "pegawai": unit_counts.get("Bidang PMPE (Rendalev)", 0),
         "terisi": "100%",
         "realisasi": "88%",
         "tindakLanjut": 1,

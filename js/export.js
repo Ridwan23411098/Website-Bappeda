@@ -34,6 +34,60 @@ const ExportService = {
   },
 
   /**
+   * Generates and downloads a real .XLSX file using SheetJS
+   */
+  downloadExcel(filename, sheetName, headers, rows) {
+    if (typeof XLSX === 'undefined') {
+      console.warn("SheetJS tidak tersedia, fallback ke CSV");
+      return this.downloadCsv(filename, headers, rows);
+    }
+    const worksheetData = [headers, ...rows];
+    const worksheet = XLSX.utils.aoa_to_sheet(worksheetData);
+    
+    // Auto-size columns approximation
+    const wscols = headers.map(h => ({ wch: Math.max(h.length + 5, 15) }));
+    worksheet['!cols'] = wscols;
+
+    // Apply styles to all cells
+    const range = XLSX.utils.decode_range(worksheet['!ref']);
+    for (let R = range.s.r; R <= range.e.r; ++R) {
+      for (let C = range.s.c; C <= range.e.c; ++C) {
+        const cellAddress = {c: C, r: R};
+        const cellRef = XLSX.utils.encode_cell(cellAddress);
+        if (!worksheet[cellRef]) continue;
+
+        // Basic border style for all cells
+        const borderStyle = {
+          top: { style: "thin", color: { auto: 1 } },
+          bottom: { style: "thin", color: { auto: 1 } },
+          left: { style: "thin", color: { auto: 1 } },
+          right: { style: "thin", color: { auto: 1 } }
+        };
+
+        // Header specific styling
+        if (R === 0) {
+          worksheet[cellRef].s = {
+            font: { bold: true, color: { rgb: "FFFFFF" } },
+            fill: { fgColor: { rgb: "2F80ED" } }, // Primary Blue
+            alignment: { horizontal: "center", vertical: "center" },
+            border: borderStyle
+          };
+        } else {
+          // Data row styling
+          worksheet[cellRef].s = {
+            alignment: { vertical: "center" },
+            border: borderStyle
+          };
+        }
+      }
+    }
+
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, sheetName);
+    XLSX.writeFile(workbook, `${filename}_${new Date().toISOString().slice(0,10)}.xlsx`);
+  },
+
+  /**
    * Export Employee Master Data to CSV
    */
   exportEmployees() {
@@ -50,7 +104,7 @@ const ExportService = {
       e.statusIdp,
       e.progress
     ]);
-    this.downloadCsv('Data_Pegawai_Bappeda_Lampung', headers, rows);
+    this.downloadExcel('Data_Pegawai_Bappeda_Lampung', 'Data Pegawai', headers, rows);
     App.toast('File Excel Data Pegawai Bappeda berhasil diunduh', 'success');
   },
 
@@ -71,8 +125,56 @@ const ExportService = {
       r.bukti,
       r.status
     ]);
-    this.downloadCsv('Monitoring_Realisasi_IDP_Bappeda_Lampung', headers, rows);
+    this.downloadExcel('Monitoring_Realisasi_IDP_Bappeda_Lampung', 'Monitoring Realisasi', headers, rows);
     App.toast('File Excel Laporan Monitoring Realisasi berhasil diunduh', 'success');
+  },
+
+  /**
+   * Menampilkan dialog pilih orientasi, lalu cetak dokumen resmi IDP
+   */
+  showPrintDialog() {
+    // Hapus dialog lama jika ada
+    const oldDialog = document.getElementById('printOrientDialog');
+    if (oldDialog) oldDialog.remove();
+
+    const dialog = document.createElement('div');
+    dialog.id = 'printOrientDialog';
+    dialog.className = 'print-dialog-overlay';
+    dialog.innerHTML = `
+      <div class="print-dialog-box">
+        <h3>🖨️ Cetak Dokumen IDP</h3>
+        <p>Pilih orientasi halaman sebelum mencetak:</p>
+        <div class="print-orientation-grid">
+          <button class="print-orient-btn selected" id="btnPortrait" onclick="ExportService.selectOrientation('portrait')">
+            <div class="print-orient-icon portrait-icon"></div>
+            Potret
+          </button>
+          <button class="print-orient-btn" id="btnLandscape" onclick="ExportService.selectOrientation('landscape')">
+            <div class="print-orient-icon landscape-icon"></div>
+            Lanskap
+          </button>
+        </div>
+        <div class="print-dialog-actions">
+          <button class="btn btn-outline" onclick="ExportService.closePrintDialog()">Batal</button>
+          <button class="btn btn-primary" onclick="ExportService.printOfficialIdp()">
+            🖨️ Cetak Sekarang
+          </button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(dialog);
+    ExportService._printOrientation = 'portrait';
+  },
+
+  selectOrientation(orient) {
+    ExportService._printOrientation = orient;
+    document.getElementById('btnPortrait').classList.toggle('selected', orient === 'portrait');
+    document.getElementById('btnLandscape').classList.toggle('selected', orient === 'landscape');
+  },
+
+  closePrintDialog() {
+    const d = document.getElementById('printOrientDialog');
+    if (d) d.remove();
   },
 
   /**
@@ -236,7 +338,30 @@ const ExportService = {
       </div>
     `;
 
-    // Trigger Browser Print
+    // Tutup dialog jika masih terbuka
+    this.closePrintDialog();
+
+    // Inject style @page dinamis sesuai orientasi pilihan
+    const orient = ExportService._printOrientation || 'portrait';
+    let styleEl = document.getElementById('dynamicPrintStyle');
+    if (!styleEl) {
+      styleEl = document.createElement('style');
+      styleEl.id = 'dynamicPrintStyle';
+      document.head.appendChild(styleEl);
+    }
+    styleEl.textContent = `@media print { @page { size: auto; margin: 10mm 10mm 15mm 10mm; } }`;
+
+    if (orient === 'landscape') {
+       styleEl.textContent = `@media print { @page { size: landscape; margin: 10mm 10mm 15mm 10mm; } }`;
+    } else {
+       styleEl.textContent = `@media print { @page { size: portrait; margin: 10mm 10mm 15mm 10mm; } }`;
+    }
+
+
+    // Pastikan print container adalah element pertama di body agar mulai dari halaman 1
+    document.body.insertBefore(printContainer, document.body.firstChild);
+
+    // Trigger Browser Print — halaman dimulai dari 1
     setTimeout(() => {
       window.print();
     }, 150);

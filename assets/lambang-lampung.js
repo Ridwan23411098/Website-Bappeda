@@ -70,14 +70,16 @@ const LambangLampung = {
   getKopSuratHtml() {
     return `
       <div class="kop-surat-resmi">
-        <div class="kop-logo">${this.getSvg(76)}</div>
+        <div class="kop-logo">
+          <img src="Gambar/Lambang Lampung.png" alt="Lambang Provinsi Lampung" style="width:76px;height:76px;object-fit:contain;flex-shrink:0;">
+        </div>
         <div class="kop-teks">
           <div class="kop-prov">PEMERINTAH PROVINSI LAMPUNG</div>
           <div class="kop-dinas">BADAN PERENCANAAN PEMBANGUNAN DAERAH</div>
           <div class="kop-alamat">
             Jl. Wolter Monginsidi No. 222, Telukbetung, Bandar Lampung, Kode Pos 35215<br>
-            Telepon: (0721) 482151, 481525 • Faksimili: (0721) 482151<br>
-            Laman: <a href="https://bappeda.lampungprov.go.id" target="_blank">bappeda.lampungprov.go.id</a> • Pos-el: bappeda@lampungprov.go.id
+            Telepon: (0721) 482151, 481525 &bull; Faksimili: (0721) 482151<br>
+            Laman: <a href="https://bappeda.lampungprov.go.id" target="_blank">bappeda.lampungprov.go.id</a> &bull; Pos-el: bappeda@lampungprov.go.id
           </div>
         </div>
       </div>

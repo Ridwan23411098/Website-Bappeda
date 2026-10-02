@@ -2324,42 +2324,193 @@ a {
 
 /* Native Print Media */
 @media print {
-  body {
+  html, body {
     background: #FFFFFF !important;
     color: #000000 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    height: auto !important;
+    overflow: visible !important;
   }
 
-  .login-screen,
-  .sidebar,
-  .topbar,
-  .main-content,
-  .toast-container,
-  .modal-overlay,
-  .drawer-overlay {
+  /* Sembunyikan semua UI kecuali print container */
+  body > *:not(#officialPrintContainer) {
     display: none !important;
   }
 
+  .print-dialog-overlay {
+    display: none !important;
+  }
+
+  /* Print container tampil full di halaman 1 */
   #officialPrintContainer {
     display: block !important;
-    width: 100%;
-    margin: 0;
-    padding: 10mm 15mm;
+    position: static !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
   }
 
   .official-print-paper {
     background: #FFFFFF !important;
     color: #000000 !important;
     font-family: 'Inter', Arial, sans-serif !important;
+    margin: 0 !important;
+    padding: 0 !important;
   }
 
+  /* @page TANPA size — biarkan browser yang kontrol Potret/Lanskap */
   @page {
-    size: A4 portrait;
-    margin: 10mm 10mm 15mm 10mm;
+    margin: 15mm 15mm 20mm 15mm;
   }
 }
+
+
+/* Print Dialog Overlay */
+.print-dialog-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.55);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(4px);
+}
+
+.print-dialog-box {
+  background: var(--color-surface, #fff);
+  border-radius: 18px;
+  padding: 32px 36px;
+  width: 400px;
+  max-width: 95vw;
+  box-shadow: 0 24px 60px rgba(0,0,0,0.25);
+  font-family: 'Inter', sans-serif;
+}
+
+.print-dialog-box h3 {
+  font-size: 17px;
+  font-weight: 750;
+  margin: 0 0 6px;
+  color: var(--color-text-primary, #111);
+}
+
+.print-dialog-box p {
+  font-size: 13px;
+  color: var(--color-text-secondary, #666);
+  margin: 0 0 24px;
+}
+
+.print-orientation-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-bottom: 24px;
+}
+
+.print-orient-btn {
+  border: 2px solid var(--color-border, #ddd);
+  border-radius: 12px;
+  padding: 18px 10px 14px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  background: var(--color-surface, #fff);
+  transition: all 0.18s ease;
+  color: var(--color-text-primary, #222);
+  font-size: 13.5px;
+  font-weight: 600;
+}
+
+.print-orient-btn:hover {
+  border-color: var(--color-primary, #1a6fc4);
+  background: var(--color-primary-light, #e8f0fe);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(26,111,196,0.15);
+}
+
+.print-orient-btn.selected {
+  border-color: var(--color-primary, #1a6fc4);
+  background: var(--color-primary-light, #dbeafe);
+  color: var(--color-primary, #1a6fc4);
+  box-shadow: 0 4px 14px rgba(26,111,196,0.2);
+}
+
+.print-orient-icon {
+  border: 2.5px solid currentColor;
+  border-radius: 3px;
+  background: transparent;
+  opacity: 0.8;
+}
+
+.print-orient-icon.portrait-icon {
+  width: 36px;
+  height: 50px;
+}
+
+.print-orient-icon.landscape-icon {
+  width: 50px;
+  height: 36px;
+}
+
+.print-dialog-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
 
 /* Role Quick Card Hover */
 button[onclick*="quickLogin"]:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+}
+
+/* Responsive Table Cards for Pimpinan (Mobile) */
+@media (max-width: 768px) {
+  .table-responsive.mobile-cards .data-table,
+  .table-responsive.mobile-cards .data-table tbody,
+  .table-responsive.mobile-cards .data-table tr,
+  .table-responsive.mobile-cards .data-table td {
+    display: block;
+    width: 100%;
+  }
+  .table-responsive.mobile-cards .data-table thead {
+    display: none;
+  }
+  .table-responsive.mobile-cards .data-table tr {
+    margin-bottom: 16px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background: var(--color-surface);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.04);
+  }
+  .table-responsive.mobile-cards .data-table td {
+    text-align: right;
+    padding-left: 50%;
+    position: relative;
+    border-bottom: 1px solid var(--color-border-subtle);
+    min-height: auto;
+    padding-top: 12px;
+    padding-bottom: 12px;
+  }
+  .table-responsive.mobile-cards .data-table td:last-child {
+    border-bottom: none;
+  }
+  .table-responsive.mobile-cards .data-table td::before {
+    content: attr(data-label);
+    position: absolute;
+    left: 16px;
+    top: 12px;
+    width: 45%;
+    padding-right: 10px;
+    white-space: normal;
+    text-align: left;
+    font-weight: 700;
+    color: var(--color-text-secondary);
+    font-size: 11px;
+    text-transform: uppercase;
+  }
 }

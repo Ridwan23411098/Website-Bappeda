@@ -109,7 +109,7 @@ new_render_employees = """  empPage: 1,
         let unitBadgeCls = 'badge-neutral';
         if (e.unit.includes('Pimpinan')) unitBadgeCls = 'badge-success';
         else if (e.unit.includes('Sekretariat')) unitBadgeCls = 'badge-neutral';
-        else if (e.unit.includes('PPEPD')) unitBadgeCls = 'badge-blue';
+        else if (e.unit.includes('PMPE')) unitBadgeCls = 'badge-blue';
         else if (e.unit.includes('Perekonomian')) unitBadgeCls = 'badge-warning';
         else if (e.unit.includes('Infrastruktur')) unitBadgeCls = 'badge-purple';
         else if (e.unit.includes('Pemerintahan')) unitBadgeCls = 'badge-rose';
@@ -199,7 +199,7 @@ new_monitoring = """  renderMonitoring() {
       ? Store.state.monitoringUnits
       : [
         { unit: 'Sekretariat', pegawai: 23, terisi: '91%', realisasi: '78%', tindakLanjut: 2, kabid: 'Ir. ANDRYA YUNILA HASTUTI, M.Si' },
-        { unit: 'Bidang PPEPD (Rendalev)', pegawai: 11, terisi: '100%', realisasi: '82%', tindakLanjut: 1, kabid: 'ENDANG WAHYUNI, S.T, M.Si' },
+        { unit: 'Bidang PMPE (Rendalev)', pegawai: 11, terisi: '100%', realisasi: '82%', tindakLanjut: 1, kabid: 'ENDANG WAHYUNI, S.T, M.Si' },
         { unit: 'Bidang Perekonomian', pegawai: 19, terisi: '89%', realisasi: '74%', tindakLanjut: 3, kabid: 'MUHAMMAD AZIZ SATRIYA JAYA SE, M.Si' },
         { unit: 'Bidang Infrastruktur & Kewilayahan', pegawai: 12, terisi: '92%', realisasi: '75%', tindakLanjut: 2, kabid: 'RIDWAN SAIFUDDIN S.E., M.Si' },
         { unit: 'Bidang Pemerintahan & PM', pegawai: 18, terisi: '89%', realisasi: '72%', tindakLanjut: 3, kabid: 'VIKA VITRI INDRA B, S.T., M.Sc' },

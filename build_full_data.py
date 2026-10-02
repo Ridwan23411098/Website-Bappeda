@@ -35,7 +35,7 @@ for idx, r in enumerate(rows[3:], 1):
 
 pimpinan_ids = {1}
 sekretariat_ids = {2, 8, 9, 10, 22, 23, 59, 73, 74, 78, 81, 82, 83, 87, 89, 90, 91, 93, 94, 95, 96, 97, 98}
-ppepd_ids = {3, 11, 21, 24, 43, 47, 49, 57, 64, 71, 99}
+pmpe_ids = {3, 11, 21, 24, 43, 47, 49, 57, 64, 71, 99}
 perekonomian_ids = {4, 12, 25, 26, 27, 28, 31, 32, 36, 44, 45, 46, 48, 56, 62, 67, 75, 76, 77}
 infraswil_ids = {5, 13, 14, 19, 20, 37, 38, 52, 58, 63, 69, 92}
 ppm_ids = {6, 15, 16, 29, 30, 34, 35, 41, 54, 60, 61, 68, 72, 79, 80, 86, 88, 100}
@@ -44,7 +44,7 @@ riset_ids = {7, 17, 18, 33, 39, 40, 42, 50, 51, 53, 55, 65, 66, 70, 84, 85}
 def get_unit(no):
     if no in pimpinan_ids: return 'Pimpinan'
     if no in sekretariat_ids: return 'Sekretariat'
-    if no in ppepd_ids: return 'Bidang PPEPD (Rendalev)'
+    if no in pmpe_ids: return 'Bidang PMPE (Rendalev)'
     if no in perekonomian_ids: return 'Bidang Perekonomian'
     if no in infraswil_ids: return 'Bidang Infrastruktur & Kewilayahan'
     if no in ppm_ids: return 'Bidang Pemerintahan & PM'
@@ -57,7 +57,7 @@ def get_jabatan_and_pangkat(no, nama, nip, unit):
     if no == 2:
         return 'Sekretaris Bappeda Provinsi Lampung', 'Pembina Utama Muda / IV-c', 'Struktural'
     if no == 3:
-        return 'Kepala Bidang PPEPD', 'Pembina Tk. I / IV-b', 'Struktural'
+        return 'Kepala Bidang PMPE', 'Pembina Tk. I / IV-b', 'Struktural'
     if no == 4:
         return 'Kepala Bidang Perekonomian', 'Pembina Tk. I / IV-b', 'Struktural'
     if no == 5:
@@ -306,7 +306,7 @@ master_jenjang = [
 
 monitoring_units = [
     {"unit": "Sekretariat", "pegawai": 23, "terisi": "91%", "realisasi": "78%", "tindakLanjut": 2, "kabid": "Ir. ANDRYA YUNILA HASTUTI, M.Si"},
-    {"unit": "Bidang PPEPD (Rendalev)", "pegawai": 11, "terisi": "100%", "realisasi": "82%", "tindakLanjut": 1, "kabid": "ENDANG WAHYUNI, S.T, M.Si"},
+    {"unit": "Bidang PMPE (Rendalev)", "pegawai": 11, "terisi": "100%", "realisasi": "82%", "tindakLanjut": 1, "kabid": "ENDANG WAHYUNI, S.T, M.Si"},
     {"unit": "Bidang Perekonomian", "pegawai": 19, "terisi": "89%", "realisasi": "74%", "tindakLanjut": 3, "kabid": "MUHAMMAD AZIZ SATRIYA JAYA SE, M.Si"},
     {"unit": "Bidang Infrastruktur & Kewilayahan", "pegawai": 12, "terisi": "92%", "realisasi": "75%", "tindakLanjut": 2, "kabid": "RIDWAN SAIFUDDIN S.E., M.Si"},
     {"unit": "Bidang Pemerintahan & PM", "pegawai": 18, "terisi": "89%", "realisasi": "72%", "tindakLanjut": 3, "kabid": "VIKA VITRI INDRA B, S.T., M.Sc"},
@@ -321,7 +321,7 @@ verifications = [
         "nip": "19740707 200212 1 008",
         "jabatan": "Perencana Ahli Muda / Subkoordinator",
         "jenisJabatan": "JFT",
-        "unitKerja": "Bidang PPEPD (Rendalev)",
+        "unitKerja": "Bidang PMPE (Rendalev)",
         "targetKarier": "JFT Madya — Level 4",
         "rencanaKarier": "Pengembangan kompetensi evaluasi perencanaan pembangunan makro dan analisis pendanaan",
         "programCount": 4,
@@ -417,7 +417,7 @@ verifications = [
         "nip": "19921120 201406 1 001",
         "jabatan": "Analis Perencanaan Anggaran & Evaluasi",
         "jenisJabatan": "JFT",
-        "unitKerja": "Bidang PPEPD (Rendalev)",
+        "unitKerja": "Bidang PMPE (Rendalev)",
         "targetKarier": "Perencana Ahli Muda — Level 3",
         "rencanaKarier": "Penguatan teknik penyusunan KUA-PPAS dan sinkronisasi indikator makro pembangunan",
         "programCount": 3,
@@ -440,7 +440,7 @@ realizations = [
         "penyelenggara": "BPSDMD Provinsi Lampung",
         "bukti": "Sertifikat_Diklat_Rendalev_2026.pdf",
         "status": "Terverifikasi",
-        "unit": "Bidang PPEPD (Rendalev)"
+        "unit": "Bidang PMPE (Rendalev)"
     },
     {
         "id": 2,
@@ -452,7 +452,7 @@ realizations = [
         "penyelenggara": "Internal Bappeda Lampung",
         "bukti": "Form_Coaching_AndiArafat.pdf",
         "status": "Terverifikasi",
-        "unit": "Bidang PPEPD (Rendalev)"
+        "unit": "Bidang PMPE (Rendalev)"
     },
     {
         "id": 3,
@@ -523,7 +523,7 @@ accounts = [
         "name": "ANDI ARAFAT S.T., M.E.",
         "pangkat": "Penata Tk. I / III-d",
         "jabatan": "Perencana Ahli Muda / Subkoordinator Rendalev",
-        "unitKerja": "Bidang PPEPD (Rendalev)",
+        "unitKerja": "Bidang PMPE (Rendalev)",
         "role": "pegawai",
         "avatarInitial": "AA"
     },
@@ -554,7 +554,7 @@ accounts = [
         "name": "ANDI ARAFAT S.T., M.E.",
         "pangkat": "Penata Tk. I / III-d",
         "jabatan": "Perencana Ahli Muda",
-        "unitKerja": "Bidang PPEPD (Rendalev)",
+        "unitKerja": "Bidang PMPE (Rendalev)",
         "role": "pegawai",
         "avatarInitial": "AA"
     },

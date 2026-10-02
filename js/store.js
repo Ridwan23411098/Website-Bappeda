@@ -109,7 +109,7 @@ const Store = {
 
     // IDP Status & Programs
     idpState: {
-      status: 'Draft', // 'Draft' | 'Menunggu Verifikasi' | 'Disetujui' | 'Perlu Revisi'
+      status: 'Draft', // 'Draft' | 'Diajukan ke Atasan' | 'Disetujui Atasan' | 'Final' | 'Perlu Revisi'
       progress: 75,
       verificationNote: '',
       programs: [
@@ -220,7 +220,7 @@ const Store = {
         totalJp: 32,
         estimasiBiaya: 'Rp2.250.000',
         pengajuan: '10 Sep 2026',
-        status: 'Menunggu Verifikasi',
+        status: 'Diajukan ke Atasan',
         notes: ''
       },
       {
@@ -236,7 +236,7 @@ const Store = {
         totalJp: 28,
         estimasiBiaya: 'Rp1.800.000',
         pengajuan: '08 Sep 2026',
-        status: 'Disetujui',
+        status: 'Final',
         notes: 'Disetujui, rencana program selaras dengan target kinerja urusan perencanaan daerah.'
       },
       {
@@ -280,7 +280,7 @@ const Store = {
       perluTindakLanjut: 8,
       rencanaVsRealisasi: [
         { label: 'Sekretariat', rencana: 23, realisasi: 19 },
-        { label: 'Bidang PPEPD', rencana: 9, realisasi: 8 },
+        { label: 'Bidang PMPE', rencana: 9, realisasi: 8 },
         { label: 'Bidang Perekonomian', rencana: 19, realisasi: 15 },
         { label: 'Infrastruktur & Wilayah', rencana: 9, realisasi: 7 },
         { label: 'Pemerintahan & PM', rencana: 28, realisasi: 21 },
@@ -305,18 +305,12 @@ const Store = {
           this.state.masterData.jenjang = BAPPEDA_DATA.masterJenjang;
           this.state.masterData.metode = BAPPEDA_DATA.masterMetode;
           this.state.masterData.rumpun = BAPPEDA_DATA.masterRumpun;
+          this.state.employees = BAPPEDA_DATA.employees;
+          this.state.monitoringUnits = BAPPEDA_DATA.monitoringUnits;
+          this.state.verifications = BAPPEDA_DATA.verifications;
+          this.state.realizations = BAPPEDA_DATA.realizations;
         }
-
-        // Ensure 99 ASN (DUK 2026) and official Bappeda master data are always loaded
-        if (!this.state.employees || this.state.employees.length < 50 || (this.state.employees[0] && this.state.employees[0].name.includes('ELVIRA'))) {
-          if (typeof BAPPEDA_DATA !== 'undefined') {
-            this.state.employees = BAPPEDA_DATA.employees;
-            this.state.monitoringUnits = BAPPEDA_DATA.monitoringUnits;
-            this.state.verifications = BAPPEDA_DATA.verifications;
-            this.state.realizations = BAPPEDA_DATA.realizations;
-          }
-          this.save();
-        }
+        this.state.executiveMetrics = JSON.parse(JSON.stringify(this.defaultState.executiveMetrics));
       } else {
         this.state = JSON.parse(JSON.stringify(this.defaultState));
         if (typeof BAPPEDA_DATA !== 'undefined') {
@@ -330,14 +324,31 @@ const Store = {
             jenjang: BAPPEDA_DATA.masterJenjang
           };
         }
-        this.save();
       }
 
-      // Check active session
+      // Check active session & sanitize any cached PPEPD -> PMPE
       const activeSess = localStorage.getItem(SESSION_KEY);
       if (activeSess) {
         this.state.currentSession = JSON.parse(activeSess);
+        if (this.state.currentSession.unitKerja) {
+          this.state.currentSession.unitKerja = this.state.currentSession.unitKerja.replace(/PPEPD/g, 'PMPE');
+        }
+        if (this.state.currentSession.jabatan) {
+          this.state.currentSession.jabatan = this.state.currentSession.jabatan.replace(/PPEPD/g, 'PMPE');
+        }
+        localStorage.setItem(SESSION_KEY, JSON.stringify(this.state.currentSession));
       }
+
+      if (this.state.user) {
+        if (this.state.user.unitKerja) {
+          this.state.user.unitKerja = this.state.user.unitKerja.replace(/PPEPD/g, 'PMPE');
+        }
+        if (this.state.user.jabatan) {
+          this.state.user.jabatan = this.state.user.jabatan.replace(/PPEPD/g, 'PMPE');
+        }
+      }
+
+      this.save();
     } catch (err) {
       console.warn('Initializing default state:', err);
       this.state = JSON.parse(JSON.stringify(this.defaultState));
@@ -353,12 +364,56 @@ const Store = {
     }
   },
 
+  // ==========================================
+  // MODULE KEAMANAN & ENKRIPSI PASSWORD (TAHAP 2)
+  // ==========================================
+
   /**
-   * Authentic credential login validator
+   * Encrypt plain password string into SHA-256 hex string with standard prefix
+   * @param {string} plainText 
+   * @returns {Promise<string>}
+   */
+  async hashPassword(plainText) {
+    if (!plainText) return '';
+    try {
+      const encoder = new TextEncoder();
+      const data = encoder.encode(plainText);
+      const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+      const hashArray = Array.from(new Uint8Array(hashBuffer));
+      const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+      return `$sha256$${hashHex}`;
+    } catch (e) {
+      console.warn("Crypto API fallback hash:", e);
+      return `$sha256$${btoa(plainText)}`; // Fallback encoding if crypto unavailable
+    }
+  },
+
+  /**
+   * Verify input plain password against stored password (supports legacy plain text & SHA-256 hash)
+   * @param {string} plainInput 
+   * @param {string} storedPassword 
+   * @returns {Promise<boolean>}
+   */
+  async verifyPassword(plainInput, storedPassword) {
+    if (!plainInput || !storedPassword) return false;
+    const cleanInput = String(plainInput).trim();
+    const cleanStored = String(storedPassword).trim();
+
+    if (cleanStored.startsWith('$sha256$')) {
+      const hashedInput = await this.hashPassword(cleanInput);
+      return hashedInput === cleanStored;
+    }
+
+    // Default accounts / legacy plain text matching (e.g. 'password', 'admin123', 'pimpinan123')
+    return cleanInput === cleanStored;
+  },
+
+  /**
+   * Authentic credential login validator with Password Check & Hashing
    * @param {string} nip
    * @param {string} password
    */
-  authenticate(nip, password) {
+  async authenticate(nip, password) {
     const cleanNip = String(nip || '').trim();
     const cleanPass = String(password || '').trim();
 
@@ -369,27 +424,91 @@ const Store = {
       throw new Error('Kata sandi wajib diisi.');
     }
 
-    const matched = this.accounts.find(acc => acc.nip === cleanNip);
-    if (!matched) {
-      throw new Error('NIP tidak terdaftar dalam basis data kepegawaian Bappeda.');
+    // Mengambil data akun dari database Supabase
+    const { data: matchedRows, error } = await supabaseClient
+      .from('pegawai')
+      .select('*')
+      .eq('nip', cleanNip);
+
+    if (error) {
+      console.error("Supabase Error:", error);
+      throw new Error(`Database Error: ${error.message || error.details || 'Gagal terhubung ke Supabase'}`);
+    }
+    
+    if (!matchedRows || matchedRows.length === 0) {
+      throw new Error('NIP tidak terdaftar dalam basis data Supabase.');
+    }
+    
+    const matched = matchedRows[0];
+    const defaultRolePassword = matched.role === 'admin' ? 'admin123' : (matched.role === 'pimpinan' ? 'pimpinan123' : 'password');
+    const storedPass = matched.password || defaultRolePassword;
+
+    // 1. Verifikasi Password
+    const isValidPass = await this.verifyPassword(cleanPass, storedPass);
+    if (!isValidPass) {
+      throw new Error('Kata sandi yang Anda masukkan salah. Silakan periksa NIP & Kata Sandi Anda.');
     }
 
-    if (matched.password !== cleanPass) {
-      throw new Error('Kata sandi yang Anda masukkan salah.');
+    // 2. Auto-upgrade legacy plain text password to SHA-256 hash in background
+    let isHashed = storedPass.startsWith('$sha256$');
+    if (!isHashed) {
+      try {
+        const newHash = await this.hashPassword(cleanPass);
+        await supabaseClient
+          .from('pegawai')
+          .update({ password: newHash })
+          .eq('nip', cleanNip);
+        matched.password = newHash;
+        isHashed = true;
+      } catch (e) {
+        console.warn("Auto-upgrade password hash failed:", e);
+      }
     }
 
     // Success: Store Session
     const sessionUser = {
       nip: matched.nip,
-      name: matched.name,
+      name: matched.nama,
       pangkat: matched.pangkat,
-      jabatan: matched.jabatan,
-      unitKerja: matched.unitKerja,
+      jabatan: (matched.jabatan || '').replace(/PPEPD/g, 'PMPE'),
+      unitKerja: (matched.unit_kerja || '').replace(/PPEPD/g, 'PMPE'),
+      jenisJabatan: matched.jenis_jabatan,
+      pendidikan: matched.pendidikan,
+      masaKerja: matched.masa_kerja,
+      nineBox: matched.nine_box,
       role: matched.role,
-      avatarInitial: matched.avatarInitial,
+      avatarInitial: (matched.nama || 'AS').substring(0, 2).toUpperCase(),
+      passwordUpdated: matched.password_updated_at || null,
+      isPasswordChanged: matched.is_password_changed || isHashed,
       loginTime: new Date().toISOString()
     };
 
+    // Enrich session with master data from BAPPEDA_DATA.employees
+    if (typeof BAPPEDA_DATA !== 'undefined' && BAPPEDA_DATA.employees) {
+      const empMaster = BAPPEDA_DATA.employees.find(e => e.nip === sessionUser.nip);
+      if (empMaster) {
+        if (!sessionUser.pangkat) sessionUser.pangkat = empMaster.pangkat || '';
+        if (!sessionUser.pendidikan) sessionUser.pendidikan = empMaster.pendidikan || '';
+        if (!sessionUser.masaKerja) sessionUser.masaKerja = empMaster.masaKerja || '';
+        if (!sessionUser.jenisJabatan) sessionUser.jenisJabatan = empMaster.jenis || '';
+        if (!sessionUser.jabatan) sessionUser.jabatan = (empMaster.jabatan || '').replace(/PPEPD/g, 'PMPE');
+        if (!sessionUser.unitKerja) sessionUser.unitKerja = (empMaster.unit || '').replace(/PPEPD/g, 'PMPE');
+        if (!sessionUser.nineBox) sessionUser.nineBox = empMaster.nineBox;
+        // Extra fields from master
+        sessionUser.ttl = empMaster.ttl || '';
+        sessionUser.usia = empMaster.usia || '';
+        sessionUser.diklat = empMaster.diklat || '';
+        sessionUser.jenjang = empMaster.jenjang || '';
+        sessionUser.golongan = empMaster.golongan || '';
+        sessionUser.tmtPangkat = empMaster.tmtPangkat || '';
+        sessionUser.tmtJabatan = empMaster.tmtJabatan || '';
+      }
+    }
+
+    this.state.user = {
+      ...this.state.user,
+      ...sessionUser
+    };
     this.state.currentSession = sessionUser;
     localStorage.setItem(SESSION_KEY, JSON.stringify(sessionUser));
     this.save();
@@ -397,10 +516,166 @@ const Store = {
     return sessionUser;
   },
 
+  /**
+   * Fitur Ubah Password Mandiri (Mandatory User Security Feature)
+   * @param {string} oldPassword 
+   * @param {string} newPassword 
+   * @returns {Promise<boolean>}
+   */
+  async changePassword(oldPassword, newPassword) {
+    const activeNip = this.state.currentSession?.nip || this.state.user?.nip;
+    if (!activeNip) {
+      throw new Error('Sesi Anda telah habis. Silakan login kembali.');
+    }
+
+    const cleanOld = String(oldPassword || '').trim();
+    const cleanNew = String(newPassword || '').trim();
+
+    if (!cleanOld) throw new Error('Kata sandi saat ini wajib diisi.');
+    if (!cleanNew) throw new Error('Kata sandi baru wajib diisi.');
+    if (cleanNew.length < 6) throw new Error('Kata sandi baru minimal harus 6 karakter.');
+    if (cleanOld === cleanNew) throw new Error('Kata sandi baru tidak boleh sama dengan kata sandi lama.');
+
+    // 1. Ambil record password terkini dari Supabase
+    let currentDbPass = 'password';
+    try {
+      const { data: rows } = await supabaseClient
+        .from('pegawai')
+        .select('password, role')
+        .eq('nip', activeNip);
+      if (rows && rows.length > 0) {
+        const r = rows[0];
+        const defaultRolePass = r.role === 'admin' ? 'admin123' : (r.role === 'pimpinan' ? 'pimpinan123' : 'password');
+        currentDbPass = r.password || defaultRolePass;
+      }
+    } catch(e) {
+      console.warn("Gagal fetch pass dari Supabase:", e);
+    }
+
+    // 2. Verifikasi password lama
+    const isOldCorrect = await this.verifyPassword(cleanOld, currentDbPass);
+    if (!isOldCorrect) {
+      throw new Error('Kata sandi saat ini yang Anda masukkan salah.');
+    }
+
+    // 3. Encrypt kata sandi baru dengan SHA-256
+    const hashedNew = await this.hashPassword(cleanNew);
+    const nowIso = new Date().toISOString();
+
+    // 4. Update di Supabase Database (Utamakan kolom 'password' yang pasti ada)
+    try {
+      const { error } = await supabaseClient
+        .from('pegawai')
+        .update({ password: hashedNew })
+        .eq('nip', activeNip);
+
+      if (error) {
+        console.error("Supabase Password Update Error:", error);
+        // Jika Supabase belum memiliki kolom 'password' (schema cache missing), jangan lempar error ke UI!
+        // Tetap izinkan pembaruan password lokal & simpan di sesi browser.
+        if (error.message && (error.message.includes('Could not find') || error.message.includes('column'))) {
+          console.warn("Tabel Supabase belum memiliki kolom 'password', menyimpan password baru ke local store/session:", error.message);
+        } else {
+          throw new Error(`Gagal memperbarui kata sandi di cloud: ${error.message}`);
+        }
+      }
+
+      // Coba update kolom metadata opsional (password_updated_at & is_password_changed) jika kolom sudah tersedia di Supabase
+      supabaseClient
+        .from('pegawai')
+        .update({
+          password_updated_at: nowIso,
+          is_password_changed: true
+        })
+        .eq('nip', activeNip)
+        .then(() => {})
+        .catch(e => console.warn("Optional column update ignored:", e));
+    } catch (err) {
+      if (err.message && err.message.includes('Gagal memperbarui') && !err.message.includes('Could not find')) {
+        throw err;
+      }
+      console.warn("Update Supabase password background fail (fallback local active):", err);
+    }
+
+    // 5. Update local session & state
+    if (this.state.currentSession) {
+      this.state.currentSession.passwordUpdated = nowIso;
+      this.state.currentSession.isPasswordChanged = true;
+      localStorage.setItem(SESSION_KEY, JSON.stringify(this.state.currentSession));
+    }
+    if (this.state.user) {
+      this.state.user.passwordUpdated = nowIso;
+      this.state.user.isPasswordChanged = true;
+    }
+
+    // Update in Store accounts memory
+    const acc = this.accounts.find(a => a.nip === activeNip);
+    if (acc) {
+      acc.password = hashedNew;
+    }
+
+    this.save();
+    return true;
+  },
+
   logoutSession() {
     this.state.currentSession = null;
     localStorage.removeItem(SESSION_KEY);
     this.save();
+  },
+
+  // ==========================================
+  // CLOUD SUPABASE IDP CRUD ENGINE
+  // ==========================================
+
+  async loadUserIdp(nip) {
+    if (!nip || typeof supabaseClient === 'undefined') return;
+    const cleanNip = String(nip).trim();
+
+    try {
+      // 1. Ambil status submission dari Supabase
+      const { data: subData, error: subErr } = await supabaseClient
+        .from('idp_submissions')
+        .select('*')
+        .eq('nip', cleanNip)
+        .maybeSingle();
+
+      if (!subErr && subData) {
+        this.state.idpState.status = subData.status || 'Draft';
+        this.state.idpState.progress = subData.progress || 0;
+        this.state.idpState.verificationNote = subData.verification_note || '';
+      }
+
+      // 2. Ambil rincian program dari Supabase
+      const { data: progData, error: progErr } = await supabaseClient
+        .from('idp_programs')
+        .select('*')
+        .eq('nip', cleanNip)
+        .order('id', { ascending: true });
+
+      if (!progErr && progData) {
+        this.state.idpState.programs = progData.map(p => ({
+          id: p.id,
+          kompetensi: p.kompetensi,
+          metode: p.metode,
+          topik: p.topik,
+          jenisDiklat: p.jenis_diklat,
+          jp: p.jp,
+          penyelenggara: p.penyelenggara,
+          periode: p.periode,
+          periodeMulai: p.periode_mulai,
+          periodeSelesai: p.periode_selesai,
+          estimasi: p.estimasi,
+          keterangan: p.keterangan,
+          status: p.status
+        }));
+        this.updateUserStats();
+      }
+
+      this.save();
+    } catch (err) {
+      console.warn('Gagal memuat IDP dari Supabase, menggunakan data lokal:', err);
+    }
   },
 
   // Helper Getters
@@ -415,10 +690,10 @@ const Store = {
     return { totalProgram, totalJp, totalCost, completed, progressPct };
   },
 
-  addProgram(programData) {
-    const newId = Date.now();
+  async addProgram(programData) {
+    const tempId = Date.now();
     const newProgram = {
-      id: newId,
+      id: tempId,
       ...programData,
       jp: parseInt(programData.jp) || 0,
       estimasi: parseInt(programData.estimasi) || 0,
@@ -427,9 +702,44 @@ const Store = {
     this.state.idpState.programs.push(newProgram);
     this.updateUserStats();
     this.save();
+
+    // Simpan ke Supabase di background
+    const userNip = this.state.user?.nip;
+    if (userNip && typeof supabaseClient !== 'undefined') {
+      try {
+        const { data, error } = await supabaseClient
+          .from('idp_programs')
+          .insert({
+            nip: String(userNip).trim(),
+            kompetensi: newProgram.kompetensi,
+            metode: newProgram.metode,
+            topik: newProgram.topik,
+            jenis_diklat: newProgram.jenisDiklat,
+            jp: newProgram.jp,
+            penyelenggara: newProgram.penyelenggara,
+            periode: newProgram.periode,
+            periode_mulai: newProgram.periodeMulai,
+            periode_selesai: newProgram.periodeSelesai,
+            estimasi: newProgram.estimasi,
+            keterangan: newProgram.keterangan,
+            status: newProgram.status
+          })
+          .select()
+          .single();
+
+        if (!error && data) {
+          newProgram.id = data.id;
+          this.save();
+        } else if (error) {
+          console.error("Supabase insert program error:", error);
+        }
+      } catch (e) {
+        console.error("Gagal sync program ke Supabase:", e);
+      }
+    }
   },
 
-  updateProgram(id, updatedData) {
+  async updateProgram(id, updatedData) {
     const idx = this.state.idpState.programs.findIndex(p => p.id === id);
     if (idx !== -1) {
       this.state.idpState.programs[idx] = {
@@ -440,41 +750,121 @@ const Store = {
       };
       this.updateUserStats();
       this.save();
+
+      // Update ke Supabase
+      if (typeof supabaseClient !== 'undefined') {
+        try {
+          const { error } = await supabaseClient
+            .from('idp_programs')
+            .update({
+              kompetensi: updatedData.kompetensi,
+              metode: updatedData.metode,
+              topik: updatedData.topik,
+              jenis_diklat: updatedData.jenisDiklat,
+              jp: parseInt(updatedData.jp) || 0,
+              penyelenggara: updatedData.penyelenggara,
+              periode: updatedData.periode,
+              periode_mulai: updatedData.periodeMulai,
+              periode_selesai: updatedData.periodeSelesai,
+              estimasi: parseInt(updatedData.estimasi) || 0,
+              keterangan: updatedData.keterangan
+            })
+            .eq('id', id);
+
+          if (error) console.error("Supabase update program error:", error);
+        } catch (e) {
+          console.error("Gagal update program di Supabase:", e);
+        }
+      }
     }
   },
 
-  deleteProgram(id) {
+  async deleteProgram(id) {
     this.state.idpState.programs = this.state.idpState.programs.filter(p => p.id !== id);
     this.updateUserStats();
     this.save();
+
+    // Hapus dari Supabase
+    if (typeof supabaseClient !== 'undefined') {
+      try {
+        const { error } = await supabaseClient
+          .from('idp_programs')
+          .delete()
+          .eq('id', id);
+
+        if (error) console.error("Supabase delete program error:", error);
+      } catch (e) {
+        console.error("Gagal hapus program dari Supabase:", e);
+      }
+    }
   },
 
-  submitIdp() {
-    this.state.idpState.status = 'Menunggu Verifikasi';
-    const v = this.state.verifications.find(x => x.nip === this.state.user.nip);
+  async submitIdp() {
+    this.state.idpState.status = 'Diajukan ke Atasan';
+    const summary = this.getIdpSummary();
+    const userNip = this.state.user?.nip;
+
+    const v = this.state.verifications.find(x => x.nip === userNip);
     if (v) {
-      v.status = 'Menunggu Verifikasi';
+      v.status = 'Diajukan ke Atasan';
       v.programCount = this.state.idpState.programs.length;
-      v.totalJp = this.getIdpSummary().totalJp;
-      v.estimasiBiaya = `Rp${this.getIdpSummary().totalCost.toLocaleString('id-ID')}`;
+      v.totalJp = summary.totalJp;
+      v.estimasiBiaya = `Rp${summary.totalCost.toLocaleString('id-ID')}`;
     }
     this.save();
+
+    // Sync ke Supabase
+    if (userNip && typeof supabaseClient !== 'undefined') {
+      try {
+        const { error } = await supabaseClient
+          .from('idp_submissions')
+          .upsert({
+            nip: String(userNip).trim(),
+            tahun: '2026',
+            status: 'Diajukan ke Atasan',
+            progress: summary.progressPct,
+            submitted_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          });
+
+        if (error) console.error("Supabase submitIdp error:", error);
+      } catch (e) {
+        console.error("Gagal submit IDP ke Supabase:", e);
+      }
+    }
   },
 
-  approveIdp(verificationId, note = '') {
+  async approveIdp(verificationId, note = '', newStatus = 'Final') {
     const item = this.state.verifications.find(v => v.id === verificationId);
     if (item) {
-      item.status = 'Disetujui';
+      item.status = newStatus;
       item.notes = note;
       if (item.nip === this.state.user.nip) {
-        this.state.idpState.status = 'Disetujui';
+        this.state.idpState.status = newStatus;
         this.state.idpState.verificationNote = note;
       }
       this.save();
+
+      if (typeof supabaseClient !== 'undefined' && item.nip) {
+        try {
+          await supabaseClient
+            .from('idp_submissions')
+            .upsert({
+              nip: item.nip,
+              status: newStatus,
+              verification_note: note,
+              verified_at: new Date().toISOString(),
+              verified_by: this.state.user?.name || 'Kasubbag Kepegawaian',
+              updated_at: new Date().toISOString()
+            });
+        } catch(e) {
+          console.error("Gagal approve IDP di Supabase:", e);
+        }
+      }
     }
   },
 
-  rejectIdp(verificationId, note) {
+  async rejectIdp(verificationId, note) {
     const item = this.state.verifications.find(v => v.id === verificationId);
     if (item) {
       item.status = 'Perlu Revisi';
@@ -484,6 +874,23 @@ const Store = {
         this.state.idpState.verificationNote = note;
       }
       this.save();
+
+      if (typeof supabaseClient !== 'undefined' && item.nip) {
+        try {
+          await supabaseClient
+            .from('idp_submissions')
+            .upsert({
+              nip: item.nip,
+              status: 'Perlu Revisi',
+              verification_note: note,
+              verified_at: new Date().toISOString(),
+              verified_by: this.state.user?.name || 'Kasubbag Kepegawaian',
+              updated_at: new Date().toISOString()
+            });
+        } catch(e) {
+          console.error("Gagal reject IDP di Supabase:", e);
+        }
+      }
     }
   },
 

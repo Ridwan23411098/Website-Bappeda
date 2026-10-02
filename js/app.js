@@ -125,16 +125,24 @@ const App = {
     App.toast(`Masuk sebagai ${NAV_CONFIG[role].label}. Selamat datang, ${account.name}`, 'success');
   },
 
-  // Real Authentication via NIP & Password
-  login() {
+  // Real Authentication via NIP & Password (Supabase)
+  async login() {
     const nipInput = document.getElementById('loginNip');
     const passInput = document.getElementById('loginPassword');
     const errAlert = document.getElementById('loginErrorAlert');
+    const loginBtn = document.querySelector('button[onclick="App.login()"]');
 
     if (errAlert) errAlert.style.display = 'none';
+    
+    // UI state: loading
+    if (loginBtn) {
+       loginBtn.disabled = true;
+       loginBtn.innerHTML = '<span class="loader"></span> Memproses...';
+    }
 
     try {
-      const sessionUser = Store.authenticate(nipInput.value, passInput.value);
+      // Tunggu hasil dari Supabase
+      const sessionUser = await Store.authenticate(nipInput.value, passInput.value);
       this.restoreSession(sessionUser);
       App.toast(`Autentikasi berhasil. Selamat datang, ${sessionUser.name}`, 'success');
     } catch (error) {
@@ -143,6 +151,13 @@ const App = {
         errAlert.style.display = 'block';
       }
       App.toast(error.message, 'error');
+    } finally {
+      // Restore UI state
+      if (loginBtn) {
+         loginBtn.disabled = false;
+         loginBtn.innerHTML = 'Masuk Portal <span data-icon="ArrowRight" data-icon-size="16"></span>';
+         if (window.lucide) window.lucide.createIcons();
+      }
     }
   },
 
@@ -153,14 +168,39 @@ const App = {
     document.getElementById('loginScreen').style.display = 'none';
     document.getElementById('appShell').style.display = 'flex';
 
+    // Sinkronkan data profil user dari session ke Store.state.user (Overwrite sepenuhnya)
+    Store.state.user.name = sessionUser.name || '';
+    Store.state.user.nip = sessionUser.nip || '';
+    Store.state.user.pangkat = sessionUser.pangkat || '';
+    Store.state.user.jabatan = (sessionUser.jabatan || '').replace(/PPEPD/g, 'PMPE');
+    Store.state.user.unitKerja = (sessionUser.unitKerja || '').replace(/PPEPD/g, 'PMPE');
+    Store.state.user.jenisJabatan = sessionUser.jenisJabatan || '';
+    Store.state.user.pendidikan = sessionUser.pendidikan || '';
+    Store.state.user.masaKerja = sessionUser.masaKerja || '';
+    Store.state.user.nineBox = sessionUser.nineBox || 5;
+    Store.state.user.avatarInitial = sessionUser.avatarInitial || '';
+    Store.state.user.role = role;
+    Store.save();
+
     // Update Topbar and Sidebar User Info
     document.getElementById('sidebarRoleBadge').innerHTML = `<span class="role-dot"></span>${cfg.label}`;
     document.getElementById('sidebarUserName').textContent = sessionUser.name;
-    document.getElementById('sidebarUserRole').textContent = sessionUser.jabatan;
+    document.getElementById('sidebarUserRole').textContent = (sessionUser.jabatan || '').replace(/PPEPD/g, 'PMPE');
     document.getElementById('topbarUserName').textContent = sessionUser.name.split(',')[0];
     document.getElementById('topbarRoleText').textContent = cfg.label;
 
     this.renderSidebarNav(role);
+
+    // Muat data IDP resmi dari cloud Supabase
+    if (sessionUser.nip) {
+      Store.loadUserIdp(sessionUser.nip).then(() => {
+        if (Store.state.activePage === 'eidp') {
+          App.renderIdpSaya();
+        } else if (Store.state.activePage === 'edash') {
+          App.renderEmployeeDashboard();
+        }
+      });
+    }
 
     // Default entry page per role
     const firstPage = cfg.sections[0].items[0].id;
@@ -198,6 +238,21 @@ const App = {
   },
 
   navigate(pageId) {
+    // Role-Based Guard: Proteksi Akses Halaman berdasarkan Peran ASN
+    const userRole = Store.state.currentSession?.role || Store.state.user?.role || 'pegawai';
+    const roleAllowedPages = {
+      pegawai: ['edash', 'eprofil', 'ekarier', 'ekompetensi', 'eidp', 'ereview', 'epelaksanaan'],
+      admin: ['adash', 'averif', 'apegawai', 'apelaksanaan', 'amaster', 'eprofil'],
+      pimpinan: ['pdash', 'pmonitoring', 'plaporan', 'eprofil']
+    };
+
+    const allowed = roleAllowedPages[userRole] || roleAllowedPages['pegawai'];
+    if (!allowed.includes(pageId)) {
+      App.toast(`Akses Ditolak: Hak Akses '${userRole.toUpperCase()}' tidak diizinkan membuka halaman ini.`, 'warning');
+      const fallbackPage = allowed[0];
+      return this.navigate(fallbackPage);
+    }
+
     Store.state.activePage = pageId;
     Store.save();
 
@@ -307,8 +362,8 @@ const App = {
       ]);
     } else if (Store.state.activePage === 'adash') {
       Charts.renderDonut('adminIdpStatusDonut', [
-        { label: 'Disetujui', value: 72, color: 'var(--color-success)' },
-        { label: 'Menunggu', value: 12, color: 'var(--color-warning)' },
+        { label: 'Final', value: 72, color: 'var(--color-success)' },
+        { label: 'Diajukan ke Atasan', value: 12, color: 'var(--color-warning)' },
         { label: 'Revisi', value: 5, color: 'var(--color-danger)' },
         { label: 'Belum Mengisi', value: 11, color: 'var(--color-text-muted)' }
       ]);
@@ -336,30 +391,97 @@ const App = {
       greetEl.textContent = (Store.state.currentSession?.name || Store.state.user.name).split(',')[0];
     }
 
-    document.getElementById('edashIdpStatusVal').textContent = idpStatus === 'Disetujui' ? '100%' : '85%';
+    document.getElementById('edashIdpStatusVal').textContent = idpStatus === 'Final' ? '100%' : '85%';
     document.getElementById('edashIdpStatusDesc').textContent = `Status Resmi: ${idpStatus}`;
     document.getElementById('edashRencanaVal').textContent = summary.totalProgram;
     document.getElementById('edashTerlaksanaVal').textContent = summary.completed;
     document.getElementById('edashBelumVal').textContent = summary.totalProgram - summary.completed;
 
-    Charts.renderCircularProgress('pegawaiCircularProgress', idpStatus === 'Disetujui' ? 100 : 85, 'Completed');
+    Charts.renderCircularProgress('pegawaiCircularProgress', idpStatus === 'Final' ? 100 : 85, 'Completed');
   },
 
   renderEmployeeProfile() {
     const u = Store.state.user;
-    document.getElementById('profNama').value = u.name;
-    document.getElementById('profNip').value = u.nip;
-    document.getElementById('profPangkat').value = u.pangkat;
-    document.getElementById('profPendidikan').value = u.pendidikan;
-    document.getElementById('profMasaKerja').value = u.masaKerja;
-    document.getElementById('profJabatan').value = u.jabatan;
-    document.getElementById('profUnit').value = u.unitKerja;
-    document.getElementById('profJenisJabatan').value = u.jenisJabatan;
+    
+    // Auto-sync missing data from Master Data Kepegawaian
+    const empList = Store.state.employees || (typeof BAPPEDA_DATA !== 'undefined' ? BAPPEDA_DATA.employees : []);
+    if (empList && empList.length > 0) {
+      const empMaster = empList.find(e => e.nip === u.nip);
+      if (empMaster) {
+        if (!u.pangkat) u.pangkat = empMaster.pangkat || '';
+        if (!u.pendidikan) u.pendidikan = empMaster.pendidikan || '';
+        if (!u.masaKerja) u.masaKerja = empMaster.masaKerja || '';
+        if (!u.jenisJabatan) u.jenisJabatan = empMaster.jenis || '';
+        if (!u.jabatan) u.jabatan = empMaster.jabatan || '';
+        if (!u.unitKerja) u.unitKerja = empMaster.unit || '';
+        if (!u.ttl) u.ttl = empMaster.ttl || '';
+        if (!u.usia) u.usia = empMaster.usia || '';
+        if (!u.diklat) u.diklat = empMaster.diklat || '';
+        if (!u.jenjang) u.jenjang = empMaster.jenjang || '';
+        if (!u.golongan) u.golongan = empMaster.golongan || '';
+        if (!u.tmtPangkat) u.tmtPangkat = empMaster.tmtPangkat || '';
+        if (!u.tmtJabatan) u.tmtJabatan = empMaster.tmtJabatan || '';
+        if (!u.nineBox) u.nineBox = empMaster.nineBox || u.nineBox;
+      }
+    }
+
+    if (u.unitKerja) u.unitKerja = u.unitKerja.replace(/PPEPD/g, 'PMPE');
+    if (u.jabatan) u.jabatan = u.jabatan.replace(/PPEPD/g, 'PMPE');
+
+    if (document.getElementById('profNama')) document.getElementById('profNama').value = u.name || '';
+    if (document.getElementById('profNip')) document.getElementById('profNip').value = u.nip || '';
+    if (document.getElementById('profPangkat')) document.getElementById('profPangkat').value = u.pangkat || '';
+    if (document.getElementById('profPendidikan')) document.getElementById('profPendidikan').value = u.pendidikan || '';
+    if (document.getElementById('profMasaKerja')) document.getElementById('profMasaKerja').value = u.masaKerja || '';
+    if (document.getElementById('profJabatan')) document.getElementById('profJabatan').value = u.jabatan || '';
+    if (document.getElementById('profUnit')) document.getElementById('profUnit').value = u.unitKerja || '';
+    if (document.getElementById('profJenisJabatan')) document.getElementById('profJenisJabatan').value = u.jenisJabatan || '';
+
+    // Update card header agar sesuai dengan akun yang login
+    const headerNama = document.getElementById('profilHeaderNama');
+    const headerJabatan = document.getElementById('profilHeaderJabatan');
+    const headerNip = document.getElementById('profilHeaderNip');
+    if (headerNama) headerNama.textContent = u.name;
+    if (headerJabatan) headerJabatan.textContent = `${u.jabatan} • ${u.unitKerja}`;
+    if (headerNip) headerNip.textContent = `NIP: ${u.nip}`;
+
+    // Render Status Keamanan Password & Role Badge
+    const secStatusEl = document.getElementById('profSecStatusBadge');
+    const secLastUpdateEl = document.getElementById('profSecLastUpdate');
+    const secRoleBadgeEl = document.getElementById('profSecRoleBadge');
+
+    const isChanged = u.isPasswordChanged || Store.state.currentSession?.isPasswordChanged;
+    if (secStatusEl) {
+      if (isChanged) {
+        secStatusEl.className = 'badge badge-success';
+        secStatusEl.innerHTML = '<span data-icon="ShieldCheck" data-icon-size="12"></span> Terenkripsi SHA-256 (Kuat)';
+      } else {
+        secStatusEl.className = 'badge badge-warning';
+        secStatusEl.innerHTML = '<span data-icon="AlertTriangle" data-icon-size="12"></span> Password Default (Perlu Diubah)';
+      }
+    }
+
+    if (secLastUpdateEl) {
+      const pDate = u.passwordUpdated || Store.state.currentSession?.passwordUpdated;
+      if (pDate) {
+        const dt = new Date(pDate);
+        secLastUpdateEl.textContent = `Terakhir diperbarui: ${dt.toLocaleDateString('id-ID')} pk. ${dt.toLocaleTimeString('id-ID', {hour: '2-digit', minute:'2-digit'})}`;
+      } else {
+        secLastUpdateEl.textContent = 'Belum pernah diubah (Menggunakan kata sandi bawaan sistem)';
+      }
+    }
+
+    if (secRoleBadgeEl) {
+      const roleName = u.role === 'admin' ? 'Pengelola SDM (Admin)' : (u.role === 'pimpinan' ? 'Pimpinan / Kepala Badan' : 'Pegawai ASN');
+      secRoleBadgeEl.textContent = roleName;
+    }
 
     document.querySelectorAll('.nine-box-cell').forEach(cell => {
       const boxNum = parseInt(cell.getAttribute('data-box'));
       cell.classList.toggle('selected', boxNum === u.nineBox);
     });
+
+    if (window.lucide) window.lucide.createIcons();
   },
 
   selectNineBox(boxNumber) {
@@ -377,6 +499,151 @@ const App = {
     Store.state.user.jabatan = document.getElementById('profJabatan').value;
     Store.save();
     App.toast('Data profil kepegawaian berhasil diperbarui secara permanen.', 'success');
+  },
+
+  // ==========================================
+  // HANDLER UBAH PASSWORD MANDIRI (TAHAP 2)
+  // ==========================================
+
+  async changePassword() {
+    const oldPassInput = document.getElementById('profOldPassword');
+    const newPassInput = document.getElementById('profNewPassword');
+    const confirmPassInput = document.getElementById('profConfirmPassword');
+    const btnSubmit = document.getElementById('btnChangePassword');
+
+    if (!oldPassInput || !newPassInput || !confirmPassInput) return;
+
+    const oldVal = oldPassInput.value.trim();
+    const newVal = newPassInput.value.trim();
+    const confirmVal = confirmPassInput.value.trim();
+
+    if (!oldVal) {
+      App.toast('Mohon masukkan kata sandi Anda saat ini.', 'error');
+      oldPassInput.focus();
+      return;
+    }
+    if (!newVal) {
+      App.toast('Mohon masukkan kata sandi baru Anda.', 'error');
+      newPassInput.focus();
+      return;
+    }
+    if (newVal.length < 6) {
+      App.toast('Kata sandi baru minimal harus 6 karakter.', 'warning');
+      newPassInput.focus();
+      return;
+    }
+    if (newVal !== confirmVal) {
+      App.toast('Konfirmasi kata sandi baru tidak cocok dengan kata sandi baru.', 'error');
+      confirmPassInput.focus();
+      return;
+    }
+
+    if (btnSubmit) {
+      btnSubmit.disabled = true;
+      btnSubmit.innerHTML = '<span class="loader"></span> Menyimpan Password Baru...';
+    }
+
+    try {
+      await Store.changePassword(oldVal, newVal);
+      App.toast('Kata sandi Anda berhasil diperbarui dan tersimpan terenkripsi SHA-256 di cloud Supabase!', 'success');
+      
+      // Reset form
+      oldPassInput.value = '';
+      newPassInput.value = '';
+      confirmPassInput.value = '';
+
+      const bar = document.getElementById('passStrengthBar');
+      const text = document.getElementById('passStrengthText');
+      const matchText = document.getElementById('passMatchText');
+      if (bar) bar.style.width = '0%';
+      if (text) text.textContent = '-';
+      if (matchText) {
+        matchText.textContent = '-';
+        matchText.style.color = 'var(--color-text-muted)';
+      }
+
+      // Refresh profile view
+      this.renderEmployeeProfile();
+    } catch (err) {
+      App.toast(err.message || 'Gagal memperbarui kata sandi.', 'error');
+    } finally {
+      if (btnSubmit) {
+        btnSubmit.disabled = false;
+        btnSubmit.innerHTML = '<span data-icon="Lock" data-icon-size="16"></span> Perbarui Kata Sandi Saya';
+        if (window.lucide) window.lucide.createIcons();
+      }
+    }
+  },
+
+  togglePasswordVisibility(inputId, btn) {
+    const input = document.getElementById(inputId);
+    if (!input) return;
+    if (input.type === 'password') {
+      input.type = 'text';
+      if (btn) btn.innerHTML = '<span data-icon="EyeOff" data-icon-size="16"></span>';
+    } else {
+      input.type = 'password';
+      if (btn) btn.innerHTML = '<span data-icon="Eye" data-icon-size="16"></span>';
+    }
+    if (window.lucide) window.lucide.createIcons();
+  },
+
+  checkPasswordStrength(inputVal) {
+    const bar = document.getElementById('passStrengthBar');
+    const text = document.getElementById('passStrengthText');
+    if (!bar || !text) return;
+
+    if (!inputVal) {
+      bar.style.width = '0%';
+      bar.style.background = 'transparent';
+      text.textContent = '-';
+      return;
+    }
+
+    let score = 0;
+    if (inputVal.length >= 6) score += 33;
+    if (inputVal.length >= 10) score += 33;
+    if (/[A-Z]/.test(inputVal) && /[0-9]/.test(inputVal)) score += 34;
+
+    if (score <= 33) {
+      bar.style.width = '33%';
+      bar.style.background = 'var(--color-danger)';
+      text.textContent = 'Lemah (Minimal 6 Karakter)';
+      text.style.color = 'var(--color-danger)';
+    } else if (score <= 66) {
+      bar.style.width = '66%';
+      bar.style.background = 'var(--color-warning)';
+      text.textContent = 'Sedang (Bisa Diperkuat)';
+      text.style.color = 'var(--color-warning)';
+    } else {
+      bar.style.width = '100%';
+      bar.style.background = 'var(--color-success)';
+      text.textContent = 'Sangat Kuat (Kombinasi Huruf & Angka)';
+      text.style.color = 'var(--color-success)';
+    }
+
+    this.checkPasswordMatch();
+  },
+
+  checkPasswordMatch() {
+    const newPass = document.getElementById('profNewPassword')?.value || '';
+    const confirmPass = document.getElementById('profConfirmPassword')?.value || '';
+    const matchText = document.getElementById('passMatchText');
+    if (!matchText) return;
+
+    if (!confirmPass) {
+      matchText.textContent = '-';
+      matchText.style.color = 'var(--color-text-muted)';
+      return;
+    }
+
+    if (newPass === confirmPass) {
+      matchText.textContent = '✓ Kata Sandi Cocok';
+      matchText.style.color = 'var(--color-success)';
+    } else {
+      matchText.textContent = '✗ Kata Sandi Tidak Cocok';
+      matchText.style.color = 'var(--color-danger)';
+    }
   },
 
   renderCareerPlan() {
@@ -723,10 +990,10 @@ const App = {
 
     if (id) {
       Store.updateProgram(parseInt(id), data);
-      App.toast('Program pengembangan berhasil diperbarui', 'success');
+      App.toast('Program pengembangan berhasil diperbarui di Cloud Database', 'success');
     } else {
       Store.addProgram(data);
-      App.toast('Program pengembangan berhasil ditambahkan', 'success');
+      App.toast('Program pengembangan berhasil disimpan ke Cloud Database', 'success');
     }
 
     this.closeModal('programModal');
@@ -739,7 +1006,7 @@ const App = {
       'Apakah Anda yakin ingin menghapus program pengembangan ini dari formulir IDP resmi Anda?',
       () => {
         Store.deleteProgram(id);
-        App.toast('Program pengembangan berhasil dihapus', 'success');
+        App.toast('Program pengembangan berhasil dihapus dari Cloud Database', 'success');
         App.renderIdpSaya();
       }
     );
@@ -769,7 +1036,7 @@ const App = {
   submitIdpConfirmed() {
     Store.submitIdp();
     this.closeModal('submitIdpConfirmModal');
-    App.toast('IDP Anda berhasil diajukan untuk verifikasi resmi Pengelola SDM Bappeda', 'success');
+    App.toast('IDP Anda berhasil diajukan & disinkronkan ke Cloud Supabase!', 'success');
     this.navigate('edash');
   },
 
@@ -833,8 +1100,8 @@ const App = {
 
   renderAdminDashboard() {
     Charts.renderDonut('adminIdpStatusDonut', [
-      { label: 'Disetujui', value: 72, color: 'var(--color-success)' },
-      { label: 'Menunggu', value: 12, color: 'var(--color-warning)' },
+      { label: 'Final', value: 72, color: 'var(--color-success)' },
+      { label: 'Diajukan ke Atasan', value: 12, color: 'var(--color-warning)' },
       { label: 'Revisi', value: 5, color: 'var(--color-danger)' },
       { label: 'Belum Mengisi', value: 11, color: 'var(--color-text-muted)' }
     ]);
@@ -844,7 +1111,7 @@ const App = {
     const list = Store.state.verifications;
     const tbody = document.getElementById('verifTableBody');
     tbody.innerHTML = list.map(v => {
-      const badgeCls = v.status === 'Disetujui' ? 'badge-success' : v.status === 'Perlu Revisi' ? 'badge-danger' : 'badge-warning';
+      const badgeCls = v.status === 'Final' ? 'badge-success' : v.status === 'Disetujui Atasan' ? 'badge-primary' : v.status === 'Perlu Revisi' ? 'badge-danger' : 'badge-warning';
       return `
         <tr>
           <td>
@@ -883,17 +1150,21 @@ const App = {
     document.getElementById('reviewDrawerEstimasiBiaya').textContent = item.estimasiBiaya;
     document.getElementById('verifNotesInput').value = item.notes || '';
 
-    document.getElementById('btnApproveVerif').onclick = () => App.approveVerification(item.id);
+    document.getElementById('btnApproveVerif').onclick = () => App.approveVerification(item.id, 'Final');
+    const btnAtasan = document.getElementById('btnApproveAtasanVerif');
+    if (btnAtasan) {
+      btnAtasan.onclick = () => App.approveVerification(item.id, 'Disetujui Atasan');
+    }
     document.getElementById('btnRejectVerif').onclick = () => App.requestRevisionModal(item.id);
 
     this.openDrawer('reviewDrawer');
   },
 
-  approveVerification(id) {
+  approveVerification(id, newStatus = 'Final') {
     const note = document.getElementById('verifNotesInput').value;
-    Store.approveIdp(id, note || 'Disetujui tanpa catatan perbaikan.');
+    Store.approveIdp(id, note || 'Disetujui tanpa catatan perbaikan.', newStatus);
     this.closeDrawer('reviewDrawer');
-    App.toast('IDP Pegawai resmi disetujui Pengelola SDM', 'success');
+    App.toast(`IDP Pegawai resmi diperbarui (Status: ${newStatus})`, 'success');
     this.renderAdminVerification();
   },
 
@@ -969,7 +1240,7 @@ const App = {
       document.getElementById('modalEmpDiklat').textContent = e.diklat || '-';
     }
     
-    const badgeCls = e.statusIdp === 'Disetujui' ? 'badge-success' : e.statusIdp === 'Belum' ? 'badge-danger' : 'badge-warning';
+    const badgeCls = e.statusIdp === 'Final' ? 'badge-success' : e.statusIdp === 'Belum' ? 'badge-danger' : 'badge-warning';
     document.getElementById('modalEmpStatusIdp').innerHTML = `<span class="badge ${badgeCls}">${e.statusIdp}</span>`;
     document.getElementById('modalEmpProgress').textContent = e.progress;
 
@@ -1008,12 +1279,12 @@ const App = {
     } else {
       tbody.innerHTML = pageItems.map((e, idx) => {
         const globalNo = startIdx + idx + 1;
-        const badgeCls = e.statusIdp === 'Disetujui' ? 'badge-success' : e.statusIdp === 'Belum' ? 'badge-danger' : 'badge-warning';
+        const badgeCls = e.statusIdp === 'Final' ? 'badge-success' : e.statusIdp === 'Belum' ? 'badge-danger' : 'badge-warning';
         
         let unitBadgeCls = 'badge-neutral';
         if (e.unit.includes('Pimpinan')) unitBadgeCls = 'badge-success';
         else if (e.unit.includes('Sekretariat')) unitBadgeCls = 'badge-neutral';
-        else if (e.unit.includes('PPEPD')) unitBadgeCls = 'badge-blue';
+        else if (e.unit.includes('PMPE') || e.unit.includes('PPEPD')) unitBadgeCls = 'badge-blue';
         else if (e.unit.includes('Perekonomian')) unitBadgeCls = 'badge-warning';
         else if (e.unit.includes('Infrastruktur')) unitBadgeCls = 'badge-purple';
         else if (e.unit.includes('Pemerintahan')) unitBadgeCls = 'badge-rose';
@@ -1189,7 +1460,7 @@ const App = {
       ? Store.state.monitoringUnits
       : [
         { unit: 'Sekretariat', pegawai: 23, terisi: '94%', realisasi: '82%', tindakLanjut: 2, kabid: 'ANDI ARAFAT S.T., M.E.' },
-        { unit: 'Bidang PPEPD (Rendalev)', pegawai: 9, terisi: '100%', realisasi: '88%', tindakLanjut: 1, kabid: 'MEYDIANDRA EKA PUTRA S.P,MIP' },
+        { unit: 'Bidang PMPE (Rendalev)', pegawai: 9, terisi: '100%', realisasi: '88%', tindakLanjut: 1, kabid: 'MEYDIANDRA EKA PUTRA S.P,MIP' },
         { unit: 'Bidang Perekonomian', pegawai: 19, terisi: '92%', realisasi: '79%', tindakLanjut: 2, kabid: 'Ir. ENDANG WAHYUNI S.T., M.Si.' },
         { unit: 'Bidang Infrastruktur & Kewilayahan', pegawai: 9, terisi: '95%', realisasi: '80%', tindakLanjut: 1, kabid: 'Ir. IDA SUSANTI S S.T., M.T' },
         { unit: 'Bidang Pemerintahan & PM', pegawai: 28, terisi: '90%', realisasi: '76%', tindakLanjut: 3, kabid: 'RADIUS PRAWIRA NEGARA S.ST' },
@@ -1205,20 +1476,20 @@ const App = {
 
     tbody.innerHTML = displayedUnits.map((u, i) => `
       <tr onclick="App.openMonitoringDetailDrawer('${u.unit}')" style="cursor: pointer;">
-        <td>${i + 1}</td>
-        <td class="font-semibold text-primary">
+        <td data-label="No">${i + 1}</td>
+        <td data-label="Unit Kerja" class="font-semibold text-primary">
           <div style="font-size: 13.5px; font-weight: 700;">${u.unit}</div>
           ${u.kabid ? `<div style="font-size: 11px; color: var(--color-text-muted); margin-top: 2px;">Penanggung Jawab: ${u.kabid}</div>` : ''}
         </td>
-        <td><span class="badge badge-blue"><b>${u.pegawai}</b> ASN</span></td>
-        <td><b>${u.terisi}</b></td>
-        <td>
+        <td data-label="Total Pegawai"><span class="badge badge-blue"><b>${u.pegawai}</b> ASN</span></td>
+        <td data-label="IDP Terisi"><b>${u.terisi}</b></td>
+        <td data-label="Realisasi">
           <div style="display: flex; align-items: center; gap: 8px;">
             <span>${u.realisasi}</span>
             <div class="progress-track" style="width: 80px; height: 6px;"><div class="progress-fill success" style="width: ${u.realisasi}"></div></div>
           </div>
         </td>
-        <td><span class="badge badge-warning">${u.tindakLanjut} Pegawai</span></td>
+        <td data-label="Tindak Lanjut"><span class="badge badge-warning">${u.tindakLanjut} Pegawai</span></td>
       </tr>
     `).join('');
   },
@@ -1236,7 +1507,7 @@ const App = {
         tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; padding: 20px; color: var(--color-text-muted);">Tidak ada data pegawai pada unit ini.</td></tr>`;
       } else {
         tbody.innerHTML = members.map(m => {
-          const isFull = m.statusIdp === 'Disetujui';
+          const isFull = m.statusIdp === 'Final';
           const badgeCls = isFull ? 'badge-success' : m.statusIdp === 'Belum' ? 'badge-danger' : 'badge-warning';
           return `
             <tr>
