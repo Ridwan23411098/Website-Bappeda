@@ -894,13 +894,43 @@ const Store = {
     }
   },
 
-  addRealization(realizationData) {
+  async addRealization(realizationData, file) {
     const newId = Date.now();
+    let fileUrl = realizationData.bukti;
+
+    // Jika ada file yang diunggah, simpan ke Supabase Storage
+    if (file && typeof supabaseClient !== 'undefined') {
+      try {
+        const fileExt = file.name.split('.').pop();
+        const safeName = realizationData.pegawai.replace(/[^a-zA-Z0-9]/g, '_');
+        const fileName = `${newId}_${safeName}.${fileExt}`;
+        const filePath = `sertifikat/${fileName}`;
+
+        const { data, error } = await supabaseClient.storage
+          .from('sertifikat_idp')
+          .upload(filePath, file, { cacheControl: '3600', upsert: false });
+
+        if (error) throw error;
+        
+        // Dapatkan Public URL
+        const { data: publicUrlData } = supabaseClient.storage
+          .from('sertifikat_idp')
+          .getPublicUrl(filePath);
+          
+        fileUrl = publicUrlData.publicUrl;
+      } catch (err) {
+        console.error("Gagal mengunggah sertifikat ke Supabase Storage:", err);
+        throw new Error("Gagal mengunggah sertifikat. Pastikan Anda telah membuat bucket 'sertifikat_idp' di Supabase. " + err.message);
+      }
+    }
+
     this.state.realizations.unshift({
       id: newId,
       ...realizationData,
       jp: parseInt(realizationData.jp) || 0,
-      status: 'Terverifikasi'
+      status: 'Terverifikasi',
+      buktiUrl: fileUrl, // Simpan URL publik
+      bukti: file ? file.name : realizationData.bukti
     });
     this.save();
   },

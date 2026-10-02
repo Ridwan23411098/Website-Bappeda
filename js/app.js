@@ -1045,17 +1045,17 @@ const App = {
     const tbody = document.getElementById('realizationTableBody');
     tbody.innerHTML = rList.map(r => `
       <tr>
-        <td class="font-semibold">${r.pegawai}</td>
-        <td>${r.program}</td>
-        <td><span class="badge badge-blue">${r.metode}</span></td>
-        <td>${r.tanggal}</td>
-        <td><b>${r.jp}</b> JP</td>
-        <td>
-          <button class="btn btn-outline btn-sm" onclick="App.previewDocument('${r.bukti}')">
-            ${getIcon('FileText', 14)} ${r.bukti}
+        <td class="font-semibold" data-label="Pegawai">${r.pegawai}</td>
+        <td data-label="Program IDP">${r.program}</td>
+        <td data-label="Metode"><span class="badge badge-blue">${r.metode}</span></td>
+        <td data-label="Tanggal">${r.tanggal}</td>
+        <td data-label="JP"><b>${r.jp}</b> JP</td>
+        <td data-label="Bukti">
+          <button class="btn btn-outline btn-sm" onclick="${r.buktiUrl ? `window.open('${r.buktiUrl}', '_blank')` : `App.previewDocument('${r.bukti}')`}">
+            <span data-icon="FileText" data-icon-size="14"></span> ${r.bukti}
           </button>
         </td>
-        <td><span class="badge badge-success">${r.status}</span></td>
+        <td data-label="Status"><span class="badge badge-success">${r.status}</span></td>
       </tr>
     `).join('');
 
@@ -1070,28 +1070,52 @@ const App = {
     this.openDrawer('realizationDrawer');
   },
 
-  saveRealizationForm() {
+  async saveRealizationForm() {
     const prog = document.getElementById('realizProgram').value;
     const tgl = document.getElementById('realizTanggal').value || '2026-11-15';
     const jp = parseInt(document.getElementById('realizJp').value) || 20;
     const peny = document.getElementById('realizPenyelenggara').value;
-    const fileName = document.getElementById('dropzoneFileName').textContent.includes('Sertifikat') 
-      ? document.getElementById('dropzoneFileName').textContent 
-      : 'Sertifikat_Pelaksanaan_Bappeda.pdf';
+    
+    const fileInput = document.getElementById('realizFileInput');
+    const file = fileInput && fileInput.files ? fileInput.files[0] : null;
 
-    Store.addRealization({
-      pegawai: Store.state.user.name,
-      program: prog,
-      metode: 'Diklat Teknis',
-      tanggal: tgl,
-      jp: jp,
-      penyelenggara: peny,
-      bukti: fileName
-    });
+    if (!file) {
+      App.toast('Bukti Sertifikat wajib diunggah!', 'error');
+      return;
+    }
+    
+    // Disable button during upload
+    const btnSubmit = document.querySelector('#realizationDrawer .btn-primary');
+    if (btnSubmit) {
+      btnSubmit.disabled = true;
+      btnSubmit.innerHTML = 'Mengunggah...';
+    }
 
-    this.closeDrawer('realizationDrawer');
-    App.toast('Realisasi pengembangan berhasil disimpan ke database kepegawaian', 'success');
-    this.renderEmployeeRealization();
+    try {
+      await Store.addRealization({
+        pegawai: Store.state.user.name,
+        program: prog,
+        metode: prog.includes('Coaching') ? 'Coaching' : prog.includes('Workshop') ? 'Workshop' : prog.includes('Mentoring') ? 'Mentoring' : 'Diklat Teknis',
+        tanggal: tgl,
+        jp: jp,
+        penyelenggara: peny,
+        bukti: file.name
+      }, file);
+
+      App.toast('Realisasi pengembangan berhasil dicatat & sertifikat diunggah!', 'success');
+      this.closeDrawer('realizationDrawer');
+      this.renderEmployeeRealization();
+    } catch (err) {
+      App.toast(err.message || 'Gagal mengunggah sertifikat.', 'error');
+    } finally {
+      if (btnSubmit) {
+        btnSubmit.disabled = false;
+        btnSubmit.innerHTML = 'Simpan Realisasi';
+      }
+      // Reset input file
+      if (fileInput) fileInput.value = '';
+      document.getElementById('dropzoneFileName').textContent = 'Pilih atau letakkan file bukti di sini';
+    }
   },
 
   // ==========================================
