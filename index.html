@@ -282,38 +282,23 @@
               <button class="btn-icon" id="notificationBtn" onclick="App.toggleNotificationDropdown()"
                 title="Notifikasi">
                 <span data-icon="Bell" data-icon-size="18"></span>
-                <span class="notification-badge"></span>
+                <span class="notification-badge" style="display: none;"></span>
               </button>
 
               <!-- Dropdown -->
               <div class="notification-dropdown" id="notificationDropdown">
                 <div class="notification-header">
                   <h3>Notifikasi Kedinasan</h3>
-                  <span class="notification-unread-count">3 belum dibaca</span>
+                  <div style="display: flex; align-items: center; gap: 8px;">
+                    <span class="notification-unread-count">Semua sudah dibaca</span>
+                    <button class="btn btn-outline btn-sm" style="font-size: 10px; padding: 2px 8px;" 
+                      onclick="NotificationService.markAllAsRead()">Tandai Dibaca</button>
+                  </div>
                 </div>
                 <div class="notification-list">
-                  <div class="notification-item unread"
-                    onclick="App.toast('IDP Anda telah disetujui Pengelola SDM', 'info')">
-                    <div class="notification-icon"><span data-icon="CircleCheck" data-icon-size="16"></span></div>
-                    <div class="notification-content">
-                      <div class="notification-text">IDP Anda telah disetujui resmi oleh Pengelola SDM</div>
-                      <div class="notification-time">5 menit lalu</div>
-                    </div>
-                  </div>
-                  <div class="notification-item unread"
-                    onclick="App.toast('Sertifikat Analisis Data terverifikasi', 'info')">
-                    <div class="notification-icon"><span data-icon="ShieldCheck" data-icon-size="16"></span></div>
-                    <div class="notification-content">
-                      <div class="notification-text">Program Pelatihan Analisis Data berhasil diverifikasi</div>
-                      <div class="notification-time">1 jam lalu</div>
-                    </div>
-                  </div>
-                  <div class="notification-item unread" onclick="App.toast('Pengingat jadwal coaching', 'warning')">
-                    <div class="notification-icon"><span data-icon="AlertTriangle" data-icon-size="16"></span></div>
-                    <div class="notification-content">
-                      <div class="notification-text">Jadwal Coaching Service Excellence direncanakan Oktober 2026</div>
-                      <div class="notification-time">Kemarin</div>
-                    </div>
+                  <div style="text-align: center; padding: 32px 16px; color: var(--color-text-muted);">
+                    <span data-icon="BellOff" data-icon-size="32"></span>
+                    <div style="margin-top: 8px; font-size: 13px;">Memuat notifikasi...</div>
                   </div>
                 </div>
               </div>
@@ -2975,9 +2960,10 @@
   <script src="js/icons.js?v=20260928_1"></script>
   <script src="js/charts.js?v=20260928_1"></script>
   <script src="js/bappeda_data.js?v=20260928_1"></script>
-  <script src="js/store.js?v=20261002_1"></script>
+  <script src="js/store.js?v=20261005_1"></script>
   <script src="js/export.js?v=20260928_2"></script>
-  <script src="js/app.js?v=20261002_1"></script>
+  <script src="js/notification.js?v=20261005_1"></script>
+  <script src="js/app.js?v=20261005_1"></script>
 </body>
 
 </html>

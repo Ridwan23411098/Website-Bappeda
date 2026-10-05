@@ -205,6 +205,11 @@ const App = {
     // Default entry page per role
     const firstPage = cfg.sections[0].items[0].id;
     this.navigate(firstPage);
+
+    // Inisialisasi Notifikasi Real-Time
+    if (typeof NotificationService !== 'undefined') {
+      NotificationService.init();
+    }
   },
 
   logout() {

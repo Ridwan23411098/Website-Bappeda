@@ -832,6 +832,17 @@ const Store = {
         console.error("Gagal submit IDP ke Supabase:", e);
       }
     }
+
+    // Kirim notifikasi real-time ke Admin & Pimpinan
+    if (typeof NotificationService !== 'undefined') {
+      const nama = this.state.user?.name || 'Pegawai';
+      NotificationService.send('admin', null, 
+        'IDP Baru Diajukan', 
+        `${nama} telah mengajukan dokumen IDP untuk ditinjau dan diverifikasi.`);
+      NotificationService.send('pimpinan', null, 
+        'IDP Baru Diajukan', 
+        `${nama} telah mengajukan dokumen IDP dan menunggu persetujuan atasan.`);
+    }
   },
 
   async approveIdp(verificationId, note = '', newStatus = 'Final') {
@@ -860,6 +871,15 @@ const Store = {
         } catch(e) {
           console.error("Gagal approve IDP di Supabase:", e);
         }
+      }
+
+      // Kirim notifikasi real-time ke Pegawai pemilik IDP
+      if (typeof NotificationService !== 'undefined') {
+        const approver = this.state.user?.name || 'Pimpinan';
+        const statusLabel = newStatus === 'Final' ? 'Diverifikasi Final' : newStatus;
+        NotificationService.send('pegawai', item.nip, 
+          `IDP Anda ${statusLabel}`, 
+          `Dokumen IDP Anda telah ${statusLabel.toLowerCase()} oleh ${approver}.`);
       }
     }
   },
@@ -890,6 +910,14 @@ const Store = {
         } catch(e) {
           console.error("Gagal reject IDP di Supabase:", e);
         }
+      }
+
+      // Kirim notifikasi real-time ke Pegawai pemilik IDP
+      if (typeof NotificationService !== 'undefined') {
+        const reviewer = this.state.user?.name || 'Pimpinan';
+        NotificationService.send('pegawai', item.nip, 
+          'IDP Perlu Revisi', 
+          `Dokumen IDP Anda dikembalikan oleh ${reviewer}. Catatan: ${note}`);
       }
     }
   },
