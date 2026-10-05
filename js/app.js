@@ -213,11 +213,13 @@ const App = {
   },
 
   logout() {
-    if (this.notifChannel && typeof supabaseClient !== 'undefined') {
+    if (typeof supabaseClient !== 'undefined') {
       try {
-        supabaseClient.removeChannel(this.notifChannel);
+        if (this.notifChannel) supabaseClient.removeChannel(this.notifChannel);
+        if (this.submissionChannel) supabaseClient.removeChannel(this.submissionChannel);
       } catch(e) {}
       this.notifChannel = null;
+      this.submissionChannel = null;
     }
     Store.logoutSession();
     document.getElementById('appShell').style.display = 'none';
@@ -1044,10 +1046,11 @@ const App = {
     this.openModal('submitIdpConfirmModal');
   },
 
-  submitIdpConfirmed() {
-    Store.submitIdp();
+  async submitIdpConfirmed() {
     this.closeModal('submitIdpConfirmModal');
-    App.toast('IDP Anda berhasil diajukan & disinkronkan ke Cloud Supabase!', 'success');
+    App.toast('Mengirimkan pengajuan IDP ke Cloud Supabase...', 'info');
+    await Store.submitIdp();
+    App.toast('IDP Anda berhasil diajukan ke Atasan & Pengelola SDM!', 'success');
     this.navigate('edash');
   },
 
@@ -1142,7 +1145,10 @@ const App = {
     ]);
   },
 
-  renderAdminVerification() {
+  async renderAdminVerification() {
+    if (typeof supabaseClient !== 'undefined') {
+      await Store.syncVerificationsFromSupabase();
+    }
     const list = Store.state.verifications;
     const tbody = document.getElementById('verifTableBody');
     tbody.innerHTML = list.map(v => {
@@ -1652,17 +1658,33 @@ const App = {
   // REAL-TIME NOTIFICATIONS CONTROLLER (TAHAP 5.3)
   // ==========================================
   notifChannel: null,
+  submissionChannel: null,
+  audioCtx: null,
+
+  unlockAudio() {
+    try {
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if (!this.audioCtx && AudioCtx) {
+        this.audioCtx = new AudioCtx();
+      }
+      if (this.audioCtx && this.audioCtx.state === 'suspended') {
+        this.audioCtx.resume();
+      }
+    } catch(e) {}
+  },
 
   initRealtimeNotifications() {
     const user = Store.state.user || Store.state.currentSession;
     if (!user) return;
 
     // 1. Bersihkan channel sebelumnya jika ada
-    if (this.notifChannel && typeof supabaseClient !== 'undefined') {
+    if (typeof supabaseClient !== 'undefined') {
       try {
-        supabaseClient.removeChannel(this.notifChannel);
+        if (this.notifChannel) supabaseClient.removeChannel(this.notifChannel);
+        if (this.submissionChannel) supabaseClient.removeChannel(this.submissionChannel);
       } catch(e) {}
       this.notifChannel = null;
+      this.submissionChannel = null;
     }
 
     // 2. Ambil notifikasi dari Supabase & Render
@@ -1673,8 +1695,9 @@ const App = {
     // 3. Pasang pendengar (listener) Realtime Supabase
     if (typeof supabaseClient !== 'undefined') {
       try {
+        // Channel Notifikasi
         this.notifChannel = supabaseClient
-          .channel('public:notifikasi')
+          .channel('realtime_sip_notifikasi')
           .on(
             'postgres_changes',
             { event: 'INSERT', schema: 'public', table: 'notifikasi' },
@@ -1684,36 +1707,55 @@ const App = {
 
               const currentUser = Store.state.user || Store.state.currentSession;
               const role = currentUser?.role || 'pegawai';
-              const nip = String(currentUser?.nip || '').trim();
+              const cleanUserNip = String(currentUser?.nip || '').replace(/\s+/g, '');
+              const cleanRowPenerima = String(newRow.penerima || '').replace(/\s+/g, '');
 
-              // Cek apakah notifikasi ini untuk user yang sedang aktif
+              // Cek apakah notifikasi ini ditujukan untuk user ini
               const isForMe =
                 newRow.penerima === 'all' ||
                 newRow.penerima === role ||
-                newRow.penerima === nip ||
-                ((role === 'admin' || role === 'pimpinan') && (newRow.penerima === 'all_admin' || newRow.penerima === role));
+                cleanRowPenerima === cleanUserNip ||
+                ((role === 'admin' || role === 'pimpinan') && (newRow.penerima === 'all_admin' || newRow.penerima === 'admin'));
 
               if (isForMe) {
-                // Tambahkan ke daftar notifikasi lokal di paling atas
                 if (!Store.state.notifications) Store.state.notifications = [];
-                // Hindari duplikasi jika sudah ada
                 if (!Store.state.notifications.some(n => n.id === newRow.id)) {
                   Store.state.notifications.unshift(newRow);
                   Store.updateNotificationUnreadCount();
                   Store.save();
                 }
 
-                // Render ulang dropdown & badge
                 this.renderNotifications();
-
-                // Bunyikan chime & munculkan popup animasi
                 this.playNotificationSound();
                 this.showNotificationPopup(newRow);
               }
             }
           )
           .subscribe((status) => {
-            console.log('SIP-KOMPETENSI Realtime Notification Status:', status);
+            console.log('SIP Notifikasi Realtime Status:', status);
+          });
+
+        // Channel IDP Submissions (Agar Admin & Pegawai melihat status IDP terupdate LIVE)
+        this.submissionChannel = supabaseClient
+          .channel('realtime_sip_submissions')
+          .on(
+            'postgres_changes',
+            { event: '*', schema: 'public', table: 'idp_submissions' },
+            async payload => {
+              console.log('SIP IDP Submission Changed Realtime:', payload);
+              await Store.syncVerificationsFromSupabase();
+              
+              if (Store.state.activePage === 'averif') {
+                App.renderAdminVerification();
+              } else if (Store.state.activePage === 'adash') {
+                App.renderAdminDashboard();
+              } else if (Store.state.activePage === 'eidp') {
+                App.renderIdpSaya();
+              }
+            }
+          )
+          .subscribe((status) => {
+            console.log('SIP Submissions Realtime Status:', status);
           });
       } catch (err) {
         console.warn("Gagal inisialisasi Supabase Realtime:", err);
@@ -1862,24 +1904,40 @@ const App = {
     }, 5500);
   },
 
-  playNotificationSound() {
+  async playNotificationSound() {
+    // 1. Getar HP jika perangkat mobile mendukung
     try {
-      const AudioCtx = window.AudioContext || window.webkitAudioContext;
-      if (!AudioCtx) return;
-      const ctx = new AudioCtx();
+      if ('vibrate' in navigator) {
+        navigator.vibrate([180, 80, 180]);
+      }
+    } catch(e) {}
+
+    // 2. Mainkan nada lonceng kedinasan (E5 -> A5 -> C6)
+    try {
+      this.unlockAudio();
+      if (!this.audioCtx) return;
+      if (this.audioCtx.state === 'suspended') {
+        await this.audioCtx.resume();
+      }
+      const ctx = this.audioCtx;
+      const now = ctx.currentTime;
       const osc = ctx.createOscillator();
       const gain = ctx.createGain();
       osc.connect(gain);
       gain.connect(ctx.destination);
+      
       osc.type = 'sine';
-      osc.frequency.setValueAtTime(587.33, ctx.currentTime); // Tone D5
-      osc.frequency.setValueAtTime(880, ctx.currentTime + 0.08); // Tone A5
-      gain.gain.setValueAtTime(0.12, ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.45);
-      osc.start(ctx.currentTime);
-      osc.stop(ctx.currentTime + 0.45);
+      osc.frequency.setValueAtTime(659.25, now);        // Nada E5
+      osc.frequency.setValueAtTime(880.00, now + 0.12); // Nada A5
+      osc.frequency.setValueAtTime(1046.50, now + 0.24); // Nada C6
+      
+      gain.gain.setValueAtTime(0.35, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.7);
+      
+      osc.start(now);
+      osc.stop(now + 0.7);
     } catch (e) {
-      // Audio autoplay policy fallback
+      console.warn("Audio play issue:", e);
     }
   },
 
@@ -1912,6 +1970,10 @@ const App = {
   },
 
   bindGlobalEvents() {
+    const unlock = () => this.unlockAudio();
+    document.addEventListener('click', unlock, { passive: true });
+    document.addEventListener('touchstart', unlock, { passive: true });
+
     document.addEventListener('keydown', e => {
       if (e.key === 'Escape') {
         document.querySelectorAll('.modal-overlay.active').forEach(m => m.classList.remove('active'));

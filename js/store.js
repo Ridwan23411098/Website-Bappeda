@@ -806,9 +806,10 @@ const Store = {
   async submitIdp() {
     this.state.idpState.status = 'Diajukan ke Atasan';
     const summary = this.getIdpSummary();
-    const userNip = this.state.user?.nip;
+    const rawNip = this.state.user?.nip;
+    const cleanUserNip = String(rawNip || '').replace(/\s+/g, '');
 
-    const v = this.state.verifications.find(x => x.nip === userNip);
+    const v = this.state.verifications.find(x => String(x.nip).replace(/\s+/g, '') === cleanUserNip);
     if (v) {
       v.status = 'Diajukan ke Atasan';
       v.programCount = this.state.idpState.programs.length;
@@ -818,12 +819,12 @@ const Store = {
     this.save();
 
     // Sync ke Supabase
-    if (userNip && typeof supabaseClient !== 'undefined') {
+    if (cleanUserNip && typeof supabaseClient !== 'undefined') {
       try {
         const { error } = await supabaseClient
           .from('idp_submissions')
           .upsert({
-            nip: String(userNip).trim(),
+            nip: cleanUserNip,
             tahun: '2026',
             status: 'Diajukan ke Atasan',
             progress: summary.progressPct,
@@ -850,6 +851,55 @@ const Store = {
       pesan: `${this.state.user?.name || 'Pegawai'} telah mengajukan rencana pengembangan kompetensi (IDP 2026).`,
       tipe: 'info'
     });
+  },
+
+  async syncVerificationsFromSupabase() {
+    if (typeof supabaseClient === 'undefined') return;
+    try {
+      const { data, error } = await supabaseClient
+        .from('idp_submissions')
+        .select('*');
+
+      if (!error && data && data.length > 0) {
+        data.forEach(sub => {
+          const cleanSubNip = String(sub.nip).replace(/\s+/g, '');
+          const v = this.state.verifications.find(x => String(x.nip).replace(/\s+/g, '') === cleanSubNip);
+          if (v) {
+            v.status = sub.status || v.status;
+            if (sub.progress !== undefined) v.progress = sub.progress;
+            if (sub.verification_note) v.notes = sub.verification_note;
+            if (sub.submitted_at) {
+              const d = new Date(sub.submitted_at);
+              v.pengajuan = d.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
+            }
+          } else {
+            const emp = (typeof BAPPEDA_DATA !== 'undefined' && BAPPEDA_DATA.employees) 
+              ? BAPPEDA_DATA.employees.find(e => String(e.nip).replace(/\s+/g, '') === cleanSubNip)
+              : null;
+            if (emp) {
+              this.state.verifications.unshift({
+                id: Date.now() + Math.floor(Math.random() * 1000),
+                pegawai: emp.nama,
+                nip: emp.nip,
+                jabatan: emp.jabatan,
+                jenisJabatan: emp.jenis || 'Struktural',
+                targetKarier: 'Pengembangan Kompetensi 2026',
+                rencanaKarier: 'Penguatan keahlian perencanaan',
+                programCount: 1,
+                totalJp: 20,
+                estimasiBiaya: 'Rp0',
+                pengajuan: 'Hari Ini',
+                status: sub.status || 'Diajukan ke Atasan',
+                notes: sub.verification_note || ''
+              });
+            }
+          }
+        });
+        this.save();
+      }
+    } catch (e) {
+      console.warn("Gagal sinkron verifikasi dari Supabase:", e);
+    }
   },
 
   async approveIdp(verificationId, note = '', newStatus = 'Final') {
