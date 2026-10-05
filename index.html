@@ -15,7 +15,7 @@
     rel="stylesheet">
 
   <!-- Core Stylesheet -->
-  <link rel="stylesheet" href="css/app.css">
+  <link rel="stylesheet" href="css/app.css?v=20261005_1">
 </head>
 
 <body>
@@ -280,26 +280,37 @@
             <!-- Notification Bell with Dropdown -->
             <div class="notification-container">
               <button class="btn-icon" id="notificationBtn" onclick="App.toggleNotificationDropdown()"
-                title="Notifikasi">
+                title="Notifikasi Kedinasan">
                 <span data-icon="Bell" data-icon-size="18"></span>
-                <span class="notification-badge" style="display: none;"></span>
+                <span class="notification-badge" id="notificationBadge" style="display: none;">0</span>
               </button>
 
               <!-- Dropdown -->
               <div class="notification-dropdown" id="notificationDropdown">
                 <div class="notification-header">
-                  <h3>Notifikasi Kedinasan</h3>
+                  <div>
+                    <h3 style="margin: 0; font-size: 13.5px; font-weight: 700;">Notifikasi Kedinasan</h3>
+                    <div style="font-size: 11px; color: var(--color-text-muted); display: flex; align-items: center; gap: 5px; margin-top: 2px;">
+                      <span class="realtime-status-dot"></span> <span>Real-time Live</span>
+                    </div>
+                  </div>
                   <div style="display: flex; align-items: center; gap: 8px;">
-                    <span class="notification-unread-count">Semua sudah dibaca</span>
-                    <button class="btn btn-outline btn-sm" style="font-size: 10px; padding: 2px 8px;" 
-                      onclick="NotificationService.markAllAsRead()">Tandai Dibaca</button>
+                    <span class="notification-unread-count" id="notificationUnreadCount">0 baru</span>
+                    <button type="button" onclick="App.markAllNotificationsRead()" title="Tandai semua telah dibaca" style="background: none; border: none; cursor: pointer; color: var(--color-primary); font-size: 11px; font-weight: 600; padding: 2px 4px;">
+                      Baca Semua
+                    </button>
                   </div>
                 </div>
-                <div class="notification-list">
-                  <div style="text-align: center; padding: 32px 16px; color: var(--color-text-muted);">
-                    <span data-icon="BellOff" data-icon-size="32"></span>
-                    <div style="margin-top: 8px; font-size: 13px;">Memuat notifikasi...</div>
+                <div class="notification-list" id="notificationList">
+                  <div style="padding: 24px 16px; text-align: center; color: var(--color-text-muted); font-size: 12px;">
+                    <span data-icon="Bell" data-icon-size="24" style="opacity: 0.4; display: block; margin: 0 auto 6px;"></span>
+                    Memuat notifikasi...
                   </div>
+                </div>
+                <div class="notification-footer" style="padding: 9px 14px; text-align: center; border-top: 1px solid var(--color-border); font-size: 11px; background: var(--color-surface-soft);">
+                  <button type="button" onclick="App.sendTestNotification()" style="font-size: 11.5px; color: var(--color-primary); border: none; background: none; cursor: pointer; font-weight: 600; display: inline-flex; align-items: center; gap: 5px;">
+                    <span data-icon="Send" data-icon-size="12"></span> Uji Kirim Notifikasi Real-time
+                  </button>
                 </div>
               </div>
             </div>
@@ -2957,12 +2968,11 @@
   <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
   <script src="js/supabase.js?v=20260928_1"></script>
   <script src="assets/lambang-lampung.js?v=20260928_1"></script>
-  <script src="js/icons.js?v=20260928_1"></script>
+  <script src="js/icons.js?v=20261005_1"></script>
   <script src="js/charts.js?v=20260928_1"></script>
   <script src="js/bappeda_data.js?v=20260928_1"></script>
   <script src="js/store.js?v=20261005_1"></script>
   <script src="js/export.js?v=20260928_2"></script>
-  <script src="js/notification.js?v=20261005_1"></script>
   <script src="js/app.js?v=20261005_1"></script>
 </body>
 

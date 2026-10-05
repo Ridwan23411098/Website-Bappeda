@@ -46,7 +46,8 @@ const Store = {
     theme: 'light',
     currentSession: null, // Logged in user object
     activePage: 'edash',
-    unreadCount: 3,
+    unreadCount: 0,
+    notifications: [],
 
     // Active ASN Profile (Official Pegawai: Andi Arafat, S.T., M.E. - DUK 2026)
     user: {
@@ -347,6 +348,9 @@ const Store = {
           this.state.user.jabatan = this.state.user.jabatan.replace(/PPEPD/g, 'PMPE');
         }
       }
+
+      if (!this.state.notifications) this.state.notifications = [];
+      this.updateNotificationUnreadCount();
 
       this.save();
     } catch (err) {
@@ -833,16 +837,19 @@ const Store = {
       }
     }
 
-    // Kirim notifikasi real-time ke Admin & Pimpinan
-    if (typeof NotificationService !== 'undefined') {
-      const nama = this.state.user?.name || 'Pegawai';
-      NotificationService.send('admin', null, 
-        'IDP Baru Diajukan', 
-        `${nama} telah mengajukan dokumen IDP untuk ditinjau dan diverifikasi.`);
-      NotificationService.send('pimpinan', null, 
-        'IDP Baru Diajukan', 
-        `${nama} telah mengajukan dokumen IDP dan menunggu persetujuan atasan.`);
-    }
+    // Kirim notifikasi Real-time ke Admin & Pimpinan
+    await this.sendNotification({
+      penerima: 'admin',
+      judul: 'Pengajuan IDP Baru',
+      pesan: `${this.state.user?.name || 'Pegawai'} mengajukan rancangan IDP Tahun 2026 (${summary.totalProgram} program, ${summary.totalJp} JP).`,
+      tipe: 'info'
+    });
+    await this.sendNotification({
+      penerima: 'pimpinan',
+      judul: 'Pengajuan IDP Masuk',
+      pesan: `${this.state.user?.name || 'Pegawai'} telah mengajukan rencana pengembangan kompetensi (IDP 2026).`,
+      tipe: 'info'
+    });
   },
 
   async approveIdp(verificationId, note = '', newStatus = 'Final') {
@@ -873,14 +880,13 @@ const Store = {
         }
       }
 
-      // Kirim notifikasi real-time ke Pegawai pemilik IDP
-      if (typeof NotificationService !== 'undefined') {
-        const approver = this.state.user?.name || 'Pimpinan';
-        const statusLabel = newStatus === 'Final' ? 'Diverifikasi Final' : newStatus;
-        NotificationService.send('pegawai', item.nip, 
-          `IDP Anda ${statusLabel}`, 
-          `Dokumen IDP Anda telah ${statusLabel.toLowerCase()} oleh ${approver}.`);
-      }
+      // Kirim Notifikasi Real-time ke Pegawai bersangkutan
+      await this.sendNotification({
+        penerima: item.nip,
+        judul: 'IDP Berhasil Disetujui',
+        pesan: `Selamat! Dokumen rencana IDP Tahun 2026 Anda telah diverifikasi & disetujui resmi oleh ${this.state.user?.name || 'Pengelola SDM'}.`,
+        tipe: 'success'
+      });
     }
   },
 
@@ -912,13 +918,13 @@ const Store = {
         }
       }
 
-      // Kirim notifikasi real-time ke Pegawai pemilik IDP
-      if (typeof NotificationService !== 'undefined') {
-        const reviewer = this.state.user?.name || 'Pimpinan';
-        NotificationService.send('pegawai', item.nip, 
-          'IDP Perlu Revisi', 
-          `Dokumen IDP Anda dikembalikan oleh ${reviewer}. Catatan: ${note}`);
-      }
+      // Kirim Notifikasi Real-time ke Pegawai bersangkutan
+      await this.sendNotification({
+        penerima: item.nip,
+        judul: 'Catatan Revisi IDP',
+        pesan: `Rencana IDP Anda memerlukan perbaikan. Catatan verifikator: "${note || 'Silakan cek kelengkapan dokumen'}".`,
+        tipe: 'warning'
+      });
     }
   },
 
@@ -961,12 +967,145 @@ const Store = {
       bukti: file ? file.name : realizationData.bukti
     });
     this.save();
+
+    // Kirim notifikasi Real-time ke Pengelola SDM (Admin)
+    await this.sendNotification({
+      penerima: 'admin',
+      judul: 'Bukti Sertifikat / Realisasi Baru',
+      pesan: `${realizationData.pegawai || 'Pegawai'} telah mengunggah bukti realisasi untuk kegiatan "${realizationData.program}" (${realizationData.jp} JP).`,
+      tipe: 'info'
+    });
   },
 
   updateUserStats() {
     const summary = this.getIdpSummary();
     this.state.idpState.progress = summary.progressPct;
     this.save();
+  },
+
+  // ==========================================
+  // REAL-TIME NOTIFICATIONS ENGINE (TAHAP 5.3)
+  // ==========================================
+
+  async fetchNotifications(user) {
+    if (!user) user = this.state.user;
+    const role = user?.role || 'pegawai';
+    const nip = String(user?.nip || '').trim();
+
+    if (typeof supabaseClient !== 'undefined') {
+      try {
+        let query = supabaseClient
+          .from('notifikasi')
+          .select('*')
+          .order('created_at', { ascending: false })
+          .limit(30);
+
+        if (role === 'admin' || role === 'pimpinan') {
+          query = query.or(`penerima.eq.all,penerima.eq.${role},penerima.eq.all_admin,penerima.eq.${nip}`);
+        } else {
+          query = query.or(`penerima.eq.all,penerima.eq.pegawai,penerima.eq.${nip}`);
+        }
+
+        const { data, error } = await query;
+        if (!error && data) {
+          this.state.notifications = data;
+          this.updateNotificationUnreadCount();
+          this.save();
+          return this.state.notifications;
+        }
+      } catch (err) {
+        console.warn("Gagal mengambil notifikasi dari Supabase, memakai data lokal:", err);
+      }
+    }
+
+    if (!this.state.notifications) this.state.notifications = [];
+    this.updateNotificationUnreadCount();
+    return this.state.notifications;
+  },
+
+  async sendNotification({ penerima, judul, pesan, tipe = 'info' }) {
+    const sender = this.state.user?.name || 'Sistem SIP-KOMPETENSI';
+    const newNotif = {
+      penerima: String(penerima || 'all').trim(),
+      pengirim: sender,
+      judul: judul || 'Pemberitahuan Kedinasan',
+      pesan: pesan || '',
+      tipe: tipe || 'info',
+      dibaca: false,
+      created_at: new Date().toISOString()
+    };
+
+    if (typeof supabaseClient !== 'undefined') {
+      try {
+        const { data, error } = await supabaseClient
+          .from('notifikasi')
+          .insert([newNotif])
+          .select();
+
+        if (error) {
+          console.error("Gagal mengirim notifikasi ke Supabase:", error);
+        } else if (data && data.length > 0) {
+          return data[0];
+        }
+      } catch (err) {
+        console.error("Error sendNotification:", err);
+      }
+    }
+
+    // Fallback simpan lokal jika offline
+    newNotif.id = Date.now();
+    if (!this.state.notifications) this.state.notifications = [];
+    this.state.notifications.unshift(newNotif);
+    this.updateNotificationUnreadCount();
+    this.save();
+    return newNotif;
+  },
+
+  async markNotificationAsRead(id) {
+    if (!this.state.notifications) return;
+    const notif = this.state.notifications.find(n => n.id == id);
+    if (notif) {
+      notif.dibaca = true;
+      this.updateNotificationUnreadCount();
+      this.save();
+    }
+
+    if (typeof supabaseClient !== 'undefined') {
+      try {
+        await supabaseClient
+          .from('notifikasi')
+          .update({ dibaca: true })
+          .eq('id', id);
+      } catch (err) {
+        console.warn("Gagal update status dibaca di Supabase:", err);
+      }
+    }
+  },
+
+  async markAllNotificationsAsRead() {
+    if (!this.state.notifications) return;
+    this.state.notifications.forEach(n => n.dibaca = true);
+    this.updateNotificationUnreadCount();
+    this.save();
+
+    if (typeof supabaseClient !== 'undefined') {
+      try {
+        const unreadIds = this.state.notifications.map(n => n.id);
+        if (unreadIds.length > 0) {
+          await supabaseClient
+            .from('notifikasi')
+            .update({ dibaca: true })
+            .in('id', unreadIds);
+        }
+      } catch (err) {
+        console.warn("Gagal mark all as read di Supabase:", err);
+      }
+    }
+  },
+
+  updateNotificationUnreadCount() {
+    if (!this.state.notifications) this.state.notifications = [];
+    this.state.unreadCount = this.state.notifications.filter(n => !n.dibaca).length;
   }
 };
 

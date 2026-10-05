@@ -75,6 +75,8 @@ const App = {
     // Check if user has an active persistent session
     if (Store.state.currentSession) {
       this.restoreSession(Store.state.currentSession);
+    } else {
+      this.initRealtimeNotifications();
     }
   },
 
@@ -202,17 +204,21 @@ const App = {
       });
     }
 
+    // Inisialisasi Real-time Notifikasi
+    this.initRealtimeNotifications();
+
     // Default entry page per role
     const firstPage = cfg.sections[0].items[0].id;
     this.navigate(firstPage);
-
-    // Inisialisasi Notifikasi Real-Time
-    if (typeof NotificationService !== 'undefined') {
-      NotificationService.init();
-    }
   },
 
   logout() {
+    if (this.notifChannel && typeof supabaseClient !== 'undefined') {
+      try {
+        supabaseClient.removeChannel(this.notifChannel);
+      } catch(e) {}
+      this.notifChannel = null;
+    }
     Store.logoutSession();
     document.getElementById('appShell').style.display = 'none';
     document.getElementById('loginScreen').style.display = 'flex';
@@ -1642,9 +1648,263 @@ const App = {
     }, 3200);
   },
 
+  // ==========================================
+  // REAL-TIME NOTIFICATIONS CONTROLLER (TAHAP 5.3)
+  // ==========================================
+  notifChannel: null,
+
+  initRealtimeNotifications() {
+    const user = Store.state.user || Store.state.currentSession;
+    if (!user) return;
+
+    // 1. Bersihkan channel sebelumnya jika ada
+    if (this.notifChannel && typeof supabaseClient !== 'undefined') {
+      try {
+        supabaseClient.removeChannel(this.notifChannel);
+      } catch(e) {}
+      this.notifChannel = null;
+    }
+
+    // 2. Ambil notifikasi dari Supabase & Render
+    Store.fetchNotifications(user).then(() => {
+      this.renderNotifications();
+    });
+
+    // 3. Pasang pendengar (listener) Realtime Supabase
+    if (typeof supabaseClient !== 'undefined') {
+      try {
+        this.notifChannel = supabaseClient
+          .channel('public:notifikasi')
+          .on(
+            'postgres_changes',
+            { event: 'INSERT', schema: 'public', table: 'notifikasi' },
+            payload => {
+              const newRow = payload.new;
+              if (!newRow) return;
+
+              const currentUser = Store.state.user || Store.state.currentSession;
+              const role = currentUser?.role || 'pegawai';
+              const nip = String(currentUser?.nip || '').trim();
+
+              // Cek apakah notifikasi ini untuk user yang sedang aktif
+              const isForMe =
+                newRow.penerima === 'all' ||
+                newRow.penerima === role ||
+                newRow.penerima === nip ||
+                ((role === 'admin' || role === 'pimpinan') && (newRow.penerima === 'all_admin' || newRow.penerima === role));
+
+              if (isForMe) {
+                // Tambahkan ke daftar notifikasi lokal di paling atas
+                if (!Store.state.notifications) Store.state.notifications = [];
+                // Hindari duplikasi jika sudah ada
+                if (!Store.state.notifications.some(n => n.id === newRow.id)) {
+                  Store.state.notifications.unshift(newRow);
+                  Store.updateNotificationUnreadCount();
+                  Store.save();
+                }
+
+                // Render ulang dropdown & badge
+                this.renderNotifications();
+
+                // Bunyikan chime & munculkan popup animasi
+                this.playNotificationSound();
+                this.showNotificationPopup(newRow);
+              }
+            }
+          )
+          .subscribe((status) => {
+            console.log('SIP-KOMPETENSI Realtime Notification Status:', status);
+          });
+      } catch (err) {
+        console.warn("Gagal inisialisasi Supabase Realtime:", err);
+      }
+    }
+  },
+
+  renderNotifications() {
+    const listEl = document.getElementById('notificationList');
+    const badgeEl = document.getElementById('notificationBadge');
+    const countEl = document.getElementById('notificationUnreadCount');
+
+    const notifs = Store.state.notifications || [];
+    const unreadCount = notifs.filter(n => !n.dibaca).length;
+
+    // Update Badge
+    if (badgeEl) {
+      if (unreadCount > 0) {
+        badgeEl.textContent = unreadCount > 9 ? '9+' : unreadCount;
+        badgeEl.style.display = 'flex';
+      } else {
+        badgeEl.style.display = 'none';
+      }
+    }
+
+    // Update Header Text
+    if (countEl) {
+      countEl.textContent = `${unreadCount} baru`;
+    }
+
+    // Update List
+    if (!listEl) return;
+
+    if (notifs.length === 0) {
+      listEl.innerHTML = `
+        <div style="padding: 28px 16px; text-align: center; color: var(--color-text-muted); font-size: 12px;">
+          <div style="margin-bottom: 8px; opacity: 0.35;">${getIcon('BellOff', 28)}</div>
+          Belum ada notifikasi kedinasan terbaru
+        </div>
+      `;
+      return;
+    }
+
+    listEl.innerHTML = notifs.map(n => {
+      const isUnread = !n.dibaca;
+      const iconName = n.tipe === 'success' ? 'CircleCheck' : n.tipe === 'warning' ? 'AlertTriangle' : n.tipe === 'error' ? 'AlertCircle' : 'Bell';
+      const iconColor = n.tipe === 'success' ? '#10b981' : n.tipe === 'warning' ? '#f59e0b' : n.tipe === 'error' ? '#ef4444' : 'var(--color-accent)';
+      const iconBg = n.tipe === 'success' ? 'rgba(16, 185, 129, 0.12)' : n.tipe === 'warning' ? 'rgba(245, 158, 11, 0.12)' : n.tipe === 'error' ? 'rgba(239, 68, 68, 0.12)' : 'var(--color-light-blue)';
+      const timeStr = this.formatRelativeTime(n.created_at);
+
+      return `
+        <div class="notification-item ${isUnread ? 'unread' : ''}" onclick="App.handleNotificationClick(${n.id}, '${n.tipe || 'info'}', '${(n.judul || '').replace(/'/g, "\\'")}')">
+          <div class="notification-icon" style="background: ${iconBg}; color: ${iconColor};">
+            ${getIcon(iconName, 16)}
+          </div>
+          <div class="notification-content">
+            <div class="notification-text" style="font-weight: ${isUnread ? '700' : '500'};">${n.pesan || n.judul}</div>
+            <div class="notification-time">
+              ${n.pengirim ? `<span style="font-weight: 600; color: var(--color-text-secondary);">${n.pengirim}</span> • ` : ''}
+              ${timeStr}
+            </div>
+          </div>
+        </div>
+      `;
+    }).join('');
+  },
+
+  async handleNotificationClick(id, tipe, judul) {
+    await Store.markNotificationAsRead(id);
+    this.renderNotifications();
+
+    const role = Store.state.user?.role || 'pegawai';
+    const lowerJudul = (judul || '').toLowerCase();
+
+    // Navigasi cerdas berdasarkan jenis notifikasi
+    if (lowerJudul.includes('idp') || lowerJudul.includes('pengajuan')) {
+      if (role === 'admin') {
+        this.navigate('averif');
+      } else if (role === 'pimpinan') {
+        this.navigate('pmonitoring');
+      } else {
+        this.navigate('eidp');
+      }
+    } else if (lowerJudul.includes('realisasi') || lowerJudul.includes('sertifikat')) {
+      if (role === 'admin') {
+        this.navigate('apelaksanaan');
+      } else {
+        this.navigate('epelaksanaan');
+      }
+    }
+  },
+
+  async markAllNotificationsRead() {
+    await Store.markAllNotificationsAsRead();
+    this.renderNotifications();
+    this.toast('Semua notifikasi ditandai telah dibaca', 'info');
+  },
+
+  async sendTestNotification() {
+    const user = Store.state.user || Store.state.currentSession;
+    const role = user?.role || 'pegawai';
+    const sampleMsg = role === 'pegawai' 
+      ? 'Dokumen IDP Anda telah disetujui resmi oleh Atasan Bappeda.' 
+      : 'Pengajuan dokumen IDP 2026 baru dari pegawai telah diterima.';
+
+    await Store.sendNotification({
+      penerima: role,
+      judul: 'Uji Notifikasi Real-time',
+      pesan: sampleMsg,
+      tipe: 'success'
+    });
+    this.toast('Sinyal notifikasi real-time terkirim!', 'success');
+  },
+
+  showNotificationPopup(notif) {
+    const container = document.getElementById('toastContainer');
+    if (!container) return;
+
+    const toastEl = document.createElement('div');
+    toastEl.className = `toast toast-${notif.tipe || 'info'} toast-notification-live`;
+
+    const iconName = notif.tipe === 'success' ? 'CircleCheck' : notif.tipe === 'warning' ? 'AlertTriangle' : notif.tipe === 'error' ? 'AlertCircle' : 'Bell';
+    toastEl.innerHTML = `
+      <div class="toast-icon" style="margin-top: 2px;">${getIcon(iconName, 20)}</div>
+      <div class="toast-msg">
+        <div style="font-weight: 700; font-size: 13px; margin-bottom: 2px; display: flex; align-items: center; justify-content: space-between;">
+          <span>${notif.judul || 'Notifikasi Baru'}</span>
+          <span style="font-size: 9px; background: rgba(16, 185, 129, 0.2); color: #10b981; padding: 1px 5px; border-radius: 4px; font-weight: 700; letter-spacing: 0.5px;">REALTIME</span>
+        </div>
+        <div style="font-size: 12px; color: var(--color-text-secondary); line-height: 1.4;">${notif.pesan}</div>
+        <div style="font-size: 10px; color: var(--color-text-muted); margin-top: 4px;">${notif.pengirim ? notif.pengirim + ' • ' : ''}Baru saja</div>
+      </div>
+    `;
+
+    toastEl.onclick = () => {
+      this.handleNotificationClick(notif.id, notif.tipe, notif.judul);
+      toastEl.remove();
+    };
+
+    container.appendChild(toastEl);
+    setTimeout(() => {
+      toastEl.style.opacity = '0';
+      toastEl.style.transform = 'translateY(10px)';
+      toastEl.style.transition = 'all 250ms ease';
+      setTimeout(() => toastEl.remove(), 260);
+    }, 5500);
+  },
+
+  playNotificationSound() {
+    try {
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if (!AudioCtx) return;
+      const ctx = new AudioCtx();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(587.33, ctx.currentTime); // Tone D5
+      osc.frequency.setValueAtTime(880, ctx.currentTime + 0.08); // Tone A5
+      gain.gain.setValueAtTime(0.12, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.45);
+      osc.start(ctx.currentTime);
+      osc.stop(ctx.currentTime + 0.45);
+    } catch (e) {
+      // Audio autoplay policy fallback
+    }
+  },
+
+  formatRelativeTime(dateString) {
+    if (!dateString) return 'Baru saja';
+    const diffSec = Math.floor((Date.now() - new Date(dateString).getTime()) / 1000);
+    if (diffSec < 45) return 'Baru saja';
+    const diffMin = Math.floor(diffSec / 60);
+    if (diffMin < 60) return `${diffMin} menit lalu`;
+    const diffHour = Math.floor(diffMin / 60);
+    if (diffHour < 24) return `${diffHour} jam lalu`;
+    const diffDay = Math.floor(diffHour / 24);
+    if (diffDay === 1) return 'Kemarin';
+    if (diffDay < 7) return `${diffDay} hari lalu`;
+    return new Date(dateString).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' });
+  },
+
   toggleNotificationDropdown() {
     const dd = document.getElementById('notificationDropdown');
-    if (dd) dd.classList.toggle('show');
+    if (dd) {
+      dd.classList.toggle('show');
+      if (dd.classList.contains('show')) {
+        this.renderNotifications();
+      }
+    }
   },
 
   toggleMobileSidebar() {
