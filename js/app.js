@@ -1660,6 +1660,8 @@ const App = {
   notifChannel: null,
   submissionChannel: null,
   audioCtx: null,
+  _audioUnlocked: false,
+  notifAudio: null,
 
   unlockAudio() {
     try {
@@ -1667,8 +1669,26 @@ const App = {
       if (!this.audioCtx && AudioCtx) {
         this.audioCtx = new AudioCtx();
       }
-      if (this.audioCtx && this.audioCtx.state === 'suspended') {
-        this.audioCtx.resume();
+      if (this.audioCtx) {
+        if (this.audioCtx.state === 'suspended') {
+          this.audioCtx.resume();
+        }
+        if (!this._audioUnlocked) {
+          const buffer = this.audioCtx.createBuffer(1, 1, 22050);
+          const source = this.audioCtx.createBufferSource();
+          source.buffer = buffer;
+          source.connect(this.audioCtx.destination);
+          source.start(0);
+          this._audioUnlocked = true;
+        }
+      }
+    } catch(e) {}
+
+    try {
+      if (!this.notifAudio) {
+        this.notifAudio = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
+        this.notifAudio.volume = 1.0;
+        this.notifAudio.load();
       }
     } catch(e) {}
   },
@@ -1904,39 +1924,105 @@ const App = {
     }, 5500);
   },
 
-  // Audio element instance untuk sound notifikasi
-  notifAudio: null,
+  playBellChime(ctx) {
+    if (!ctx) return;
+    try {
+      const now = ctx.currentTime;
+      // Tone 1: Ding (880 Hz / A5)
+      const osc1 = ctx.createOscillator();
+      const gain1 = ctx.createGain();
+      osc1.type = 'sine';
+      osc1.frequency.setValueAtTime(880, now);
+      gain1.gain.setValueAtTime(0, now);
+      gain1.gain.linearRampToValueAtTime(0.4, now + 0.02);
+      gain1.gain.exponentialRampToValueAtTime(0.0001, now + 0.45);
+      osc1.connect(gain1);
+      gain1.connect(ctx.destination);
+      osc1.start(now);
+      osc1.stop(now + 0.45);
+
+      // Tone 2: Dong tinggi (1318.5 Hz / E6)
+      const osc2 = ctx.createOscillator();
+      const gain2 = ctx.createGain();
+      osc2.type = 'sine';
+      osc2.frequency.setValueAtTime(1318.5, now + 0.12);
+      gain2.gain.setValueAtTime(0, now + 0.12);
+      gain2.gain.linearRampToValueAtTime(0.5, now + 0.14);
+      gain2.gain.exponentialRampToValueAtTime(0.0001, now + 0.85);
+      osc2.connect(gain2);
+      gain2.connect(ctx.destination);
+      osc2.start(now + 0.12);
+      osc2.stop(now + 0.85);
+
+      // Harmoni metalik (1760 Hz / A6)
+      const osc3 = ctx.createOscillator();
+      const gain3 = ctx.createGain();
+      osc3.type = 'triangle';
+      osc3.frequency.setValueAtTime(1760, now + 0.12);
+      gain3.gain.setValueAtTime(0, now + 0.12);
+      gain3.gain.linearRampToValueAtTime(0.12, now + 0.14);
+      gain3.gain.exponentialRampToValueAtTime(0.0001, now + 0.55);
+      osc3.connect(gain3);
+      gain3.connect(ctx.destination);
+      osc3.start(now + 0.12);
+      osc3.stop(now + 0.55);
+    } catch(err) {
+      console.warn('Error playing synthesized chime:', err);
+    }
+  },
 
   async playNotificationSound() {
-    // 1. Getar HP jika perangkat mobile mendukung
+    // 1. Getar HP jika didukung (Android)
     try {
       if ('vibrate' in navigator) {
         navigator.vibrate([180, 80, 180]);
       }
     } catch(e) {}
 
-    // 2. Mainkan nada lonceng menggunakan HTML5 Audio (Lebih handal di HP)
+    // 2. Mainkan nada lonceng Web Audio API (Cepat, 0 latency, tanpa koneksi internet)
+    let webAudioSuccess = false;
+    try {
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if (!this.audioCtx && AudioCtx) {
+        this.audioCtx = new AudioCtx();
+      }
+      if (this.audioCtx) {
+        if (this.audioCtx.state === 'suspended') {
+          await this.audioCtx.resume();
+        }
+        if (this.audioCtx.state === 'running') {
+          this.playBellChime(this.audioCtx);
+          webAudioSuccess = true;
+        }
+      }
+    } catch(e) {
+      console.warn("Web Audio chime issue:", e);
+    }
+
+    // 3. Fallback / simultan nada lonceng MP3
     try {
       if (!this.notifAudio) {
-        // Menggunakan suara notifikasi (bell/ding) gratis dari server publik
         this.notifAudio = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
         this.notifAudio.volume = 1.0;
       }
-      
-      // Reset waktu ke awal jika sedang dimainkan
       this.notifAudio.currentTime = 0;
-      
-      // Mainkan suara
       const playPromise = this.notifAudio.play();
       if (playPromise !== undefined) {
         playPromise.catch(error => {
-          console.warn("Audio playback blocked by browser:", error);
-          // Jika diblokir, tidak bisa berbuat banyak selain menunggu interaksi user lagi
+          if (!webAudioSuccess) {
+            console.warn("Audio playback blocked by browser:", error);
+          }
         });
       }
     } catch (e) {
       console.warn("Audio play issue:", e);
     }
+  },
+
+  testNotificationSound() {
+    this.unlockAudio();
+    this.playNotificationSound();
+    this.toast('🔔 Memutar nada lonceng! Di iPhone: jika hening, pastikan Saklar Hening di samping bodi HP OFF & volume media aktif.', 'info');
   },
 
   formatRelativeTime(dateString) {
@@ -1971,6 +2057,9 @@ const App = {
     const unlock = () => this.unlockAudio();
     document.addEventListener('click', unlock, { passive: true });
     document.addEventListener('touchstart', unlock, { passive: true });
+    document.addEventListener('touchend', unlock, { passive: true });
+    document.addEventListener('pointerdown', unlock, { passive: true });
+    window.addEventListener('scroll', unlock, { passive: true });
 
     document.addEventListener('keydown', e => {
       if (e.key === 'Escape') {
