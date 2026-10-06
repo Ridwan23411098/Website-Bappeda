@@ -72,6 +72,15 @@ const App = {
     renderAllIcons();
     this.renderOfficialLogos();
 
+    // Register Service Worker for PWA & Background Alerts
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js').then(reg => {
+        console.log('SIP Service Worker active:', reg.scope);
+      }).catch(err => {
+        console.warn('SIP Service Worker registration failed:', err);
+      });
+    }
+
     // Check if user has an active persistent session
     if (Store.state.currentSession) {
       this.restoreSession(Store.state.currentSession);
@@ -1806,6 +1815,16 @@ const App = {
       countEl.textContent = `${unreadCount} baru`;
     }
 
+    // Toggle PWA Notification banner
+    const pwaBanner = document.getElementById('pwaNotifBanner');
+    if (pwaBanner) {
+      if ('Notification' in window && Notification.permission !== 'granted') {
+        pwaBanner.style.display = 'flex';
+      } else {
+        pwaBanner.style.display = 'none';
+      }
+    }
+
     // Update List
     if (!listEl) return;
 
@@ -1922,6 +1941,29 @@ const App = {
       toastEl.style.transition = 'all 250ms ease';
       setTimeout(() => toastEl.remove(), 260);
     }, 5500);
+
+    // Kirim notifikasi sistem ke HP (muncul di atas layar HP seperti aplikasi)
+    try {
+      if ('Notification' in window && Notification.permission === 'granted') {
+        if ('serviceWorker' in navigator && navigator.serviceWorker.ready) {
+          navigator.serviceWorker.ready.then(reg => {
+            reg.showNotification(notif.judul || 'SIP-KOMPETENSI Bappeda', {
+              body: notif.pesan || 'Pengajuan IDP baru telah diterima untuk diverifikasi.',
+              icon: 'assets/logo-lampung.png',
+              badge: 'assets/logo-lampung.png',
+              vibrate: [200, 100, 200],
+              tag: 'sip-notif-' + (notif.id || Date.now()),
+              renotify: true
+            });
+          }).catch(() => {});
+        } else {
+          new Notification(notif.judul || 'SIP-KOMPETENSI Bappeda', {
+            body: notif.pesan,
+            icon: 'assets/logo-lampung.png'
+          });
+        }
+      }
+    } catch(err) {}
   },
 
   playBellChime(ctx) {
@@ -2023,6 +2065,35 @@ const App = {
     this.unlockAudio();
     this.playNotificationSound();
     this.toast('🔔 Memutar nada lonceng! Di iPhone: jika hening, pastikan Saklar Hening di samping bodi HP OFF & volume media aktif.', 'info');
+  },
+
+  async requestNotificationPermission() {
+    if (!('Notification' in window)) {
+      this.toast('Browser ini belum mendukung notifikasi sistem.', 'warning');
+      return;
+    }
+    try {
+      const permission = await Notification.requestPermission();
+      if (permission === 'granted') {
+        this.toast('✅ Izin notifikasi sistem HP berhasil aktif! Notifikasi akan muncul dari atas layar.', 'success');
+        this.renderNotifications();
+        
+        // Kirim contoh notifikasi uji coba
+        if ('serviceWorker' in navigator && navigator.serviceWorker.ready) {
+          const reg = await navigator.serviceWorker.ready;
+          reg.showNotification('SIP-KOMPETENSI Bappeda Lampung', {
+            body: 'Notifikasi sistem berhasil diaktifkan untuk akun Anda!',
+            icon: 'assets/logo-lampung.png',
+            badge: 'assets/logo-lampung.png',
+            vibrate: [200, 100, 200]
+          });
+        }
+      } else if (permission === 'denied') {
+        this.toast('Izin notifikasi ditolak. Aktifkan lewat Pengaturan HP > Safari/Chrome > Notifikasi.', 'warning');
+      }
+    } catch(err) {
+      console.warn('Error requesting notification permission:', err);
+    }
   },
 
   formatRelativeTime(dateString) {

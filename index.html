@@ -3,10 +3,20 @@
 
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <meta name="description"
     content="SIP-KOMPETENSI — Sistem Individual Development Plan (IDP) Badan Perencanaan Pembangunan Daerah (Bappeda) Provinsi Lampung.">
   <title>SIP-KOMPETENSI — Bappeda Provinsi Lampung</title>
+
+  <!-- PWA & Mobile App Capability -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#1e3a8a">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="SIP-Kompetensi">
+  <link rel="apple-touch-icon" href="assets/logo-lampung.png">
+  <link rel="icon" type="image/png" href="assets/logo-lampung.png">
 
   <!-- Google Fonts: Plus Jakarta Sans -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -300,6 +310,12 @@
                       Baca Semua
                     </button>
                   </div>
+                </div>
+                <div id="pwaNotifBanner" style="display: none; padding: 8px 14px; background: rgba(30, 58, 138, 0.08); border-bottom: 1px solid var(--color-border); font-size: 11px; align-items: center; justify-content: space-between; gap: 8px;">
+                  <span style="color: var(--color-text-secondary); line-height: 1.3;">🔔 Izinkan notifikasi sistem HP (banner & suara)</span>
+                  <button type="button" onclick="App.requestNotificationPermission()" style="background: var(--color-primary); color: #fff; border: none; padding: 4px 9px; border-radius: 5px; font-size: 10.5px; font-weight: 600; cursor: pointer; white-space: nowrap;">
+                    Aktifkan
+                  </button>
                 </div>
                 <div class="notification-list" id="notificationList">
                   <div style="padding: 24px 16px; text-align: center; color: var(--color-text-muted); font-size: 12px;">

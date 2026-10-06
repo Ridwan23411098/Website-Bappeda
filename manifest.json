@@ -1,0 +1,24 @@
+{
+  "name": "SIP-KOMPETENSI — Bappeda Provinsi Lampung",
+  "short_name": "SIP-Kompetensi",
+  "description": "Sistem Manajemen Kompetensi & Individual Development Plan Bappeda Provinsi Lampung",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#1e3a8a",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "assets/logo-lampung.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/logo-lampung.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
