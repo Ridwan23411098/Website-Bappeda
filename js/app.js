@@ -204,7 +204,9 @@ const App = {
       });
     }
 
-    // Inisialisasi Real-time Notifikasi
+    // Inisialisasi Audio & Real-time Notifikasi
+    this.ensureAudioReady();
+    this.unlockAudio();
     this.initRealtimeNotifications();
 
     // Default entry page per role
@@ -1670,7 +1672,27 @@ const App = {
       if (this.audioCtx && this.audioCtx.state === 'suspended') {
         this.audioCtx.resume();
       }
+      // Mainkan nada kosong super pendek agar browser "membuka" audio
+      if (this.audioCtx && this.audioCtx.state === 'running' && !this._audioUnlocked) {
+        const buf = this.audioCtx.createBuffer(1, 1, 22050);
+        const src = this.audioCtx.createBufferSource();
+        src.buffer = buf;
+        src.connect(this.audioCtx.destination);
+        src.start(0);
+        this._audioUnlocked = true;
+      }
     } catch(e) {}
+  },
+
+  // Pasang listener global agar audio selalu siap di HP
+  _audioListenerAttached: false,
+  ensureAudioReady() {
+    if (this._audioListenerAttached) return;
+    this._audioListenerAttached = true;
+    const handler = () => { this.unlockAudio(); };
+    document.addEventListener('click', handler, { once: false, passive: true });
+    document.addEventListener('touchstart', handler, { once: false, passive: true });
+    document.addEventListener('touchend', handler, { once: false, passive: true });
   },
 
   initRealtimeNotifications() {
@@ -1908,11 +1930,11 @@ const App = {
     // 1. Getar HP jika perangkat mobile mendukung
     try {
       if ('vibrate' in navigator) {
-        navigator.vibrate([180, 80, 180]);
+        navigator.vibrate([200, 100, 200, 100, 300]);
       }
     } catch(e) {}
 
-    // 2. Mainkan nada lonceng kedinasan (E5 -> A5 -> C6)
+    // 2. Mainkan 3 nada lonceng yang keras & jelas
     try {
       this.unlockAudio();
       if (!this.audioCtx) return;
@@ -1921,21 +1943,37 @@ const App = {
       }
       const ctx = this.audioCtx;
       const now = ctx.currentTime;
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-      
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(659.25, now);        // Nada E5
-      osc.frequency.setValueAtTime(880.00, now + 0.12); // Nada A5
-      osc.frequency.setValueAtTime(1046.50, now + 0.24); // Nada C6
-      
-      gain.gain.setValueAtTime(0.35, now);
-      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.7);
-      
-      osc.start(now);
-      osc.stop(now + 0.7);
+
+      // Fungsi pembantu untuk memainkan 1 nada lonceng
+      const playChime = (freq, startTime, duration, volume) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(freq, startTime);
+        gain.gain.setValueAtTime(volume, startTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, startTime + duration);
+        osc.start(startTime);
+        osc.stop(startTime + duration);
+
+        // Harmonik agar lebih nyaring
+        const osc2 = ctx.createOscillator();
+        const gain2 = ctx.createGain();
+        osc2.connect(gain2);
+        gain2.connect(ctx.destination);
+        osc2.type = 'triangle';
+        osc2.frequency.setValueAtTime(freq * 2, startTime);
+        gain2.gain.setValueAtTime(volume * 0.3, startTime);
+        gain2.gain.exponentialRampToValueAtTime(0.01, startTime + duration * 0.7);
+        osc2.start(startTime);
+        osc2.stop(startTime + duration);
+      };
+
+      // 3 nada lonceng: Ding - Ding - DONG (naik)
+      playChime(880,    now,        0.4, 0.6);  // A5 - Ding
+      playChime(1046.5, now + 0.25, 0.4, 0.6);  // C6 - Ding
+      playChime(1318.5, now + 0.5,  0.8, 0.7);  // E6 - DONG (lebih panjang & keras)
     } catch (e) {
       console.warn("Audio play issue:", e);
     }
