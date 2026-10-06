@@ -1702,6 +1702,8 @@ const App = {
     } catch(e) {}
   },
 
+  _notifPollTimer: null,
+
   initRealtimeNotifications() {
     const user = Store.state.user || Store.state.currentSession;
     if (!user) return;
@@ -1789,6 +1791,67 @@ const App = {
       } catch (err) {
         console.warn("Gagal inisialisasi Supabase Realtime:", err);
       }
+    }
+
+    // 4. Timer Heartbeat Berkala (Mengantisipasi WebSocket tertidur saat HP di-minimize)
+    if (!this._notifPollTimer) {
+      this._notifPollTimer = setInterval(() => {
+        this.checkNewNotificationsInBackground(false);
+      }, 10000);
+    }
+  },
+
+  async handleAppResume() {
+    console.log('SIP App Resumed: Re-syncing notifications & submissions...');
+    const user = Store.state.user || Store.state.currentSession;
+    if (!user) return;
+
+    // Pastikan channel Realtime aktif kembali jika sempat putus saat sleep
+    if (typeof supabaseClient !== 'undefined') {
+      try {
+        if (!this.notifChannel || this.notifChannel.state !== 'joined') {
+          this.initRealtimeNotifications();
+        }
+      } catch(e) {}
+    }
+
+    // Ambil data terbaru & periksa apakah ada IDP masuk saat layar mati
+    await this.checkNewNotificationsInBackground(true);
+    await Store.syncVerificationsFromSupabase();
+    if (Store.state.activePage === 'averif') {
+      this.renderAdminVerification();
+    } else if (Store.state.activePage === 'adash') {
+      this.renderAdminDashboard();
+    }
+  },
+
+  async checkNewNotificationsInBackground(isResume = false) {
+    const user = Store.state.user || Store.state.currentSession;
+    if (!user) return;
+
+    try {
+      const prevIds = new Set((Store.state.notifications || []).map(n => n.id));
+      const freshNotifs = await Store.fetchNotifications(user);
+      
+      // Deteksi notifikasi baru yang masuk saat aplikasi di latar belakang
+      const newItems = (freshNotifs || []).filter(n => !prevIds.has(n.id) && !n.dibaca);
+      
+      if (newItems.length > 0) {
+        this.renderNotifications();
+        this.playNotificationSound();
+        this.showNotificationPopup(newItems[0]);
+        // Update data verifikasi otomatis
+        await Store.syncVerificationsFromSupabase();
+        if (Store.state.activePage === 'averif') {
+          this.renderAdminVerification();
+        } else if (Store.state.activePage === 'adash') {
+          this.renderAdminDashboard();
+        }
+      } else {
+        this.renderNotifications();
+      }
+    } catch(err) {
+      console.warn("Background notification check warning:", err);
     }
   },
 
@@ -2131,6 +2194,19 @@ const App = {
     document.addEventListener('touchend', unlock, { passive: true });
     document.addEventListener('pointerdown', unlock, { passive: true });
     window.addEventListener('scroll', unlock, { passive: true });
+
+    // Auto-sync & bangunkan koneksi saat aplikasi kembali dibuka dari minimize / layar HP dinyalakan
+    const onAppWake = () => {
+      if (document.visibilityState === 'visible') {
+        this.unlockAudio();
+        this.handleAppResume();
+      }
+    };
+    document.addEventListener('visibilitychange', onAppWake);
+    window.addEventListener('focus', () => {
+      this.unlockAudio();
+      this.handleAppResume();
+    });
 
     document.addEventListener('keydown', e => {
       if (e.key === 'Escape') {
