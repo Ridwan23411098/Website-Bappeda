@@ -832,25 +832,33 @@ const Store = {
             updated_at: new Date().toISOString()
           });
 
-        if (error) console.error("Supabase submitIdp error:", error);
+        if (error) {
+          console.error("Supabase submitIdp error:", error);
+          if (typeof App !== 'undefined') App.toast("Error DB: " + error.message, 'error');
+        }
       } catch (e) {
         console.error("Gagal submit IDP ke Supabase:", e);
+        if (typeof App !== 'undefined') App.toast("Koneksi gagal: " + e.message, 'error');
       }
     }
 
     // Kirim notifikasi Real-time ke Admin & Pimpinan
-    await this.sendNotification({
-      penerima: 'admin',
-      judul: 'Pengajuan IDP Baru',
-      pesan: `${this.state.user?.name || 'Pegawai'} mengajukan rancangan IDP Tahun 2026 (${summary.totalProgram} program, ${summary.totalJp} JP).`,
-      tipe: 'info'
-    });
-    await this.sendNotification({
-      penerima: 'pimpinan',
-      judul: 'Pengajuan IDP Masuk',
-      pesan: `${this.state.user?.name || 'Pegawai'} telah mengajukan rencana pengembangan kompetensi (IDP 2026).`,
-      tipe: 'info'
-    });
+    try {
+      await this.sendNotification({
+        penerima: 'admin',
+        judul: 'Pengajuan IDP Baru',
+        pesan: `${this.state.user?.name || 'Pegawai'} mengajukan rancangan IDP Tahun 2026 (${summary.totalProgram} program, ${summary.totalJp} JP).`,
+        tipe: 'info'
+      });
+      await this.sendNotification({
+        penerima: 'pimpinan',
+        judul: 'Pengajuan IDP Masuk',
+        pesan: `${this.state.user?.name || 'Pegawai'} telah mengajukan rencana pengembangan kompetensi (IDP 2026).`,
+        tipe: 'info'
+      });
+    } catch (e) {
+      if (typeof App !== 'undefined') App.toast("Error Notif: " + e.message, 'warning');
+    }
   },
 
   async syncVerificationsFromSupabase() {
@@ -858,7 +866,15 @@ const Store = {
     try {
       const { data, error } = await supabaseClient
         .from('idp_submissions')
-        .select('*');
+        .select('*')
+        .order('updated_at', { ascending: true }); // Penting: yang terbaru me-replace yang lama (jika ada NIP duplikat spasi)
+
+      if (error) {
+        console.error("Gagal select Supabase:", error);
+        if (typeof App !== 'undefined') App.toast("Error Sinkronisasi: " + error.message, 'error');
+      } else {
+        if (typeof App !== 'undefined') App.toast("Berhasil terhubung ke Supabase. Data ditarik: " + (data ? data.length : 0) + " baris.", 'info');
+      }
 
       if (!error && data && data.length > 0) {
         data.forEach(sub => {
