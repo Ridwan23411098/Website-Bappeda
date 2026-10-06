@@ -1904,6 +1904,9 @@ const App = {
     }, 5500);
   },
 
+  // Audio element instance untuk sound notifikasi
+  notifAudio: null,
+
   async playNotificationSound() {
     // 1. Getar HP jika perangkat mobile mendukung
     try {
@@ -1912,33 +1915,25 @@ const App = {
       }
     } catch(e) {}
 
-    // 2. Mainkan nada lonceng kedinasan (E5 -> A5 -> C6)
+    // 2. Mainkan nada lonceng menggunakan HTML5 Audio (Lebih handal di HP)
     try {
-      this.unlockAudio();
-      if (!this.audioCtx) return;
-      if (this.audioCtx.state === 'suspended') {
-        const resumePromise = this.audioCtx.resume();
-        if (resumePromise) resumePromise.catch(() => {});
+      if (!this.notifAudio) {
+        // Menggunakan suara notifikasi (bell/ding) gratis dari server publik
+        this.notifAudio = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
+        this.notifAudio.volume = 1.0;
       }
-      const ctx = this.audioCtx;
-      const now = ctx.currentTime;
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.connect(gain);
-      gain.connect(ctx.destination);
       
-      // Gunakan 'triangle' agar lebih terdengar di speaker kecil HP
-      osc.type = 'triangle';
-      osc.frequency.setValueAtTime(659.25, now);        // Nada E5
-      osc.frequency.setValueAtTime(880.00, now + 0.12); // Nada A5
-      osc.frequency.setValueAtTime(1046.50, now + 0.24); // Nada C6
+      // Reset waktu ke awal jika sedang dimainkan
+      this.notifAudio.currentTime = 0;
       
-      // Volume lebih keras (1.0)
-      gain.gain.setValueAtTime(1.0, now);
-      gain.gain.exponentialRampToValueAtTime(0.01, now + 0.7);
-      
-      osc.start(now);
-      osc.stop(now + 0.7);
+      // Mainkan suara
+      const playPromise = this.notifAudio.play();
+      if (playPromise !== undefined) {
+        playPromise.catch(error => {
+          console.warn("Audio playback blocked by browser:", error);
+          // Jika diblokir, tidak bisa berbuat banyak selain menunggu interaksi user lagi
+        });
+      }
     } catch (e) {
       console.warn("Audio play issue:", e);
     }
