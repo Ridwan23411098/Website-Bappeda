@@ -871,9 +871,6 @@ const Store = {
 
       if (error) {
         console.error("Gagal select Supabase:", error);
-        if (typeof App !== 'undefined') App.toast("Error Sinkronisasi: " + error.message, 'error');
-      } else {
-        if (typeof App !== 'undefined') App.toast("Berhasil terhubung ke Supabase. Data ditarik: " + (data ? data.length : 0) + " baris.", 'info');
       }
 
       if (!error && data && data.length > 0) {
