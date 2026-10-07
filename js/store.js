@@ -995,29 +995,44 @@ const Store = {
     const newId = Date.now();
     let fileUrl = realizationData.bukti;
 
-    // Jika ada file yang diunggah, simpan ke Supabase Storage
-    if (file && typeof supabaseClient !== 'undefined') {
-      try {
-        const fileExt = file.name.split('.').pop();
-        const safeName = realizationData.pegawai.replace(/[^a-zA-Z0-9]/g, '_');
-        const fileName = `${newId}_${safeName}.${fileExt}`;
-        const filePath = `sertifikat/${fileName}`;
+    // Jika ada file yang diunggah, coba simpan ke Supabase Storage
+    if (file) {
+      let uploadedToCloud = false;
+      if (typeof supabaseClient !== 'undefined') {
+        try {
+          const fileExt = file.name.split('.').pop();
+          const safeName = (realizationData.pegawai || 'pegawai').replace(/[^a-zA-Z0-9]/g, '_');
+          const fileName = `${newId}_${safeName}.${fileExt}`;
+          const filePath = `sertifikat/${fileName}`;
 
-        const { data, error } = await supabaseClient.storage
-          .from('sertifikat_idp')
-          .upload(filePath, file, { cacheControl: '3600', upsert: false });
+          const { data, error } = await supabaseClient.storage
+            .from('sertifikat_idp')
+            .upload(filePath, file, { cacheControl: '3600', upsert: false });
 
-        if (error) throw error;
-        
-        // Dapatkan Public URL
-        const { data: publicUrlData } = supabaseClient.storage
-          .from('sertifikat_idp')
-          .getPublicUrl(filePath);
-          
-        fileUrl = publicUrlData.publicUrl;
-      } catch (err) {
-        console.error("Gagal mengunggah sertifikat ke Supabase Storage:", err);
-        throw new Error("Gagal mengunggah sertifikat. Pastikan Anda telah membuat bucket 'sertifikat_idp' di Supabase. " + err.message);
+          if (!error) {
+            const { data: publicUrlData } = supabaseClient.storage
+              .from('sertifikat_idp')
+              .getPublicUrl(filePath);
+            if (publicUrlData && publicUrlData.publicUrl) {
+              fileUrl = publicUrlData.publicUrl;
+              uploadedToCloud = true;
+            }
+          }
+        } catch (err) {
+          console.warn("Supabase Storage bucket belum aktif atau gagal upload:", err);
+        }
+      }
+
+      // Fallback lokal jika bucket cloud belum dibuat
+      if (!uploadedToCloud) {
+        try {
+          fileUrl = await new Promise((resolve) => {
+            const reader = new FileReader();
+            reader.onload = e => resolve(e.target.result);
+            reader.onerror = () => resolve('');
+            reader.readAsDataURL(file);
+          });
+        } catch(e) {}
       }
     }
 
@@ -1026,9 +1041,22 @@ const Store = {
       ...realizationData,
       jp: parseInt(realizationData.jp) || 0,
       status: 'Terverifikasi',
-      buktiUrl: fileUrl, // Simpan URL publik
+      buktiUrl: fileUrl,
       bukti: file ? file.name : realizationData.bukti
     });
+
+    // Tandai status program IDP yang bersangkutan menjadi 'Terlaksana'
+    if (this.state.idpState && this.state.idpState.programs) {
+      const pMatch = this.state.idpState.programs.find(p => 
+        p.topik === realizationData.program || 
+        p.kompetensi === realizationData.program ||
+        realizationData.program.includes(p.topik)
+      );
+      if (pMatch) {
+        pMatch.status = 'Terlaksana';
+      }
+    }
+    this.updateUserStats();
     this.save();
 
     // Kirim notifikasi Real-time ke Pengelola SDM (Admin)
@@ -1036,7 +1064,7 @@ const Store = {
       penerima: 'admin',
       judul: 'Bukti Sertifikat / Realisasi Baru',
       pesan: `${realizationData.pegawai || 'Pegawai'} telah mengunggah bukti realisasi untuk kegiatan "${realizationData.program}" (${realizationData.jp} JP).`,
-      tipe: 'info'
+      tipe: 'success'
     });
   },
 

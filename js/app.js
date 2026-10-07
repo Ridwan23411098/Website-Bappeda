@@ -1090,14 +1090,47 @@ const App = {
   },
 
   openInputRealizationDrawer() {
+    const progSelect = document.getElementById('realizProgram');
+    const programs = Store.state.idpState?.programs || [];
+    
+    if (progSelect && programs.length > 0) {
+      progSelect.innerHTML = programs.map((p, idx) => `
+        <option value="${p.topik}" data-jp="${p.jp}" data-peny="${p.penyelenggara || 'BPSDMD Provinsi Lampung'}" data-metode="${p.metode}" ${idx === 0 ? 'selected' : ''}>
+          ${p.topik} (${p.metode} — ${p.jp} JP)
+        </option>
+      `).join('');
+
+      const updateFields = () => {
+        const opt = progSelect.options[progSelect.selectedIndex];
+        if (opt) {
+          const jpVal = opt.getAttribute('data-jp');
+          const penyVal = opt.getAttribute('data-peny');
+          if (jpVal) document.getElementById('realizJp').value = jpVal;
+          if (penyVal) document.getElementById('realizPenyelenggara').value = penyVal;
+        }
+      };
+
+      progSelect.onchange = updateFields;
+      updateFields();
+    }
+
+    // Set tanggal default ke hari ini
+    const today = new Date().toISOString().split('T')[0];
+    const tglInput = document.getElementById('realizTanggal');
+    if (tglInput) tglInput.value = today;
+
     this.openDrawer('realizationDrawer');
   },
 
   async saveRealizationForm() {
-    const prog = document.getElementById('realizProgram').value;
-    const tgl = document.getElementById('realizTanggal').value || '2026-11-15';
+    const progSelect = document.getElementById('realizProgram');
+    const prog = progSelect ? progSelect.value : '';
+    const opt = progSelect ? progSelect.options[progSelect.selectedIndex] : null;
+    const metode = opt ? opt.getAttribute('data-metode') : (prog.includes('Coaching') ? 'Coaching' : prog.includes('Workshop') ? 'Workshop' : prog.includes('Mentoring') ? 'Mentoring' : 'Diklat Teknis');
+
+    const tgl = document.getElementById('realizTanggal').value || new Date().toISOString().split('T')[0];
     const jp = parseInt(document.getElementById('realizJp').value) || 20;
-    const peny = document.getElementById('realizPenyelenggara').value;
+    const peny = document.getElementById('realizPenyelenggara').value || 'BPSDMD Provinsi Lampung';
     
     const fileInput = document.getElementById('realizFileInput');
     const file = fileInput && fileInput.files ? fileInput.files[0] : null;
@@ -1111,25 +1144,26 @@ const App = {
     const btnSubmit = document.querySelector('#realizationDrawer .btn-primary');
     if (btnSubmit) {
       btnSubmit.disabled = true;
-      btnSubmit.innerHTML = 'Mengunggah...';
+      btnSubmit.innerHTML = 'Mengunggah Bukti...';
     }
 
     try {
       await Store.addRealization({
-        pegawai: Store.state.user.name,
+        pegawai: Store.state.user?.name || 'Pegawai Bappeda',
         program: prog,
-        metode: prog.includes('Coaching') ? 'Coaching' : prog.includes('Workshop') ? 'Workshop' : prog.includes('Mentoring') ? 'Mentoring' : 'Diklat Teknis',
+        metode: metode,
         tanggal: tgl,
         jp: jp,
         penyelenggara: peny,
         bukti: file.name
       }, file);
 
-      App.toast('Realisasi pengembangan berhasil dicatat & sertifikat diunggah!', 'success');
+      App.toast('Realisasi pengembangan berhasil dicatat & sertifikat tersimpan!', 'success');
       this.closeDrawer('realizationDrawer');
       this.renderEmployeeRealization();
+      this.renderIdpSaya();
     } catch (err) {
-      App.toast(err.message || 'Gagal mengunggah sertifikat.', 'error');
+      App.toast(err.message || 'Gagal menyimpan sertifikat.', 'error');
     } finally {
       if (btnSubmit) {
         btnSubmit.disabled = false;
