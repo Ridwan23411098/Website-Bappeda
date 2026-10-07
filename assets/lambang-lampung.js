@@ -71,7 +71,7 @@ const LambangLampung = {
     return `
       <div class="kop-surat-resmi">
         <div class="kop-logo">
-          <img src="Gambar/Lambang Lampung.png" alt="Lambang Provinsi Lampung" style="width:76px;height:76px;object-fit:contain;flex-shrink:0;">
+          <img src="Gambar/Lambang%20Lampung.png" alt="Lambang Provinsi Lampung" style="width:76px;height:76px;object-fit:contain;flex-shrink:0;">
         </div>
         <div class="kop-teks">
           <div class="kop-prov">PEMERINTAH PROVINSI LAMPUNG</div>

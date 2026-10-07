@@ -1192,6 +1192,7 @@ const App = {
     const item = Store.state.verifications.find(x => x.id === id);
     if (!item) return;
 
+    this._currentReviewVerifItem = item;
     document.getElementById('reviewDrawerEmployeeName').textContent = item.pegawai;
     document.getElementById('reviewDrawerNip').textContent = `NIP: ${item.nip} • ${item.jabatan} (${item.jenisJabatan})`;
     document.getElementById('reviewDrawerTargetKarier').textContent = item.targetKarier;

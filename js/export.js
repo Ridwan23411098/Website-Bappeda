@@ -132,7 +132,15 @@ const ExportService = {
   /**
    * Menampilkan dialog pilih orientasi, lalu cetak dokumen resmi IDP
    */
-  showPrintDialog() {
+  _printOrientation: 'portrait',
+  _customPrintData: null,
+
+  /**
+   * Menampilkan dialog pilih orientasi, lalu cetak dokumen resmi IDP
+   */
+  showPrintDialog(customData = null) {
+    ExportService._customPrintData = customData;
+
     // Hapus dialog lama jika ada
     const oldDialog = document.getElementById('printOrientDialog');
     if (oldDialog) oldDialog.remove();
@@ -142,34 +150,38 @@ const ExportService = {
     dialog.className = 'print-dialog-overlay';
     dialog.innerHTML = `
       <div class="print-dialog-box">
-        <h3>🖨️ Cetak Dokumen IDP</h3>
-        <p>Pilih orientasi halaman sebelum mencetak:</p>
+        <h3>🖨️ Cetak / Unduh Dokumen IDP (.PDF)</h3>
+        <p>Pilih orientasi halaman sebelum mencetak atau menyimpan dokumen IDP resmi:</p>
         <div class="print-orientation-grid">
-          <button class="print-orient-btn selected" id="btnPortrait" onclick="ExportService.selectOrientation('portrait')">
+          <button class="print-orient-btn ${ExportService._printOrientation === 'portrait' ? 'selected' : ''}" id="btnPortrait" onclick="ExportService.selectOrientation('portrait')">
             <div class="print-orient-icon portrait-icon"></div>
-            Potret
+            Potret (Standar A4)
           </button>
-          <button class="print-orient-btn" id="btnLandscape" onclick="ExportService.selectOrientation('landscape')">
+          <button class="print-orient-btn ${ExportService._printOrientation === 'landscape' ? 'selected' : ''}" id="btnLandscape" onclick="ExportService.selectOrientation('landscape')">
             <div class="print-orient-icon landscape-icon"></div>
-            Lanskap
+            Lanskap (Tabel Lebar)
           </button>
         </div>
-        <div class="print-dialog-actions">
+        <div style="font-size: 11.5px; color: var(--color-text-secondary); background: rgba(47, 128, 237, 0.08); border-left: 3px solid var(--color-primary); padding: 10px 14px; border-radius: 6px; margin-bottom: 20px; line-height: 1.45;">
+          💡 <b>Cara Simpan ke File PDF:</b> Pada jendela cetak browser yang muncul, ubah pilihan <b>Tujuan / Printer</b> menjadi <b>"Simpan sebagai PDF" (Save as PDF)</b> lalu klik <b>Simpan</b>.
+        </div>
+        <div class="print-dialog-actions" style="display: flex; justify-content: flex-end; gap: 10px;">
           <button class="btn btn-outline" onclick="ExportService.closePrintDialog()">Batal</button>
           <button class="btn btn-primary" onclick="ExportService.printOfficialIdp()">
-            🖨️ Cetak Sekarang
+            🖨️ Buka Jendela Cetak / PDF
           </button>
         </div>
       </div>
     `;
     document.body.appendChild(dialog);
-    ExportService._printOrientation = 'portrait';
   },
 
   selectOrientation(orient) {
     ExportService._printOrientation = orient;
-    document.getElementById('btnPortrait').classList.toggle('selected', orient === 'portrait');
-    document.getElementById('btnLandscape').classList.toggle('selected', orient === 'landscape');
+    const btnP = document.getElementById('btnPortrait');
+    const btnL = document.getElementById('btnLandscape');
+    if (btnP) btnP.classList.toggle('selected', orient === 'portrait');
+    if (btnL) btnL.classList.toggle('selected', orient === 'landscape');
   },
 
   closePrintDialog() {
@@ -178,16 +190,72 @@ const ExportService = {
   },
 
   /**
+   * Cetak Dokumen IDP dari Drawer Verifikasi Admin
+   */
+  printReviewDrawerIdp() {
+    const item = App._currentReviewVerifItem;
+    if (!item) {
+      App.toast('Data pengajuan pegawai belum dipilih', 'warning');
+      return;
+    }
+
+    const cleanItemNip = String(item.nip || '').replace(/\s+/g, '');
+    const emp = Store.state.employees.find(e => String(e.nip).replace(/\s+/g, '') === cleanItemNip) || {
+      name: item.pegawai,
+      nip: item.nip,
+      jabatan: item.jabatan,
+      pangkat: item.pangkat || 'Penata Muda / III/a',
+      unitKerja: item.unit || 'Bappeda Provinsi Lampung',
+      pendidikan: 'S1',
+      masaKerja: '8 Tahun',
+      nineBox: '8'
+    };
+
+    const careerPlan = {
+      jenjangTarget: item.targetKarier || 'JFT Muda — Level 3',
+      rencana: item.rencanaKarier || 'Peningkatan kapasitas perencanaan dan perumusan kebijakan pembangunan daerah.',
+      rumpunTarget: ['Perencanaan Pembangunan', 'Manajemen Publik']
+    };
+
+    this.showPrintDialog({
+      user: emp,
+      careerPlan: careerPlan,
+      programs: Store.state.idpState.programs
+    });
+  },
+
+  /**
    * Generates and triggers Official Printable PDF with Official Kop Surat & Signatures
    */
   printOfficialIdp() {
-    const u = Store.state.user;
-    const cp = Store.state.careerPlan;
-    const idpState = Store.state.idpState;
-    const programs = idpState.programs;
-    const summary = Store.getIdpSummary();
+    const custom = ExportService._customPrintData;
+    const u = custom?.user || Store.state.user || {
+      name: 'Pegawai Bappeda',
+      nip: '-',
+      pangkat: 'Penata Muda / III/a',
+      jabatan: 'Analis Perencanaan',
+      unitKerja: 'Bappeda Provinsi Lampung',
+      pendidikan: 'S1',
+      masaKerja: '5 Tahun',
+      nineBox: '8'
+    };
+
+    const cp = custom?.careerPlan || Store.state.careerPlan || {
+      jenjangTarget: 'JFT Muda — Level 3',
+      rencana: 'Peningkatan kapasitas perencanaan dan perumusan kebijakan pembangunan.',
+      rumpunTarget: ['Perencanaan Pembangunan', 'Manajemen Publik']
+    };
+
+    const programs = custom?.programs || Store.state.idpState.programs || [];
+    const totalJp = programs.reduce((acc, p) => acc + (parseInt(p.jp) || 0), 0);
+    const totalCost = programs.reduce((acc, p) => acc + (parseFloat(p.estimasi) || 0), 0);
 
     const kopHtml = LambangLampung.getKopSuratHtml();
+
+    // Format tanggal Indonesia resmi
+    const now = new Date();
+    const months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+    const tanggalSurat = `${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}`;
 
     let programRowsHtml = '';
     programs.forEach((p, idx) => {
@@ -202,7 +270,7 @@ const ExportService = {
           <td>${p.penyelenggara}</td>
           <td>${p.periode}</td>
           <td style="text-align: right;">Rp${(p.estimasi || 0).toLocaleString('id-ID')}</td>
-          <td><span class="badge ${p.status === 'Terlaksana' ? 'badge-success' : 'badge-warning'}">${p.status}</span></td>
+          <td style="text-align: center;"><span class="badge ${p.status === 'Terlaksana' ? 'badge-success' : 'badge-warning'}">${p.status}</span></td>
         </tr>
       `;
     });
@@ -233,7 +301,7 @@ const ExportService = {
             <td style="width: 33%;"><b>${u.name}</b></td>
             <td style="width: 20%;">Masa Kerja</td>
             <td style="width: 2%;">:</td>
-            <td>${u.masaKerja}</td>
+            <td>${u.masaKerja || '-'}</td>
           </tr>
           <tr>
             <td>NIP</td>
@@ -241,23 +309,23 @@ const ExportService = {
             <td>${u.nip}</td>
             <td>Pangkat / Gol. Ruang</td>
             <td>:</td>
-            <td>${u.pangkat}</td>
+            <td>${u.pangkat || '-'}</td>
           </tr>
           <tr>
             <td>Jabatan Saat Ini</td>
             <td>:</td>
-            <td>${u.jabatan}</td>
+            <td>${u.jabatan || '-'}</td>
             <td>Unit Kerja</td>
             <td>:</td>
-            <td>${u.unitKerja}</td>
+            <td>${u.unitKerja || u.unit || 'Bappeda Provinsi Lampung'}</td>
           </tr>
           <tr>
             <td>Pendidikan Terakhir</td>
             <td>:</td>
-            <td>${u.pendidikan}</td>
+            <td>${u.pendidikan || 'S-1'}</td>
             <td>Posisi Nine Box</td>
             <td>:</td>
-            <td>Box ${u.nineBox} (High Performer)</td>
+            <td>Box ${u.nineBox || '8'} (High Performer)</td>
           </tr>
         </table>
 
@@ -277,7 +345,7 @@ const ExportService = {
           <tr>
             <td>Rumpun Keahlian</td>
             <td>:</td>
-            <td colspan="4">${cp.rumpunTarget.join(' • ')}</td>
+            <td colspan="4">${(cp.rumpunTarget || []).join(' • ')}</td>
           </tr>
         </table>
 
@@ -288,14 +356,14 @@ const ExportService = {
             <tr>
               <th style="width: 4%;">No</th>
               <th style="width: 15%;">Kompetensi</th>
-              <th style="width: 12%;">Metode</th>
-              <th>Topik / Substansi</th>
-              <th style="width: 12%;">Jenis Diklat</th>
+              <th style="width: 11%;">Metode</th>
+              <th>Topik / Substansi Pelatihan</th>
+              <th style="width: 12%;">Jenis Jalur</th>
               <th style="width: 7%;">JP</th>
               <th style="width: 14%;">Penyelenggara</th>
-              <th style="width: 12%;">Waktu</th>
+              <th style="width: 11%;">Waktu</th>
               <th style="width: 11%;">Estimasi Biaya</th>
-              <th style="width: 9%;">Status</th>
+              <th style="width: 8%;">Status</th>
             </tr>
           </thead>
           <tbody>
@@ -304,15 +372,15 @@ const ExportService = {
           <tfoot>
             <tr style="font-weight: 700; background: #f0f0f0;">
               <td colspan="5" style="text-align: right;">TOTAL AKUMULASI:</td>
-              <td style="text-align: center;">${summary.totalJp} JP</td>
+              <td style="text-align: center;">${totalJp} JP</td>
               <td colspan="2"></td>
-              <td style="text-align: right;">Rp${summary.totalCost.toLocaleString('id-ID')}</td>
+              <td style="text-align: right;">Rp${totalCost.toLocaleString('id-ID')}</td>
               <td></td>
             </tr>
           </tfoot>
         </table>
 
-        <!-- LEMBAR PENGESAHAN (3 PEJABAT) -->
+        <!-- LEMBAR PENGESAHAN RESMI (3 PEJABAT BAPPEDA PROVINSI LAMPUNG) -->
         <div style="margin-top: 36px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; text-align: center; font-size: 11px; color: #000; page-break-inside: avoid;">
           <div>
             <div>Pegawai yang Dinilai,</div>
@@ -324,21 +392,21 @@ const ExportService = {
           <div>
             <div>Verifikator Pengelola SDM,</div>
             <div style="height: 60px;"></div>
-            <div style="font-weight: 700; text-decoration: underline;">Budi Santoso, S.STP., M.P.A.</div>
-            <div>NIP. 198403152008011002</div>
+            <div style="font-weight: 700; text-decoration: underline;">CIK MARYA, S.E., M.M.</div>
+            <div>Pembina (IV/a)<br>NIP. 19691026 199203 2 002</div>
           </div>
 
           <div>
-            <div>Bandar Lampung, 10 September 2026<br>Mengetahui & Menyetujui,<br><b>Kepala Bappeda Provinsi Lampung</b></div>
+            <div>Bandar Lampung, ${tanggalSurat}<br>Mengetahui & Menyetujui,<br><b>Kepala Bappeda Provinsi Lampung</b></div>
             <div style="height: 48px;"></div>
-            <div style="font-weight: 700; text-decoration: underline;">Dr. Ir. M. Taufik, M.M.</div>
-            <div>Pembina Utama Madya (IV/d)<br>NIP. 197206181997031003</div>
+            <div style="font-weight: 700; text-decoration: underline;">Dr. ANANG RISGIYANTO, S.K.M., M.Kes.</div>
+            <div>Pembina Utama Madya (IV/d)<br>NIP. 19750731 200003 1 002</div>
           </div>
         </div>
       </div>
     `;
 
-    // Tutup dialog jika masih terbuka
+    // Tutup dialog orientasi jika masih terbuka
     this.closePrintDialog();
 
     // Inject style @page dinamis sesuai orientasi pilihan
@@ -349,7 +417,6 @@ const ExportService = {
       styleEl.id = 'dynamicPrintStyle';
       document.head.appendChild(styleEl);
     }
-    styleEl.textContent = `@media print { @page { size: auto; margin: 10mm 10mm 15mm 10mm; } }`;
 
     if (orient === 'landscape') {
        styleEl.textContent = `@media print { @page { size: landscape; margin: 10mm 10mm 15mm 10mm; } }`;
@@ -357,11 +424,10 @@ const ExportService = {
        styleEl.textContent = `@media print { @page { size: portrait; margin: 10mm 10mm 15mm 10mm; } }`;
     }
 
-
     // Pastikan print container adalah element pertama di body agar mulai dari halaman 1
     document.body.insertBefore(printContainer, document.body.firstChild);
 
-    // Trigger Browser Print — halaman dimulai dari 1
+    // Trigger Browser Print / Simpan PDF
     setTimeout(() => {
       window.print();
     }, 150);

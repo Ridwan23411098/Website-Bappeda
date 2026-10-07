@@ -2723,8 +2723,11 @@
             placeholder="Tuliskan catatan verifikasi resmi di sini..."></textarea>
         </div>
       </div>
-      <div class="drawer-footer">
+      <div class="drawer-footer" style="flex-wrap: wrap; gap: 8px;">
         <button class="btn btn-outline" onclick="App.closeDrawer('reviewDrawer')">Tutup</button>
+        <button class="btn btn-outline" onclick="ExportService.printReviewDrawerIdp()" style="display: inline-flex; align-items: center; gap: 5px;">
+          <span data-icon="FileText" data-icon-size="14"></span> Cetak PDF Resmi
+        </button>
         <button class="btn btn-danger" id="btnRejectVerif">Minta Revisi</button>
         <button class="btn btn-warning" id="btnApproveAtasanVerif" style="color:white; border-color:var(--color-warning); background:var(--color-warning);">Setujui sbg Atasan</button>
         <button class="btn btn-success" id="btnApproveVerif">Verifikasi & Finalisasi</button>
