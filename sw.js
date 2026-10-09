@@ -1,7 +1,7 @@
 // SIP-KOMPETENSI — Bappeda Provinsi Lampung
 // Service Worker for PWA & Background Push Notifications
 
-const CACHE_NAME = 'sip-bappeda-v2026';
+const CACHE_NAME = 'sip-bappeda-v2026-2';
 
 self.addEventListener('install', event => {
   self.skipWaiting();
@@ -25,8 +25,8 @@ self.addEventListener('push', event => {
   const title = data.title || 'SIP-KOMPETENSI — Bappeda Lampung';
   const options = {
     body: data.body || 'Pengajuan IDP baru telah diterima untuk diverifikasi.',
-    icon: 'assets/logo-idp.png',
-    badge: 'assets/logo-idp.png',
+    icon: 'assets/logo-idp.png?v=2',
+    badge: 'assets/logo-idp.png?v=2',
     vibrate: [200, 100, 200],
     data: data.url || '/',
     tag: 'sip-bappeda-idp',
