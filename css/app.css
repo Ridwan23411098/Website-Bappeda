@@ -325,11 +325,11 @@ a {
   gap: 8px;
   padding: 6px 14px;
   background: rgba(0, 0, 0, 0.35);
-  border: 1px solid rgba(251, 192, 45, 0.4);
+  border: 1px solid rgba(56, 189, 248, 0.4);
   border-radius: var(--radius-pill);
   font-size: 12px;
   font-weight: 600;
-  color: #FBC02D;
+  color: #38BDF8;
   margin-bottom: 24px;
   backdrop-filter: blur(8px);
 }
@@ -345,7 +345,7 @@ a {
 }
 
 .login-headline span {
-  background: linear-gradient(135deg, #FBC02D 0%, #FFA000 100%);
+  background: linear-gradient(135deg, #38BDF8 0%, #0284C7 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
