@@ -44,18 +44,21 @@
         <div class="brand-badge-card">
           <img src="Gambar/logo-idp.png" alt="Logo IDP Bappeda Lampung" class="brand-badge-img">
         </div>
-        <div class="brand-tag-small" style="color: #0284C7; font-weight: 800; font-size: 11px; margin-bottom: 6px; letter-spacing: 0.12em;">PORTAL LAYANAN ASN</div>
+        <div class="gov-badge-tag">
+          <span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:#0284C7;"></span>
+          PEMERINTAH PROVINSI LAMPUNG
+        </div>
         <h1 class="login-headline-centered">
-          SISTEM INDIVIDUAL DEVELOPMENT PLAN
+          Sistem Individual Development Plan
         </h1>
         <p class="login-subheadline-centered">
-          Portal manajemen kompetensi terpadu ASN Bappeda Provinsi Lampung untuk pemetaan kesenjangan kualifikasi, perencanaan pengembangan karier jabatan, serta pengendalian mutu SDM.
+          Portal Terpadu Perencanaan Pengembangan Kompetensi dan Pemetaan Potensi Karier ASN di Lingkungan Badan Perencanaan Pembangunan Daerah Provinsi Lampung.
         </p>
       </div>
 
       <!-- Auth Card -->
       <div class="login-card">
-        <p style="font-size: 13px; color: #475569; margin-bottom: 22px; text-align: center;">Gunakan Nomor Induk Pegawai (NIP) dan kata sandi kedinasan Anda.</p>
+        <p style="font-size: 12.5px; color: #627D98; margin-bottom: 20px; text-align: center;">Silakan masuk menggunakan NIP dan kata sandi kedinasan Anda.</p>
 
         <!-- Error Alert Container -->
         <div id="loginErrorAlert"
@@ -64,90 +67,92 @@
 
         <form id="loginForm" onsubmit="event.preventDefault(); App.login();">
           <div class="form-group">
-            <label class="form-label" for="loginNip">Nomor Induk Pegawai (NIP) <span class="required">*</span></label>
+            <label class="form-label" for="loginNip" style="color: #334E68; font-weight: 600; font-size: 12px;">Nomor Induk Pegawai (NIP) <span class="required">*</span></label>
             <div class="input-icon-wrapper">
-              <span class="input-icon-left" data-icon="UserRound" data-icon-size="16"></span>
+              <span class="input-icon-left" data-icon="UserRound" data-icon-size="16" style="color: #627D98;"></span>
               <input type="text" id="loginNip" class="form-control" value="198701012010011001"
-                placeholder="Masukkan 18 digit NIP resmi" required autocomplete="username">
+                placeholder="Masukkan 18 digit NIP resmi" required autocomplete="username"
+                style="border-color: #CBD5E1; color: #1E293B;">
             </div>
           </div>
 
           <div class="form-group">
-            <label class="form-label" for="loginPassword">Kata Sandi Kedinasan <span class="required">*</span></label>
+            <label class="form-label" for="loginPassword" style="color: #334E68; font-weight: 600; font-size: 12px;">Kata Sandi Kedinasan <span class="required">*</span></label>
             <div class="input-icon-wrapper">
-              <span class="input-icon-left" data-icon="ShieldCheck" data-icon-size="16"></span>
+              <span class="input-icon-left" data-icon="ShieldCheck" data-icon-size="16" style="color: #627D98;"></span>
               <input type="password" id="loginPassword" class="form-control has-right" value="password"
-                placeholder="Masukkan kata sandi" required autocomplete="current-password">
+                placeholder="Masukkan kata sandi" required autocomplete="current-password"
+                style="border-color: #CBD5E1; color: #1E293B;">
               <span class="input-icon-right" id="togglePasswordBtn"
-                onclick="const p = document.getElementById('loginPassword'); p.type = p.type === 'password' ? 'text' : 'password';">
+                onclick="const p = document.getElementById('loginPassword'); p.type = p.type === 'password' ? 'text' : 'password';"
+                style="color: #627D98;">
                 <span data-icon="Eye" data-icon-size="16"></span>
               </span>
             </div>
           </div>
 
           <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 22px;">
-            <label class="custom-checkbox">
+            <label class="custom-checkbox" style="font-size: 12px; color: #486581;">
               <input type="checkbox" checked>
               <span>Ingat sesi perangkat ini</span>
             </label>
             <a href="javascript:void(0)" onclick="App.showAccountHelper()"
-              style="font-size: 11.5px; font-weight: 600; color: var(--color-secondary-blue);">Daftar Akun Kedinasan</a>
+              style="font-size: 11.5px; font-weight: 600; color: #1E3A5F;">Daftar Akun Kedinasan</a>
           </div>
 
-          <button type="submit" class="btn btn-primary btn-block btn-lg" style="background: linear-gradient(135deg, #0F2E4A 0%, #1A4D7A 100%);">
+          <button type="submit" class="btn btn-primary btn-block btn-lg" style="background: linear-gradient(135deg, #1A365D 0%, #2B4C7E 100%); box-shadow: 0 4px 14px rgba(26, 54, 93, 0.25);">
             <span>Masuk ke Akun ASN</span>
             <span data-icon="ArrowRight" data-icon-size="16"></span>
           </button>
         </form>
 
-        <div style="margin-top: 22px; padding-top: 18px; border-top: 1px solid var(--color-border-subtle);">
+        <div style="margin-top: 22px; padding-top: 18px; border-top: 1px solid #E2E8F0;">
           <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
-            <span data-icon="ShieldCheck" data-icon-size="14"></span>
-            <span style="font-size: 12px; font-weight: 700; color: var(--color-text-primary);">Akses Cepat — Pilih Hak Akses</span>
+            <span data-icon="ShieldCheck" data-icon-size="14" style="color: #1E3A5F;"></span>
+            <span style="font-size: 11.5px; font-weight: 700; color: #334E68; text-transform: uppercase; letter-spacing: 0.04em;">Akses Cepat — Pilih Hak Akses</span>
           </div>
-          <div style="display: flex; flex-direction: column; gap: 10px;">
+          <div style="display: flex; flex-direction: column; gap: 8px;">
             <!-- 1. Pegawai ASN -->
             <button type="button" onclick="App.quickLogin('pegawai')"
-              style="display:flex;align-items:center;gap:14px;width:100%;padding:13px 16px;background:linear-gradient(135deg,rgba(37,99,235,0.06),rgba(37,99,235,0.02));border:1.5px solid rgba(37,99,235,0.2);border-radius:12px;cursor:pointer;text-align:left;transition:all 200ms ease;">
+              style="display:flex;align-items:center;gap:12px;width:100%;padding:10px 14px;background:#F8FAFC;border:1px solid #E2E8F0;border-radius:10px;cursor:pointer;text-align:left;transition:all 150ms ease;">
               <div
-                style="width:42px;height:42px;border-radius:10px;background:linear-gradient(135deg,#2563EB,#3B82F6);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#fff;">
-                <span data-icon="UserRound" data-icon-size="20"></span></div>
+                style="width:36px;height:36px;border-radius:8px;background:rgba(30,58,95,0.08);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#1E3A5F;">
+                <span data-icon="UserRound" data-icon-size="18"></span></div>
               <div style="flex:1;">
-                <div style="font-weight:700;font-size:12.5px;color:var(--color-text-primary);margin-bottom:2px;">Pegawai ASN: ANDI ARAFAT, S.T., M.E.</div>
-                <div style="font-size:10px;color:var(--color-text-muted);line-height:1.4;">Sekretaris Bappeda • NIP: 197407072002121008</div>
+                <div style="font-weight:650;font-size:12px;color:#1E293B;margin-bottom:2px;">Pegawai: ANDI ARAFAT, S.T., M.E.</div>
+                <div style="font-size:10px;color:#64748B;line-height:1.3;">Sekretaris Bappeda • NIP: 197407072002121008</div>
               </div>
             </button>
 
             <!-- 2. Admin -->
             <button type="button" onclick="App.quickLogin('admin')"
-              style="display:flex;align-items:center;gap:14px;width:100%;padding:13px 16px;background:linear-gradient(135deg,rgba(37,99,235,0.06),rgba(37,99,235,0.02));border:1.5px solid rgba(37,99,235,0.2);border-radius:12px;cursor:pointer;text-align:left;transition:all 200ms ease;">
+              style="display:flex;align-items:center;gap:12px;width:100%;padding:10px 14px;background:#F8FAFC;border:1px solid #E2E8F0;border-radius:10px;cursor:pointer;text-align:left;transition:all 150ms ease;">
               <div
-                style="width:42px;height:42px;border-radius:10px;background:linear-gradient(135deg,#2563EB,#3B82F6);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#fff;">
-                <span data-icon="Settings2" data-icon-size="20"></span></div>
+                style="width:36px;height:36px;border-radius:8px;background:rgba(30,58,95,0.08);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#1E3A5F;">
+                <span data-icon="Settings2" data-icon-size="18"></span></div>
               <div style="flex:1;">
-                <div style="font-weight:700;font-size:12.5px;color:var(--color-text-primary);margin-bottom:2px;">Admin SDM: CIK MARYA, S.E., M.M.</div>
-                <div style="font-size:10px;color:var(--color-text-muted);line-height:1.4;">Kasubbag Umum & Kepegawaian • NIP: 196910261992032002</div>
+                <div style="font-weight:650;font-size:12px;color:#1E293B;margin-bottom:2px;">Admin SDM: CIK MARYA, S.E., M.M.</div>
+                <div style="font-size:10px;color:#64748B;line-height:1.3;">Kasubbag Umum & Kepegawaian • NIP: 196910261992032002</div>
               </div>
             </button>
 
             <!-- 3. Pimpinan -->
             <button type="button" onclick="App.quickLogin('pimpinan')"
-              style="display:flex;align-items:center;gap:14px;width:100%;padding:13px 16px;background:linear-gradient(135deg,rgba(37,99,235,0.06),rgba(37,99,235,0.02));border:1.5px solid rgba(37,99,235,0.2);border-radius:12px;cursor:pointer;text-align:left;transition:all 200ms ease;">
+              style="display:flex;align-items:center;gap:12px;width:100%;padding:10px 14px;background:#F8FAFC;border:1px solid #E2E8F0;border-radius:10px;cursor:pointer;text-align:left;transition:all 150ms ease;">
               <div
-                style="width:42px;height:42px;border-radius:10px;background:linear-gradient(135deg,#2563EB,#3B82F6);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#fff;">
-                <span data-icon="ChartNoAxesCombined" data-icon-size="20"></span></div>
+                style="width:36px;height:36px;border-radius:8px;background:rgba(30,58,95,0.08);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#1E3A5F;">
+                <span data-icon="ChartNoAxesCombined" data-icon-size="18"></span></div>
               <div style="flex:1;">
-                <div style="font-weight:700;font-size:12.5px;color:var(--color-text-primary);margin-bottom:2px;">
-                  Pimpinan: Dr. ANANG RISGIYANTO</div>
-                <div style="font-size:10px;color:var(--color-text-muted);line-height:1.4;">Kepala Bappeda • NIP: 197507312000031002</div>
+                <div style="font-weight:650;font-size:12px;color:#1E293B;margin-bottom:2px;">Pimpinan: Dr. ANANG RISGIYANTO</div>
+                <div style="font-size:10px;color:#64748B;line-height:1.3;">Kepala Bappeda • NIP: 197507312000031002</div>
               </div>
             </button>
           </div>
         </div>
       </div>
 
-      <div style="font-size: 11px; color: #475569; line-height: 1.6; text-align: center; margin-top: 24px;">
-        <b style="color: #0F172A;">Badan Perencanaan Pembangunan Daerah Provinsi Lampung</b><br>
+      <div style="font-size: 11px; color: #627D98; line-height: 1.6; text-align: center; margin-top: 22px;">
+        <span style="font-weight: 600; color: #334E68;">Badan Perencanaan Pembangunan Daerah Provinsi Lampung</span><br>
         Jl. Wolter Monginsidi No. 222, Telukbetung, Bandar Lampung (Kode Pos 35215)
       </div>
 
