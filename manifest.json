@@ -1,7 +1,7 @@
 {
-  "name": "SIP-KOMPETENSI — Bappeda Provinsi Lampung",
-  "short_name": "SIP-Kompetensi",
-  "description": "Sistem Manajemen Kompetensi & Individual Development Plan Bappeda Provinsi Lampung",
+  "name": "Sistem Individual Development Plan — Bappeda Provinsi Lampung",
+  "short_name": "IDP Bappeda",
+  "description": "Sistem Individual Development Plan Bappeda Provinsi Lampung",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#0f172a",
