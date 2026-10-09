@@ -214,6 +214,23 @@ a {
   align-items: center;
 }
 
+.brand-badge-card {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.brand-badge-img {
+  width: 100%;
+  height: 100%;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
 .login-header-centered .brand-badge-card {
   width: 64px; height: 64px;
   margin-bottom: 16px;
@@ -543,10 +560,27 @@ a {
 .sidebar-brand .brand-badge-card {
   width: 44px;
   height: 44px;
+  min-width: 44px;
+  min-height: 44px;
   border-radius: 12px;
   background: #FFFFFF;
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.15);
   flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  padding: 3px;
+}
+
+.sidebar-brand .brand-badge-card img,
+.sidebar-brand .brand-badge-card .brand-badge-img {
+  width: 100%;
+  height: 100%;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  display: block;
 }
 
 .sidebar-brand-text {
