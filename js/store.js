@@ -3,8 +3,98 @@
  * Persistent Local Database & Official ASN Authentication Engine
  */
 
-const STORAGE_KEY = 'sip_kompetensi_bappeda_db_v3';
+const STORAGE_KEY = 'sip_kompetensi_bappeda_db_v4';
 const SESSION_KEY = 'sip_kompetensi_active_session';
+const USER_REALIZATIONS_KEY = 'sip_user_realizations_v2';
+
+// IndexedDB Helper untuk penyimpanan bukti/sertifikat dan backup data realisasi tanpa batas 5MB localStorage
+const IDBHelper = {
+  dbPromise: null,
+  getDB() {
+    if (typeof indexedDB === 'undefined') return Promise.resolve(null);
+    if (!this.dbPromise) {
+      this.dbPromise = new Promise((resolve) => {
+        try {
+          const req = indexedDB.open('sip_kompetensi_files_db', 2);
+          req.onupgradeneeded = e => {
+            const db = e.target.result;
+            if (!db.objectStoreNames.contains('files')) {
+              db.createObjectStore('files', { keyPath: 'id' });
+            }
+            if (!db.objectStoreNames.contains('backup')) {
+              db.createObjectStore('backup', { keyPath: 'key' });
+            }
+          };
+          req.onsuccess = e => resolve(e.target.result);
+          req.onerror = () => resolve(null);
+        } catch(e) {
+          resolve(null);
+        }
+      });
+    }
+    return this.dbPromise;
+  },
+  async setFile(id, dataUrl) {
+    if (!id || !dataUrl) return false;
+    try {
+      const db = await this.getDB();
+      if (!db) return false;
+      return new Promise((resolve) => {
+        const tx = db.transaction('files', 'readwrite');
+        tx.objectStore('files').put({ id: String(id), data: dataUrl });
+        tx.oncomplete = () => resolve(true);
+        tx.onerror = () => resolve(false);
+      });
+    } catch(e) {
+      return false;
+    }
+  },
+  async getFile(id) {
+    if (!id) return null;
+    try {
+      const db = await this.getDB();
+      if (!db) return null;
+      return new Promise((resolve) => {
+        const tx = db.transaction('files', 'readonly');
+        const req = tx.objectStore('files').get(String(id));
+        req.onsuccess = () => resolve(req.result ? req.result.data : null);
+        req.onerror = () => resolve(null);
+      });
+    } catch(e) {
+      return null;
+    }
+  },
+  async setData(key, val) {
+    if (!key) return false;
+    try {
+      const db = await this.getDB();
+      if (!db || !db.objectStoreNames.contains('backup')) return false;
+      return new Promise((resolve) => {
+        const tx = db.transaction('backup', 'readwrite');
+        tx.objectStore('backup').put({ key, val });
+        tx.oncomplete = () => resolve(true);
+        tx.onerror = () => resolve(false);
+      });
+    } catch(e) {
+      return false;
+    }
+  },
+  async getData(key) {
+    if (!key) return null;
+    try {
+      const db = await this.getDB();
+      if (!db || !db.objectStoreNames.contains('backup')) return null;
+      return new Promise((resolve) => {
+        const tx = db.transaction('backup', 'readonly');
+        const req = tx.objectStore('backup').get(key);
+        req.onsuccess = () => resolve(req.result ? req.result.val : null);
+        req.onerror = () => resolve(null);
+      });
+    } catch(e) {
+      return null;
+    }
+  }
+};
 
 const Store = {
   // Official ASN Accounts Directory of Bappeda Lampung (DUK 2026)
@@ -297,47 +387,122 @@ const Store = {
 
   init() {
     try {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      if (saved) {
-        this.state = JSON.parse(saved);
-        // Ensure official master data is always synchronized
-        if (typeof BAPPEDA_DATA !== 'undefined') {
-          if (!this.state.masterData) this.state.masterData = {};
-          this.state.masterData.jenjang = BAPPEDA_DATA.masterJenjang;
-          this.state.masterData.metode = BAPPEDA_DATA.masterMetode;
-          this.state.masterData.rumpun = BAPPEDA_DATA.masterRumpun;
-          this.state.employees = BAPPEDA_DATA.employees;
-          this.state.monitoringUnits = BAPPEDA_DATA.monitoringUnits;
-          this.state.verifications = BAPPEDA_DATA.verifications;
-          this.state.realizations = BAPPEDA_DATA.realizations;
-        }
-        this.state.executiveMetrics = JSON.parse(JSON.stringify(this.defaultState.executiveMetrics));
-      } else {
-        this.state = JSON.parse(JSON.stringify(this.defaultState));
-        if (typeof BAPPEDA_DATA !== 'undefined') {
-          this.state.employees = BAPPEDA_DATA.employees;
-          this.state.monitoringUnits = BAPPEDA_DATA.monitoringUnits;
-          this.state.verifications = BAPPEDA_DATA.verifications;
-          this.state.realizations = BAPPEDA_DATA.realizations;
-          this.state.masterData = {
-            metode: BAPPEDA_DATA.masterMetode,
-            rumpun: BAPPEDA_DATA.masterRumpun,
-            jenjang: BAPPEDA_DATA.masterJenjang
-          };
+      let saved = localStorage.getItem(STORAGE_KEY);
+      if (!saved) {
+        // Fallback migrasi jika user sebelumnya punya data di versi key lama
+        const oldKeys = ['sip_kompetensi_bappeda_db_v3', 'sip_kompetensi_bappeda_db_v2', 'sip_kompetensi_bappeda_db'];
+        for (const k of oldKeys) {
+          const prev = localStorage.getItem(k);
+          if (prev) {
+            saved = prev;
+            break;
+          }
         }
       }
+
+      if (saved) {
+        try {
+          this.state = JSON.parse(saved);
+        } catch (parseErr) {
+          console.error("Gagal parse saved state:", parseErr);
+          this.state = JSON.parse(JSON.stringify(this.defaultState));
+        }
+      } else {
+        this.state = JSON.parse(JSON.stringify(this.defaultState));
+      }
+
+      // Ensure official master data is always synchronized
+      if (typeof BAPPEDA_DATA !== 'undefined') {
+        if (!this.state.masterData) this.state.masterData = {};
+        this.state.masterData.jenjang = BAPPEDA_DATA.masterJenjang;
+        this.state.masterData.metode = BAPPEDA_DATA.masterMetode;
+        this.state.masterData.rumpun = BAPPEDA_DATA.masterRumpun;
+        this.state.employees = BAPPEDA_DATA.employees;
+        this.state.monitoringUnits = BAPPEDA_DATA.monitoringUnits;
+
+        // PERTAHANKAN SEMUA REALISASI YANG SUDAH TERSIMPAN DI STATE (jangan pernah buang data lokal!)
+        const currentRealizations = Array.isArray(this.state.realizations) ? this.state.realizations : [];
+        const bappedaRealizations = Array.isArray(BAPPEDA_DATA.realizations) ? BAPPEDA_DATA.realizations : [];
+        const currentIds = new Set(currentRealizations.map(r => r.id));
+        const missingBappeda = bappedaRealizations.filter(r => !currentIds.has(r.id));
+        this.state.realizations = [...currentRealizations, ...missingBappeda];
+
+        if (!this.state.verifications || this.state.verifications.length === 0) {
+          this.state.verifications = BAPPEDA_DATA.verifications;
+        }
+        this.state.executiveMetrics = JSON.parse(JSON.stringify(this.defaultState.executiveMetrics));
+      }
+
+      // 1. PULIHKAN DARI USER_REALIZATIONS_KEY (Penyimpanan khusus terpisah yang anti-penuh & anti-hilang)
+      try {
+        const dedicatedSaved = localStorage.getItem(USER_REALIZATIONS_KEY);
+        if (dedicatedSaved) {
+          const dedicatedList = JSON.parse(dedicatedSaved);
+          if (Array.isArray(dedicatedList) && dedicatedList.length > 0) {
+            if (!Array.isArray(this.state.realizations)) this.state.realizations = [];
+            const existingIds = new Set(this.state.realizations.map(r => r.id));
+            dedicatedList.forEach(dr => {
+              if (!existingIds.has(dr.id)) {
+                this.state.realizations.unshift(dr);
+                existingIds.add(dr.id);
+              }
+            });
+          }
+        }
+      } catch (dedErr) {
+        console.warn("Gagal membaca dedicated realization storage:", dedErr);
+      }
+
+      // 2. Pulihkan cadangan dari IndexedDB secara asinkron
+      if (typeof IDBHelper !== 'undefined') {
+        IDBHelper.getData('user_realizations').then(idbList => {
+          if (Array.isArray(idbList) && idbList.length > 0) {
+            let changed = false;
+            if (!Array.isArray(this.state.realizations)) this.state.realizations = [];
+            const existingIds = new Set(this.state.realizations.map(r => r.id));
+            idbList.forEach(ir => {
+              if (!existingIds.has(ir.id)) {
+                this.state.realizations.unshift(ir);
+                existingIds.add(ir.id);
+                changed = true;
+              }
+            });
+            if (changed) {
+              this.syncIdpStatusWithRealizations();
+              this.save();
+              if (typeof App !== 'undefined') {
+                if (Store.state.activePage === 'eidp' && App.renderIdpSaya) App.renderIdpSaya();
+                if (Store.state.activePage === 'epelaksanaan' && App.renderEmployeeRealization) App.renderEmployeeRealization();
+              }
+            }
+          }
+        }).catch(() => {});
+      }
+
+      // Pastikan idpState dan programs selalu ada
+      if (!this.state.idpState) {
+        this.state.idpState = JSON.parse(JSON.stringify(this.defaultState.idpState));
+      }
+      if (!Array.isArray(this.state.idpState.programs) || this.state.idpState.programs.length === 0) {
+        this.state.idpState.programs = JSON.parse(JSON.stringify(this.defaultState.idpState.programs));
+      }
+
+      // SINKRONKAN STATUS IDP BERDASARKAN REALISASI SECARA AMAN (Bebas TypeError)
+      this.syncIdpStatusWithRealizations();
 
       // Check active session & sanitize any cached PPEPD -> PMPE
       const activeSess = localStorage.getItem(SESSION_KEY);
       if (activeSess) {
-        this.state.currentSession = JSON.parse(activeSess);
-        if (this.state.currentSession.unitKerja) {
-          this.state.currentSession.unitKerja = this.state.currentSession.unitKerja.replace(/PPEPD/g, 'PMPE');
-        }
-        if (this.state.currentSession.jabatan) {
-          this.state.currentSession.jabatan = this.state.currentSession.jabatan.replace(/PPEPD/g, 'PMPE');
-        }
-        localStorage.setItem(SESSION_KEY, JSON.stringify(this.state.currentSession));
+        try {
+          this.state.currentSession = JSON.parse(activeSess);
+          if (this.state.currentSession.unitKerja) {
+            this.state.currentSession.unitKerja = this.state.currentSession.unitKerja.replace(/PPEPD/g, 'PMPE');
+          }
+          if (this.state.currentSession.jabatan) {
+            this.state.currentSession.jabatan = this.state.currentSession.jabatan.replace(/PPEPD/g, 'PMPE');
+          }
+          localStorage.setItem(SESSION_KEY, JSON.stringify(this.state.currentSession));
+        } catch(e) {}
       }
 
       if (this.state.user) {
@@ -351,20 +516,111 @@ const Store = {
 
       if (!this.state.notifications) this.state.notifications = [];
       this.updateNotificationUnreadCount();
+      this.updateUserStats();
 
       this.save();
     } catch (err) {
-      console.warn('Initializing default state:', err);
-      this.state = JSON.parse(JSON.stringify(this.defaultState));
-      this.save();
+      console.error('Peringatan di Store.init():', err);
+      // JANGAN PERNAH WIPE DATA USER JIKA TERJADI ERROR KECIL!
+      if (!this.state || !Array.isArray(this.state.realizations)) {
+        this.state = JSON.parse(JSON.stringify(this.defaultState));
+        this.save();
+      }
     }
   },
 
+  syncIdpStatusWithRealizations() {
+    if (!this.state.idpState) {
+      this.state.idpState = { status: 'Draft', progress: 0, programs: [] };
+    }
+    if (!Array.isArray(this.state.idpState.programs)) {
+      this.state.idpState.programs = [];
+    }
+
+    const allRels = this.state.realizations || [];
+    const progList = this.state.idpState.programs;
+
+    progList.forEach(p => {
+      const pTopik = String(p.topik || '').toLowerCase();
+      const hasRel = allRels.some(r => {
+        const rProg = String(r.program || '').toLowerCase();
+        if (r.programId && r.programId === p.id) return true;
+        if (pTopik && rProg && (pTopik === rProg || pTopik.includes(rProg) || rProg.includes(pTopik))) return true;
+        return false;
+      });
+      if (hasRel) {
+        p.status = 'Terlaksana';
+      }
+    });
+
+    // Tambahkan realisasi user yang belum ada di daftar program IDP
+    allRels.forEach(r => {
+      if (r.isUserInput && r.program) {
+        const rProg = String(r.program || '').toLowerCase();
+        const exists = progList.some(p => {
+          const pTopik = String(p.topik || '').toLowerCase();
+          if (p.id === r.programId) return true;
+          if (pTopik && rProg && (pTopik === rProg || pTopik.includes(rProg) || rProg.includes(pTopik))) return true;
+          return false;
+        });
+        if (!exists) {
+          progList.unshift({
+            id: r.programId || r.id,
+            kompetensi: r.kompetensi || 'Pengembangan Kompetensi',
+            metode: r.metode || 'Diklat Teknis',
+            topik: r.program,
+            jenisDiklat: r.metode || 'Diklat Teknis',
+            jp: parseInt(r.jp) || 20,
+            penyelenggara: r.penyelenggara || 'BPSDMD Provinsi Lampung',
+            periode: 'Tahun 2026',
+            estimasi: 0,
+            status: 'Terlaksana',
+            isUserInput: true
+          });
+        }
+      }
+    });
+  },
+
   save() {
+    // 1. Simpan realisasi user ke dedicated key anti-penuh (hanya data teks ringan)
     try {
+      const userRels = (this.state.realizations || []).filter(r => r.isUserInput);
+      const cleanUserRels = userRels.map(r => ({
+        ...r,
+        buktiUrl: (r.buktiUrl && r.buktiUrl.startsWith('http')) ? r.buktiUrl : ''
+      }));
+      localStorage.setItem(USER_REALIZATIONS_KEY, JSON.stringify(cleanUserRels));
+      if (typeof IDBHelper !== 'undefined') {
+        IDBHelper.setData('user_realizations', cleanUserRels).catch(() => {});
+      }
+    } catch (e) {
+      console.warn("Gagal menyimpan ke dedicated realization key:", e);
+    }
+
+    // 2. Simpan full state ke main STORAGE_KEY dengan pembersihan dataUrl besar
+    try {
+      if (Array.isArray(this.state.realizations)) {
+        this.state.realizations.forEach(r => {
+          if (r.buktiUrl && r.buktiUrl.startsWith('data:')) {
+            r.buktiUrl = ''; // Sudah aman di IndexedDB
+          }
+        });
+      }
       localStorage.setItem(STORAGE_KEY, JSON.stringify(this.state));
     } catch (e) {
-      console.error('Failed to save state to localStorage:', e);
+      console.warn('localStorage save quota reached, saving sanitized lightweight state:', e);
+      try {
+        const safeState = JSON.parse(JSON.stringify(this.state, (key, value) => {
+          if (key === 'buktiUrl' && typeof value === 'string' && value.startsWith('data:')) {
+            return '';
+          }
+          return value;
+        }));
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(safeState));
+      } catch (err2) {
+        console.error('Critical: Failed to save state to localStorage even after sanitizing:', err2);
+      }
     }
   },
 
@@ -657,8 +913,8 @@ const Store = {
         .eq('nip', cleanNip)
         .order('id', { ascending: true });
 
-      if (!progErr && progData) {
-        this.state.idpState.programs = progData.map(p => ({
+      if (!progErr && progData && progData.length > 0) {
+        const remotePrograms = progData.map(p => ({
           id: p.id,
           kompetensi: p.kompetensi,
           metode: p.metode,
@@ -673,6 +929,29 @@ const Store = {
           keterangan: p.keterangan,
           status: p.status
         }));
+
+        // Sinkronkan status Terlaksana berdasarkan realisasi lokal yang ada secara aman
+        const realizations = this.state.realizations || [];
+        remotePrograms.forEach(p => {
+          const pTopik = String(p.topik || '').toLowerCase();
+          const hasRealization = realizations.some(r => {
+            const rProg = String(r.program || '').toLowerCase();
+            return (r.programId && r.programId === p.id) ||
+              (pTopik && rProg && (pTopik === rProg || pTopik.includes(rProg) || rProg.includes(pTopik)));
+          });
+          if (hasRealization) {
+            p.status = 'Terlaksana';
+          }
+        });
+
+        // Pertahankan program buatan user lokal yang belum ada di Supabase
+        const existingRemoteTopiks = new Set(remotePrograms.map(p => String(p.topik || '').toLowerCase()));
+        const localOnlyPrograms = (this.state.idpState?.programs || []).filter(p => 
+          p.isUserInput && !existingRemoteTopiks.has(String(p.topik || '').toLowerCase())
+        );
+
+        this.state.idpState.programs = [...localOnlyPrograms, ...remotePrograms];
+        this.syncIdpStatusWithRealizations();
         this.updateUserStats();
       }
 
@@ -993,11 +1272,11 @@ const Store = {
 
   async addRealization(realizationData, file) {
     const newId = Date.now();
-    let fileUrl = realizationData.bukti;
+    let fileUrl = realizationData.bukti || '';
+    let uploadedToCloud = false;
 
     // Jika ada file yang diunggah, coba simpan ke Supabase Storage
     if (file) {
-      let uploadedToCloud = false;
       if (typeof supabaseClient !== 'undefined') {
         try {
           const fileExt = file.name.split('.').pop();
@@ -1034,38 +1313,124 @@ const Store = {
           });
         } catch(e) {}
       }
-    }
 
-    this.state.realizations.unshift({
-      id: newId,
-      ...realizationData,
-      jp: parseInt(realizationData.jp) || 0,
-      status: 'Terverifikasi',
-      buktiUrl: fileUrl,
-      bukti: file ? file.name : realizationData.bukti
-    });
-
-    // Tandai status program IDP yang bersangkutan menjadi 'Terlaksana'
-    if (this.state.idpState && this.state.idpState.programs) {
-      const pMatch = this.state.idpState.programs.find(p => 
-        p.topik === realizationData.program || 
-        p.kompetensi === realizationData.program ||
-        realizationData.program.includes(p.topik)
-      );
-      if (pMatch) {
-        pMatch.status = 'Terlaksana';
+      // Simpan file ke IndexedDB agar tidak hilang setelah reload dan tidak membebani localStorage quota
+      if (fileUrl && fileUrl.startsWith('data:')) {
+        try {
+          await IDBHelper.setFile(newId, fileUrl);
+        } catch(e) {}
       }
     }
+
+    const currentAsn = this.state.user || this.state.currentSession || {};
+    const entryNip = realizationData.nip || currentAsn.nip || '';
+    const entryPegawai = realizationData.pegawai || currentAsn.name || 'Pegawai Bappeda';
+
+    // PENTING: buktiUrl HANYA simpan URL jika terunggah ke Cloud.
+    // Jika base64 lokal, kosongkan di state memori agar localStorage super ringan!
+    // File aslinya dibuka via IDBHelper.getFile(id)
+    const storedBuktiUrl = uploadedToCloud ? fileUrl : '';
+
+    const newRealizationObj = {
+      id: newId,
+      ...realizationData,
+      nip: entryNip,
+      pegawai: entryPegawai,
+      jp: parseInt(realizationData.jp) || 0,
+      status: 'Terverifikasi',
+      isUserInput: true,
+      buktiUrl: storedBuktiUrl,
+      bukti: file ? file.name : (realizationData.bukti || 'Sertifikat_Kegiatan.pdf')
+    };
+
+    if (!Array.isArray(this.state.realizations)) {
+      this.state.realizations = [];
+    }
+    this.state.realizations.unshift(newRealizationObj);
+
+    // Tandai status program IDP yang bersangkutan menjadi 'Terlaksana'
+    // ATAU jika belum ada di tabel IDP, otomatis tambahkan ke IDP Saya!
+    if (!this.state.idpState) {
+      this.state.idpState = { status: 'Draft', progress: 0, programs: [] };
+    }
+    if (!this.state.idpState.programs) {
+      this.state.idpState.programs = [];
+    }
+
+    let pMatch = null;
+    // Prioritas 1: cocokkan via ID program (paling akurat)
+    if (realizationData.programId) {
+      pMatch = this.state.idpState.programs.find(p => p.id === realizationData.programId);
+    }
+    // Fallback: cocokkan via topik string secara aman
+    if (!pMatch && realizationData.program) {
+      const targetStr = String(realizationData.program || '').toLowerCase();
+      pMatch = this.state.idpState.programs.find(p => {
+        const pTopik = String(p.topik || '').toLowerCase();
+        const pKomp = String(p.kompetensi || '').toLowerCase();
+        return pTopik === targetStr || pKomp === targetStr ||
+          (pTopik && targetStr.includes(pTopik)) ||
+          (pTopik && pTopik.includes(targetStr));
+      });
+    }
+
+    if (pMatch) {
+      pMatch.status = 'Terlaksana';
+      pMatch.isRealized = true;
+    } else {
+      // Otomatis tambahkan program baru ke formulir IDP Saya dengan status Terlaksana!
+      const newProg = {
+        id: Date.now() + 1,
+        kompetensi: realizationData.kompetensi || 'Pengembangan Kompetensi',
+        metode: realizationData.metode || 'Diklat Teknis',
+        topik: realizationData.program,
+        jenisDiklat: realizationData.metode || 'Diklat Teknis',
+        jp: parseInt(realizationData.jp) || 20,
+        penyelenggara: realizationData.penyelenggara || 'BPSDMD Provinsi Lampung',
+        periode: 'Tahun 2026',
+        estimasi: 0,
+        status: 'Terlaksana',
+        isUserInput: true,
+        isRealized: true
+      };
+      this.state.idpState.programs.unshift(newProg);
+      pMatch = newProg;
+    }
+
+    // Sinkronkan status program ke Supabase Database jika ada koneksi
+    if (typeof supabaseClient !== 'undefined') {
+      try {
+        if (pMatch && pMatch.id && !pMatch.isUserInput) {
+          supabaseClient.from('idp_programs').update({ status: 'Terlaksana' }).eq('id', pMatch.id).then();
+        } else if (entryNip && pMatch) {
+          supabaseClient.from('idp_programs').insert({
+            nip: String(entryNip).trim(),
+            kompetensi: pMatch.kompetensi,
+            metode: pMatch.metode,
+            topik: pMatch.topik,
+            jenis_diklat: pMatch.jenisDiklat,
+            jp: pMatch.jp,
+            penyelenggara: pMatch.penyelenggara,
+            periode: pMatch.periode,
+            estimasi: 0,
+            status: 'Terlaksana'
+          }).then();
+        }
+      } catch(e) {}
+    }
+
     this.updateUserStats();
     this.save();
 
     // Kirim notifikasi Real-time ke Pengelola SDM (Admin)
-    await this.sendNotification({
-      penerima: 'admin',
-      judul: 'Bukti Sertifikat / Realisasi Baru',
-      pesan: `${realizationData.pegawai || 'Pegawai'} telah mengunggah bukti realisasi untuk kegiatan "${realizationData.program}" (${realizationData.jp} JP).`,
-      tipe: 'success'
-    });
+    try {
+      await this.sendNotification({
+        penerima: 'admin',
+        judul: 'Bukti Sertifikat / Realisasi Baru',
+        pesan: `${entryPegawai} telah mengunggah bukti realisasi untuk kegiatan "${realizationData.program}" (${realizationData.jp} JP).`,
+        tipe: 'success'
+      });
+    } catch(e) {}
   },
 
   updateUserStats() {

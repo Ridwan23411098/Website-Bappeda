@@ -4,6 +4,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
   <meta name="description"
     content="SIP-KOMPETENSI — Sistem Individual Development Plan (IDP) Badan Perencanaan Pembangunan Daerah (Bappeda) Provinsi Lampung.">
   <title>SIP-KOMPETENSI — Bappeda Provinsi Lampung</title>
@@ -1206,7 +1209,7 @@
               <p class="page-subtitle" style="margin-bottom: 0;">Rencana program pengembangan kompetensi prioritas resmi
                 Bappeda Provinsi Lampung.</p>
             </div>
-            <div style="display: flex; gap: 10px;">
+            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
               <button class="btn btn-outline" onclick="ExportService.showPrintDialog()">
                 <span data-icon="Download" data-icon-size="16"></span> Cetak Dokumen Resmi
               </button>
@@ -1276,9 +1279,14 @@
                 <div style="font-size: 11.5px; color: var(--color-text-muted);">Daftar rencana kegiatan diklat,
                   bimbingan, maupun non-klasikal</div>
               </div>
-              <button class="btn btn-primary btn-sm" onclick="App.openAddProgramModal()">
-                <span data-icon="Plus" data-icon-size="14"></span> Tambah Program
-              </button>
+              <div style="display: flex; gap: 8px;">
+                <button class="btn btn-outline btn-sm" onclick="App.openInputRealizationDrawer()" style="border-color: #16a34a; color: #16a34a;">
+                  <span data-icon="Upload" data-icon-size="14"></span> Upload Bukti Realisasi
+                </button>
+                <button class="btn btn-primary btn-sm" onclick="App.openAddProgramModal()">
+                  <span data-icon="Plus" data-icon-size="14"></span> Tambah Program
+                </button>
+              </div>
             </div>
 
             <div class="table-responsive">
@@ -1313,9 +1321,46 @@
               </button>
             </div>
           </div>
+
+          <!-- Riwayat Realisasi Saya -->
+          <div class="card" style="margin-top: 24px;">
+            <div class="card-header">
+              <div>
+                <h3 class="card-title">Riwayat Realisasi &amp; Sertifikat Saya</h3>
+                <div style="font-size: 11.5px; color: var(--color-text-muted);">Bukti pelaksanaan kegiatan pengembangan yang telah Anda unggah</div>
+              </div>
+              <button class="btn btn-primary btn-sm" onclick="App.openInputRealizationDrawer()">
+                <span data-icon="Plus" data-icon-size="14"></span> Upload Bukti Baru
+              </button>
+            </div>
+            <div class="table-responsive">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>No</th>
+                    <th>Program IDP</th>
+                    <th>Metode</th>
+                    <th>Tanggal</th>
+                    <th>JP</th>
+                    <th>Penyelenggara</th>
+                    <th>Bukti Sertifikat</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody id="idpRealisasiTableBody">
+                  <tr>
+                    <td colspan="8" style="text-align: center; padding: 32px 16px; color: var(--color-text-muted);">
+                      <div style="margin-bottom: 8px;"><span data-icon="Upload" data-icon-size="28"></span></div>
+                      Belum ada realisasi yang diunggah. Klik "Upload Bukti Baru" untuk menambahkan.
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
         </section>
 
-        <!-- 6. REVIEW & SUBMIT IDP (ereview) -->
+        <!-- 6. REVIEW &amp; SUBMIT IDP (ereview) -->
         <section id="page-ereview" class="page-view">
           <h1 class="page-title">Review & Pengajuan IDP Kedinasan</h1>
           <p class="page-subtitle">Periksa kelengkapan seluruh data sebelum diajukan ke Pengelola SDM Bappeda Provinsi
@@ -2755,6 +2800,24 @@
             <option>Coaching Service Excellence dalam Perencanaan (Coaching)</option>
             <option>Workshop Strategic Decision Making Kebijakan Publik (Workshop)</option>
             <option>Mentoring Manajemen Waktu & Efektivitas Tim Kerja (Mentoring)</option>
+            <option value="__custom__">+ Kegiatan / Pelatihan Baru (Input Mandiri)</option>
+          </select>
+        </div>
+
+        <!-- Input Khusus jika Memilih Kegiatan Mandiri/Baru -->
+        <div class="form-group" id="realizCustomContainer" style="display: none; background: rgba(30, 58, 138, 0.04); border: 1px dashed var(--color-primary); padding: 12px; border-radius: 8px;">
+          <label class="form-label">Nama Kegiatan / Diklat Baru <span class="required">*</span></label>
+          <input type="text" id="realizProgramCustom" class="form-control" placeholder="Contoh: Bimbingan Teknis Perencanaan Anggaran">
+          
+          <label class="form-label" style="margin-top: 10px;">Metode Pengembangan</label>
+          <select id="realizMetodeCustom" class="form-select">
+            <option value="Diklat Teknis" selected>Diklat Teknis</option>
+            <option value="Coaching">Coaching</option>
+            <option value="Mentoring">Mentoring</option>
+            <option value="Workshop">Workshop</option>
+            <option value="Bimbingan Teknis">Bimbingan Teknis</option>
+            <option value="Seminar / Webinar">Seminar / Webinar</option>
+            <option value="Magang / Pertukaran">Magang / Pertukaran</option>
           </select>
         </div>
 
@@ -2988,14 +3051,14 @@
   <!-- Core Scripts -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
-  <script src="js/supabase.js?v=20260928_1"></script>
-  <script src="assets/lambang-lampung.js?v=20260928_1"></script>
-  <script src="js/icons.js?v=20261005_1"></script>
-  <script src="js/charts.js?v=20260928_1"></script>
-  <script src="js/bappeda_data.js?v=20260928_1"></script>
-  <script src="js/store.js?v=20261006_9"></script>
-  <script src="js/export.js?v=20260928_2"></script>
-  <script src="js/app.js?v=20261006_9"></script>
+  <script src="js/supabase.js?v=20261008_fix"></script>
+  <script src="assets/lambang-lampung.js?v=20261008_fix"></script>
+  <script src="js/icons.js?v=20261008_fix"></script>
+  <script src="js/charts.js?v=20261008_fix"></script>
+  <script src="js/bappeda_data.js?v=20261008_v3"></script>
+  <script src="js/store.js?v=20261008_v3"></script>
+  <script src="js/export.js?v=20261008_v3"></script>
+  <script src="js/app.js?v=20261008_v3"></script>
 </body>
 
 </html>

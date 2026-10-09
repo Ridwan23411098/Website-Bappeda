@@ -903,32 +903,93 @@ const App = {
           </td>
         </tr>
       `;
-      return;
+    } else {
+      tbody.innerHTML = idpState.programs.map((p, idx) => {
+        const badgeCls = p.status === 'Terlaksana' ? 'badge-success' : p.status === 'Perlu Revisi' ? 'badge-danger' : 'badge-warning';
+        return `
+          <tr>
+            <td>${idx + 1}</td>
+            <td class="font-semibold">${p.kompetensi}</td>
+            <td><span class="badge badge-blue">${p.metode}</span></td>
+            <td>${p.topik}</td>
+            <td>${p.jenisDiklat || '-'}</td>
+            <td><b>${p.jp}</b> JP</td>
+            <td>${p.penyelenggara}</td>
+            <td>${p.periode}</td>
+            <td>Rp${(p.estimasi || 0).toLocaleString('id-ID')}</td>
+            <td><span class="badge ${badgeCls}">${p.status}</span></td>
+            <td>
+              <div style="display: flex; gap: 6px; align-items: center; white-space: nowrap;">
+                ${p.status !== 'Terlaksana' ? `
+                  <button class="btn btn-sm" style="background: #16a34a; color: white; padding: 4px 10px; font-size: 11.5px; border-radius: 6px; border: none; cursor: pointer; display: flex; align-items: center; gap: 4px;" title="Upload Bukti Realisasi Program Ini" onclick="App.openRealizationForProgram(${p.id})">
+                    ${getIcon('Upload', 13)} Realisasi
+                  </button>
+                ` : `
+                  <span class="badge badge-success" style="font-size: 11px;">✓ Terlaksana</span>
+                `}
+                <button class="btn btn-outline btn-sm" title="Edit" onclick="App.openEditProgramModal(${p.id})">${getIcon('Edit3', 14)}</button>
+                <button class="btn btn-danger btn-sm" title="Hapus" onclick="App.confirmDeleteProgram(${p.id})">${getIcon('Trash2', 14)}</button>
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join('');
     }
 
-    tbody.innerHTML = idpState.programs.map((p, idx) => {
-      const badgeCls = p.status === 'Terlaksana' ? 'badge-success' : p.status === 'Perlu Revisi' ? 'badge-danger' : 'badge-warning';
-      return `
+    // === RIWAYAT REALISASI MILIK USER YANG LOGIN ===
+    const currentUser = Store.state.user || Store.state.currentSession || {};
+    const myName = (currentUser.name || '').trim().toLowerCase();
+    const myNip = String(currentUser.nip || '').trim().replace(/\s/g, '');
+    const allRealizations = Store.state.realizations || [];
+
+    // Filter realisasi: data milik user aktif atau yang diinput secara manual
+    const myRealizations = allRealizations.filter(r => {
+      if (r.isUserInput) return true;
+      if (r.nip && myNip && String(r.nip).trim().replace(/\s/g, '') === myNip) return true;
+      if (r.pegawai && myName) {
+        const cleanR = r.pegawai.toLowerCase().replace(/[^a-z]/g, '');
+        const cleanU = myName.toLowerCase().replace(/[^a-z]/g, '');
+        if (cleanR.includes(cleanU) || cleanU.includes(cleanR)) return true;
+        const words = myName.split(/[\s,.]+/).filter(w => w.length >= 4);
+        if (words.some(w => r.pegawai.toLowerCase().includes(w))) return true;
+      }
+      return false;
+    });
+
+    const realizTbody = document.getElementById('idpRealisasiTableBody');
+    if (!realizTbody) return;
+
+    if (myRealizations.length === 0) {
+      realizTbody.innerHTML = `
         <tr>
-          <td>${idx + 1}</td>
-          <td class="font-semibold">${p.kompetensi}</td>
-          <td><span class="badge badge-blue">${p.metode}</span></td>
-          <td>${p.topik}</td>
-          <td>${p.jenisDiklat || '-'}</td>
-          <td><b>${p.jp}</b> JP</td>
-          <td>${p.penyelenggara}</td>
-          <td>${p.periode}</td>
-          <td>Rp${(p.estimasi || 0).toLocaleString('id-ID')}</td>
-          <td><span class="badge ${badgeCls}">${p.status}</span></td>
-          <td>
-            <div style="display: flex; gap: 6px;">
-              <button class="btn btn-outline btn-sm" onclick="App.openEditProgramModal(${p.id})">${getIcon('Edit3', 14)}</button>
-              <button class="btn btn-danger btn-sm" onclick="App.confirmDeleteProgram(${p.id})">${getIcon('Trash2', 14)}</button>
-            </div>
+          <td colspan="8" style="text-align: center; padding: 32px 16px; color: var(--color-text-muted);">
+            <div style="margin-bottom: 8px;">${getIcon('Upload', 28)}</div>
+            Belum ada realisasi yang diunggah. Klik "Upload Bukti Baru" untuk menambahkan.
           </td>
         </tr>
       `;
-    }).join('');
+    } else {
+      realizTbody.innerHTML = myRealizations.map((r, idx) => {
+        const docName = (r.bukti || 'Sertifikat.pdf').replace(/'/g, "\\'");
+        const buktiBtn = `
+          <button class="btn btn-outline btn-sm" onclick="App.viewRealizationBukti(${r.id}, '${docName}', '${r.buktiUrl || ''}')">
+            ${getIcon('FileText', 13)} ${r.bukti || 'Lihat'}
+          </button>
+        `;
+        return `
+          <tr>
+            <td>${idx + 1}</td>
+            <td class="font-semibold" style="max-width:200px; white-space:normal;">${r.program}</td>
+            <td><span class="badge badge-blue">${r.metode}</span></td>
+            <td>${r.tanggal}</td>
+            <td><b>${r.jp}</b> JP</td>
+            <td>${r.penyelenggara || '-'}</td>
+            <td>${buktiBtn}</td>
+            <td><span class="badge badge-success">${r.status || 'Terverifikasi'}</span></td>
+          </tr>
+        `;
+      }).join('');
+    }
   },
 
   openAddProgramModal() {
@@ -1064,23 +1125,27 @@ const App = {
   },
 
   renderEmployeeRealization() {
-    const rList = Store.state.realizations;
+    const rList = Store.state.realizations || [];
     const tbody = document.getElementById('realizationTableBody');
-    tbody.innerHTML = rList.map(r => `
-      <tr>
-        <td class="font-semibold" data-label="Pegawai">${r.pegawai}</td>
-        <td data-label="Program IDP">${r.program}</td>
-        <td data-label="Metode"><span class="badge badge-blue">${r.metode}</span></td>
-        <td data-label="Tanggal">${r.tanggal}</td>
-        <td data-label="JP"><b>${r.jp}</b> JP</td>
-        <td data-label="Bukti">
-          <button class="btn btn-outline btn-sm" onclick="${r.buktiUrl ? `window.open('${r.buktiUrl}', '_blank')` : `App.previewDocument('${r.bukti}')`}">
-            <span data-icon="FileText" data-icon-size="14"></span> ${r.bukti}
-          </button>
-        </td>
-        <td data-label="Status"><span class="badge badge-success">${r.status}</span></td>
-      </tr>
-    `).join('');
+    if (!tbody) return;
+    tbody.innerHTML = rList.map(r => {
+      const docName = (r.bukti || 'Sertifikat.pdf').replace(/'/g, "\\'");
+      return `
+        <tr>
+          <td class="font-semibold" data-label="Pegawai">${r.pegawai}</td>
+          <td data-label="Program IDP">${r.program}</td>
+          <td data-label="Metode"><span class="badge badge-blue">${r.metode}</span></td>
+          <td data-label="Tanggal">${r.tanggal}</td>
+          <td data-label="JP"><b>${r.jp}</b> JP</td>
+          <td data-label="Bukti">
+            <button class="btn btn-outline btn-sm" onclick="App.viewRealizationBukti(${r.id}, '${docName}', '${r.buktiUrl || ''}')">
+              <span data-icon="FileText" data-icon-size="14"></span> ${r.bukti}
+            </button>
+          </td>
+          <td data-label="Status"><span class="badge badge-success">${r.status}</span></td>
+        </tr>
+      `;
+    }).join('');
 
     Charts.renderDonut('realizationDonutChart', [
       { label: 'Terlaksana', value: 98, color: 'var(--color-success)' },
@@ -1089,24 +1154,50 @@ const App = {
     ]);
   },
 
+  openRealizationForProgram(programId) {
+    this.openInputRealizationDrawer();
+    const progSelect = document.getElementById('realizProgram');
+    if (progSelect && programId) {
+      for (let i = 0; i < progSelect.options.length; i++) {
+        if (progSelect.options[i].getAttribute('data-id') == programId) {
+          progSelect.selectedIndex = i;
+          progSelect.dispatchEvent(new Event('change'));
+          break;
+        }
+      }
+    }
+  },
+
   openInputRealizationDrawer() {
     const progSelect = document.getElementById('realizProgram');
     const programs = Store.state.idpState?.programs || [];
     
-    if (progSelect && programs.length > 0) {
-      progSelect.innerHTML = programs.map((p, idx) => `
-        <option value="${p.topik}" data-jp="${p.jp}" data-peny="${p.penyelenggara || 'BPSDMD Provinsi Lampung'}" data-metode="${p.metode}" ${idx === 0 ? 'selected' : ''}>
+    let htmlOptions = '';
+    if (programs.length > 0) {
+      htmlOptions += programs.map((p, idx) => `
+        <option value="${p.topik}" data-id="${p.id}" data-jp="${p.jp}" data-peny="${p.penyelenggara || 'BPSDMD Provinsi Lampung'}" data-metode="${p.metode}" ${idx === 0 ? 'selected' : ''}>
           ${p.topik} (${p.metode} — ${p.jp} JP)
         </option>
       `).join('');
+    }
+    // Opsi input mandiri / baru
+    htmlOptions += `<option value="__custom__" data-id="0" data-jp="20" data-peny="BPSDMD Provinsi Lampung" data-metode="Diklat Teknis">+ Kegiatan / Pelatihan Baru (Input Mandiri)</option>`;
+
+    if (progSelect) {
+      progSelect.innerHTML = htmlOptions;
 
       const updateFields = () => {
         const opt = progSelect.options[progSelect.selectedIndex];
+        const isCustom = progSelect.value === '__custom__';
+        const customContainer = document.getElementById('realizCustomContainer');
+        if (customContainer) {
+          customContainer.style.display = isCustom ? 'block' : 'none';
+        }
         if (opt) {
           const jpVal = opt.getAttribute('data-jp');
           const penyVal = opt.getAttribute('data-peny');
-          if (jpVal) document.getElementById('realizJp').value = jpVal;
-          if (penyVal) document.getElementById('realizPenyelenggara').value = penyVal;
+          if (jpVal && !isCustom) document.getElementById('realizJp').value = jpVal;
+          if (penyVal && !isCustom) document.getElementById('realizPenyelenggara').value = penyVal;
         }
       };
 
@@ -1124,9 +1215,23 @@ const App = {
 
   async saveRealizationForm() {
     const progSelect = document.getElementById('realizProgram');
-    const prog = progSelect ? progSelect.value : '';
+    let prog = progSelect ? progSelect.value : '';
     const opt = progSelect ? progSelect.options[progSelect.selectedIndex] : null;
-    const metode = opt ? opt.getAttribute('data-metode') : (prog.includes('Coaching') ? 'Coaching' : prog.includes('Workshop') ? 'Workshop' : prog.includes('Mentoring') ? 'Mentoring' : 'Diklat Teknis');
+    const isCustom = prog === '__custom__';
+    
+    if (isCustom) {
+      const customInput = document.getElementById('realizProgramCustom');
+      prog = (customInput ? customInput.value : '').trim();
+      if (!prog) {
+        App.toast('Mohon masukkan nama kegiatan / pelatihan pengembangan!', 'warning');
+        return;
+      }
+    }
+
+    const customMetodeEl = document.getElementById('realizMetodeCustom');
+    const metode = isCustom 
+      ? (customMetodeEl ? customMetodeEl.value : 'Diklat Teknis')
+      : (opt ? opt.getAttribute('data-metode') : (prog.includes('Coaching') ? 'Coaching' : prog.includes('Workshop') ? 'Workshop' : prog.includes('Mentoring') ? 'Mentoring' : 'Diklat Teknis'));
 
     const tgl = document.getElementById('realizTanggal').value || new Date().toISOString().split('T')[0];
     const jp = parseInt(document.getElementById('realizJp').value) || 20;
@@ -1144,13 +1249,18 @@ const App = {
     const btnSubmit = document.querySelector('#realizationDrawer .btn-primary');
     if (btnSubmit) {
       btnSubmit.disabled = true;
-      btnSubmit.innerHTML = 'Mengunggah Bukti...';
+      btnSubmit.innerHTML = 'Menyimpan Realisasi...';
     }
 
     try {
+      const programId = (!isCustom && opt) ? parseInt(opt.getAttribute('data-id')) : null;
+      const currentUser = Store.state.user || Store.state.currentSession || {};
+
       await Store.addRealization({
-        pegawai: Store.state.user?.name || 'Pegawai Bappeda',
+        pegawai: currentUser.name || 'Pegawai Bappeda',
+        nip: currentUser.nip || '',
         program: prog,
+        programId: programId,
         metode: metode,
         tanggal: tgl,
         jp: jp,
@@ -1162,6 +1272,7 @@ const App = {
       this.closeDrawer('realizationDrawer');
       this.renderEmployeeRealization();
       this.renderIdpSaya();
+      this.renderEmployeeDashboard();
     } catch (err) {
       App.toast(err.message || 'Gagal menyimpan sertifikat.', 'error');
     } finally {
@@ -1169,10 +1280,39 @@ const App = {
         btnSubmit.disabled = false;
         btnSubmit.innerHTML = 'Simpan Realisasi';
       }
-      // Reset input file
+      // Reset input file & custom program
       if (fileInput) fileInput.value = '';
+      const customInput = document.getElementById('realizProgramCustom');
+      if (customInput) customInput.value = '';
       document.getElementById('dropzoneFileName').textContent = 'Pilih atau letakkan file bukti di sini';
     }
+  },
+
+  async viewRealizationBukti(id, filename, inMemoryUrl) {
+    if (inMemoryUrl && inMemoryUrl.startsWith('http')) {
+      window.open(inMemoryUrl, '_blank');
+      return;
+    }
+    if (inMemoryUrl && inMemoryUrl.startsWith('data:')) {
+      const w = window.open('');
+      if (w) {
+        w.document.write(`<iframe src="${inMemoryUrl}" frameborder="0" style="border:0; top:0px; left:0px; bottom:0px; right:0px; width:100%; height:100%;" allowfullscreen></iframe>`);
+        return;
+      }
+    }
+    if (typeof IDBHelper !== 'undefined') {
+      try {
+        const dataUrl = await IDBHelper.getFile(id);
+        if (dataUrl) {
+          const w = window.open('');
+          if (w) {
+            w.document.write(`<iframe src="${dataUrl}" frameborder="0" style="border:0; top:0px; left:0px; bottom:0px; right:0px; width:100%; height:100%;" allowfullscreen></iframe>`);
+            return;
+          }
+        }
+      } catch(e) {}
+    }
+    this.previewDocument(filename);
   },
 
   // ==========================================
