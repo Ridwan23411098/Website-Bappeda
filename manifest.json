@@ -9,13 +9,13 @@
   "orientation": "portrait-primary",
   "icons": [
     {
-      "src": "assets/logo-lampung.png",
+      "src": "assets/logo-idp.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "assets/logo-lampung.png",
+      "src": "assets/logo-idp.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"

@@ -25,8 +25,8 @@ self.addEventListener('push', event => {
   const title = data.title || 'SIP-KOMPETENSI — Bappeda Lampung';
   const options = {
     body: data.body || 'Pengajuan IDP baru telah diterima untuk diverifikasi.',
-    icon: 'assets/logo-lampung.png',
-    badge: 'assets/logo-lampung.png',
+    icon: 'assets/logo-idp.png',
+    badge: 'assets/logo-idp.png',
     vibrate: [200, 100, 200],
     data: data.url || '/',
     tag: 'sip-bappeda-idp',
