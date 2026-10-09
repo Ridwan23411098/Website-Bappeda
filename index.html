@@ -36,72 +36,26 @@
   <!-- ========================================================================
        01 — LOGIN SCREEN RESMI PEMERINTAH PROVINSI LAMPUNG
        ======================================================================== -->
-  <div id="loginScreen" class="login-screen">
-    <!-- LEFT HERO 55% -->
-    <div class="login-hero">
-      <div class="login-brand-header">
-        <div class="brand-badge-card" style="width: 60px; height: 60px;">
+  <div id="loginScreen" class="login-screen-centered">
+    <div class="login-content-wrapper">
+      
+      <!-- Brand & Header -->
+      <div class="login-header-centered">
+        <div class="brand-badge-card">
           <img src="Gambar/logo-idp.png" alt="Logo IDP Bappeda Lampung" class="brand-badge-img">
         </div>
-        <div class="brand-text-lockup light">
-          <div class="brand-tag-small">PORTAL LAYANAN ASN</div>
-          <div class="brand-title-primary" style="font-size: 18px;">SISTEM INDIVIDUAL DEVELOPMENT PLAN</div>
-          <div class="brand-sub-agency">BAPPEDA PROVINSI LAMPUNG</div>
-        </div>
-      </div>
-
-      <div class="login-hero-content">
-        <h1 class="login-headline">
-          Bangun Kompetensi.<br>
-          <span>Wujudkan Perencanaan Berkelanjutan.</span>
+        <div class="brand-tag-small" style="color: #0284C7; font-weight: 800; font-size: 11px; margin-bottom: 6px; letter-spacing: 0.12em;">PORTAL LAYANAN ASN</div>
+        <h1 class="login-headline-centered">
+          SISTEM INDIVIDUAL DEVELOPMENT PLAN
         </h1>
-        <p class="login-subheadline">
-          Portal manajemen kompetensi terpadu ASN Bappeda Provinsi Lampung untuk pemetaan kesenjangan kualifikasi,
-          perencanaan pengembangan karier jabatan, serta pengendalian mutu SDM aparatur perencana pembangunan daerah.
+        <p class="login-subheadline-centered">
+          Portal manajemen kompetensi terpadu ASN Bappeda Provinsi Lampung untuk pemetaan kesenjangan kualifikasi, perencanaan pengembangan karier jabatan, serta pengendalian mutu SDM.
         </p>
-
-        <!-- Official Statistics Panel -->
-        <div class="login-mockup-card">
-          <div class="mockup-stat-item">
-            <div class="mockup-stat-val">100</div>
-            <div class="mockup-stat-lbl">Aparatur Sipil Negara</div>
-          </div>
-          <div style="width: 1px; height: 36px; background: rgba(0,0,0,0.1);"></div>
-          <div class="mockup-stat-item">
-            <div class="mockup-stat-val">89%</div>
-            <div class="mockup-stat-lbl">IDP Terverifikasi</div>
-          </div>
-          <div style="width: 1px; height: 36px; background: rgba(0,0,0,0.1);"></div>
-          <div class="mockup-stat-item">
-            <div class="mockup-stat-val">74%</div>
-            <div class="mockup-stat-lbl">Capaian Realisasi</div>
-          </div>
-        </div>
       </div>
 
-      <div style="font-size: 12px; color: #475569; line-height: 1.6;">
-        <b style="color: #0F172A;">Badan Perencanaan Pembangunan Daerah Provinsi Lampung</b><br>
-        Jl. Wolter Monginsidi No. 222, Telukbetung, Bandar Lampung (Kode Pos 35215)
-      </div>
-    </div>
-
-    <!-- RIGHT AUTH CARD 45% -->
-    <div class="login-auth-pane">
+      <!-- Auth Card -->
       <div class="login-card">
-        <div class="login-card-head">
-          <div class="auth-card-brand-lockup">
-            <div class="brand-badge-card" style="width: 48px; height: 48px;">
-              <img src="Gambar/logo-idp.png" alt="Logo IDP Bappeda" class="brand-badge-img">
-            </div>
-            <div class="brand-text-lockup light">
-              <div class="brand-tag-small">PORTAL LAYANAN ASN</div>
-              <h2 class="brand-title-primary" style="font-size: 16px; margin: 0;">SISTEM INDIVIDUAL DEVELOPMENT PLAN</h2>
-              <div class="brand-sub-agency">BAPPEDA PROVINSI LAMPUNG</div>
-            </div>
-          </div>
-          <p style="font-size: 12px; color: #5F6B76; margin-bottom: 14px;">Gunakan Nomor Induk Pegawai (NIP) dan kata sandi kedinasan Anda.
-          </p>
-        </div>
+        <p style="font-size: 13px; color: #475569; margin-bottom: 22px; text-align: center;">Gunakan Nomor Induk Pegawai (NIP) dan kata sandi kedinasan Anda.</p>
 
         <!-- Error Alert Container -->
         <div id="loginErrorAlert"
@@ -140,7 +94,7 @@
               style="font-size: 11.5px; font-weight: 600; color: var(--color-secondary-blue);">Daftar Akun Kedinasan</a>
           </div>
 
-          <button type="submit" class="btn btn-primary btn-block btn-lg">
+          <button type="submit" class="btn btn-primary btn-block btn-lg" style="background: linear-gradient(135deg, #0F2E4A 0%, #1A4D7A 100%);">
             <span>Masuk ke Akun ASN</span>
             <span data-icon="ArrowRight" data-icon-size="16"></span>
           </button>
@@ -149,43 +103,34 @@
         <div style="margin-top: 22px; padding-top: 18px; border-top: 1px solid var(--color-border-subtle);">
           <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
             <span data-icon="ShieldCheck" data-icon-size="14"></span>
-            <span style="font-size: 12px; font-weight: 700; color: var(--color-text-primary);">Akses Cepat — Pilih Hak
-              Akses</span>
+            <span style="font-size: 12px; font-weight: 700; color: var(--color-text-primary);">Akses Cepat — Pilih Hak Akses</span>
           </div>
-          <p style="font-size: 11px; color: var(--color-text-muted); margin-bottom: 14px; line-height: 1.5;">Setiap hak
-            akses memiliki <b>dashboard dan menu yang berbeda</b>. Klik salah satu untuk langsung masuk:</p>
           <div style="display: flex; flex-direction: column; gap: 10px;">
-            <!-- 1. Pegawai ASN: Andi Arafat, S.T., M.E. -->
+            <!-- 1. Pegawai ASN -->
             <button type="button" onclick="App.quickLogin('pegawai')"
               style="display:flex;align-items:center;gap:14px;width:100%;padding:13px 16px;background:linear-gradient(135deg,rgba(37,99,235,0.06),rgba(37,99,235,0.02));border:1.5px solid rgba(37,99,235,0.2);border-radius:12px;cursor:pointer;text-align:left;transition:all 200ms ease;">
               <div
                 style="width:42px;height:42px;border-radius:10px;background:linear-gradient(135deg,#2563EB,#3B82F6);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#fff;">
                 <span data-icon="UserRound" data-icon-size="20"></span></div>
               <div style="flex:1;">
-                <div style="font-weight:700;font-size:12.5px;color:var(--color-text-primary);margin-bottom:2px;">Pegawai
-                  ASN: ANDI ARAFAT, S.T., M.E.</div>
-                <div style="font-size:10px;color:var(--color-text-muted);line-height:1.4;">Sekretaris Bappeda • Pembina
-                  Tk. I / IV-b • NIP: 197407072002121008</div>
+                <div style="font-weight:700;font-size:12.5px;color:var(--color-text-primary);margin-bottom:2px;">Pegawai ASN: ANDI ARAFAT, S.T., M.E.</div>
+                <div style="font-size:10px;color:var(--color-text-muted);line-height:1.4;">Sekretaris Bappeda • NIP: 197407072002121008</div>
               </div>
-              <span data-icon="ArrowRight" data-icon-size="16" style="color:#2563EB;flex-shrink:0;"></span>
             </button>
 
-            <!-- 2. Admin / SDM: Cik Marya, S.E., M.M. -->
+            <!-- 2. Admin -->
             <button type="button" onclick="App.quickLogin('admin')"
               style="display:flex;align-items:center;gap:14px;width:100%;padding:13px 16px;background:linear-gradient(135deg,rgba(37,99,235,0.06),rgba(37,99,235,0.02));border:1.5px solid rgba(37,99,235,0.2);border-radius:12px;cursor:pointer;text-align:left;transition:all 200ms ease;">
               <div
                 style="width:42px;height:42px;border-radius:10px;background:linear-gradient(135deg,#2563EB,#3B82F6);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#fff;">
                 <span data-icon="Settings2" data-icon-size="20"></span></div>
               <div style="flex:1;">
-                <div style="font-weight:700;font-size:12.5px;color:var(--color-text-primary);margin-bottom:2px;">Admin /
-                  Pengelola SDM: CIK MARYA, S.E., M.M.</div>
-                <div style="font-size:10px;color:var(--color-text-muted);line-height:1.4;">Kasubbag Umum & Kepegawaian •
-                  Sekretariat • NIP: 196910261992032002</div>
+                <div style="font-weight:700;font-size:12.5px;color:var(--color-text-primary);margin-bottom:2px;">Admin SDM: CIK MARYA, S.E., M.M.</div>
+                <div style="font-size:10px;color:var(--color-text-muted);line-height:1.4;">Kasubbag Umum & Kepegawaian • NIP: 196910261992032002</div>
               </div>
-              <span data-icon="ArrowRight" data-icon-size="16" style="color:#2563EB;flex-shrink:0;"></span>
             </button>
 
-            <!-- 3. Pimpinan: Dr. Anang Risgiyanto, S.K.M., M.Kes. -->
+            <!-- 3. Pimpinan -->
             <button type="button" onclick="App.quickLogin('pimpinan')"
               style="display:flex;align-items:center;gap:14px;width:100%;padding:13px 16px;background:linear-gradient(135deg,rgba(37,99,235,0.06),rgba(37,99,235,0.02));border:1.5px solid rgba(37,99,235,0.2);border-radius:12px;cursor:pointer;text-align:left;transition:all 200ms ease;">
               <div
@@ -193,20 +138,19 @@
                 <span data-icon="ChartNoAxesCombined" data-icon-size="20"></span></div>
               <div style="flex:1;">
                 <div style="font-weight:700;font-size:12.5px;color:var(--color-text-primary);margin-bottom:2px;">
-                  Pimpinan: Dr. ANANG RISGIYANTO, S.K.M., M.Kes.</div>
-                <div style="font-size:10px;color:var(--color-text-muted);line-height:1.4;">Kepala Badan Perencanaan
-                  Pembangunan Daerah • NIP: 197507312000031002</div>
+                  Pimpinan: Dr. ANANG RISGIYANTO</div>
+                <div style="font-size:10px;color:var(--color-text-muted);line-height:1.4;">Kepala Bappeda • NIP: 197507312000031002</div>
               </div>
-              <span data-icon="ArrowRight" data-icon-size="16" style="color:#2563EB;flex-shrink:0;"></span>
             </button>
           </div>
         </div>
-        <div
-          style="margin-top: 14px; padding-top: 10px; border-top: 1px solid var(--color-border-subtle); display: flex; justify-content: space-between; align-items: center; font-size: 10px; color: var(--color-text-muted);">
-          <span>Subbagian Umum & Kepegawaian</span>
-          <a href="javascript:void(0)" onclick="App.showAccountHelper()" style="font-weight: 600;">Daftar Akun NIP</a>
-        </div>
       </div>
+
+      <div style="font-size: 11px; color: #475569; line-height: 1.6; text-align: center; margin-top: 24px;">
+        <b style="color: #0F172A;">Badan Perencanaan Pembangunan Daerah Provinsi Lampung</b><br>
+        Jl. Wolter Monginsidi No. 222, Telukbetung, Bandar Lampung (Kode Pos 35215)
+      </div>
+
     </div>
   </div>
 
