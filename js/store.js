@@ -428,7 +428,25 @@ const Store = {
         this.state.realizations = [...currentRealizations, ...missingBappeda];
 
         if (!this.state.verifications || this.state.verifications.length === 0) {
-          this.state.verifications = BAPPEDA_DATA.verifications;
+          this.state.verifications = JSON.parse(JSON.stringify(BAPPEDA_DATA.verifications || []));
+        } else {
+          // Bersihkan data corrupt di verifications (jika ada pegawai yang undefined)
+          this.state.verifications.forEach(v => {
+            if (!v.pegawai || v.pegawai === 'undefined') {
+              const cleanNip = String(v.nip || '').replace(/\s+/g, '');
+              const emp = (typeof BAPPEDA_DATA !== 'undefined' && BAPPEDA_DATA.employees) 
+                ? BAPPEDA_DATA.employees.find(e => String(e.nip).replace(/\s+/g, '') === cleanNip)
+                : null;
+              if (emp) {
+                v.pegawai = emp.name || emp.nama || 'Pegawai ASN Bappeda';
+                v.jabatan = v.jabatan || emp.jabatan || 'Aparatur Perencana';
+                v.jenisJabatan = v.jenisJabatan || emp.jenis || 'Struktural';
+                v.unitKerja = v.unitKerja || emp.unit || 'Bappeda Provinsi Lampung';
+              } else {
+                v.pegawai = 'Pegawai ASN Bappeda';
+              }
+            }
+          });
         }
         this.state.executiveMetrics = JSON.parse(JSON.stringify(this.defaultState.executiveMetrics));
       }
@@ -1146,45 +1164,83 @@ const Store = {
       const { data, error } = await supabaseClient
         .from('idp_submissions')
         .select('*')
-        .order('updated_at', { ascending: true }); // Penting: yang terbaru me-replace yang lama (jika ada NIP duplikat spasi)
+        .order('updated_at', { ascending: true });
 
       if (error) {
-        console.error("Gagal select Supabase:", error);
+        console.error("Gagal select Supabase submissions:", error);
+        return;
       }
 
-      if (!error && data && data.length > 0) {
+      // Ambil rincian program dari Supabase jika ada untuk menghitung JP & jumlah program riil
+      let programsByNip = {};
+      try {
+        const { data: progList } = await supabaseClient
+          .from('idp_programs')
+          .select('*');
+        if (progList && progList.length > 0) {
+          progList.forEach(p => {
+            const pNip = String(p.nip || '').replace(/\s+/g, '');
+            if (!programsByNip[pNip]) programsByNip[pNip] = [];
+            programsByNip[pNip].push(p);
+          });
+        }
+      } catch (err) {
+        console.warn("Gagal fetch program list:", err);
+      }
+
+      if (data && data.length > 0) {
         data.forEach(sub => {
           const cleanSubNip = String(sub.nip).replace(/\s+/g, '');
-          const v = this.state.verifications.find(x => String(x.nip).replace(/\s+/g, '') === cleanSubNip);
+          const progs = programsByNip[cleanSubNip] || [];
+          const progCount = progs.length;
+          const totalJp = progs.reduce((acc, curr) => acc + (parseInt(curr.jp) || 0), 0);
+          const totalCost = progs.reduce((acc, curr) => acc + (parseInt(curr.estimasi) || 0), 0);
+
+          let v = this.state.verifications.find(x => String(x.nip).replace(/\s+/g, '') === cleanSubNip);
+          
+          const emp = (typeof BAPPEDA_DATA !== 'undefined' && BAPPEDA_DATA.employees) 
+            ? BAPPEDA_DATA.employees.find(e => String(e.nip).replace(/\s+/g, '') === cleanSubNip)
+            : (this.state.employees ? this.state.employees.find(e => String(e.nip).replace(/\s+/g, '') === cleanSubNip) : null);
+
+          const empName = emp ? (emp.name || emp.nama) : (sub.nama || `Pegawai Bappeda (${sub.nip})`);
+          const empJabatan = emp ? emp.jabatan : 'Aparatur Perencana';
+          const empJenis = emp ? (emp.jenis || 'Struktural') : 'Struktural';
+          const empUnit = emp ? (emp.unit || 'Bappeda Provinsi Lampung') : 'Bappeda';
+
           if (v) {
+            v.pegawai = empName;
+            v.jabatan = empJabatan;
+            v.jenisJabatan = empJenis;
+            v.unitKerja = empUnit;
             v.status = sub.status || v.status;
             if (sub.progress !== undefined) v.progress = sub.progress;
             if (sub.verification_note) v.notes = sub.verification_note;
+            if (progCount > 0) {
+              v.programCount = progCount;
+              v.totalJp = totalJp;
+              v.estimasiBiaya = `Rp${totalCost.toLocaleString('id-ID')}`;
+            }
             if (sub.submitted_at) {
               const d = new Date(sub.submitted_at);
               v.pengajuan = d.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
             }
           } else {
-            const emp = (typeof BAPPEDA_DATA !== 'undefined' && BAPPEDA_DATA.employees) 
-              ? BAPPEDA_DATA.employees.find(e => String(e.nip).replace(/\s+/g, '') === cleanSubNip)
-              : null;
-            if (emp) {
-              this.state.verifications.unshift({
-                id: Date.now() + Math.floor(Math.random() * 1000),
-                pegawai: emp.nama,
-                nip: emp.nip,
-                jabatan: emp.jabatan,
-                jenisJabatan: emp.jenis || 'Struktural',
-                targetKarier: 'Pengembangan Kompetensi 2026',
-                rencanaKarier: 'Penguatan keahlian perencanaan',
-                programCount: 1,
-                totalJp: 20,
-                estimasiBiaya: 'Rp0',
-                pengajuan: 'Hari Ini',
-                status: sub.status || 'Diajukan ke Atasan',
-                notes: sub.verification_note || ''
-              });
-            }
+            this.state.verifications.unshift({
+              id: Date.now() + Math.floor(Math.random() * 1000),
+              pegawai: empName,
+              nip: sub.nip,
+              jabatan: empJabatan,
+              jenisJabatan: empJenis,
+              unitKerja: empUnit,
+              targetKarier: 'Pengembangan Kompetensi 2026',
+              rencanaKarier: 'Penguatan keahlian perencanaan pembangunan daerah',
+              programCount: progCount > 0 ? progCount : 1,
+              totalJp: totalJp > 0 ? totalJp : 20,
+              estimasiBiaya: totalCost > 0 ? `Rp${totalCost.toLocaleString('id-ID')}` : 'Rp0',
+              pengajuan: sub.submitted_at ? new Date(sub.submitted_at).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' }) : 'Hari Ini',
+              status: sub.status || 'Diajukan ke Atasan',
+              notes: sub.verification_note || ''
+            });
           }
         });
         this.save();

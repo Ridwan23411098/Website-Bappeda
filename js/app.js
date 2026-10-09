@@ -1329,37 +1329,94 @@ const App = {
   },
 
   async renderAdminVerification() {
-    if (typeof supabaseClient !== 'undefined') {
-      await Store.syncVerificationsFromSupabase();
+    try {
+      if (typeof supabaseClient !== 'undefined') {
+        await Store.syncVerificationsFromSupabase();
+      }
+    } catch (err) {
+      console.warn("Gagal sinkron verifikasi Supabase:", err);
     }
-    const list = Store.state.verifications;
+
+    let list = Store.state.verifications || [];
+
+    // Filter pencarian dan status jika elemen input ada
+    const searchEl = document.getElementById('verifSearchInput');
+    const statusEl = document.getElementById('verifStatusSelect');
+    const unitEl = document.getElementById('verifUnitSelect');
+
+    const searchVal = (searchEl ? searchEl.value : '').toLowerCase().trim();
+    const statusVal = statusEl ? statusEl.value : 'Semua Status';
+    const unitVal = unitEl ? unitEl.value : 'Semua Unit Kerja';
+
+    if (searchVal) {
+      list = list.filter(v => 
+        (v.pegawai || '').toLowerCase().includes(searchVal) || 
+        String(v.nip || '').includes(searchVal)
+      );
+    }
+
+    if (statusVal && statusVal !== 'Semua Status') {
+      list = list.filter(v => v.status === statusVal);
+    }
+
+    if (unitVal && unitVal !== 'Semua Unit Kerja') {
+      list = list.filter(v => (v.unitKerja || '').toLowerCase().includes(unitVal.toLowerCase()));
+    }
+
     const tbody = document.getElementById('verifTableBody');
+    if (!tbody) return;
+
+    if (list.length === 0) {
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="7" style="text-align: center; padding: 36px 20px; color: var(--color-text-muted);">
+            <div style="display: flex; flex-direction: column; align-items: center; gap: 8px;">
+              <span data-icon="ShieldCheck" data-icon-size="28" style="opacity: 0.4;"></span>
+              <div style="font-size: 13px; font-weight: 600;">Tidak ada dokumen IDP yang sesuai filter</div>
+              <div style="font-size: 11.5px; opacity: 0.8;">Pengajuan IDP dari pegawai ASN Bappeda akan muncul di sini untuk diverifikasi.</div>
+            </div>
+          </td>
+        </tr>
+      `;
+      if (typeof renderAllIcons === 'function') renderAllIcons();
+      return;
+    }
+
     tbody.innerHTML = list.map(v => {
-      const badgeCls = v.status === 'Final' ? 'badge-success' : v.status === 'Disetujui Atasan' ? 'badge-primary' : v.status === 'Perlu Revisi' ? 'badge-danger' : 'badge-warning';
+      const name = v.pegawai || 'Pegawai ASN Bappeda';
+      const initials = name.split(' ').filter(Boolean).map(n => n[0]).slice(0, 2).join('').toUpperCase() || 'AS';
+      const badgeCls = (v.status === 'Final' || v.status === 'Disetujui') ? 'badge-success' : v.status === 'Disetujui Atasan' ? 'badge-primary' : v.status === 'Perlu Revisi' ? 'badge-danger' : 'badge-warning';
+      const totalJp = v.totalJp || 20;
+
       return `
         <tr>
           <td>
             <div class="table-user-cell">
-              <div class="table-user-avatar">${v.pegawai.split(' ').map(n=>n[0]).slice(0,2).join('')}</div>
+              <div class="table-user-avatar">${initials}</div>
               <div class="table-user-info">
-                <div class="name">${v.pegawai}</div>
-                <div class="sub">${v.nip}</div>
+                <div class="name">${name}</div>
+                <div class="sub">${v.nip || '-'}</div>
               </div>
             </div>
           </td>
-          <td>${v.jabatan}</td>
-          <td>${v.targetKarier}</td>
-          <td><b>${v.programCount}</b> Program</td>
-          <td>${v.pengajuan}</td>
-          <td><span class="badge ${badgeCls}">${v.status}</span></td>
+          <td>${v.jabatan || '-'}</td>
+          <td>${v.targetKarier || 'Pengembangan 2026'}</td>
+          <td><b>${v.programCount || 1}</b> Program (${totalJp} JP)</td>
+          <td>${v.pengajuan || 'Hari Ini'}</td>
+          <td><span class="badge ${badgeCls}">${v.status || 'Diajukan ke Atasan'}</span></td>
           <td>
-            <button class="btn btn-primary btn-sm" onclick="App.openReviewVerificationDrawer(${v.id})">
-              ${getIcon('ShieldCheck', 14)} Review
+            <button class="btn btn-primary btn-sm" onclick="App.openReviewVerificationDrawer(${v.id})" style="display: flex; align-items: center; gap: 6px;">
+              ${typeof getIcon === 'function' ? getIcon('ShieldCheck', 14) : ''} Review
             </button>
           </td>
         </tr>
       `;
     }).join('');
+    if (typeof renderAllIcons === 'function') renderAllIcons();
+  },
+
+  onVerifFilterChange() {
+    this.renderAdminVerification();
   },
 
   openReviewVerificationDrawer(id) {
@@ -1367,12 +1424,13 @@ const App = {
     if (!item) return;
 
     this._currentReviewVerifItem = item;
-    document.getElementById('reviewDrawerEmployeeName').textContent = item.pegawai;
-    document.getElementById('reviewDrawerNip').textContent = `NIP: ${item.nip} • ${item.jabatan} (${item.jenisJabatan})`;
-    document.getElementById('reviewDrawerTargetKarier').textContent = item.targetKarier;
-    document.getElementById('reviewDrawerRencanaKarier').textContent = item.rencanaKarier;
-    document.getElementById('reviewDrawerTotalJp').textContent = `${item.totalJp} JP`;
-    document.getElementById('reviewDrawerEstimasiBiaya').textContent = item.estimasiBiaya;
+    const name = item.pegawai || 'Pegawai ASN Bappeda';
+    document.getElementById('reviewDrawerEmployeeName').textContent = name;
+    document.getElementById('reviewDrawerNip').textContent = `NIP: ${item.nip || '-'} • ${item.jabatan || ''} (${item.jenisJabatan || 'Struktural'})`;
+    document.getElementById('reviewDrawerTargetKarier').textContent = item.targetKarier || 'Pengembangan Kompetensi 2026';
+    document.getElementById('reviewDrawerRencanaKarier').textContent = item.rencanaKarier || 'Penguatan keahlian perencanaan pembangunan daerah.';
+    document.getElementById('reviewDrawerTotalJp').textContent = `${item.totalJp || 20} JP`;
+    document.getElementById('reviewDrawerEstimasiBiaya').textContent = item.estimasiBiaya || 'Rp0';
     document.getElementById('verifNotesInput').value = item.notes || '';
 
     document.getElementById('btnApproveVerif').onclick = () => App.approveVerification(item.id, 'Final');
