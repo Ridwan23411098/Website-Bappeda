@@ -75,6 +75,7 @@ const App = {
     // Register Service Worker for PWA & Background Alerts
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('sw.js').then(reg => {
+        reg.update();
         console.log('SIP Service Worker active:', reg.scope);
       }).catch(err => {
         console.warn('SIP Service Worker registration failed:', err);
