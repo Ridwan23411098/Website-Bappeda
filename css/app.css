@@ -232,11 +232,11 @@ a {
 }
 
 .login-header-centered .brand-badge-card {
-  width: 64px; height: 64px;
-  margin-bottom: 16px;
+  width: 82px; height: 82px;
+  margin-bottom: 18px;
   background: #FFFFFF;
-  border-radius: 14px;
-  padding: 4px;
+  border-radius: 16px;
+  padding: 6px;
   box-shadow: 0 6px 20px -4px rgba(16, 42, 67, 0.10);
   border: 1px solid rgba(203, 213, 225, 0.7);
 }
