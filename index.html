@@ -65,13 +65,14 @@
           style="display: none; padding: 10px 14px; background: var(--color-danger-light); border: 1px solid rgba(180,35,24,0.3); border-radius: var(--radius-md); font-size: 12px; color: var(--color-danger); font-weight: 600; margin-bottom: 16px;">
         </div>
 
-        <form id="loginForm" onsubmit="event.preventDefault(); App.login();">
+        <form id="loginForm" autocomplete="off" onsubmit="event.preventDefault(); App.login();">
           <div class="form-group">
             <label class="form-label" for="loginNip" style="color: #334E68; font-weight: 600; font-size: 12px;">Nomor Induk Pegawai (NIP) <span class="required">*</span></label>
             <div class="input-icon-wrapper">
               <span class="input-icon-left" data-icon="UserRound" data-icon-size="16" style="color: #627D98;"></span>
-              <input type="text" id="loginNip" class="form-control" value="198701012010011001"
-                placeholder="Masukkan 18 digit NIP resmi" required autocomplete="username"
+              <input type="text" id="loginNip" class="form-control" value=""
+                placeholder="Masukkan 18 digit NIP resmi" required autocomplete="off" readonly
+                onfocus="this.removeAttribute('readonly');"
                 style="border-color: #CBD5E1; color: #1E293B;">
             </div>
           </div>
@@ -80,8 +81,9 @@
             <label class="form-label" for="loginPassword" style="color: #334E68; font-weight: 600; font-size: 12px;">Kata Sandi Kedinasan <span class="required">*</span></label>
             <div class="input-icon-wrapper">
               <span class="input-icon-left" data-icon="ShieldCheck" data-icon-size="16" style="color: #627D98;"></span>
-              <input type="password" id="loginPassword" class="form-control has-right" value="password"
-                placeholder="Masukkan kata sandi" required autocomplete="current-password"
+              <input type="password" id="loginPassword" class="form-control has-right" value=""
+                placeholder="Masukkan kata sandi" required autocomplete="new-password" readonly
+                onfocus="this.removeAttribute('readonly');"
                 style="border-color: #CBD5E1; color: #1E293B;">
               <span class="input-icon-right" id="togglePasswordBtn"
                 onclick="const p = document.getElementById('loginPassword'); p.type = p.type === 'password' ? 'text' : 'password';"
@@ -93,7 +95,7 @@
 
           <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 22px;">
             <label class="custom-checkbox" style="font-size: 12px; color: #486581;">
-              <input type="checkbox" checked>
+              <input type="checkbox" id="rememberSession">
               <span>Ingat sesi perangkat ini</span>
             </label>
             <a href="javascript:void(0)" onclick="App.showAccountHelper()"
@@ -3006,10 +3008,10 @@
   <script src="assets/lambang-lampung.js?v=20261008_fix"></script>
   <script src="js/icons.js?v=20261008_fix"></script>
   <script src="js/charts.js?v=20261008_fix"></script>
-  <script src="js/bappeda_data.js?v=20261008_v3"></script>
-  <script src="js/store.js?v=20261008_v3"></script>
-  <script src="js/export.js?v=20261008_v3"></script>
-  <script src="js/app.js?v=20261008_v3"></script>
+  <script src="js/bappeda_data.js?v=20261012_v4"></script>
+  <script src="js/store.js?v=20261012_v4"></script>
+  <script src="js/export.js?v=20261012_v4"></script>
+  <script src="js/app.js?v=20261012_v4"></script>
 </body>
 
 </html>

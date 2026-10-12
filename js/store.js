@@ -508,8 +508,18 @@ const Store = {
       // SINKRONKAN STATUS IDP BERDASARKAN REALISASI SECARA AMAN (Bebas TypeError)
       this.syncIdpStatusWithRealizations();
 
-      // Check active session & sanitize any cached PPEPD -> PMPE
-      const activeSess = localStorage.getItem(SESSION_KEY);
+      // Check active session: Utamakan sessionStorage.
+      // localStorage hanya digunakan jika user secara eksplisit mencentang 'Ingat sesi'
+      let activeSess = null;
+      try {
+        const sessData = sessionStorage.getItem(SESSION_KEY);
+        if (sessData) {
+          activeSess = sessData;
+        } else if (localStorage.getItem('sip_remember_session') === 'true') {
+          activeSess = localStorage.getItem(SESSION_KEY);
+        }
+      } catch (e) {}
+
       if (activeSess) {
         try {
           this.state.currentSession = JSON.parse(activeSess);
@@ -519,8 +529,11 @@ const Store = {
           if (this.state.currentSession.jabatan) {
             this.state.currentSession.jabatan = this.state.currentSession.jabatan.replace(/PPEPD/g, 'PMPE');
           }
-          localStorage.setItem(SESSION_KEY, JSON.stringify(this.state.currentSession));
-        } catch(e) {}
+        } catch(e) {
+          this.state.currentSession = null;
+        }
+      } else {
+        this.state.currentSession = null;
       }
 
       if (this.state.user) {
@@ -616,7 +629,7 @@ const Store = {
       console.warn("Gagal menyimpan ke dedicated realization key:", e);
     }
 
-    // 2. Simpan full state ke main STORAGE_KEY dengan pembersihan dataUrl besar
+    // 2. Simpan full state ke main STORAGE_KEY dengan pembersihan dataUrl besar & sanitasi session
     try {
       if (Array.isArray(this.state.realizations)) {
         this.state.realizations.forEach(r => {
@@ -625,11 +638,15 @@ const Store = {
           }
         });
       }
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(this.state));
+      const stateToPersist = { ...this.state };
+      // PENTING: Jangan simpan currentSession di STORAGE_KEY agar saat aplikasi ditutup tidak auto-login
+      delete stateToPersist.currentSession;
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(stateToPersist));
     } catch (e) {
       console.warn('localStorage save quota reached, saving sanitized lightweight state:', e);
       try {
         const safeState = JSON.parse(JSON.stringify(this.state, (key, value) => {
+          if (key === 'currentSession') return undefined;
           if (key === 'buktiUrl' && typeof value === 'string' && value.startsWith('data:')) {
             return '';
           }
@@ -788,7 +805,22 @@ const Store = {
       ...sessionUser
     };
     this.state.currentSession = sessionUser;
-    localStorage.setItem(SESSION_KEY, JSON.stringify(sessionUser));
+    
+    // Simpan ke sessionStorage (sesi otomatis berakhir saat browser/aplikasi ditutup)
+    try {
+      sessionStorage.setItem(SESSION_KEY, JSON.stringify(sessionUser));
+    } catch(e) {}
+
+    // Simpan ke localStorage HANYA jika opsi 'Ingat sesi' dicentang
+    const rememberBox = typeof document !== 'undefined' ? document.getElementById('rememberSession') : null;
+    if (rememberBox && rememberBox.checked) {
+      localStorage.setItem(SESSION_KEY, JSON.stringify(sessionUser));
+      localStorage.setItem('sip_remember_session', 'true');
+    } else {
+      localStorage.removeItem(SESSION_KEY);
+      localStorage.removeItem('sip_remember_session');
+    }
+
     this.save();
 
     return sessionUser;
@@ -898,7 +930,11 @@ const Store = {
 
   logoutSession() {
     this.state.currentSession = null;
-    localStorage.removeItem(SESSION_KEY);
+    try {
+      sessionStorage.removeItem(SESSION_KEY);
+      localStorage.removeItem(SESSION_KEY);
+      localStorage.removeItem('sip_remember_session');
+    } catch(e) {}
     this.save();
   },
 

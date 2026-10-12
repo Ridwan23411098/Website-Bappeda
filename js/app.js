@@ -81,11 +81,34 @@ const App = {
       });
     }
 
+    // Kosongkan form input login secara agresif untuk mencegah autofill browser
+    this.clearLoginFields();
+    setTimeout(() => this.clearLoginFields(), 150);
+    setTimeout(() => this.clearLoginFields(), 400);
+
     // Check if user has an active persistent session
     if (Store.state.currentSession) {
       this.restoreSession(Store.state.currentSession);
     } else {
+      const loginScr = document.getElementById('loginScreen');
+      const appSh = document.getElementById('appShell');
+      if (loginScr) loginScr.style.display = 'flex';
+      if (appSh) appSh.style.display = 'none';
+      this.clearLoginFields();
       this.initRealtimeNotifications();
+    }
+  },
+
+  clearLoginFields() {
+    const nipInput = document.getElementById('loginNip');
+    const passInput = document.getElementById('loginPassword');
+    if (nipInput) {
+      nipInput.value = '';
+      if (document.activeElement !== nipInput) nipInput.setAttribute('readonly', 'readonly');
+    }
+    if (passInput) {
+      passInput.value = '';
+      if (document.activeElement !== passInput) passInput.setAttribute('readonly', 'readonly');
     }
   },
 
@@ -131,6 +154,9 @@ const App = {
       avatarInitial: account.avatarInitial
     };
     Store.state.currentSession = sessionUser;
+    try {
+      sessionStorage.setItem('sip_kompetensi_active_session', JSON.stringify(sessionUser));
+    } catch(e) {}
     Store.save();
     this.restoreSession(sessionUser);
     App.toast(`Masuk sebagai ${NAV_CONFIG[role].label}. Selamat datang, ${account.name}`, 'success');
@@ -233,7 +259,7 @@ const App = {
     Store.logoutSession();
     document.getElementById('appShell').style.display = 'none';
     document.getElementById('loginScreen').style.display = 'flex';
-    document.getElementById('loginPassword').value = '';
+    this.clearLoginFields();
     App.toast('Sesi Anda telah berhasil diakhiri dengan aman.', 'info');
   },
 
