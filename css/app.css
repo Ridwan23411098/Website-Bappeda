@@ -592,31 +592,33 @@ a {
 }
 
 .sidebar-brand-text .brand-tag-small {
-  font-size: 9.5px;
-  font-weight: 800;
-  letter-spacing: 0.12em;
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
   color: #38BDF8;
   text-transform: uppercase;
   margin-bottom: 2px;
+  font-family: 'Inter', sans-serif;
 }
 
 .sidebar-brand-text .brand-title-primary {
-  font-size: 14.5px;
-  font-weight: 850;
+  font-size: 12.5px;
+  font-weight: 800;
   letter-spacing: -0.01em;
   color: #FFFFFF;
   margin: 0;
-  line-height: 1.15;
-  font-family: 'Plus Jakarta Sans', sans-serif;
+  line-height: 1.2;
+  font-family: 'Inter', sans-serif;
 }
 
 .sidebar-brand-text .brand-sub-agency {
-  font-size: 8.5px;
-  font-weight: 700;
-  letter-spacing: 0.16em;
+  font-size: 7.5px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
   color: #94A3B8;
   text-transform: uppercase;
   margin-top: 2px;
+  font-family: 'Inter', sans-serif;
 }
 
 .sidebar-role-badge {
