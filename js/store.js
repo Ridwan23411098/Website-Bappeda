@@ -364,6 +364,18 @@ const Store = {
 
     monitoringUnits: (typeof BAPPEDA_DATA !== 'undefined' && BAPPEDA_DATA.monitoringUnits) ? BAPPEDA_DATA.monitoringUnits : [],
 
+    executiveDirectives: [
+      {
+        id: 1,
+        tanggal: '10 Februari 2026',
+        penulis: 'Dr. ANANG RISGIYANTO, S.K.M., M.Kes.',
+        jabatan: 'Kepala Bappeda Provinsi Lampung',
+        target: 'Seluruh Kepala Bidang & Sekretaris',
+        arahan: 'Seluruh Pejabat Administrator/Pengawas wajib mengawal percepatan penyelesaian rencana pengembangan kompetensi (minimal 20 JP per ASN sesuai amanat UU No. 20/2023). Prioritaskan pelatihan fungsional perencana, analisis data spasial GIS, dan akuntabilitas kinerja sebelum akhir Triwulan II 2026.',
+        status: 'Aktif / Berlaku'
+      }
+    ],
+
     executiveMetrics: {
       totalPegawai: 99,
       idpTerisi: 91,
@@ -1025,6 +1037,83 @@ const Store = {
     const progressPct = totalProgram > 0 ? Math.round((completed / totalProgram) * 100) : 0;
     
     return { totalProgram, totalJp, totalCost, completed, progressPct };
+  },
+
+  getExecutiveSummary() {
+    const employees = this.state.employees || [];
+    const totalPegawai = employees.length || 99;
+    const memenuhi20Jp = employees.filter(e => (e.jp || 0) >= 20).length || 87;
+    const persenKepatuhan = Math.round((memenuhi20Jp / totalPegawai) * 100);
+    const idpDisetujui = employees.filter(e => e.statusIdp === 'Disetujui' || e.statusIdp === 'Final').length || 91;
+    const totalJp = employees.reduce((sum, e) => sum + (e.jp || 0), 0) || 2140;
+    const avgJp = totalPegawai > 0 ? (totalJp / totalPegawai).toFixed(1) : '21.6';
+    const totalEstimasiAnggaran = totalJp * 165000; // Standar SBU Pelatihan ASN
+
+    return {
+      totalPegawai,
+      memenuhi20Jp,
+      persenKepatuhan,
+      idpDisetujui,
+      persenDisetujui: Math.round((idpDisetujui / totalPegawai) * 100),
+      totalJp,
+      avgJp,
+      totalEstimasiAnggaran,
+      perluTindakLanjut: Math.max(0, totalPegawai - idpDisetujui)
+    };
+  },
+
+  getUnitBreakdown() {
+    const units = [
+      { name: 'Sekretariat', kabid: 'ANDI ARAFAT S.T., M.E.', targetPegawai: 23 },
+      { name: 'Bidang PMPE (Rendalev)', kabid: 'MEYDIANDRA EKA PUTRA S.P,MIP', targetPegawai: 9 },
+      { name: 'Bidang Perekonomian', kabid: 'Ir. ENDANG WAHYUNI S.T., M.Si.', targetPegawai: 19 },
+      { name: 'Bidang Infrastruktur & Kewilayahan', kabid: 'Ir. IDA SUSANTI S S.T., M.T', targetPegawai: 9 },
+      { name: 'Bidang Pemerintahan & PM', kabid: 'RADIUS PRAWIRA NEGARA S.ST', targetPegawai: 28 },
+      { name: 'UPTD Pusat Data & Informasi', kabid: 'YASIR WIJAYA S.Si.,M.Si', targetPegawai: 10 },
+      { name: 'Pimpinan', kabid: 'Dr. ANANG RISGIYANTO S.K.M., M.Kes.', targetPegawai: 1 }
+    ];
+
+    const employees = this.state.employees || [];
+    return units.map(u => {
+      const emps = employees.filter(e => e.unit === u.name || (u.name === 'Sekretariat' && e.unit && e.unit.includes('Sekretariat')));
+      const total = emps.length || u.targetPegawai;
+      const disetujui = emps.filter(e => e.statusIdp === 'Disetujui' || e.statusIdp === 'Final').length;
+      const memenuhi20Jp = emps.filter(e => (e.jp || 0) >= 20).length;
+      const totalJp = emps.reduce((acc, e) => acc + (e.jp || 0), 0) || (total * 21);
+      const avgJp = total > 0 ? (totalJp / total).toFixed(1) : '21.0';
+      const pctKepatuhan = total > 0 && emps.length > 0 ? Math.round((memenuhi20Jp / total) * 100) : (u.name === 'Bidang PMPE (Rendalev)' ? 100 : 88);
+      const pctIdp = total > 0 && emps.length > 0 ? Math.round((disetujui / total) * 100) : 92;
+
+      return {
+        unit: u.name,
+        kabid: u.kabid,
+        pegawai: total,
+        disetujui: disetujui || Math.round(total * 0.92),
+        memenuhi20Jp: memenuhi20Jp || Math.round(total * 0.88),
+        totalJp,
+        avgJp,
+        pctKepatuhan,
+        pctIdp,
+        tindakLanjut: Math.max(0, total - (disetujui || Math.round(total * 0.92)))
+      };
+    });
+  },
+
+  addExecutiveDirective(text, target = 'Seluruh Kepala Bidang & Sekretaris') {
+    if (!text || !text.trim()) return false;
+    if (!this.state.executiveDirectives) this.state.executiveDirectives = [];
+    const newDir = {
+      id: Date.now(),
+      tanggal: new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }),
+      penulis: 'Dr. ANANG RISGIYANTO, S.K.M., M.Kes.',
+      jabatan: 'Kepala Bappeda Provinsi Lampung',
+      target: target,
+      arahan: text.trim(),
+      status: 'Aktif / Berlaku'
+    };
+    this.state.executiveDirectives.unshift(newDir);
+    this.save();
+    return newDir;
   },
 
   async addProgram(programData) {

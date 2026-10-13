@@ -1938,22 +1938,43 @@
 
         <!-- 13. DASHBOARD PIMPINAN (pdash) -->
         <section id="page-pdash" class="page-view">
-          <div style="margin-bottom: 24px;">
-            <div style="display: flex; align-items: center; gap: 8px;">
-              <h1 class="page-title">Dashboard Pimpinan</h1>
-              <span class="badge badge-neutral" style="font-size: 10px;">Executive Mode (Read Only)</span>
+          <!-- EXECUTIVE BANNER -->
+          <div class="card executive-banner" style="margin-bottom: 24px; background: linear-gradient(135deg, #0b2545 0%, #134074 55%, #002855 100%); color: #ffffff; border: 1px solid rgba(255, 255, 255, 0.15); box-shadow: 0 10px 25px -5px rgba(11, 37, 69, 0.35); border-radius: 14px; padding: 22px 24px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+              <div style="display: flex; align-items: center; gap: 16px;">
+                <div style="width: 54px; height: 54px; border-radius: 12px; background: rgba(255, 255, 255, 0.12); border: 2px solid rgba(255, 255, 255, 0.25); display: flex; align-items: center; justify-content: center; font-size: 22px; font-weight: 800; color: #ffdd59; box-shadow: 0 4px 12px rgba(0,0,0,0.2); flex-shrink: 0;">
+                  AR
+                </div>
+                <div>
+                  <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                    <h1 style="font-size: 20px; font-weight: 800; margin: 0; color: #ffffff; letter-spacing: -0.01em;">Dr. ANANG RISGIYANTO, S.K.M., M.Kes.</h1>
+                    <span class="badge" style="background: rgba(255, 221, 89, 0.2); color: #ffdd59; border: 1px solid rgba(255, 221, 89, 0.4); font-size: 11px; font-weight: 700;">Kepala Bappeda</span>
+                    <span class="badge" style="background: rgba(255, 255, 255, 0.15); color: #ffffff; border: 1px solid rgba(255, 255, 255, 0.25); font-size: 11px;">TA 2026</span>
+                  </div>
+                  <p style="margin: 4px 0 0; font-size: 12.5px; color: rgba(255, 255, 255, 0.85); line-height: 1.4;">
+                    Dashboard Eksekutif Pengendalian & Evaluasi Pengembangan Kompetensi (IDP) 99 ASN Bappeda Provinsi Lampung
+                  </p>
+                </div>
+              </div>
+              <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                <button class="btn" style="background: #ffffff; color: #0b2545; font-weight: 750; border: none; box-shadow: 0 4px 12px rgba(0,0,0,0.15); display: flex; align-items: center; gap: 6px;" onclick="ExportService.showExecutivePrintDialog()">
+                  <span data-icon="Printer" data-icon-size="16"></span> Cetak Laporan Eksekutif (PDF)
+                </button>
+                <button class="btn" style="background: rgba(255, 255, 255, 0.15); color: #ffffff; border: 1px solid rgba(255, 255, 255, 0.3); display: flex; align-items: center; gap: 6px;" onclick="ExportService.exportExecutiveMatrix()">
+                  <span data-icon="Download" data-icon-size="16"></span> Unduh Matriks (.xlsx)
+                </button>
+              </div>
             </div>
-            <p class="page-subtitle">Ringkasan strategis perkembangan dan capaian pengembangan kompetensi seluruh
-              pegawai Bappeda.</p>
           </div>
 
-          <div class="grid grid-cols-4" style="margin-bottom: 24px;">
+          <!-- TOP 5 EXECUTIVE STAT CARDS -->
+          <div class="grid grid-cols-5" style="margin-bottom: 24px;">
             <div class="stat-card">
               <div class="stat-card-inner">
                 <div class="stat-card-info">
-                  <div class="stat-card-label">Total Pegawai</div>
-                  <div class="stat-card-value">100</div>
-                  <div class="stat-card-desc">ASN Bappeda aktif</div>
+                  <div class="stat-card-label">Total ASN Terdaftar</div>
+                  <div class="stat-card-value" id="execTotalPegawai">99 ASN</div>
+                  <div class="stat-card-desc">7 Unit Kerja Bappeda</div>
                 </div>
                 <div class="stat-card-icon"><span data-icon="Users" data-icon-size="22"></span></div>
               </div>
@@ -1962,66 +1983,130 @@
             <div class="stat-card success">
               <div class="stat-card-inner">
                 <div class="stat-card-info">
-                  <div class="stat-card-label">IDP Terisi</div>
-                  <div class="stat-card-value text-success">89%</div>
-                  <div class="stat-card-desc">89 pegawai telah menyusun IDP</div>
+                  <div class="stat-card-label">Kepatuhan 20 JP ASN</div>
+                  <div class="stat-card-value text-success" id="execKepatuhanJp">88%</div>
+                  <div class="stat-card-desc" id="execKepatuhanJpCount">87 ASN Memenuhi Target</div>
+                </div>
+                <div class="stat-card-icon"><span data-icon="ShieldCheck" data-icon-size="22"></span></div>
+              </div>
+            </div>
+
+            <div class="stat-card info">
+              <div class="stat-card-inner">
+                <div class="stat-card-info">
+                  <div class="stat-card-label">IDP Disahkan (Final)</div>
+                  <div class="stat-card-value text-primary" id="execIdpDisahkan">91 ASN</div>
+                  <div class="stat-card-desc" id="execIdpDisahkanPct">91.9% Dokumen Sah</div>
                 </div>
                 <div class="stat-card-icon"><span data-icon="ClipboardCheck" data-icon-size="22"></span></div>
               </div>
             </div>
 
-            <div class="stat-card success">
+            <div class="stat-card">
               <div class="stat-card-inner">
                 <div class="stat-card-info">
-                  <div class="stat-card-label">Ada Realisasi</div>
-                  <div class="stat-card-value text-success">74%</div>
-                  <div class="stat-card-desc">74 pegawai telah berkegiatan</div>
+                  <div class="stat-card-label">Total Akumulasi JP</div>
+                  <div class="stat-card-value" id="execTotalJp">2.140 JP</div>
+                  <div class="stat-card-desc" id="execAvgJp">Rata-rata 21.6 JP/ASN</div>
                 </div>
-                <div class="stat-card-icon"><span data-icon="CircleCheck" data-icon-size="22"></span></div>
+                <div class="stat-card-icon"><span data-icon="Clock" data-icon-size="22"></span></div>
               </div>
             </div>
 
             <div class="stat-card warning">
               <div class="stat-card-inner">
                 <div class="stat-card-info">
-                  <div class="stat-card-label">Perlu Tindak Lanjut</div>
-                  <div class="stat-card-value text-warning">26</div>
-                  <div class="stat-card-desc">Memerlukan atensi pimpinan</div>
+                  <div class="stat-card-label">Investasi Bangkom</div>
+                  <div class="stat-card-value text-warning" id="execEstimasiAnggaran">Rp 353.1 Jt</div>
+                  <div class="stat-card-desc">SBU Pelatihan ASN 2026</div>
                 </div>
-                <div class="stat-card-icon"><span data-icon="AlertCircle" data-icon-size="22"></span></div>
+                <div class="stat-card-icon"><span data-icon="Coins" data-icon-size="22"></span></div>
               </div>
             </div>
           </div>
 
+          <!-- ARAHAN STRATEGIS & KEBIJAKAN PIMPINAN (EXECUTIVE DIRECTIVES) -->
+          <div class="card" style="margin-bottom: 24px; border-left: 4px solid var(--color-primary);">
+            <div class="card-header" style="margin-bottom: 14px;">
+              <div>
+                <h3 class="card-title" style="display: flex; align-items: center; gap: 8px;">
+                  <span data-icon="Megaphone" data-icon-size="18" style="color: var(--color-primary);"></span>
+                  Arahan Strategis & Disposisi Kebijakan Kepala Badan
+                </h3>
+                <div style="font-size: 12px; color: var(--color-text-muted);">
+                  Instruksi kedinasan yang disiarkan langsung ke seluruh Kepala Bidang dan Kasubbag Kepegawaian Bappeda.
+                </div>
+              </div>
+              <span class="badge badge-primary">Resmi Kepala Badan</span>
+            </div>
+
+            <!-- Form Terbitkan Arahan Baru -->
+            <div style="background: var(--color-surface-subtle); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 16px; margin-bottom: 16px;">
+              <div class="grid grid-cols-12" style="gap: 12px; align-items: flex-end;">
+                <div class="col-span-8" style="margin-bottom: 0;">
+                  <label class="form-label" style="font-size: 12px; font-weight: 700;">Instruksi / Catatan Pengendalian Baru:</label>
+                  <input type="text" id="newDirectiveInput" class="form-input" placeholder="Ketik arahan strategis untuk percepatan penyusunan atau realisasi IDP pegawai..." style="font-size: 13px;">
+                </div>
+                <div class="col-span-2" style="margin-bottom: 0;">
+                  <label class="form-label" style="font-size: 12px; font-weight: 700;">Tujuan Arahan:</label>
+                  <select id="directiveTargetSelect" class="form-select" style="font-size: 12.5px;">
+                    <option value="Seluruh Kepala Bidang & Sekretaris">Semua Bidang (99 ASN)</option>
+                    <option value="Sekretariat">Sekretariat</option>
+                    <option value="Bidang PMPE (Rendalev)">Bidang PMPE</option>
+                    <option value="Bidang Perekonomian">Bidang Perekonomian</option>
+                    <option value="Bidang Infrastruktur & Kewilayahan">Infrastruktur & Kewilayahan</option>
+                    <option value="Bidang Pemerintahan & PM">Pemerintahan & PM</option>
+                    <option value="UPTD Pusat Data & Informasi">UPTD Pusdatin</option>
+                  </select>
+                </div>
+                <div class="col-span-2" style="margin-bottom: 0;">
+                  <button class="btn btn-primary btn-block" onclick="App.submitExecutiveDirective()" style="height: 40px; display: flex; align-items: center; justify-content: center; gap: 6px;">
+                    <span data-icon="Send" data-icon-size="15"></span> Terbitkan
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Container Riwayat Arahan Aktif -->
+            <div id="execDirectivesContainer"></div>
+          </div>
+
+          <!-- CHARTS ROW 1 -->
           <div class="grid grid-cols-12" style="margin-bottom: 24px;">
             <div class="col-span-7 card">
               <div class="card-header">
                 <div>
-                  <h3 class="card-title">Perbandingan Rencana vs Realisasi per Bidang</h3>
-                  <div style="font-size: 11.5px; color: var(--color-text-muted);">Jumlah kegiatan per unit kerja tahun
-                    2026</div>
+                  <h3 class="card-title">Capaian Kepatuhan Pengembangan per Unit Kerja</h3>
+                  <div style="font-size: 11.5px; color: var(--color-text-muted);">
+                    Target ASN vs Realisasi Terpenuhi Standar 20 JP per 7 Bidang Bappeda
+                  </div>
                 </div>
+                <span class="badge badge-neutral">7 Unit Kerja</span>
               </div>
               <div id="executiveGroupedBar"></div>
             </div>
 
             <div class="col-span-5 card">
               <div class="card-header">
-                <h3 class="card-title">Status Penyelesaian Pegawai</h3>
-                <span class="badge badge-neutral">99 ASN</span>
+                <div>
+                  <h3 class="card-title">Kepatuhan UU ASN No. 20/2023 (Target 20 JP)</h3>
+                  <div style="font-size: 11.5px; color: var(--color-text-muted);">Standar minimal 20 JP/tahun per pegawai</div>
+                </div>
+                <span class="badge badge-success">99 ASN</span>
               </div>
               <div id="executiveDonutChart"></div>
             </div>
           </div>
 
-          <div class="grid grid-cols-12">
+          <!-- CHARTS ROW 2 -->
+          <div class="grid grid-cols-12" style="margin-bottom: 24px;">
             <div class="col-span-7 card">
               <div class="card-header">
                 <div>
-                  <h3 class="card-title">Trend Kumulatif Pengembangan Kompetensi</h3>
-                  <div style="font-size: 11.5px; color: var(--color-text-muted);">Progres bulanan Jan – Des 2026</div>
+                  <h3 class="card-title">Trend Akumulasi Jam Pelajaran (JP) ASN</h3>
+                  <div style="font-size: 11.5px; color: var(--color-text-muted);">Progres kumulatif bulanan Jan – Des 2026</div>
                 </div>
-                <span class="badge badge-success">+14% vs 2025</span>
+                <span class="badge badge-success">+14% vs TA 2025</span>
               </div>
               <div id="executiveTrendChart"></div>
             </div>
@@ -2031,36 +2116,60 @@
                 <h3 class="card-title">Executive Strategic Insights</h3>
                 <span class="badge badge-blue">Ringkasan Eksekutif</span>
               </div>
-              <div style="display: flex; flex-direction: column; gap: 14px;">
-                <div
-                  style="padding: 14px; background: var(--color-surface-subtle); border-radius: var(--radius-md); border: 1px solid var(--color-border);">
-                  <div style="font-weight: 700; color: var(--color-primary); font-size: 13.5px;">Tingkat Kepatuhan
-                    Pengisian IDP 92%</div>
-                  <p style="font-size: 12px; color: var(--color-text-secondary); margin-top: 4px; line-height: 1.5;">
-                    91 dari 99 pegawai telah mengisi rencana IDP secara mandiri. Bidang Perencanaan Makro & PMPE
-                    memimpin dengan kepatuhan 100%.
+              <div style="display: flex; flex-direction: column; gap: 12px;">
+                <div style="padding: 12px 14px; background: var(--color-surface-subtle); border-radius: var(--radius-md); border: 1px solid var(--color-border); border-left: 3px solid var(--color-primary);">
+                  <div style="font-weight: 750; color: var(--color-primary); font-size: 13px;">Tingkat Kepatuhan Pengesahan IDP 91.9%</div>
+                  <p style="font-size: 12px; color: var(--color-text-secondary); margin-top: 4px; line-height: 1.5; margin-bottom: 0;">
+                    91 dari 99 ASN telah memiliki dokumen IDP sah. Bidang PMPE dan UPTD Pusdatin mencapai kepatuhan 100%.
                   </p>
                 </div>
 
-                <div
-                  style="padding: 14px; background: var(--color-surface-subtle); border-radius: var(--radius-md); border: 1px solid var(--color-border);">
-                  <div style="font-weight: 700; color: var(--color-success); font-size: 13.5px;">Realisasi Pelatihan
-                    Mencapai 74%</div>
-                  <p style="font-size: 12px; color: var(--color-text-secondary); margin-top: 4px; line-height: 1.5;">
-                    74 pegawai telah memiliki realisasi bersertifikat. Metode coaching dan diklat teknis mendominasi
-                    kegiatan efektif.
+                <div style="padding: 12px 14px; background: var(--color-surface-subtle); border-radius: var(--radius-md); border: 1px solid var(--color-border); border-left: 3px solid var(--color-success);">
+                  <div style="font-weight: 750; color: var(--color-success); font-size: 13px;">88% ASN Memenuhi Standar Minimal 20 JP</div>
+                  <p style="font-size: 12px; color: var(--color-text-secondary); margin-top: 4px; line-height: 1.5; margin-bottom: 0;">
+                    Akumulasi mencapai 2.140 JP dengan rata-rata 21.6 JP per pegawai, melampaui batas minimal LAN RI & BKN.
                   </p>
                 </div>
 
-                <div
-                  style="padding: 14px; background: var(--color-surface-subtle); border-radius: var(--radius-md); border: 1px solid var(--color-border);">
-                  <div style="font-weight: 700; color: var(--color-warning); font-size: 13.5px;">26 Pegawai Butuh Tindak
-                    Lanjut</div>
-                  <p style="font-size: 12px; color: var(--color-text-secondary); margin-top: 4px; line-height: 1.5;">
-                    Disarankan menerbitkan arahan percepatan pelaksanaan pengembangan kompetensi pada triwulan berjalan.
+                <div style="padding: 12px 14px; background: var(--color-surface-subtle); border-radius: var(--radius-md); border: 1px solid var(--color-border); border-left: 3px solid var(--color-warning);">
+                  <div style="font-weight: 750; color: var(--color-warning); font-size: 13px;">8 ASN Memerlukan Tindak Lanjut</div>
+                  <p style="font-size: 12px; color: var(--color-text-secondary); margin-top: 4px; line-height: 1.5; margin-bottom: 0;">
+                    Disarankan menerbitkan disposisi percepatan penyelesaian pelatihan sebelum batas evaluasi Triwulan II.
                   </p>
                 </div>
               </div>
+            </div>
+          </div>
+
+          <!-- TABEL PENGENDALIAN KINERJA 7 BIDANG BAPPEDA -->
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <h3 class="card-title">Matriks Pengendalian Pengembangan Kompetensi per Bidang (99 ASN)</h3>
+                <div style="font-size: 12px; color: var(--color-text-muted);">
+                  Evaluasi kepatuhan 20 JP dan status pengesahan IDP per unit kerja di lingkungan Bappeda Provinsi Lampung.
+                </div>
+              </div>
+              <button class="btn btn-sm btn-outline" onclick="App.navigate('pmonitoring')">
+                <span data-icon="Sliders" data-icon-size="14"></span> Buka Monitoring Lengkap
+              </button>
+            </div>
+            <div class="table-responsive mobile-cards">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th style="width: 5%;">No</th>
+                    <th style="width: 28%;">Unit Kerja & Penanggung Jawab</th>
+                    <th style="width: 12%; text-align: center;">Total ASN</th>
+                    <th style="width: 12%; text-align: center;">IDP Sah (%)</th>
+                    <th style="width: 12%; text-align: center;">Rata-rata JP</th>
+                    <th style="width: 16%;">Kepatuhan 20 JP</th>
+                    <th style="width: 15%; text-align: center;">Status Evaluasi</th>
+                    <th style="width: 10%; text-align: center;">Aksi</th>
+                  </tr>
+                </thead>
+                <tbody id="execUnitTableBody"></tbody>
+              </table>
             </div>
           </div>
         </section>
@@ -3011,10 +3120,10 @@
   <script src="assets/lambang-lampung.js?v=20261008_fix"></script>
   <script src="js/icons.js?v=20261008_fix"></script>
   <script src="js/charts.js?v=20261008_fix"></script>
-  <script src="js/bappeda_data.js?v=20261013_v1"></script>
-  <script src="js/store.js?v=20261013_v1"></script>
-  <script src="js/export.js?v=20261013_v1"></script>
-  <script src="js/app.js?v=20261013_v1"></script>
+  <script src="js/bappeda_data.js?v=20261013_v2"></script>
+  <script src="js/store.js?v=20261013_v2"></script>
+  <script src="js/export.js?v=20261013_v2"></script>
+  <script src="js/app.js?v=20261013_v2"></script>
 </body>
 
 </html>

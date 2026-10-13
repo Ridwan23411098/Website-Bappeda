@@ -417,13 +417,7 @@ const App = {
         { label: 'Belum Mengisi', value: 11, color: 'var(--color-text-muted)' }
       ]);
     } else if (Store.state.activePage === 'pdash') {
-      Charts.renderGroupedBar('executiveGroupedBar', Store.state.executiveMetrics.rencanaVsRealisasi);
-      Charts.renderDonut('executiveDonutChart', [
-        { label: 'Selesai', value: 48, color: 'var(--color-success)' },
-        { label: 'Berjalan', value: 26, color: 'var(--color-warning)' },
-        { label: 'Belum Terlaksana', value: 26, color: 'var(--color-danger)' }
-      ]);
-      Charts.renderTrendLine('executiveTrendChart', Store.state.executiveMetrics.monthlyTrend, Store.state.executiveMetrics.monthLabels);
+      this.renderExecutiveDashboard();
     }
   },
 
@@ -1781,13 +1775,162 @@ const App = {
   // ==========================================
 
   renderExecutiveDashboard() {
-    Charts.renderGroupedBar('executiveGroupedBar', Store.state.executiveMetrics.rencanaVsRealisasi);
+    const summary = Store.getExecutiveSummary ? Store.getExecutiveSummary() : {
+      totalPegawai: 99,
+      memenuhi20Jp: 87,
+      persenKepatuhan: 88,
+      idpDisetujui: 91,
+      persenDisetujui: 92,
+      totalJp: 2140,
+      avgJp: '21.6',
+      totalEstimasiAnggaran: 353100000,
+      perluTindakLanjut: 8
+    };
+
+    // Update Top Stat Elements if present
+    const elTotal = document.getElementById('execTotalPegawai');
+    if (elTotal) elTotal.textContent = `${summary.totalPegawai} ASN`;
+
+    const elKepatuhan = document.getElementById('execKepatuhanJp');
+    if (elKepatuhan) elKepatuhan.textContent = `${summary.persenKepatuhan}%`;
+
+    const elKepatuhanCount = document.getElementById('execKepatuhanJpCount');
+    if (elKepatuhanCount) elKepatuhanCount.textContent = `${summary.memenuhi20Jp} dari ${summary.totalPegawai} ASN (≥20 JP)`;
+
+    const elIdpDisahkan = document.getElementById('execIdpDisahkan');
+    if (elIdpDisahkan) elIdpDisahkan.textContent = `${summary.idpDisetujui} ASN`;
+
+    const elIdpDisahkanPct = document.getElementById('execIdpDisahkanPct');
+    if (elIdpDisahkanPct) elIdpDisahkanPct.textContent = `${summary.persenDisetujui}% Dokumen Sah`;
+
+    const elTotalJp = document.getElementById('execTotalJp');
+    if (elTotalJp) elTotalJp.textContent = `${summary.totalJp.toLocaleString('id-ID')} JP`;
+
+    const elAvgJp = document.getElementById('execAvgJp');
+    if (elAvgJp) elAvgJp.textContent = `Rata-rata ${summary.avgJp} JP/ASN`;
+
+    const elAnggaran = document.getElementById('execEstimasiAnggaran');
+    if (elAnggaran) elAnggaran.textContent = `Rp ${(summary.totalEstimasiAnggaran / 1000000).toFixed(1)} Jt`;
+
+    // 1. Grouped Bar: 7 Unit Kerja Bappeda
+    const unitBreakdown = Store.getUnitBreakdown ? Store.getUnitBreakdown() : [];
+    const barData = unitBreakdown.map(u => ({
+      label: u.unit.replace('Bidang ', '').replace('UPTD ', ''),
+      rencana: u.pegawai,
+      realisasi: Math.round(u.pegawai * (u.pctKepatuhan / 100))
+    }));
+    Charts.renderGroupedBar('executiveGroupedBar', barData);
+
+    // 2. Donut Chart: Kepatuhan Standar UU ASN No. 20/2023
+    const kurang20 = Math.max(0, summary.totalPegawai - summary.memenuhi20Jp);
+    const sedangProses = Math.round(kurang20 * 0.65);
+    const belumTerlaksana = kurang20 - sedangProses;
+
     Charts.renderDonut('executiveDonutChart', [
-      { label: 'Selesai', value: 48, color: 'var(--color-success)' },
-      { label: 'Berjalan', value: 26, color: 'var(--color-warning)' },
-      { label: 'Belum Terlaksana', value: 26, color: 'var(--color-danger)' }
+      { label: 'Memenuhi (≥20 JP)', value: summary.memenuhi20Jp, color: 'var(--color-success)' },
+      { label: 'Progres (10-19 JP)', value: Math.max(1, sedangProses), color: 'var(--color-warning)' },
+      { label: 'Kurang (<10 JP)', value: Math.max(1, belumTerlaksana), color: 'var(--color-danger)' }
     ]);
-    Charts.renderTrendLine('executiveTrendChart', Store.state.executiveMetrics.monthlyTrend, Store.state.executiveMetrics.monthLabels);
+
+    // 3. Trend Line
+    Charts.renderTrendLine('executiveTrendChart', [180, 360, 590, 840, 1120, 1380, 1620, 1850, 1990, 2080, 2120, summary.totalJp], [
+      'Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'
+    ]);
+
+    // 4. Render Executive Directives
+    this.renderExecutiveDirectivesList();
+
+    // 5. Render 7-Unit Executive Table
+    this.renderExecutiveUnitTable();
+
+    // Re-create lucide icons inside rendered components
+    if (typeof lucide !== 'undefined' && lucide.createIcons) {
+      lucide.createIcons();
+    }
+  },
+
+  renderExecutiveDirectivesList() {
+    const container = document.getElementById('execDirectivesContainer');
+    if (!container) return;
+
+    const directives = Store.state.executiveDirectives || [];
+    if (directives.length === 0) {
+      container.innerHTML = `<div style="text-align: center; color: var(--color-text-muted); padding: 14px; font-size: 12px;">Belum ada arahan pimpinan yang diterbitkan.</div>`;
+      return;
+    }
+
+    container.innerHTML = directives.map(d => `
+      <div style="background: var(--color-surface-subtle); border: 1px solid var(--color-border); border-left: 4px solid var(--color-primary); border-radius: var(--radius-md); padding: 14px; margin-bottom: 10px;">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px; flex-wrap: wrap; gap: 6px;">
+          <div>
+            <span style="font-weight: 700; color: var(--color-primary); font-size: 13px;">${d.penulis}</span>
+            <span style="font-size: 11px; color: var(--color-text-muted); margin-left: 6px;">(${d.jabatan})</span>
+          </div>
+          <span class="badge badge-neutral" style="font-size: 10px;">${d.tanggal}</span>
+        </div>
+        <p style="font-size: 12.5px; color: var(--color-text-primary); margin: 0; line-height: 1.5; font-style: italic;">
+          "${d.arahan}"
+        </p>
+        <div style="margin-top: 8px; font-size: 11px; color: var(--color-text-muted); display: flex; align-items: center; gap: 6px;">
+          <span>🎯 Target: <b>${d.target}</b></span> &bull; 
+          <span class="text-success" style="font-weight: 600;">Status: ${d.status}</span>
+        </div>
+      </div>
+    `).join('');
+  },
+
+  submitExecutiveDirective() {
+    const input = document.getElementById('newDirectiveInput');
+    const target = document.getElementById('directiveTargetSelect')?.value || 'Seluruh Kepala Bidang & Sekretaris';
+    if (!input || !input.value.trim()) {
+      App.toast('Mohon ketikkan arahan atau instruksi pimpinan terlebih dahulu', 'warning');
+      return;
+    }
+
+    Store.addExecutiveDirective(input.value.trim(), target);
+    input.value = '';
+    this.renderExecutiveDirectivesList();
+    App.toast('Arahan Kepala Badan berhasil diterbitkan dan disiarkan ke seluruh unit kerja!', 'success');
+  },
+
+  renderExecutiveUnitTable() {
+    const tbody = document.getElementById('execUnitTableBody');
+    if (!tbody) return;
+
+    const units = Store.getUnitBreakdown ? Store.getUnitBreakdown() : [];
+    tbody.innerHTML = units.map((u, i) => {
+      const isGood = u.pctKepatuhan >= 85;
+      const statusBadge = u.pctKepatuhan >= 95
+        ? `<span class="badge badge-success">Prima (100%)</span>`
+        : u.pctKepatuhan >= 85
+        ? `<span class="badge badge-blue">Baik (${u.pctKepatuhan}%)</span>`
+        : `<span class="badge badge-warning">Perlu Atensi (${u.pctKepatuhan}%)</span>`;
+
+      return `
+        <tr>
+          <td data-label="No" style="text-align: center;">${i + 1}</td>
+          <td data-label="Unit Kerja">
+            <div style="font-weight: 700; color: var(--color-text-primary); font-size: 13px;">${u.unit}</div>
+            <div style="font-size: 11px; color: var(--color-text-muted); margin-top: 2px;">PJ: ${u.kabid}</div>
+          </td>
+          <td data-label="Total Pegawai" style="text-align: center;"><span class="badge badge-neutral"><b>${u.pegawai}</b> ASN</span></td>
+          <td data-label="IDP Sah" style="text-align: center;"><b>${u.pctIdp}%</b></td>
+          <td data-label="Rata-rata JP" style="text-align: center;"><b>${u.avgJp} JP</b></td>
+          <td data-label="Kepatuhan 20 JP">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span style="font-weight: 700; font-size: 12px; width: 36px;">${u.pctKepatuhan}%</span>
+              <div class="progress-track" style="flex: 1; height: 6px;"><div class="progress-fill ${isGood ? 'success' : 'warning'}" style="width: ${u.pctKepatuhan}%"></div></div>
+            </div>
+          </td>
+          <td data-label="Status Evaluasi" style="text-align: center;">${statusBadge}</td>
+          <td data-label="Aksi" style="text-align: center;">
+            <button class="btn btn-sm btn-outline" onclick="App.openMonitoringDetailDrawer('${u.unit}')" title="Lihat Daftar Pegawai">
+              <span data-icon="Eye" data-icon-size="14"></span> Rincian ASN
+            </button>
+          </td>
+        </tr>
+      `;
+    }).join('');
   },
 
   renderMonitoring() {
