@@ -1552,9 +1552,34 @@ const App = {
     
     const badgeCls = e.statusIdp === 'Final' ? 'badge-success' : e.statusIdp === 'Belum' ? 'badge-danger' : 'badge-warning';
     document.getElementById('modalEmpStatusIdp').innerHTML = `<span class="badge ${badgeCls}">${e.statusIdp}</span>`;
-    document.getElementById('modalEmpProgress').textContent = e.progress;
-
+    this._currentDetailEmployee = e;
     this.openModal('empDetailModal');
+  },
+
+  printCurrentDetailEmployee() {
+    const e = this._currentDetailEmployee;
+    if (!e) return;
+    const cleanNip = String(e.nip || '').replace(/\s+/g, '');
+    const verif = (Store.state.verifications || []).find(v => String(v.nip).replace(/\s+/g, '') === cleanNip);
+    ExportService.showPrintDialog({
+      user: {
+        name: e.name,
+        nip: e.nipFormatted || e.nip,
+        pangkat: e.pangkat,
+        jabatan: e.jabatanLengkap || e.jabatan,
+        unitKerja: e.unit,
+        jenisJabatan: e.jenis,
+        pendidikan: e.pendidikan || 'S-1',
+        masaKerja: e.masaKerja || '10 Tahun',
+        nineBox: e.nineBox || '6'
+      },
+      careerPlan: {
+        jenjangTarget: verif?.targetKarier || 'JFT Muda — Level 3',
+        rencana: verif?.rencanaKarier || 'Peningkatan kapasitas teknis perencanaan pembangunan daerah dan pengendalian program.',
+        rumpunTarget: ['Perencanaan Pembangunan Daerah', 'Manajemen Publik', 'Statistik Daerah']
+      },
+      programs: Store.state.idpState.programs
+    });
   },
 
   renderAdminEmployees() {
