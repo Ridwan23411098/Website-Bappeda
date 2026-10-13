@@ -1404,6 +1404,9 @@ const App = {
 
   renderAdminDashboard() {
     this.renderAdminDirectiveBanner();
+    if (typeof BackupService !== 'undefined') {
+      BackupService.renderAdminDashboardBackupCard();
+    }
     Charts.renderDonut('adminIdpStatusDonut', [
       { label: 'Final', value: 72, color: 'var(--color-success)' },
       { label: 'Diajukan ke Atasan', value: 12, color: 'var(--color-warning)' },
@@ -1852,6 +1855,30 @@ const App = {
         `;
       }).join('');
     }
+
+    if (typeof BackupService !== 'undefined') {
+      BackupService.renderBackupTab();
+    }
+  },
+
+  switchMasterTab(tabName) {
+    const tabs = ['metode', 'rumpun', 'jenjang', 'backup'];
+    tabs.forEach(t => {
+      const cap = t.charAt(0).toUpperCase() + t.slice(1);
+      const btn = document.getElementById(`tabBtn${cap}`);
+      const pane = document.getElementById(`masterPane${cap}`);
+      if (btn) btn.classList.toggle('active', t === tabName);
+      if (pane) pane.style.display = (t === tabName) ? 'block' : 'none';
+    });
+    if (tabName === 'backup' && typeof BackupService !== 'undefined') {
+      BackupService.renderBackupTab();
+    }
+    renderAllIcons();
+  },
+
+  openMasterBackupTab() {
+    this.navigate('amaster');
+    this.switchMasterTab('backup');
   },
 
   confirmDeleteMasterItem(type, id) {

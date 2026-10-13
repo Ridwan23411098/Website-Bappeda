@@ -1567,6 +1567,9 @@
           <!-- Executive Directive Banner for Admin -->
           <div id="adashDirectiveBanner"></div>
 
+          <!-- Data Safety & Backup Status Card for Kasubbag Kepegawaian -->
+          <div id="adashBackupStatusCard"></div>
+
           <div class="grid grid-cols-4" style="margin-bottom: 24px;">
             <div class="stat-card warning">
               <div class="stat-card-inner">
@@ -1677,6 +1680,9 @@
               </button>
               <button class="btn btn-secondary" onclick="App.navigate('amaster')">
                 <span data-icon="Settings2" data-icon-size="16"></span> Kelola Master Referensi
+              </button>
+              <button class="btn btn-secondary" onclick="App.openMasterBackupTab()">
+                <span data-icon="DatabaseBackup" data-icon-size="16"></span> Cadangan & Keamanan Data
               </button>
             </div>
           </div>
@@ -1888,15 +1894,18 @@
 
           <div class="card">
             <div class="tab-nav">
-              <button class="tab-btn active"
-                onclick="document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active')); this.classList.add('active'); document.getElementById('masterPaneMetode').style.display='block'; document.getElementById('masterPaneRumpun').style.display='none'; document.getElementById('masterPaneJenjang').style.display='none';">Metode
-                Pengembangan</button>
-              <button class="tab-btn"
-                onclick="document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active')); this.classList.add('active'); document.getElementById('masterPaneMetode').style.display='none'; document.getElementById('masterPaneRumpun').style.display='block'; document.getElementById('masterPaneJenjang').style.display='none';">Rumpun
-                Target Keahlian</button>
-              <button class="tab-btn"
-                onclick="document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active')); this.classList.add('active'); document.getElementById('masterPaneMetode').style.display='none'; document.getElementById('masterPaneRumpun').style.display='none'; document.getElementById('masterPaneJenjang').style.display='block';">Jenjang
-                Target & Level Jabatan</button>
+              <button class="tab-btn active" id="tabBtnMetode" onclick="App.switchMasterTab('metode')">
+                Metode Pengembangan
+              </button>
+              <button class="tab-btn" id="tabBtnRumpun" onclick="App.switchMasterTab('rumpun')">
+                Rumpun Target Keahlian
+              </button>
+              <button class="tab-btn" id="tabBtnJenjang" onclick="App.switchMasterTab('jenjang')">
+                Jenjang Target & Level Jabatan
+              </button>
+              <button class="tab-btn" id="tabBtnBackup" onclick="App.switchMasterTab('backup')">
+                <span data-icon="DatabaseBackup" data-icon-size="14" style="margin-right: 4px;"></span> Cadangan & Keamanan Data
+              </button>
             </div>
 
             <div id="masterPaneMetode">
@@ -1947,6 +1956,9 @@
                 </table>
               </div>
             </div>
+
+            <!-- Tab 4: Pusat Cadangan & Keamanan Data (Tahap 6) -->
+            <div id="masterPaneBackup" style="display: none;"></div>
           </div>
         </section>
 

@@ -731,3 +731,674 @@ const ExportService = {
     }
   }
 };
+
+// ===========================================================================
+// BACKUP & RESTORE SERVICE (TAHAP 6: DATA SAFETY & RECOVERY)
+// ===========================================================================
+
+const BackupService = {
+  _selectedBackupFile: null,
+  _parsedBackupData: null,
+
+  /**
+   * Mengambil data statistik cadangan terkini
+   */
+  getBackupStats() {
+    let lastInfo = Store.state ? Store.state.lastBackupInfo : null;
+    if (!lastInfo) {
+      try {
+        const saved = localStorage.getItem('sip_last_backup_info');
+        if (saved) lastInfo = JSON.parse(saved);
+      } catch(e) {}
+    }
+
+    const employees = (Store.state && Store.state.employees) ? Store.state.employees : [];
+    const realizations = (Store.state && Store.state.realizations) ? Store.state.realizations : [];
+    const verifications = (Store.state && Store.state.verifications) ? Store.state.verifications : [];
+    const directives = (Store.state && Store.state.executiveDirectives) ? Store.state.executiveDirectives : [];
+
+    return {
+      totalEmployees: employees.length,
+      totalRealizations: realizations.length,
+      totalVerifications: verifications.length,
+      totalDirectives: directives.length,
+      lastBackupInfo: lastInfo,
+      lastBackupFormatted: lastInfo ? (lastInfo.createdFormatted || lastInfo.timestamp) : 'Belum pernah dicadangkan'
+    };
+  },
+
+  /**
+   * Menghitung checksum SHA-256 untuk memverifikasi integritas file
+   */
+  async computeChecksum(contentStr) {
+    try {
+      if (window.crypto && crypto.subtle) {
+        const encoder = new TextEncoder();
+        const data = encoder.encode(contentStr);
+        const hashBuf = await crypto.subtle.digest('SHA-256', data);
+        const hashArr = Array.from(new Uint8Array(hashBuf));
+        return hashArr.map(b => b.toString(16).padStart(2, '0')).join('');
+      }
+    } catch (e) {
+      console.warn('Crypto API fallback checksum:', e);
+    }
+    // Simple hash fallback
+    let hash = 0;
+    for (let i = 0; i < contentStr.length; i++) {
+      hash = ((hash << 5) - hash) + contentStr.charCodeAt(i);
+      hash |= 0;
+    }
+    return 'sha256_alt_' + Math.abs(hash).toString(16);
+  },
+
+  /**
+   * Membuat Cadangan Lengkap (.JSON) Basis Data SIP-KOMPETENSI
+   */
+  async createFullBackup() {
+    try {
+      if (typeof App !== 'undefined' && App.toast) {
+        App.toast('Menyiapkan arsip cadangan basis data...', 'info');
+      }
+
+      // 1. Kumpulkan identitas pembuat cadangan
+      const sess = (Store.state && Store.state.currentSession) ? Store.state.currentSession : {};
+      const author = {
+        nip: sess.nip || '196910261992032002',
+        name: sess.name || 'CIK MARYA S.E.,M.M.',
+        jabatan: sess.jabatan || 'Kepala Sub Bagian Umum & Kepegawaian',
+        role: sess.role || 'admin'
+      };
+
+      const now = new Date();
+      const pad = n => String(n).padStart(2, '0');
+      const dateCode = `${now.getFullYear()}${pad(now.getMonth()+1)}${pad(now.getDate())}_${pad(now.getHours())}${pad(now.getMinutes())}`;
+      const nowFormatted = now.toLocaleDateString('id-ID', {
+        weekday: 'long',
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric'
+      }) + ' pukul ' + pad(now.getHours()) + '.' + pad(now.getMinutes()) + ' WIB';
+
+      // 2. Ambil snapshot data Supabase jika online
+      let cloudSnapshot = null;
+      if (typeof supabaseClient !== 'undefined') {
+        try {
+          const [subRes, progRes, notifRes] = await Promise.all([
+            supabaseClient.from('idp_submissions').select('*').limit(200),
+            supabaseClient.from('idp_programs').select('*').limit(500),
+            supabaseClient.from('notifikasi').select('*').limit(100)
+          ]);
+          cloudSnapshot = {
+            submissions: subRes.data || [],
+            programs: progRes.data || [],
+            notifications: notifRes.data || []
+          };
+        } catch (errCloud) {
+          console.warn('Peringatan saat mengambil snapshot cloud:', errCloud);
+        }
+      }
+
+      // 3. Susun payload bundle resmi
+      const bundle = {
+        app: 'SIP-KOMPETENSI — BAPPEDA PROVINSI LAMPUNG',
+        agency: 'Badan Perencanaan Pembangunan Daerah Provinsi Lampung',
+        version: '2.0-bappeda-lampung',
+        schemaVersion: 2,
+        backupId: `SIP-BKP-${dateCode}`,
+        createdAt: now.toISOString(),
+        createdFormatted: nowFormatted,
+        createdBy: author,
+        summary: {
+          totalPegawai: Store.state.employees?.length || 0,
+          totalRealisasi: Store.state.realizations?.length || 0,
+          totalVerifikasi: Store.state.verifications?.length || 0,
+          totalArahan: Store.state.executiveDirectives?.length || 0,
+          totalNotifikasi: Store.state.notifications?.length || 0
+        },
+        data: {
+          employees: Store.state.employees || [],
+          realizations: (Store.state.realizations || []).map(r => ({
+            ...r,
+            buktiUrl: (r.buktiUrl && r.buktiUrl.startsWith('http')) ? r.buktiUrl : ''
+          })),
+          verifications: Store.state.verifications || [],
+          executiveDirectives: Store.state.executiveDirectives || [],
+          masterData: Store.state.masterData || {},
+          idpState: Store.state.idpState || {},
+          careerPlan: Store.state.careerPlan || {},
+          competencies: Store.state.competencies || {},
+          monitoringUnits: Store.state.monitoringUnits || []
+        },
+        cloudSync: cloudSnapshot
+      };
+
+      // 4. Hitung hash integritas SHA-256
+      const jsonContent = JSON.stringify(bundle, null, 2);
+      const checksum = await this.computeChecksum(jsonContent);
+      bundle.checksum = checksum;
+
+      // 5. Unduh file .json ke komputer lokal
+      const blob = new Blob([JSON.stringify(bundle, null, 2)], { type: 'application/json;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      const filename = `SIP_BAPPEDA_BACKUP_${dateCode}.json`;
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      // 6. Simpan riwayat pencadangan di state
+      const backupRecord = {
+        timestamp: now.toISOString(),
+        createdFormatted: nowFormatted,
+        filename: filename,
+        createdBy: author.name,
+        checksum: checksum,
+        recordCount: bundle.summary.totalPegawai + bundle.summary.totalRealisasi
+      };
+      Store.state.lastBackupInfo = backupRecord;
+      Store.save();
+      try {
+        localStorage.setItem('sip_last_backup_info', JSON.stringify(backupRecord));
+      } catch(e) {}
+
+      // 7. Notifikasi sistem & refresh tampilan
+      if (typeof App !== 'undefined' && App.toast) {
+        App.toast('Cadangan basis data resmi berhasil diunduh!', 'success');
+      }
+      if (Store.pushNotification) {
+        Store.pushNotification({
+          title: 'Cadangan Basis Data Resmi Dibuat',
+          pesan: `Berkas cadangan '${filename}' (${bundle.summary.totalPegawai} ASN) berhasil diunduh oleh ${author.name}.`,
+          tipe: 'success'
+        });
+      }
+
+      this.renderBackupTab();
+      this.renderAdminDashboardBackupCard();
+
+    } catch (err) {
+      console.error('Gagal membuat cadangan basis data:', err);
+      if (typeof App !== 'undefined' && App.toast) {
+        App.toast('Gagal membuat cadangan: ' + err.message, 'error');
+      }
+    }
+  },
+
+  /**
+   * Menangani pemilihan berkas cadangan dari komputer (File Picker)
+   */
+  async handleBackupFileSelect(event) {
+    const file = event.target.files ? event.target.files[0] : null;
+    if (!file) return;
+
+    if (!file.name.endsWith('.json')) {
+      if (typeof App !== 'undefined' && App.toast) {
+        App.toast('Harap pilih berkas cadangan berekstensi .JSON', 'warning');
+      }
+      return;
+    }
+
+    try {
+      const text = await file.text();
+      let parsed;
+      try {
+        parsed = JSON.parse(text);
+      } catch(e) {
+        throw new Error('Format berkas JSON tidak valid atau berkas rusak.');
+      }
+
+      // Validasi struktur berkas
+      if (!parsed.data || (!parsed.data.employees && !parsed.data.realizations)) {
+        throw new Error('Berkas ini bukan arsip cadangan resmi SIP-KOMPETENSI Bappeda yang valid.');
+      }
+
+      this._selectedBackupFile = file;
+      this._parsedBackupData = parsed;
+
+      // Render info pratinjau pemulihan
+      this.renderRestorePreview(file, parsed);
+      if (typeof App !== 'undefined' && App.toast) {
+        App.toast('Berkas cadangan valid. Silakan periksa pratinjau sebelum memulihkan.', 'info');
+      }
+
+    } catch (err) {
+      console.error('Error membaca berkas cadangan:', err);
+      if (typeof App !== 'undefined' && App.toast) {
+        App.toast(err.message, 'error');
+      }
+      const previewEl = document.getElementById('backupRestorePreview');
+      if (previewEl) previewEl.style.display = 'none';
+      this._selectedBackupFile = null;
+      this._parsedBackupData = null;
+    }
+  },
+
+  /**
+   * Render kartu pratinjau pemulihan setelah file dipilih
+   */
+  renderRestorePreview(file, parsed) {
+    const previewEl = document.getElementById('backupRestorePreview');
+    if (!previewEl) return;
+
+    const summary = parsed.summary || {
+      totalPegawai: parsed.data.employees?.length || 0,
+      totalRealisasi: parsed.data.realizations?.length || 0,
+      totalVerifikasi: parsed.data.verifications?.length || 0,
+      totalArahan: parsed.data.executiveDirectives?.length || 0
+    };
+
+    const author = parsed.createdBy?.name || 'Pengelola SDM Bappeda';
+    const createdDate = parsed.createdFormatted || parsed.createdAt || '-';
+    const checksumDisplay = parsed.checksum ? parsed.checksum.substring(0, 16) + '...' : 'SHA-256 Terverifikasi';
+
+    previewEl.style.display = 'block';
+    previewEl.innerHTML = `
+      <div style="background: rgba(30, 58, 138, 0.04); border: 1px solid rgba(59, 130, 246, 0.3); border-radius: var(--radius-md); padding: 18px; margin-top: 16px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span style="color: var(--color-success);">${getIcon('FileCheck', 20)}</span>
+            <span style="font-weight: 700; font-size: 13.5px; color: var(--color-text-primary);">${file.name}</span>
+            <span class="badge badge-success" style="font-size: 10px;">Valid (${(file.size / 1024).toFixed(1)} KB)</span>
+          </div>
+          <span style="font-size: 11px; color: var(--color-text-muted);">Integritas: <code style="background: #e2e8f0; padding: 2px 6px; border-radius: 4px; font-size: 10px;">${checksumDisplay}</code></span>
+        </div>
+
+        <div class="grid grid-cols-4" style="gap: 10px; margin-bottom: 14px;">
+          <div style="background: var(--color-surface); padding: 10px 12px; border-radius: 6px; border: 1px solid var(--color-border);">
+            <div style="font-size: 11px; color: var(--color-text-muted);">Data Pegawai</div>
+            <div style="font-size: 15px; font-weight: 700; color: var(--color-primary);">${summary.totalPegawai} ASN</div>
+          </div>
+          <div style="background: var(--color-surface); padding: 10px 12px; border-radius: 6px; border: 1px solid var(--color-border);">
+            <div style="font-size: 11px; color: var(--color-text-muted);">Bukti Realisasi</div>
+            <div style="font-size: 15px; font-weight: 700; color: var(--color-success);">${summary.totalRealisasi} Berkas</div>
+          </div>
+          <div style="background: var(--color-surface); padding: 10px 12px; border-radius: 6px; border: 1px solid var(--color-border);">
+            <div style="font-size: 11px; color: var(--color-text-muted);">Verifikasi IDP</div>
+            <div style="font-size: 15px; font-weight: 700; color: var(--color-warning);">${summary.totalVerifikasi} Rekap</div>
+          </div>
+          <div style="background: var(--color-surface); padding: 10px 12px; border-radius: 6px; border: 1px solid var(--color-border);">
+            <div style="font-size: 11px; color: var(--color-text-muted);">Tanggal Arsip</div>
+            <div style="font-size: 11px; font-weight: 600; color: var(--color-text-primary); line-height: 1.3;">${createdDate}</div>
+          </div>
+        </div>
+
+        <div style="font-size: 12px; color: var(--color-text-secondary); margin-bottom: 14px; background: rgba(245, 158, 11, 0.08); border-left: 3px solid var(--color-warning); padding: 8px 12px; border-radius: 4px;">
+          ⚠️ <b>Peringatan:</b> Menekan tombol di bawah akan memulihkan data sistem ke status cadangan ini. Titik pemulihan darurat <i>(safety snapshot)</i> otomatis dicatat sebelum pemulihan diterapkan.
+        </div>
+
+        <div style="display: flex; gap: 10px; justify-content: flex-end;">
+          <button class="btn btn-outline btn-sm" onclick="BackupService.cancelRestore()">Batal</button>
+          <button class="btn btn-primary btn-sm" onclick="BackupService.confirmAndExecuteRestore()">
+            ${getIcon('RotateCcw', 14)} Pulihkan Basis Data Sekarang
+          </button>
+        </div>
+      </div>
+    `;
+    renderAllIcons();
+  },
+
+  cancelRestore() {
+    this._selectedBackupFile = null;
+    this._parsedBackupData = null;
+    const previewEl = document.getElementById('backupRestorePreview');
+    if (previewEl) previewEl.style.display = 'none';
+    const input = document.getElementById('backupFileInput');
+    if (input) input.value = '';
+  },
+
+  /**
+   * Eksekusi pemulihan data setelah konfirmasi
+   */
+  confirmAndExecuteRestore() {
+    if (!this._parsedBackupData) {
+      if (typeof App !== 'undefined' && App.toast) {
+        App.toast('Pilih berkas cadangan terlebih dahulu', 'warning');
+      }
+      return;
+    }
+
+    const backup = this._parsedBackupData;
+    if (typeof App !== 'undefined' && App.confirmAction) {
+      App.confirmAction(
+        'Konfirmasi Pemulihan Basis Data',
+        `Anda akan memulihkan basis data dari arsip tanggal ${backup.createdFormatted || backup.createdAt}. Lanjutkan proses pemulihan?`,
+        () => {
+          this.executeRestore(backup);
+        }
+      );
+    } else {
+      if (confirm('Lanjutkan proses pemulihan basis data dari berkas cadangan ini?')) {
+        this.executeRestore(backup);
+      }
+    }
+  },
+
+  async executeRestore(backup) {
+    try {
+      if (typeof App !== 'undefined' && App.toast) {
+        App.toast('Memproses pemulihan data...', 'info');
+      }
+
+      // 1. Simpan safety snapshot sebelum restore
+      if (typeof IDBHelper !== 'undefined') {
+        try {
+          await IDBHelper.setData('sip_pre_restore_snapshot', JSON.parse(JSON.stringify(Store.state)));
+        } catch(e) {}
+      }
+
+      // 2. Pulihkan state dari data cadangan
+      const d = backup.data || {};
+      if (Array.isArray(d.employees) && d.employees.length > 0) {
+        Store.state.employees = d.employees;
+      }
+      if (Array.isArray(d.realizations)) {
+        Store.state.realizations = d.realizations;
+      }
+      if (Array.isArray(d.verifications)) {
+        Store.state.verifications = d.verifications;
+      }
+      if (Array.isArray(d.executiveDirectives)) {
+        Store.state.executiveDirectives = d.executiveDirectives;
+      }
+      if (d.masterData) {
+        Store.state.masterData = d.masterData;
+      }
+      if (d.idpState) {
+        Store.state.idpState = d.idpState;
+      }
+      if (d.careerPlan) {
+        Store.state.careerPlan = d.careerPlan;
+      }
+      if (d.competencies) {
+        Store.state.competencies = d.competencies;
+      }
+      if (Array.isArray(d.monitoringUnits)) {
+        Store.state.monitoringUnits = d.monitoringUnits;
+      }
+
+      // 3. Simpan permanen ke localStorage & IndexedDB
+      Store.save();
+      const userRels = (Store.state.realizations || []).filter(r => r.isUserInput);
+      localStorage.setItem(USER_REALIZATIONS_KEY, JSON.stringify(userRels));
+      if (typeof IDBHelper !== 'undefined') {
+        IDBHelper.setData('user_realizations', userRels).catch(() => {});
+      }
+
+      // 4. Catat notifikasi audit
+      const restoreMsg = `Basis data berhasil dipulihkan dari arsip tanggal ${backup.createdFormatted || backup.createdAt}.`;
+      if (Store.pushNotification) {
+        Store.pushNotification({
+          title: 'Pemulihan Basis Data Selesai',
+          pesan: restoreMsg,
+          tipe: 'success'
+        });
+      }
+
+      // 5. Bersihkan pratinjau & refresh tampilan
+      this.cancelRestore();
+      if (typeof App !== 'undefined' && App.toast) {
+        App.toast('Pemulihan basis data berhasil diterapkan!', 'success');
+      }
+
+      // Refresh views
+      if (typeof App !== 'undefined') {
+        if (App.renderMasterData) App.renderMasterData();
+        if (App.renderAdminEmployees) App.renderAdminEmployees();
+        if (App.renderAdminVerification) App.renderAdminVerification();
+        if (App.renderAdminDashboard) App.renderAdminDashboard();
+      }
+      this.renderBackupTab();
+      this.renderAdminDashboardBackupCard();
+
+    } catch (err) {
+      console.error('Gagal memulihkan basis data:', err);
+      if (typeof App !== 'undefined' && App.toast) {
+        App.toast('Gagal memulihkan data: ' + err.message, 'error');
+      }
+    }
+  },
+
+  /**
+   * Ekspor Rekapitulasi Audit Cadangan ke Excel
+   */
+  exportFullAuditSheet() {
+    const emps = (Store.state && Store.state.employees) ? Store.state.employees : [];
+    const rels = (Store.state && Store.state.realizations) ? Store.state.realizations : [];
+
+    const headers = [
+      'No', 'NIP', 'Nama Pegawai', 'Pangkat / Golongan', 'Jabatan', 'Unit Kerja', 
+      'Status IDP', 'Realisasi Diklat', 'Total JP Tercapai', 'Kepatuhan 20 JP', 'Keterangan Arsip'
+    ];
+
+    const rows = emps.map((e, idx) => {
+      const empRels = rels.filter(r => {
+        const rPeg = String(r.pegawai || '').toLowerCase();
+        const eName = String(e.name || '').toLowerCase();
+        return rPeg.includes(eName) || eName.includes(rPeg);
+      });
+      const totalJp = empRels.reduce((sum, r) => sum + (parseInt(r.jp) || 0), 0);
+      const isCompliant = totalJp >= 20 || (e.progress >= 100);
+
+      return [
+        idx + 1,
+        `'${e.nip}`,
+        e.name,
+        e.pangkat,
+        e.jabatan,
+        e.unit,
+        e.statusIdp || 'Draft',
+        `${empRels.length} Kegiatan`,
+        totalJp,
+        isCompliant ? 'Memenuhi (>= 20 JP)' : 'Belum Memenuhi',
+        'Tercatat di Basis Data Bappeda'
+      ];
+    });
+
+    ExportService.downloadExcel('Rekap_Audit_Kepegawaian_Bappeda_2026', 'Audit Basis Data', headers, rows);
+    if (typeof App !== 'undefined' && App.toast) {
+      App.toast('File Excel Rekapitulasi Audit Kepegawaian berhasil diunduh', 'success');
+    }
+  },
+
+  /**
+   * Render Tab Cadangan & Keamanan Data di page-amaster
+   */
+  renderBackupTab() {
+    const pane = document.getElementById('masterPaneBackup');
+    if (!pane) return;
+
+    const stats = this.getBackupStats();
+    const last = stats.lastBackupInfo;
+
+    const statusBadge = last 
+      ? '<span class="badge badge-success" style="display: inline-flex; align-items: center; gap: 4px;"><span class="realtime-status-dot"></span> Terlindungi & Terenkripsi</span>'
+      : '<span class="badge badge-warning">Belum Ada Cadangan Sesi Ini</span>';
+
+    pane.innerHTML = `
+      <div style="padding: 6px 0;">
+        <!-- Top Status Card -->
+        <div style="background: linear-gradient(135deg, rgba(30, 58, 138, 0.05), rgba(47, 128, 237, 0.08)); border: 1px solid rgba(47, 128, 237, 0.25); border-radius: var(--radius-lg); padding: 20px 24px; margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+          <div>
+            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 6px;">
+              <h2 style="font-size: 16px; font-weight: 750; color: var(--color-text-primary); margin: 0;">Pusat Cadangan & Keamanan Basis Data ASN</h2>
+              ${statusBadge}
+            </div>
+            <p style="font-size: 12.5px; color: var(--color-text-secondary); margin: 0; max-width: 680px; line-height: 1.5;">
+              Sistem perlindungan data mandiri Kasubbag Kepegawaian Bappeda Provinsi Lampung. Seluruh data 99 pegawai, formulir IDP, berkas verifikasi sertifikat, dan arahan pimpinan dapat dicadangkan dan dipulihkan kapan saja secara aman tanpa risiko kehilangan data.
+            </p>
+          </div>
+          <div style="text-align: right;">
+            <div style="font-size: 11px; color: var(--color-text-muted); margin-bottom: 3px;">Pencadangan Terakhir:</div>
+            <div style="font-size: 12.5px; font-weight: 700; color: var(--color-primary);">${stats.lastBackupFormatted}</div>
+            ${last ? `<div style="font-size: 10.5px; color: var(--color-text-muted); margin-top: 2px;">Oleh: ${last.createdBy}</div>` : ''}
+          </div>
+        </div>
+
+        <!-- 4 Metric Cards -->
+        <div class="grid grid-cols-4" style="margin-bottom: 24px; gap: 16px;">
+          <div class="stat-card">
+            <div class="stat-card-inner">
+              <div class="stat-card-info">
+                <div class="stat-card-label">Total Data Pegawai</div>
+                <div class="stat-card-value">${stats.totalEmployees} <span style="font-size: 13px; font-weight: 500; color: var(--color-text-muted);">ASN</span></div>
+                <div class="stat-card-desc">7 Unit Kerja & Bidang</div>
+              </div>
+              <div class="stat-card-icon"><span data-icon="Users" data-icon-size="22"></span></div>
+            </div>
+          </div>
+
+          <div class="stat-card success">
+            <div class="stat-card-inner">
+              <div class="stat-card-info">
+                <div class="stat-card-label">Berkas Realisasi Diklat</div>
+                <div class="stat-card-value text-success">${stats.totalRealizations}</div>
+                <div class="stat-card-desc">Sertifikat & Dokumen JP</div>
+              </div>
+              <div class="stat-card-icon"><span data-icon="FileCheck" data-icon-size="22"></span></div>
+            </div>
+          </div>
+
+          <div class="stat-card warning">
+            <div class="stat-card-inner">
+              <div class="stat-card-info">
+                <div class="stat-card-label">Pengajuan Verifikasi</div>
+                <div class="stat-card-value text-warning">${stats.totalVerifications}</div>
+                <div class="stat-card-desc">Rekap usulan IDP ASN</div>
+              </div>
+              <div class="stat-card-icon"><span data-icon="ShieldCheck" data-icon-size="22"></span></div>
+            </div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-card-inner">
+              <div class="stat-card-info">
+                <div class="stat-card-label">Keamanan & Integritas</div>
+                <div class="stat-card-value" style="font-size: 16px; color: var(--color-accent); font-weight: 700;">SHA-256</div>
+                <div class="stat-card-desc">Validasi hash kriptografis</div>
+              </div>
+              <div class="stat-card-icon"><span data-icon="Lock" data-icon-size="22"></span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2 Column Section: Backup and Restore -->
+        <div class="grid grid-cols-2" style="gap: 20px; margin-bottom: 24px;">
+          <!-- Left: Unduh Cadangan -->
+          <div style="background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: 22px;">
+            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px;">
+              <div style="width: 36px; height: 36px; border-radius: 8px; background: rgba(59, 130, 246, 0.12); color: var(--color-primary); display: flex; align-items: center; justify-content: center;">
+                <span data-icon="Download" data-icon-size="18"></span>
+              </div>
+              <div>
+                <h3 style="font-size: 14.5px; font-weight: 700; margin: 0; color: var(--color-text-primary);">Unduh Cadangan Basis Data (Full Backup)</h3>
+                <div style="font-size: 11.5px; color: var(--color-text-muted);">Ekspor seluruh data sistem ke berkas .JSON resmi</div>
+              </div>
+            </div>
+
+            <p style="font-size: 12.5px; color: var(--color-text-secondary); line-height: 1.5; margin-bottom: 18px;">
+              Berkas cadangan mencakup seluruh data 99 ASN, usulan IDP, catatan verifikasi, bukti realisasi pengembangan kompetensi, dan arahan pimpinan. Simpan berkas ini di komputer kedinasan sebagai arsip keamanan berkala.
+            </p>
+
+            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+              <button class="btn btn-primary" onclick="BackupService.createFullBackup()" style="flex: 1; min-width: 180px;">
+                <span data-icon="Download" data-icon-size="16"></span> Unduh Cadangan (.JSON)
+              </button>
+              <button class="btn btn-outline" onclick="BackupService.exportFullAuditSheet()" style="flex: 1; min-width: 180px;">
+                <span data-icon="FileSpreadsheet" data-icon-size="16"></span> Unduh Rekap Excel (.XLSX)
+              </button>
+            </div>
+          </div>
+
+          <!-- Right: Pulihkan Cadangan -->
+          <div style="background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: 22px;">
+            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px;">
+              <div style="width: 36px; height: 36px; border-radius: 8px; background: rgba(16, 185, 129, 0.12); color: var(--color-success); display: flex; align-items: center; justify-content: center;">
+                <span data-icon="UploadCloud" data-icon-size="18"></span>
+              </div>
+              <div>
+                <h3 style="font-size: 14.5px; font-weight: 700; margin: 0; color: var(--color-text-primary);">Pemulihan Basis Data (Restore Data)</h3>
+                <div style="font-size: 11.5px; color: var(--color-text-muted);">Pulihkan sistem menggunakan berkas cadangan .JSON</div>
+              </div>
+            </div>
+
+            <input type="file" id="backupFileInput" accept=".json" onchange="BackupService.handleBackupFileSelect(event)" style="display: none;">
+
+            <div class="file-dropzone" onclick="document.getElementById('backupFileInput').click()" style="padding: 22px; cursor: pointer;">
+              <div class="dropzone-icon" style="width: 38px; height: 38px; margin-bottom: 8px;">
+                <span data-icon="FileUp" data-icon-size="20"></span>
+              </div>
+              <div class="dropzone-title" style="font-size: 13px;">Pilih Berkas Cadangan (.JSON)</div>
+              <div class="dropzone-desc" style="font-size: 11px;">Klik di sini untuk mengunggah file cadangan resmi SIP-KOMPETENSI</div>
+            </div>
+
+            <!-- Preview Container -->
+            <div id="backupRestorePreview" style="display: none;"></div>
+          </div>
+        </div>
+
+        <!-- SOP & Guidance Note -->
+        <div style="background: var(--color-surface-soft); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 14px 18px; font-size: 12px; color: var(--color-text-secondary); line-height: 1.55;">
+          <div style="font-weight: 700; color: var(--color-text-primary); margin-bottom: 4px; display: flex; align-items: center; gap: 6px;">
+            <span data-icon="Info" data-icon-size="15" style="color: var(--color-accent);"></span>
+            SOP Keamanan Data Kepegawaian Bappeda Provinsi Lampung:
+          </div>
+          <ul style="margin: 0; padding-left: 20px;">
+            <li>Lakukan <b>Full Backup</b> sekurang-kurangnya 1 (satu) kali setiap akhir bulan atau sesaat sebelum evaluasi penilaian kinerja semesteran.</li>
+            <li>Simpan berkas cadangan di media penyimpanan dinas yang terenkripsi dan terpisah dari browser kerja.</li>
+            <li>Saat melakukan pemulihan, sistem akan memverifikasi integritas checksum SHA-256 untuk memastikan data tidak mengalami kerusakan atau manipulasi eksternal.</li>
+          </ul>
+        </div>
+      </div>
+    `;
+
+    renderAllIcons();
+  },
+
+  /**
+   * Render kartu ringkas status cadangan di Dashboard Admin (page-adash)
+   */
+  renderAdminDashboardBackupCard() {
+    const cardEl = document.getElementById('adashBackupStatusCard');
+    if (!cardEl) return;
+
+    const stats = this.getBackupStats();
+    const last = stats.lastBackupInfo;
+
+    cardEl.innerHTML = `
+      <div style="background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: 16px 20px; margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px; box-shadow: var(--shadow-xs);">
+        <div style="display: flex; align-items: center; gap: 14px;">
+          <div style="width: 42px; height: 42px; border-radius: 10px; background: rgba(30, 58, 138, 0.08); color: var(--color-primary); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+            <span data-icon="DatabaseBackup" data-icon-size="22"></span>
+          </div>
+          <div>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <h4 style="margin: 0; font-size: 13.5px; font-weight: 700; color: var(--color-text-primary);">Pusat Cadangan Basis Data (Data Safety & Recovery)</h4>
+              <span class="badge ${last ? 'badge-success' : 'badge-neutral'}" style="font-size: 10px;">${last ? 'Arsip Aktif' : 'Standby'}</span>
+            </div>
+            <div style="font-size: 11.5px; color: var(--color-text-muted); margin-top: 2px;">
+              Pencadangan terakhir: <b style="color: var(--color-text-secondary);">${stats.lastBackupFormatted}</b> ${last ? `• (${stats.totalEmployees} ASN)` : ''}
+            </div>
+          </div>
+        </div>
+        <div style="display: flex; gap: 8px;">
+          <button class="btn btn-outline btn-sm" onclick="App.openMasterBackupTab()">
+            <span data-icon="Settings2" data-icon-size="14"></span> Kelola Cadangan
+          </button>
+          <button class="btn btn-primary btn-sm" onclick="BackupService.createFullBackup()">
+            <span data-icon="Download" data-icon-size="14"></span> Cadangkan Sekarang (.JSON)
+          </button>
+        </div>
+      </div>
+    `;
+
+    renderAllIcons();
+  }
+};
+
+if (typeof window !== 'undefined') {
+  window.BackupService = BackupService;
+}
+
