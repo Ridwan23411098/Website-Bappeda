@@ -150,6 +150,11 @@
               </div>
             </button>
           </div>
+          <div style="text-align: center; margin-top: 14px;">
+            <button type="button" onclick="App.openSopGuide()" style="background: none; border: none; color: #1E3A5F; font-size: 11.5px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; text-decoration: underline;">
+              <span data-icon="BookOpen" data-icon-size="14"></span> Buku Panduan Pengguna &amp; SOP Kedinasan
+            </button>
+          </div>
         </div>
       </div>
 
@@ -250,8 +255,8 @@
               <span data-icon="Moon" data-icon-size="18"></span>
             </button>
 
-            <!-- Help Icon -->
-            <button class="btn-icon" onclick="App.showAccountHelper()" title="Bantuan & Petunjuk">
+            <!-- Help Icon (Buku Panduan & SOP Kedinasan) -->
+            <button class="btn-icon" onclick="App.openSopGuide()" title="Buku Panduan & SOP Kedinasan">
               <span data-icon="HelpCircle" data-icon-size="18"></span>
             </button>
 
@@ -328,6 +333,9 @@
                 rencana pengembangan kompetensi Anda.</p>
             </div>
             <div style="display: flex; align-items: center; gap: 10px;">
+              <button class="btn btn-outline btn-sm" onclick="App.openSopGuide('pegawai')" title="Buku Panduan & SOP Pegawai">
+                <span data-icon="BookOpen" data-icon-size="14"></span> Panduan IDP
+              </button>
               <select class="form-select" style="width: 110px;">
                 <option selected>2026</option>
                 <option>2025</option>
@@ -1554,7 +1562,10 @@
               <p class="page-subtitle" style="margin-bottom: 0;">Pusat pengelolaan dan verifikasi Individual Development
                 Plan ASN Bappeda Provinsi Lampung.</p>
             </div>
-            <div style="display: flex; gap: 10px;">
+            <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+              <button class="btn btn-outline btn-sm" onclick="App.openSopGuide('admin')" title="SOP Verifikasi &amp; Kepegawaian">
+                <span data-icon="BookOpen" data-icon-size="14"></span> SOP Verifikasi
+              </button>
               <button class="btn btn-outline btn-sm" onclick="App.navigate('averif')">
                 <span data-icon="ShieldCheck" data-icon-size="14"></span> Verifikasi IDP (12)
               </button>
@@ -1987,6 +1998,9 @@
                 </div>
               </div>
               <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                <button class="btn" style="background: rgba(255, 255, 255, 0.15); color: #ffffff; border: 1px solid rgba(255, 255, 255, 0.3); font-size: 12px; display: flex; align-items: center; gap: 6px;" onclick="App.openSopGuide('pimpinan')" title="Buku Panduan &amp; SOP Eksekutif">
+                  <span data-icon="BookOpen" data-icon-size="15"></span> Buku Panduan &amp; SOP
+                </button>
                 <button class="btn" style="background: #ffffff; color: #0b2545; font-weight: 700; border: none; font-size: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); display: flex; align-items: center; gap: 6px;" onclick="ExportService.showExecutivePrintDialog()">
                   <span data-icon="Printer" data-icon-size="15"></span> Cetak Laporan Eksekutif (PDF)
                 </button>
@@ -2986,6 +3000,282 @@
     </div>
   </div>
 
+  <!-- ========================================================================
+       MODAL: BUKU PANDUAN PENGGUNA & SOP RESMI BAPPEDA (TAHAP 7)
+       ======================================================================== -->
+  <div class="modal-overlay" id="sopGuideModal">
+    <div class="modal-card" style="max-width: 820px; width: 95%; max-height: 90vh; display: flex; flex-direction: column;">
+      <div class="modal-header" style="border-bottom: 1px solid var(--color-border); padding: 18px 24px; flex-shrink: 0;">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <div style="width: 40px; height: 40px; border-radius: 10px; background: rgba(30, 58, 95, 0.08); color: #1E3A5F; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+            <span data-icon="BookOpen" data-icon-size="20"></span>
+          </div>
+          <div>
+            <h3 style="margin: 0; font-size: 16px; font-weight: 700; color: var(--color-text-primary);">Buku Panduan Pengguna &amp; SOP Kedinasan</h3>
+            <p style="margin: 2px 0 0; font-size: 11.5px; color: var(--color-text-muted);">
+              SOP Pengelolaan IDP &amp; Bangkom ASN Bappeda Prov. Lampung • UU No. 20/2023 &amp; PP No. 17/2020
+            </p>
+          </div>
+        </div>
+        <button class="btn-icon" onclick="App.closeModal('sopGuideModal')" title="Tutup Modal">
+          <span data-icon="X" data-icon-size="18"></span>
+        </button>
+      </div>
+
+      <!-- Tab Navigasi Peran -->
+      <div class="tab-nav" style="padding: 0 24px; margin-bottom: 0; background: var(--color-surface-variant, rgba(0,0,0,0.02)); flex-shrink: 0; border-bottom: 1px solid var(--color-border);">
+        <button class="tab-btn active" id="sopTabPegawai" onclick="App.switchSopTab('pegawai')">
+          <span data-icon="User" data-icon-size="14"></span> 1. Panduan Pegawai (ASN)
+        </button>
+        <button class="tab-btn" id="sopTabAdmin" onclick="App.switchSopTab('admin')">
+          <span data-icon="ShieldCheck" data-icon-size="14"></span> 2. SOP Verifikator (SDM)
+        </button>
+        <button class="tab-btn" id="sopTabPimpinan" onclick="App.switchSopTab('pimpinan')">
+          <span data-icon="TrendingUp" data-icon-size="14"></span> 3. Evaluasi Pimpinan
+        </button>
+        <button class="tab-btn" id="sopTabAkun" onclick="App.switchSopTab('akun')">
+          <span data-icon="Key" data-icon-size="14"></span> 4. Kredensial Uji Coba
+        </button>
+      </div>
+
+      <!-- Isi Panduan Berdasarkan Tab -->
+      <div class="modal-body" style="padding: 20px 24px; overflow-y: auto; flex: 1;">
+
+        <!-- PANE 1: PEGAWAI ASN -->
+        <div id="sopPanePegawai">
+          <div style="background: linear-gradient(135deg, rgba(37,99,235,0.08) 0%, rgba(30,58,95,0.04) 100%); border: 1px solid rgba(37,99,235,0.2); border-radius: 12px; padding: 14px 18px; margin-bottom: 18px;">
+            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+              <span class="badge badge-blue" style="font-size: 11px; font-weight: 700;">Landasan Regulasi</span>
+              <span style="font-size: 12px; font-weight: 700; color: #1E3A5F;">UU No. 20 Tahun 2023 Pasal 49 &amp; PP No. 17 Tahun 2020</span>
+            </div>
+            <p style="margin: 0; font-size: 12px; color: var(--color-text-secondary); line-height: 1.5;">
+              Setiap Aparatur Sipil Negara (ASN) wajib mengembangkan kompetensi kerja minimal <b>20 Jam Pelajaran (JP) per tahun</b> yang dituangkan dalam formulir Individual Development Plan (IDP) dan disahkan oleh atasan langsung / verifikator kepegawaian.
+            </p>
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 12px;">
+            <div style="display: flex; gap: 14px; padding: 14px; border: 1px solid var(--color-border); border-radius: 10px; background: var(--color-surface);">
+              <div style="width: 30px; height: 30px; border-radius: 50%; background: #2563EB; color: #fff; font-weight: 700; font-size: 13px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">1</div>
+              <div style="flex: 1;">
+                <h4 style="margin: 0 0 3px; font-size: 13.5px; font-weight: 700; color: var(--color-text-primary);">Autentikasi &amp; Akses Dashboard Pegawai</h4>
+                <p style="margin: 0; font-size: 12px; color: var(--color-text-secondary); line-height: 1.5;">
+                  Masuk menggunakan <b>NIP 18 digit</b> dan kata sandi kedinasan Anda. Sistem secara otomatis memuat profil, unit kerja, jabatan, dan riwayat jam pelajaran Anda.
+                </p>
+              </div>
+            </div>
+
+            <div style="display: flex; gap: 14px; padding: 14px; border: 1px solid var(--color-border); border-radius: 10px; background: var(--color-surface);">
+              <div style="width: 30px; height: 30px; border-radius: 50%; background: #2563EB; color: #fff; font-weight: 700; font-size: 13px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">2</div>
+              <div style="flex: 1;">
+                <h4 style="margin: 0 0 3px; font-size: 13.5px; font-weight: 700; color: var(--color-text-primary);">Penyusunan Rencana Bangkom (Target Min. 20 JP)</h4>
+                <p style="margin: 0 0 8px; font-size: 12px; color: var(--color-text-secondary); line-height: 1.5;">
+                  Buka menu <b>Rencana IDP (eidp)</b>, lalu klik tombol <b>Tambah Agenda Pelatihan</b>. Pilih program pengembangan kompetensi sesuai 5 rumpun jalur resmi:
+                </p>
+                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; font-size: 11px;">
+                  <div style="background: rgba(0,0,0,0.03); padding: 5px 8px; border-radius: 5px;">• <b>Klasikal:</b> Diklat Struktural / Teknis (20–40 JP)</div>
+                  <div style="background: rgba(0,0,0,0.03); padding: 5px 8px; border-radius: 5px;">• <b>Non-Klasikal:</b> Workshop, Bimtek, Seminar (8–16 JP)</div>
+                  <div style="background: rgba(0,0,0,0.03); padding: 5px 8px; border-radius: 5px;">• <b>E-Learning:</b> MOOC LAN RI / BPSDM (10–24 JP)</div>
+                  <div style="background: rgba(0,0,0,0.03); padding: 5px 8px; border-radius: 5px;">• <b>Mentoring &amp; Coaching:</b> Bimbingan Atasan (4–8 JP)</div>
+                </div>
+              </div>
+            </div>
+
+            <div style="display: flex; gap: 14px; padding: 14px; border: 1px solid var(--color-border); border-radius: 10px; background: var(--color-surface);">
+              <div style="width: 30px; height: 30px; border-radius: 50%; background: #2563EB; color: #fff; font-weight: 700; font-size: 13px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">3</div>
+              <div style="flex: 1;">
+                <h4 style="margin: 0 0 3px; font-size: 13.5px; font-weight: 700; color: var(--color-text-primary);">Unggah Sertifikat &amp; Pengajuan ke Verifikator</h4>
+                <p style="margin: 0; font-size: 12px; color: var(--color-text-secondary); line-height: 1.5;">
+                  Setelah menyelesaikan kegiatan pelatihan, unggah bukti sertifikat kelulusan / STTPL (format PDF atau JPG/PNG, maks 2MB). Kemudian klik tombol <b>Ajukan ke Pengelola Kepegawaian</b> untuk verifikasi resmi.
+                </p>
+              </div>
+            </div>
+
+            <div style="display: flex; gap: 14px; padding: 14px; border: 1px solid var(--color-border); border-radius: 10px; background: var(--color-surface);">
+              <div style="width: 30px; height: 30px; border-radius: 50%; background: #2563EB; color: #fff; font-weight: 700; font-size: 13px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">4</div>
+              <div style="flex: 1;">
+                <h4 style="margin: 0 0 3px; font-size: 13.5px; font-weight: 700; color: var(--color-text-primary);">Cetak Lembar Pengesahan Tripartit Resmi (A4)</h4>
+                <p style="margin: 0; font-size: 12px; color: var(--color-text-secondary); line-height: 1.5;">
+                  Setelah formulir disetujui, gunakan tombol <b>Cetak Formulir IDP Resmi (PDF)</b> untuk mencetak dokumen format A4 berkop Lambang Daerah Lampung dengan lembar pengesahan 3 pihak: Pegawai, Kasubbag Kepegawaian, dan Kepala Bappeda.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- PANE 2: ADMIN SDM (VERIFIKATOR) -->
+        <div id="sopPaneAdmin" style="display: none;">
+          <div style="background: linear-gradient(135deg, rgba(217,119,6,0.08) 0%, rgba(180,83,9,0.04) 100%); border: 1px solid rgba(217,119,6,0.25); border-radius: 12px; padding: 14px 18px; margin-bottom: 18px;">
+            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+              <span class="badge badge-warning" style="font-size: 11px; font-weight: 700;">Service Level Agreement (SLA)</span>
+              <span style="font-size: 12px; font-weight: 700; color: #92400E;">Maksimal 3 Hari Kerja Verifikasi</span>
+            </div>
+            <p style="margin: 0; font-size: 12px; color: var(--color-text-secondary); line-height: 1.5;">
+              Pengelola Kepegawaian (Subbagian Umum &amp; Kepegawaian Sekretariat Bappeda) bertindak sebagai verifikator tunggal terhadap keabsahan dokumen usulan bangkom seluruh 99 ASN Bappeda Provinsi Lampung.
+            </p>
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 12px;">
+            <div style="display: flex; gap: 14px; padding: 14px; border: 1px solid var(--color-border); border-radius: 10px; background: var(--color-surface);">
+              <div style="width: 30px; height: 30px; border-radius: 50%; background: #D97706; color: #fff; font-weight: 700; font-size: 13px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">1</div>
+              <div style="flex: 1;">
+                <h4 style="margin: 0 0 3px; font-size: 13.5px; font-weight: 700; color: var(--color-text-primary);">Pemeriksaan Antrean Pengajuan Masuk</h4>
+                <p style="margin: 0; font-size: 12px; color: var(--color-text-secondary); line-height: 1.5;">
+                  Buka menu <b>Verifikasi IDP (averif)</b>. Filter pengajuan berdasarkan status <i>Diajukan ke Atasan</i> atau unit kerja pemohon.
+                </p>
+              </div>
+            </div>
+
+            <div style="display: flex; gap: 14px; padding: 14px; border: 1px solid var(--color-border); border-radius: 10px; background: var(--color-surface);">
+              <div style="width: 30px; height: 30px; border-radius: 50%; background: #D97706; color: #fff; font-weight: 700; font-size: 13px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">2</div>
+              <div style="flex: 1;">
+                <h4 style="margin: 0 0 3px; font-size: 13.5px; font-weight: 700; color: var(--color-text-primary);">Validasi Standar Dokumen &amp; Relevansi</h4>
+                <p style="margin: 0; font-size: 12px; color: var(--color-text-secondary); line-height: 1.5;">
+                  Periksa kelayakan sertifikat/STTPL: Akreditasi penyelenggara (LAN/BPSDM/Kemendagri), kesesuaian jumlah jam pelajaran (JP), dan relevansi materi dengan tugas pokok fungsi jabatan.
+                </p>
+              </div>
+            </div>
+
+            <div style="display: flex; gap: 14px; padding: 14px; border: 1px solid var(--color-border); border-radius: 10px; background: var(--color-surface);">
+              <div style="width: 30px; height: 30px; border-radius: 50%; background: #D97706; color: #fff; font-weight: 700; font-size: 13px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">3</div>
+              <div style="flex: 1;">
+                <h4 style="margin: 0 0 3px; font-size: 13.5px; font-weight: 700; color: var(--color-text-primary);">Keputusan Verifikasi &amp; Catatan Kedinasan</h4>
+                <div style="display: flex; gap: 8px; margin-top: 6px; font-size: 11.5px; align-items: center;">
+                  <span class="badge badge-success">Setujui (Approve)</span> Berkas lengkap &amp; validasi terpenuhi.
+                </div>
+                <div style="display: flex; gap: 8px; margin-top: 4px; font-size: 11.5px; align-items: center;">
+                  <span class="badge badge-warning">Minta Revisi</span> Berikan catatan jelas (misal: "Lampirkan jadwal/rundown lengkap").
+                </div>
+                <div style="display: flex; gap: 8px; margin-top: 4px; font-size: 11.5px; align-items: center;">
+                  <span class="badge badge-danger">Tolak (Reject)</span> Diklat tidak terakreditasi / materi di luar tugas kedinasan.
+                </div>
+              </div>
+            </div>
+
+            <div style="display: flex; gap: 14px; padding: 14px; border: 1px solid var(--color-border); border-radius: 10px; background: var(--color-surface);">
+              <div style="width: 30px; height: 30px; border-radius: 50%; background: #D97706; color: #fff; font-weight: 700; font-size: 13px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">4</div>
+              <div style="flex: 1;">
+                <h4 style="margin: 0 0 3px; font-size: 13.5px; font-weight: 700; color: var(--color-text-primary);">Pelaporan Excel &amp; Backup Data Rutin (SOP Tahap 6)</h4>
+                <p style="margin: 0; font-size: 12px; color: var(--color-text-secondary); line-height: 1.5;">
+                  Unduh berkas Excel matrik 99 ASN melalui tombol <b>Ekspor Matriks IDP (.xlsx)</b>. Jalankan <b>Cadangkan Data (.json)</b> setiap akhir pekan melalui panel Keamanan Data di dashboard untuk menjamin integritas data kepegawaian.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- PANE 3: KEPALA BAPPEDA (PIMPINAN EKSEKUTIF) -->
+        <div id="sopPanePimpinan" style="display: none;">
+          <div style="background: linear-gradient(135deg, rgba(30,58,95,0.08) 0%, rgba(11,37,69,0.04) 100%); border: 1px solid rgba(30,58,95,0.25); border-radius: 12px; padding: 14px 18px; margin-bottom: 18px;">
+            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+              <span class="badge" style="background: #1E3A5F; color: #fff; font-size: 11px; font-weight: 700;">Pengendalian Pimpinan</span>
+              <span style="font-size: 12px; font-weight: 700; color: #0B2545;">Target Kepatuhan Institusional: Minimal 85% ASN Bappeda</span>
+            </div>
+            <p style="margin: 0; font-size: 12px; color: var(--color-text-secondary); line-height: 1.5;">
+              Kepala Bappeda mengawasi secara makro ketercapaian Indeks Profesionalitas ASN (IP-ASN) dan memberikan arahan strategis terhadap percepatan pengembangan kompetensi aparatur perencana.
+            </p>
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 12px;">
+            <div style="display: flex; gap: 14px; padding: 14px; border: 1px solid var(--color-border); border-radius: 10px; background: var(--color-surface);">
+              <div style="width: 30px; height: 30px; border-radius: 50%; background: #1E3A5F; color: #fff; font-weight: 700; font-size: 13px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">1</div>
+              <div style="flex: 1;">
+                <h4 style="margin: 0 0 3px; font-size: 13.5px; font-weight: 700; color: var(--color-text-primary);">Evaluasi Matriks Kepatuhan 7 Unit Kerja</h4>
+                <p style="margin: 0; font-size: 12px; color: var(--color-text-secondary); line-height: 1.5;">
+                  Pantau widget persentase pemenuhan 20 JP per unit kerja: Sekretariat, Bidang IPW, Bidang Pemsosbud, Bidang Ekosumberdaya, Bidang PMPE, Bidang Litbang, dan Kelompok Jabatan Fungsional.
+                </p>
+              </div>
+            </div>
+
+            <div style="display: flex; gap: 14px; padding: 14px; border: 1px solid var(--color-border); border-radius: 10px; background: var(--color-surface);">
+              <div style="width: 30px; height: 30px; border-radius: 50%; background: #1E3A5F; color: #fff; font-weight: 700; font-size: 13px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">2</div>
+              <div style="flex: 1;">
+                <h4 style="margin: 0 0 3px; font-size: 13.5px; font-weight: 700; color: var(--color-text-primary);">Penerbitan Arahan Eksekutif (Instant Push Broadcast)</h4>
+                <p style="margin: 0; font-size: 12px; color: var(--color-text-secondary); line-height: 1.5;">
+                  Gunakan kartu <b>Terbitkan Arahan Pimpinan</b> pada Dashboard Eksekutif. Pesan instruksi akan langsung disiarkan secara serentak ke banner dashboard seluruh ASN dan Pengelola SDM.
+                </p>
+              </div>
+            </div>
+
+            <div style="display: flex; gap: 14px; padding: 14px; border: 1px solid var(--color-border); border-radius: 10px; background: var(--color-surface);">
+              <div style="width: 30px; height: 30px; border-radius: 50%; background: #1E3A5F; color: #fff; font-weight: 700; font-size: 13px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">3</div>
+              <div style="flex: 1;">
+                <h4 style="margin: 0 0 3px; font-size: 13.5px; font-weight: 700; color: var(--color-text-primary);">Pengesahan Laporan Eksekutif Capaian IDP Resmi</h4>
+                <p style="margin: 0; font-size: 12px; color: var(--color-text-secondary); line-height: 1.5;">
+                  Klik tombol <b>Cetak Laporan Eksekutif (PDF)</b> untuk menerbitkan lembar laporan dinas formal berkop Lambang Daerah Lampung untuk pelaporan ke BKD Provinsi Lampung, BKN Kanreg V, dan KemenPAN-RB.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- PANE 4: KREDENSIAL & AKUN RESMI UJI COBA -->
+        <div id="sopPaneAkun" style="display: none;">
+          <p style="font-size: 12.5px; color: var(--color-text-secondary); margin: 0 0 16px;">
+            Gunakan akun resmi berikut untuk simulasi dan pengujian operasional sistem sesuai peran hak akses:
+          </p>
+
+          <div style="display: flex; flex-direction: column; gap: 12px;">
+            <!-- 1. Pegawai -->
+            <div style="padding: 12px 16px; border: 1.5px solid rgba(37,99,235,0.25); background: rgba(37,99,235,0.03); border-radius: 10px; display: flex; justify-content: space-between; align-items: center;">
+              <div>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <span class="badge badge-blue">Pegawai ASN</span>
+                  <span style="font-size: 11px; color: var(--color-text-muted);">Sekretaris Bappeda</span>
+                </div>
+                <div style="font-weight: 700; font-size: 13px; color: var(--color-text-primary); margin-top: 4px;">ANDI ARAFAT, S.T., M.E.</div>
+                <div style="font-size: 11px; color: var(--color-text-secondary); margin-top: 2px;">
+                  NIP: <code style="background: rgba(0,0,0,0.06); padding: 1px 5px; border-radius: 4px;">197407072002121008</code> • Sandi: <code style="background: rgba(0,0,0,0.06); padding: 1px 5px; border-radius: 4px;">password</code>
+                </div>
+              </div>
+              <button class="btn btn-primary btn-sm" onclick="App.fillTestAccount('197407072002121008', 'password')">Gunakan</button>
+            </div>
+
+            <!-- 2. Admin SDM -->
+            <div style="padding: 12px 16px; border: 1.5px solid rgba(217,119,6,0.25); background: rgba(217,119,6,0.03); border-radius: 10px; display: flex; justify-content: space-between; align-items: center;">
+              <div>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <span class="badge badge-warning">Admin / SDM</span>
+                  <span style="font-size: 11px; color: var(--color-text-muted);">Kasubbag Umum &amp; Kepegawaian</span>
+                </div>
+                <div style="font-weight: 700; font-size: 13px; color: var(--color-text-primary); margin-top: 4px;">CIK MARYA, S.E., M.M.</div>
+                <div style="font-size: 11px; color: var(--color-text-secondary); margin-top: 2px;">
+                  NIP: <code style="background: rgba(0,0,0,0.06); padding: 1px 5px; border-radius: 4px;">196910261992032002</code> • Sandi: <code style="background: rgba(0,0,0,0.06); padding: 1px 5px; border-radius: 4px;">password</code>
+                </div>
+              </div>
+              <button class="btn btn-primary btn-sm" onclick="App.fillTestAccount('196910261992032002', 'password')">Gunakan</button>
+            </div>
+
+            <!-- 3. Pimpinan -->
+            <div style="padding: 12px 16px; border: 1.5px solid rgba(16,185,129,0.25); background: rgba(16,185,129,0.03); border-radius: 10px; display: flex; justify-content: space-between; align-items: center;">
+              <div>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <span class="badge badge-success">Pimpinan</span>
+                  <span style="font-size: 11px; color: var(--color-text-muted);">Kepala Bappeda Prov. Lampung</span>
+                </div>
+                <div style="font-weight: 700; font-size: 13px; color: var(--color-text-primary); margin-top: 4px;">Dr. ANANG RISGIYANTO, S.K.M., M.Kes.</div>
+                <div style="font-size: 11px; color: var(--color-text-secondary); margin-top: 2px;">
+                  NIP: <code style="background: rgba(0,0,0,0.06); padding: 1px 5px; border-radius: 4px;">197507312000031002</code> • Sandi: <code style="background: rgba(0,0,0,0.06); padding: 1px 5px; border-radius: 4px;">password</code>
+                </div>
+              </div>
+              <button class="btn btn-primary btn-sm" onclick="App.fillTestAccount('197507312000031002', 'password')">Gunakan</button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="modal-footer" style="display: flex; justify-content: space-between; align-items: center; padding: 14px 24px; border-top: 1px solid var(--color-border); background: var(--color-surface); flex-shrink: 0;">
+        <button class="btn btn-outline" onclick="ExportService.printOfficialSop()" title="Cetak Dokumen Resmi Format A4 Berkop Lambang Lampung">
+          <span data-icon="Printer" data-icon-size="15"></span> Cetak SOP Resmi Bappeda (A4 Berkop)
+        </button>
+        <button class="btn btn-primary" onclick="App.closeModal('sopGuideModal')">
+          Tutup Panduan
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- MODAL: BANTUAN AKUN RESMI NIP BAPPEDA -->
   <div class="modal-overlay" id="accountHelperModal">
     <div class="modal-card" style="max-width: 580px;">
@@ -3143,17 +3433,20 @@
   <!-- TOAST CONTAINER -->
   <div class="toast-container" id="toastContainer"></div>
 
+  <!-- OFFICIAL PRINT CONTAINER FOR A4 REPORT & SOP -->
+  <div id="officialPrintContainer" style="display: none;"></div>
+
   <!-- Core Scripts -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
   <script src="js/supabase.js?v=20261008_fix"></script>
   <script src="assets/lambang-lampung.js?v=20261013_v3"></script>
-  <script src="js/icons.js?v=20261008_fix"></script>
+  <script src="js/icons.js?v=20261013_v8"></script>
   <script src="js/charts.js?v=20261008_fix"></script>
-  <script src="js/bappeda_data.js?v=20261013_v7"></script>
-  <script src="js/store.js?v=20261013_v7"></script>
-  <script src="js/export.js?v=20261013_v7"></script>
-  <script src="js/app.js?v=20261013_v7"></script>
+  <script src="js/bappeda_data.js?v=20261013_v8"></script>
+  <script src="js/store.js?v=20261013_v8"></script>
+  <script src="js/export.js?v=20261013_v8"></script>
+  <script src="js/app.js?v=20261013_v8"></script>
 </body>
 
 </html>

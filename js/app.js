@@ -2148,16 +2148,38 @@ const App = {
     this.openModal('docPreviewModal');
   },
 
+  // Buku Panduan Pengguna & SOP Kedinasan (Tahap 7)
+  openSopGuide(tabName = 'pegawai') {
+    if (tabName === 'login') tabName = 'akun';
+    this.openModal('sopGuideModal');
+    this.switchSopTab(tabName);
+  },
+
+  switchSopTab(tabName) {
+    const tabs = ['pegawai', 'admin', 'pimpinan', 'akun'];
+    tabs.forEach(t => {
+      const cap = t.charAt(0).toUpperCase() + t.slice(1);
+      const btn = document.getElementById(`sopTab${cap}`);
+      const pane = document.getElementById(`sopPane${cap}`);
+      if (btn) btn.classList.toggle('active', t === tabName);
+      if (pane) pane.style.display = (t === tabName) ? 'block' : 'none';
+    });
+    renderAllIcons();
+  },
+
   // Official Account Quick Guide
   showAccountHelper() {
-    this.openModal('accountHelperModal');
+    this.openSopGuide('akun');
   },
 
   fillTestAccount(nip, password) {
-    document.getElementById('loginNip').value = nip;
-    document.getElementById('loginPassword').value = password;
+    const nipInput = document.getElementById('loginNip');
+    const passInput = document.getElementById('loginPassword');
+    if (nipInput) nipInput.value = nip;
+    if (passInput) passInput.value = password;
+    this.closeModal('sopGuideModal');
     this.closeModal('accountHelperModal');
-    App.toast(`Akun ASN ${nip} dimuat. Klik 'Masuk ke Sistem'`, 'info');
+    App.toast(`Kredensial ASN ${nip} dimuat. Klik 'Masuk Portal'`, 'info');
   },
 
   // ==========================================

@@ -303,8 +303,12 @@ const ExportService = {
 
     const verificationNote = Store.state.idpState?.verificationNote || custom?.verificationNote || 'Telah diverifikasi sesuai dengan sasaran kinerja organisasi (IKU) dan kebutuhan pengembangan kompetensi jabatan aparatur Bappeda Provinsi Lampung.';
 
-    const printContainer = document.getElementById('officialPrintContainer');
-    if (!printContainer) return;
+    let printContainer = document.getElementById('officialPrintContainer');
+    if (!printContainer) {
+      printContainer = document.createElement('div');
+      printContainer.id = 'officialPrintContainer';
+      document.body.appendChild(printContainer);
+    }
 
     printContainer.innerHTML = `
       <div class="official-print-paper">
@@ -566,8 +570,12 @@ const ExportService = {
       `;
     });
 
-    const printContainer = document.getElementById('officialPrintContainer');
-    if (!printContainer) return;
+    let printContainer = document.getElementById('officialPrintContainer');
+    if (!printContainer) {
+      printContainer = document.createElement('div');
+      printContainer.id = 'officialPrintContainer';
+      document.body.appendChild(printContainer);
+    }
 
     printContainer.innerHTML = `
       <div class="official-print-paper">
@@ -729,6 +737,163 @@ const ExportService = {
     if (typeof App !== 'undefined' && App.toast) {
       App.toast('File Excel Rekapitulasi Eksekutif berhasil diunduh', 'success');
     }
+  },
+
+  /**
+   * Cetak Dokumen Standar Operasional Prosedur (SOP) Resmi Bappeda
+   */
+  printOfficialSop() {
+    const kopHtml = typeof LambangLampung !== 'undefined' ? LambangLampung.getKopSuratHtml() : '';
+    const now = new Date();
+    const months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+    const tanggalSurat = `${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}`;
+    const docRegNo = `000.8.3/SOP-IDP/BAPPEDA/${now.getFullYear()}`;
+
+    let printContainer = document.getElementById('officialPrintContainer');
+    if (!printContainer) {
+      printContainer = document.createElement('div');
+      printContainer.id = 'officialPrintContainer';
+      document.body.appendChild(printContainer);
+    }
+
+    printContainer.innerHTML = `
+      <div class="official-print-paper">
+        ${kopHtml}
+
+        <!-- REGISTRASI & METADATA SOP -->
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin: 10px 0 14px; border-bottom: 1.5px solid #000; padding-bottom: 8px; font-size: 10px; color: #000;">
+          <div>
+            <div><b>Nomor SOP:</b> ${docRegNo}</div>
+            <div><b>Tanggal Penetapan:</b> 02 Januari ${now.getFullYear()}</div>
+            <div><b>Unit Pengelola:</b> Subbagian Umum & Kepegawaian (Sekretariat)</div>
+          </div>
+          <div style="text-align: right;">
+            <div><b>Nama Prosedur:</b> Pengelolaan Individual Development Plan (IDP) ASN</div>
+            <div><b>Kualifikasi Pelaksana:</b> Seluruh Aparatur Sipil Negara (99 ASN)</div>
+            <div><b>Tanggal Cetak:</b> ${tanggalSurat}</div>
+          </div>
+        </div>
+
+        <!-- JUDUL DOKUMEN SOP -->
+        <div style="text-align: center; margin: 10px 0 14px;">
+          <h2 style="font-size: 11.5px; font-weight: 750; text-transform: uppercase; margin: 0; color: #000; letter-spacing: 0.02em; line-height: 1.35;">
+            STANDAR OPERASIONAL PROSEDUR (SOP)<br>
+            PENGELOLAAN PENGEMBANGAN KOMPETENSI ASN BERBASIS INDIVIDUAL DEVELOPMENT PLAN (IDP)<br>
+            BADAN PERENCANAAN PEMBANGUNAN DAERAH PROVINSI LAMPUNG
+          </h2>
+        </div>
+
+        <!-- BAGIAN I: DASAR HUKUM -->
+        <div class="print-section-title">I. DASAR HUKUM & REGULASI KEDINASAN</div>
+        <div style="font-size: 9.5px; line-height: 1.5; margin-bottom: 12px; padding-left: 12px;">
+          1. Undang-Undang RI No. 20 Tahun 2023 tentang Aparatur Sipil Negara (Pasal 49: Kewajiban Pengembangan Kompetensi Minimal 20 JP per tahun).<br>
+          2. Peraturan Pemerintah No. 17 Tahun 2020 tentang Perubahan atas PP No. 11 Tahun 2017 tentang Manajemen PNS.<br>
+          3. Peraturan Lembaga Administrasi Negara (LAN) RI No. 10 Tahun 2018 tentang Pengembangan Kompetensi PNS.<br>
+          4. Peraturan Menteri PAN-RB No. 3 Tahun 2020 tentang Manajemen Talenta ASN.<br>
+          5. Peraturan Gubernur Lampung No. 54 Tahun 2021 tentang Organisasi dan Tata Kerja Bappeda Provinsi Lampung.
+        </div>
+
+        <!-- BAGIAN II: MATRIKS ALUR OPERASIONAL PROSEDUR -->
+        <div class="print-section-title">II. MATRIKS STANDAR OPERASIONAL PROSEDUR (SOP)</div>
+        <table class="print-table-programs" style="margin-bottom: 14px;">
+          <thead>
+            <tr style="background: #f1f3f4; font-size: 9.5px;">
+              <th style="width: 4%;">No</th>
+              <th style="width: 27%;">Uraian Tahapan Prosedur</th>
+              <th style="width: 17%;">Pelaksana</th>
+              <th style="width: 13%;">Batas Waktu (SLA)</th>
+              <th style="width: 24%;">Kelengkapan & Output</th>
+              <th style="width: 15%;">Keterangan</th>
+            </tr>
+          </thead>
+          <tbody style="font-size: 9px;">
+            <tr>
+              <td style="text-align: center;">1</td>
+              <td><b>Penyusunan Usulan IDP</b><br>Pegawai menyusun rencana pengembangan kompetensi minimal 20 JP sesuai gap kompetensi jabatan.</td>
+              <td>Pegawai ASN</td>
+              <td style="text-align: center;">Triwulan I</td>
+              <td>Draf Formulir IDP Digital (Sistem SIP-KOMPETENSI)</td>
+              <td>Target Wajib min. 20 JP</td>
+            </tr>
+            <tr>
+              <td style="text-align: center;">2</td>
+              <td><b>Verifikasi & Penetapan IDP</b><br>Pengelola SDM menelaah keselarasan program dengan Renstra dan formasi kebutuhan instansi.</td>
+              <td>Kasubbag Kepegawaian</td>
+              <td style="text-align: center;">Maks. 3 Hari Kerja</td>
+              <td>Formulir IDP Sah & Terverifikasi</td>
+              <td>Persetujuan Resmi Atasan</td>
+            </tr>
+            <tr>
+              <td style="text-align: center;">3</td>
+              <td><b>Pelaksanaan & Pengunggahan Bukti</b><br>Pegawai mengikuti diklat/coaching dan mengunggah bukti dukung sertifikat/surat tugas.</td>
+              <td>Pegawai ASN</td>
+              <td style="text-align: center;">Maks. 7 Hari Kerja</td>
+              <td>Sertifikat Pelatihan Digital (Format PDF/JPG/PNG)</td>
+              <td>Cloud Storage Terenkripsi</td>
+            </tr>
+            <tr>
+              <td style="text-align: center;">4</td>
+              <td><b>Validasi Capaian Jam Pelajaran (JP)</b><br>Pengelola SDM memeriksa keabsahan bukti dan mengesahkan perolehan JP riil.</td>
+              <td>Pengelola SDM / Admin</td>
+              <td style="text-align: center;">Maks. 2 Hari Kerja</td>
+              <td>Konversi JP Sah & Akumulasi Capaian Otomatis</td>
+              <td>Real-time Tracking</td>
+            </tr>
+            <tr>
+              <td style="text-align: center;">5</td>
+              <td><b>Monitoring & Evaluasi Eksekutif</b><br>Kepala Badan memantau capaian 20 JP di 7 bidang dan menerbitkan disposisi arahan dinas.</td>
+              <td>Kepala Bappeda</td>
+              <td style="text-align: center;">Bulanan / Semesteran</td>
+              <td>Dashboard Eksekutif, Laporan 9-Box, & Disposisi Arahan</td>
+              <td>Live Broadcast ke ASN</td>
+            </tr>
+            <tr>
+              <td style="text-align: center;">6</td>
+              <td><b>Pencadangan Basis Data & Arsip</b><br>Kasubbag Kepegawaian mengunduh berkas cadangan data resmi untuk arsip dinas.</td>
+              <td>Pengelola SDM</td>
+              <td style="text-align: center;">Akhir Setiap Bulan</td>
+              <td>Berkas Full Backup (.JSON & .XLSX)</td>
+              <td>Keamanan Data (SHA-256)</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <!-- BAGIAN III: LEMBAR PENGESAHAN RESMI -->
+        <div style="margin-top: 18px; display: flex; justify-content: space-between; font-size: 10px; page-break-inside: avoid;">
+          <div style="width: 44%; text-align: center;">
+            <div>Mengetahui / Memeriksa:</div>
+            <div style="font-weight: 700; margin-top: 2px;">KEPALA SUB BAGIAN UMUM & KEPEGAWAIAN<br>BAPPEDA PROVINSI LAMPUNG</div>
+            <div style="height: 50px;"></div>
+            <div style="font-weight: 700; text-decoration: underline;">CIK MARYA, S.E., M.M.</div>
+            <div>Pembina / IV/a</div>
+            <div>NIP. 19691026 199203 2 002</div>
+          </div>
+          <div style="width: 44%; text-align: center;">
+            <div>Ditetapkan di Bandar Lampung,</div>
+            <div style="font-weight: 700; margin-top: 2px;">KEPALA BADAN PERENCANAAN PEMBANGUNAN DAERAH<br>PROVINSI LAMPUNG</div>
+            <div style="height: 50px;"></div>
+            <div style="font-weight: 700; text-decoration: underline;">Dr. ANANG RISGIYANTO, S.K.M., M.Kes.</div>
+            <div>Pembina Utama Madya / IV-d</div>
+            <div>NIP. 19750731 200003 1 002</div>
+          </div>
+        </div>
+      </div>
+    `;
+
+    this.closePrintDialog();
+
+    let styleEl = document.getElementById('dynamicPrintStyle');
+    if (!styleEl) {
+      styleEl = document.createElement('style');
+      styleEl.id = 'dynamicPrintStyle';
+      document.head.appendChild(styleEl);
+    }
+    styleEl.textContent = `@media print { @page { size: portrait; margin: 8mm 10mm 10mm 10mm; } }`;
+
+    document.body.insertBefore(printContainer, document.body.firstChild);
+    setTimeout(() => {
+      window.print();
+    }, 150);
   }
 };
 
