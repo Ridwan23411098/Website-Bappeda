@@ -28,4 +28,18 @@ on storage.objects for insert
 to public
 with check ( bucket_id = 'sertifikat_idp' );
 
--- Selesai! Bucket Anda sekarang siap digunakan untuk menerima file sertifikat.
+-- 6. Policy: Pegawai dapat memperbarui sertifikat
+drop policy if exists "Pegawai dapat memperbarui sertifikat" on storage.objects;
+create policy "Pegawai dapat memperbarui sertifikat"
+on storage.objects for update
+to public
+using ( bucket_id = 'sertifikat_idp' );
+
+-- 7. Policy: Pegawai dapat menghapus sertifikat
+drop policy if exists "Pegawai dapat menghapus sertifikat" on storage.objects;
+create policy "Pegawai dapat menghapus sertifikat"
+on storage.objects for delete
+to public
+using ( bucket_id = 'sertifikat_idp' );
+
+-- Selesai! Bucket sertifikat_idp siap menerima, menampilkan, dan mengelola file sertifikat cloud.
