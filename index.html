@@ -28,7 +28,7 @@
     rel="stylesheet">
 
   <!-- Core Stylesheet -->
-  <link rel="stylesheet" href="css/app.css?v=20261009_logo">
+  <link rel="stylesheet" href="css/app.css?v=20261013_v3">
 </head>
 
 <body>
@@ -1947,21 +1947,21 @@
                 </div>
                 <div>
                   <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
-                    <h1 style="font-size: 20px; font-weight: 800; margin: 0; color: #ffffff; letter-spacing: -0.01em;">Dr. ANANG RISGIYANTO, S.K.M., M.Kes.</h1>
-                    <span class="badge" style="background: rgba(255, 221, 89, 0.2); color: #ffdd59; border: 1px solid rgba(255, 221, 89, 0.4); font-size: 11px; font-weight: 700;">Kepala Bappeda</span>
-                    <span class="badge" style="background: rgba(255, 255, 255, 0.15); color: #ffffff; border: 1px solid rgba(255, 255, 255, 0.25); font-size: 11px;">TA 2026</span>
+                    <h1 style="font-size: 16px; font-weight: 700; margin: 0; color: #ffffff;">Dr. ANANG RISGIYANTO, S.K.M., M.Kes.</h1>
+                    <span class="badge" style="background: rgba(255, 221, 89, 0.2); color: #ffdd59; border: 1px solid rgba(255, 221, 89, 0.4); font-size: 10px; font-weight: 700;">Kepala Bappeda</span>
+                    <span class="badge" style="background: rgba(255, 255, 255, 0.15); color: #ffffff; border: 1px solid rgba(255, 255, 255, 0.25); font-size: 10px;">TA 2026</span>
                   </div>
-                  <p style="margin: 4px 0 0; font-size: 12.5px; color: rgba(255, 255, 255, 0.85); line-height: 1.4;">
+                  <p style="margin: 3px 0 0; font-size: 12px; color: rgba(255, 255, 255, 0.85); line-height: 1.4;">
                     Dashboard Eksekutif Pengendalian & Evaluasi Pengembangan Kompetensi (IDP) 99 ASN Bappeda Provinsi Lampung
                   </p>
                 </div>
               </div>
               <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                <button class="btn" style="background: #ffffff; color: #0b2545; font-weight: 750; border: none; box-shadow: 0 4px 12px rgba(0,0,0,0.15); display: flex; align-items: center; gap: 6px;" onclick="ExportService.showExecutivePrintDialog()">
-                  <span data-icon="Printer" data-icon-size="16"></span> Cetak Laporan Eksekutif (PDF)
+                <button class="btn" style="background: #ffffff; color: #0b2545; font-weight: 700; border: none; font-size: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); display: flex; align-items: center; gap: 6px;" onclick="ExportService.showExecutivePrintDialog()">
+                  <span data-icon="Printer" data-icon-size="15"></span> Cetak Laporan Eksekutif (PDF)
                 </button>
-                <button class="btn" style="background: rgba(255, 255, 255, 0.15); color: #ffffff; border: 1px solid rgba(255, 255, 255, 0.3); display: flex; align-items: center; gap: 6px;" onclick="ExportService.exportExecutiveMatrix()">
-                  <span data-icon="Download" data-icon-size="16"></span> Unduh Matriks (.xlsx)
+                <button class="btn" style="background: rgba(255, 255, 255, 0.15); color: #ffffff; border: 1px solid rgba(255, 255, 255, 0.3); font-size: 12px; display: flex; align-items: center; gap: 6px;" onclick="ExportService.exportExecutiveMatrix()">
+                  <span data-icon="Download" data-icon-size="15"></span> Unduh Matriks (.xlsx)
                 </button>
               </div>
             </div>
@@ -1973,10 +1973,10 @@
               <div class="stat-card-inner">
                 <div class="stat-card-info">
                   <div class="stat-card-label">Total ASN Terdaftar</div>
-                  <div class="stat-card-value" id="execTotalPegawai">99 ASN</div>
+                  <div class="stat-card-value" id="execTotalPegawai"><span>99</span> <span class="unit">ASN</span></div>
                   <div class="stat-card-desc">7 Unit Kerja Bappeda</div>
                 </div>
-                <div class="stat-card-icon"><span data-icon="Users" data-icon-size="22"></span></div>
+                <div class="stat-card-icon"><span data-icon="Users" data-icon-size="20"></span></div>
               </div>
             </div>
 
@@ -1984,10 +1984,10 @@
               <div class="stat-card-inner">
                 <div class="stat-card-info">
                   <div class="stat-card-label">Kepatuhan 20 JP ASN</div>
-                  <div class="stat-card-value text-success" id="execKepatuhanJp">88%</div>
+                  <div class="stat-card-value text-success" id="execKepatuhanJp"><span>88%</span></div>
                   <div class="stat-card-desc" id="execKepatuhanJpCount">87 ASN Memenuhi Target</div>
                 </div>
-                <div class="stat-card-icon"><span data-icon="ShieldCheck" data-icon-size="22"></span></div>
+                <div class="stat-card-icon"><span data-icon="ShieldCheck" data-icon-size="20"></span></div>
               </div>
             </div>
 
@@ -1995,10 +1995,10 @@
               <div class="stat-card-inner">
                 <div class="stat-card-info">
                   <div class="stat-card-label">IDP Disahkan (Final)</div>
-                  <div class="stat-card-value text-primary" id="execIdpDisahkan">91 ASN</div>
+                  <div class="stat-card-value text-primary" id="execIdpDisahkan"><span>91</span> <span class="unit">ASN</span></div>
                   <div class="stat-card-desc" id="execIdpDisahkanPct">91.9% Dokumen Sah</div>
                 </div>
-                <div class="stat-card-icon"><span data-icon="ClipboardCheck" data-icon-size="22"></span></div>
+                <div class="stat-card-icon"><span data-icon="ClipboardCheck" data-icon-size="20"></span></div>
               </div>
             </div>
 
@@ -2006,10 +2006,10 @@
               <div class="stat-card-inner">
                 <div class="stat-card-info">
                   <div class="stat-card-label">Total Akumulasi JP</div>
-                  <div class="stat-card-value" id="execTotalJp">2.140 JP</div>
+                  <div class="stat-card-value" id="execTotalJp"><span>2.140</span> <span class="unit">JP</span></div>
                   <div class="stat-card-desc" id="execAvgJp">Rata-rata 21.6 JP/ASN</div>
                 </div>
-                <div class="stat-card-icon"><span data-icon="Clock" data-icon-size="22"></span></div>
+                <div class="stat-card-icon"><span data-icon="Clock" data-icon-size="20"></span></div>
               </div>
             </div>
 
@@ -2017,10 +2017,10 @@
               <div class="stat-card-inner">
                 <div class="stat-card-info">
                   <div class="stat-card-label">Investasi Bangkom</div>
-                  <div class="stat-card-value text-warning" id="execEstimasiAnggaran">Rp 353.1 Jt</div>
+                  <div class="stat-card-value text-warning" id="execEstimasiAnggaran"><span>Rp 353.1</span> <span class="unit">Jt</span></div>
                   <div class="stat-card-desc">SBU Pelatihan ASN 2026</div>
                 </div>
-                <div class="stat-card-icon"><span data-icon="Coins" data-icon-size="22"></span></div>
+                <div class="stat-card-icon"><span data-icon="Coins" data-icon-size="20"></span></div>
               </div>
             </div>
           </div>
@@ -3117,13 +3117,13 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
   <script src="js/supabase.js?v=20261008_fix"></script>
-  <script src="assets/lambang-lampung.js?v=20261008_fix"></script>
+  <script src="assets/lambang-lampung.js?v=20261013_v3"></script>
   <script src="js/icons.js?v=20261008_fix"></script>
   <script src="js/charts.js?v=20261008_fix"></script>
-  <script src="js/bappeda_data.js?v=20261013_v2"></script>
-  <script src="js/store.js?v=20261013_v2"></script>
-  <script src="js/export.js?v=20261013_v2"></script>
-  <script src="js/app.js?v=20261013_v2"></script>
+  <script src="js/bappeda_data.js?v=20261013_v3"></script>
+  <script src="js/store.js?v=20261013_v3"></script>
+  <script src="js/export.js?v=20261013_v3"></script>
+  <script src="js/app.js?v=20261013_v3"></script>
 </body>
 
 </html>

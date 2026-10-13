@@ -325,11 +325,11 @@ const ExportService = {
         </div>
 
         <!-- JUDUL UTAMA DOKUMEN RESMI -->
-        <div style="text-align: center; margin: 12px 0 20px;">
-          <h2 style="font-size: 14px; font-weight: 850; text-transform: uppercase; margin: 0; color: #000; letter-spacing: 0.03em; line-height: 1.4;">
+        <div style="text-align: center; margin: 10px 0 16px;">
+          <h2 style="font-size: 12px; font-weight: 750; text-transform: uppercase; margin: 0; color: #000; letter-spacing: 0.02em; line-height: 1.35;">
             FORMULIR RENCANA PENGEMBANGAN INDIVIDU<br>(INDIVIDUAL DEVELOPMENT PLAN — IDP)
           </h2>
-          <div style="font-size: 11.5px; font-weight: 700; color: #222; margin-top: 3px;">
+          <div style="font-size: 10px; font-weight: 650; color: #222; margin-top: 2px;">
             PEGAWAI APARATUR SIPIL NEGARA BADAN PERENCANAAN PEMBANGUNAN DAERAH PROVINSI LAMPUNG
           </div>
         </div>
@@ -587,19 +587,19 @@ const ExportService = {
         </div>
 
         <!-- JUDUL LAPORAN -->
-        <div style="text-align: center; margin: 14px 0 20px;">
-          <h2 style="font-size: 13.5px; font-weight: 850; text-transform: uppercase; margin: 0; color: #000; letter-spacing: 0.03em; line-height: 1.4;">
+        <div style="text-align: center; margin: 10px 0 16px;">
+          <h2 style="font-size: 12px; font-weight: 750; text-transform: uppercase; margin: 0; color: #000; letter-spacing: 0.02em; line-height: 1.35;">
             LAPORAN EKSEKUTIF PENGENDALIAN PENGEMBANGAN KOMPETENSI PEGAWAI (IDP)<br>
             BADAN PERENCANAAN PEMBANGUNAN DAERAH PROVINSI LAMPUNG
           </h2>
-          <div style="font-size: 11px; font-weight: 700; color: #222; margin-top: 3px;">
+          <div style="font-size: 10px; font-weight: 650; color: #222; margin-top: 2px;">
             PERIODE TAHUN ANGGARAN 2026 &bull; STANDAR MINIMAL 20 JAM PELAJARAN (JP) PER PEGAWAI
           </div>
         </div>
 
         <!-- BAGIAN I: RINGKASAN CAPAIAN STRATEGIS -->
         <div class="print-section-title">I. RINGKASAN INDIKATOR KINERJA UTAMA (IKU) PENGEMBANGAN SDM</div>
-        <table class="print-table-programs" style="margin-bottom: 16px;">
+        <table class="print-table-programs" style="margin-bottom: 12px;">
           <thead>
             <tr style="background: #f1f3f4;">
               <th>Total ASN Bappeda</th>
@@ -611,7 +611,7 @@ const ExportService = {
             </tr>
           </thead>
           <tbody>
-            <tr style="text-align: center; font-size: 11px;">
+            <tr style="text-align: center; font-size: 10px;">
               <td><b>${summary.totalPegawai} Pegawai</b></td>
               <td><b style="color: #137333;">${summary.persenKepatuhan}%</b> (${summary.memenuhi20Jp} ASN)</td>
               <td><b>${summary.idpDisetujui} Pegawai</b> (${summary.persenDisetujui}%)</td>
@@ -643,38 +643,38 @@ const ExportService = {
 
         <!-- BAGIAN III: ARAHAN & KEBIJAKAN PIMPINAN -->
         <div class="print-section-title">III. ARAHAN STRATEGIS KEPALA BADAN</div>
-        <div style="border: 1px solid #999; border-radius: 4px; padding: 10px 14px; background: #fafafa; font-size: 11px; line-height: 1.6; margin-bottom: 24px;">
+        <div style="border: 1px solid #777; border-radius: 3px; padding: 8px 12px; background: #fafafa; font-size: 10px; line-height: 1.5; margin-bottom: 16px;">
           <b>Catatan Disposisi / Arahan:</b><br>
           "${directives}"
         </div>
 
         <!-- TANDA TANGAN KEPALA BADAN -->
-        <div style="display: flex; justify-content: flex-end; margin-top: 10px;">
-          <div style="width: 320px; text-align: center; font-size: 11px; line-height: 1.45;">
+        <div style="display: flex; justify-content: flex-end; margin-top: 8px;">
+          <div style="width: 300px; text-align: center; font-size: 10px; line-height: 1.4;">
             <div>Bandar Lampung, ${tanggalSurat}</div>
-            <div style="font-weight: 700; margin-top: 4px; text-transform: uppercase;">
+            <div style="font-weight: 700; margin-top: 3px; text-transform: uppercase;">
               KEPALA BADAN PERENCANAAN PEMBANGUNAN DAERAH<br>PROVINSI LAMPUNG
             </div>
             
             <!-- Stempel Digital & QR Verification -->
-            <div style="margin: 12px auto; display: flex; align-items: center; justify-content: center; gap: 8px;">
-              <div style="width: 54px; height: 54px; border: 1.5px dashed #0b5394; border-radius: 6px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 8px; color: #0b5394; line-height: 1.1; font-weight: 700; text-align: center; padding: 2px;">
+            <div style="margin: 10px auto; display: flex; align-items: center; justify-content: center; gap: 8px;">
+              <div style="width: 48px; height: 48px; border: 1.2px dashed #0b5394; border-radius: 5px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 7.5px; color: #0b5394; line-height: 1.1; font-weight: 700; text-align: center; padding: 2px;">
                 <span>SEAL</span>
-                <span style="font-size: 11px;">★</span>
+                <span style="font-size: 10px;">★</span>
                 <span>BAPPEDA</span>
               </div>
-              <div style="font-size: 9.5px; color: #333; text-align: left; line-height: 1.3;">
+              <div style="font-size: 9px; color: #333; text-align: left; line-height: 1.25;">
                 <div style="font-weight: 700; color: #0b5394;">TERTANDATANGANI SECARA ELEKTRONIK</div>
                 <div>Sistem Informasi IDP Bappeda</div>
                 <div>ID: VERIF-EXECUTIVE-${now.getFullYear()}-001</div>
               </div>
             </div>
 
-            <div style="font-weight: 800; text-decoration: underline; font-size: 12px; margin-top: 4px;">
+            <div style="font-weight: 750; text-decoration: underline; font-size: 11px; margin-top: 3px;">
               Dr. ANANG RISGIYANTO, S.K.M., M.Kes.
             </div>
-            <div>Pembina Utama Madya / IV.d</div>
-            <div>NIP. 19750731 200003 1 002</div>
+            <div style="font-size: 9.5px;">Pembina Utama Madya / IV.d</div>
+            <div style="font-size: 9.5px;">NIP. 19750731 200003 1 002</div>
           </div>
         </div>
 

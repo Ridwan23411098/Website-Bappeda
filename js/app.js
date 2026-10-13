@@ -1787,30 +1787,30 @@ const App = {
       perluTindakLanjut: 8
     };
 
-    // Update Top Stat Elements if present
+    // Update Top Stat Elements if present with standard sizing and inline units
     const elTotal = document.getElementById('execTotalPegawai');
-    if (elTotal) elTotal.textContent = `${summary.totalPegawai} ASN`;
+    if (elTotal) elTotal.innerHTML = `<span>${summary.totalPegawai}</span> <span class="unit">ASN</span>`;
 
     const elKepatuhan = document.getElementById('execKepatuhanJp');
-    if (elKepatuhan) elKepatuhan.textContent = `${summary.persenKepatuhan}%`;
+    if (elKepatuhan) elKepatuhan.innerHTML = `<span>${summary.persenKepatuhan}%</span>`;
 
     const elKepatuhanCount = document.getElementById('execKepatuhanJpCount');
     if (elKepatuhanCount) elKepatuhanCount.textContent = `${summary.memenuhi20Jp} dari ${summary.totalPegawai} ASN (≥20 JP)`;
 
     const elIdpDisahkan = document.getElementById('execIdpDisahkan');
-    if (elIdpDisahkan) elIdpDisahkan.textContent = `${summary.idpDisetujui} ASN`;
+    if (elIdpDisahkan) elIdpDisahkan.innerHTML = `<span>${summary.idpDisetujui}</span> <span class="unit">ASN</span>`;
 
     const elIdpDisahkanPct = document.getElementById('execIdpDisahkanPct');
     if (elIdpDisahkanPct) elIdpDisahkanPct.textContent = `${summary.persenDisetujui}% Dokumen Sah`;
 
     const elTotalJp = document.getElementById('execTotalJp');
-    if (elTotalJp) elTotalJp.textContent = `${summary.totalJp.toLocaleString('id-ID')} JP`;
+    if (elTotalJp) elTotalJp.innerHTML = `<span>${summary.totalJp.toLocaleString('id-ID')}</span> <span class="unit">JP</span>`;
 
     const elAvgJp = document.getElementById('execAvgJp');
     if (elAvgJp) elAvgJp.textContent = `Rata-rata ${summary.avgJp} JP/ASN`;
 
     const elAnggaran = document.getElementById('execEstimasiAnggaran');
-    if (elAnggaran) elAnggaran.textContent = `Rp ${(summary.totalEstimasiAnggaran / 1000000).toFixed(1)} Jt`;
+    if (elAnggaran) elAnggaran.innerHTML = `<span>Rp ${(summary.totalEstimasiAnggaran / 1000000).toFixed(1)}</span> <span class="unit">Jt</span>`;
 
     // 1. Grouped Bar: 7 Unit Kerja Bappeda
     const unitBreakdown = Store.getUnitBreakdown ? Store.getUnitBreakdown() : [];
