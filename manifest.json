@@ -1,12 +1,14 @@
 {
-  "name": "Sistem Individual Development Plan — Bappeda Provinsi Lampung",
-  "short_name": "IDP Bappeda",
-  "description": "Sistem Individual Development Plan Bappeda Provinsi Lampung",
-  "start_url": "/",
+  "name": "SIP-KOMPETENSI — Bappeda Provinsi Lampung",
+  "short_name": "SIP-Kompetensi",
+  "description": "Sistem Informasi Pelaksanaan & Perencanaan Kompetensi ASN Bappeda Provinsi Lampung",
+  "start_url": "./",
+  "scope": "./",
   "display": "standalone",
   "background_color": "#0f172a",
   "theme_color": "#1e3a8a",
   "orientation": "portrait-primary",
+  "categories": ["government", "productivity"],
   "icons": [
     {
       "src": "assets/logo-idp.png?v=2",
@@ -19,6 +21,20 @@
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Dashboard IDP",
+      "short_name": "Dashboard",
+      "description": "Buka Dashboard IDP Pegawai",
+      "url": "./#edash"
+    },
+    {
+      "name": "Realisasi Pelatihan",
+      "short_name": "Realisasi",
+      "description": "Catat Bukti Realisasi Pelatihan",
+      "url": "./#epelaksanaan"
     }
   ]
 }

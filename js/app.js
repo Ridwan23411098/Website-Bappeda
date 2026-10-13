@@ -82,6 +82,9 @@ const App = {
       });
     }
 
+    // Initialize PWA Installation & Mobile Capabilities
+    this.initPwaInstaller();
+
     // Kosongkan form input login secara agresif untuk mencegah autofill browser
     this.clearLoginFields();
     setTimeout(() => this.clearLoginFields(), 150);
@@ -341,7 +344,10 @@ const App = {
     if (crumbEl) crumbEl.textContent = currentTitle;
 
     // Close mobile sidebar if open
-    document.getElementById('appSidebar').classList.remove('mobile-open');
+    const sb = document.getElementById('appSidebar');
+    const bd = document.getElementById('sidebarBackdrop');
+    if (sb) sb.classList.remove('mobile-open');
+    if (bd) bd.classList.remove('active');
 
     // Trigger page-specific renders
     this.renderPageData(pageId);
@@ -2703,8 +2709,86 @@ const App = {
     }
   },
 
+  // ==========================================
+  // PWA & MOBILE INSTALLATION (TAHAP 5)
+  // ==========================================
+  initPwaInstaller() {
+    this.deferredInstallPrompt = null;
+
+    // Deteksi jika sudah berjalan dalam mode PWA Standalone (sudah terpasang)
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches || 
+                         window.navigator.standalone === true;
+    if (isStandalone) {
+      console.log('SIP App is running as installed standalone PWA');
+      return;
+    }
+
+    // Tangkap event sebelum instalasi browser (Chrome, Edge, Samsung Internet)
+    window.addEventListener('beforeinstallprompt', e => {
+      e.preventDefault();
+      this.deferredInstallPrompt = e;
+      console.log('PWA installation prompt available');
+
+      const topbarBtn = document.getElementById('pwaInstallBtn');
+      const sidebarBtn = document.getElementById('pwaSidebarInstallBtn');
+      if (topbarBtn) topbarBtn.style.display = 'inline-flex';
+      if (sidebarBtn) sidebarBtn.style.display = 'flex';
+      if (typeof lucide !== 'undefined' && lucide.createIcons) lucide.createIcons();
+    });
+
+    window.addEventListener('appinstalled', () => {
+      this.deferredInstallPrompt = null;
+      const topbarBtn = document.getElementById('pwaInstallBtn');
+      const sidebarBtn = document.getElementById('pwaSidebarInstallBtn');
+      if (topbarBtn) topbarBtn.style.display = 'none';
+      if (sidebarBtn) sidebarBtn.style.display = 'none';
+      this.toast('Aplikasi SIP-KOMPETENSI berhasil dipasang di layar utama perangkat Anda!', 'success');
+    });
+
+    // Untuk perangkat iOS / iPhone / iPad (tampilkan tombol instalasi petunjuk)
+    const isIos = /iphone|ipad|ipod/.test(window.navigator.userAgent.toLowerCase());
+    if (isIos && !isStandalone) {
+      const topbarBtn = document.getElementById('pwaInstallBtn');
+      const sidebarBtn = document.getElementById('pwaSidebarInstallBtn');
+      if (topbarBtn) topbarBtn.style.display = 'inline-flex';
+      if (sidebarBtn) sidebarBtn.style.display = 'flex';
+      if (typeof lucide !== 'undefined' && lucide.createIcons) lucide.createIcons();
+    }
+  },
+
+  async triggerPwaInstall() {
+    if (this.deferredInstallPrompt) {
+      this.deferredInstallPrompt.prompt();
+      const { outcome } = await this.deferredInstallPrompt.userChoice;
+      if (outcome === 'accepted') {
+        this.toast('Memasang aplikasi ke perangkat Anda...', 'info');
+      }
+      this.deferredInstallPrompt = null;
+      const topbarBtn = document.getElementById('pwaInstallBtn');
+      const sidebarBtn = document.getElementById('pwaSidebarInstallBtn');
+      if (topbarBtn) topbarBtn.style.display = 'none';
+      if (sidebarBtn) sidebarBtn.style.display = 'none';
+      return;
+    }
+
+    // Petunjuk Safari di iOS / iPhone
+    const isIos = /iphone|ipad|ipod/.test(window.navigator.userAgent.toLowerCase());
+    if (isIos) {
+      this.toast('Untuk pasang di iPhone/iPad: Ketuk tombol Bagikan (Share ⎋) di Safari, lalu pilih "Tambah ke Layar Utama" (+)', 'info', 8000);
+      return;
+    }
+
+    // Panduan jika sudah pernah menolak prompt sebelumnya
+    this.toast('Ketuk menu titik tiga (⋮) pada browser Anda, lalu pilih "Instal Aplikasi" atau "Tambahkan ke Layar Utama"', 'info', 6000);
+  },
+
   toggleMobileSidebar() {
-    document.getElementById('appSidebar').classList.toggle('mobile-open');
+    const sb = document.getElementById('appSidebar');
+    const bd = document.getElementById('sidebarBackdrop');
+    if (sb) {
+      sb.classList.toggle('mobile-open');
+      if (bd) bd.classList.toggle('active', sb.classList.contains('mobile-open'));
+    }
   },
 
   bindGlobalEvents() {
