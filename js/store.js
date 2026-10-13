@@ -1099,7 +1099,7 @@ const Store = {
     });
   },
 
-  addExecutiveDirective(text, target = 'Seluruh Kepala Bidang & Sekretaris') {
+  async addExecutiveDirective(text, target = 'Seluruh Kepala Bidang & Sekretaris') {
     if (!text || !text.trim()) return false;
     if (!this.state.executiveDirectives) this.state.executiveDirectives = [];
     const newDir = {
@@ -1113,6 +1113,19 @@ const Store = {
     };
     this.state.executiveDirectives.unshift(newDir);
     this.save();
+
+    // Broadcast ke Notifikasi Lonceng (Top Bar Bell)
+    try {
+      await this.sendNotification({
+        penerima: 'semua',
+        judul: `📢 Arahan Kepala Bappeda (${target})`,
+        pesan: `"${text.trim().substring(0, 120)}${text.trim().length > 120 ? '...' : ''}"`,
+        tipe: 'warning'
+      });
+    } catch (e) {
+      console.warn("Gagal broadcast notifikasi arahan:", e);
+    }
+
     return newDir;
   },
 

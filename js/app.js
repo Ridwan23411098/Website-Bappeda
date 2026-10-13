@@ -441,6 +441,62 @@ const App = {
     document.getElementById('edashBelumVal').textContent = summary.totalProgram - summary.completed;
 
     Charts.renderCircularProgress('pegawaiCircularProgress', idpStatus === 'Final' ? 100 : 85, 'Completed');
+    this.renderEmployeeDirectiveBanner();
+  },
+
+  renderEmployeeDirectiveBanner() {
+    const bannerEl = document.getElementById('edashDirectiveBanner');
+    if (!bannerEl) return;
+
+    const directives = Store.state.executiveDirectives || [];
+    if (directives.length === 0) {
+      bannerEl.innerHTML = '';
+      return;
+    }
+
+    const user = Store.state.user || {};
+    const userUnit = (user.unitKerja || '').toLowerCase();
+
+    // Saring arahan: untuk Semua Bidang, Seluruh Kepala Bidang & Sekretaris, atau unit kerja pegawai
+    const relevant = directives.filter(d => {
+      const tgt = (d.target || '').toLowerCase();
+      if (tgt.includes('semua') || tgt.includes('seluruh')) return true;
+      if (userUnit && (tgt.includes(userUnit) || userUnit.includes(tgt))) return true;
+      if (userUnit.includes('sekretariat') && tgt.includes('sekretariat')) return true;
+      if (userUnit.includes('pmpe') && (tgt.includes('pmpe') || tgt.includes('perencanaan makro'))) return true;
+      if (userUnit.includes('infrastruktur') && tgt.includes('infrastruktur')) return true;
+      if (userUnit.includes('pemerintahan') && tgt.includes('pemerintahan')) return true;
+      if (userUnit.includes('perekonomian') && tgt.includes('perekonomian')) return true;
+      return false;
+    });
+
+    if (relevant.length === 0) {
+      bannerEl.innerHTML = '';
+      return;
+    }
+
+    const latest = relevant[0];
+    bannerEl.innerHTML = `
+      <div style="background: linear-gradient(135deg, rgba(239, 246, 255, 0.95), rgba(240, 253, 250, 0.95)); border: 1px solid #bfdbfe; border-left: 4px solid var(--color-primary); border-radius: var(--radius-md); padding: 14px 18px; margin-bottom: 24px; box-shadow: var(--shadow-sm);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; gap: 8px;">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span style="background: var(--color-primary); color: white; font-size: 10.5px; font-weight: 700; padding: 2px 9px; border-radius: 4px; text-transform: uppercase; letter-spacing: 0.5px; display: inline-flex; align-items: center; gap: 4px;">
+              <span data-icon="Megaphone" data-icon-size="12"></span> Arahan Resmi Kepala Bappeda
+            </span>
+            <span style="font-size: 11px; color: var(--color-text-muted);">Sasaran: <b style="color: var(--color-primary);">${latest.target}</b></span>
+          </div>
+          <span style="font-size: 11px; color: var(--color-text-muted);">${latest.tanggal}</span>
+        </div>
+        <p style="font-size: 13px; font-style: italic; color: #1e3a8a; margin: 4px 0 8px 0; line-height: 1.5; font-weight: 500;">
+          "${latest.arahan}"
+        </p>
+        <div style="font-size: 11px; color: var(--color-text-muted); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; border-top: 1px dashed #dbeafe; padding-top: 6px;">
+          <span>Diterbitkan oleh: <b>${latest.penulis}</b> (${latest.jabatan})</span>
+          <span class="badge badge-success" style="font-size: 10px;">Status: ${latest.status}</span>
+        </div>
+      </div>
+    `;
+    if (typeof lucide !== 'undefined' && lucide.createIcons) lucide.createIcons();
   },
 
   renderEmployeeProfile() {
@@ -1341,12 +1397,47 @@ const App = {
   // ==========================================
 
   renderAdminDashboard() {
+    this.renderAdminDirectiveBanner();
     Charts.renderDonut('adminIdpStatusDonut', [
       { label: 'Final', value: 72, color: 'var(--color-success)' },
       { label: 'Diajukan ke Atasan', value: 12, color: 'var(--color-warning)' },
       { label: 'Revisi', value: 5, color: 'var(--color-danger)' },
       { label: 'Belum Mengisi', value: 11, color: 'var(--color-text-muted)' }
     ]);
+  },
+
+  renderAdminDirectiveBanner() {
+    const bannerEl = document.getElementById('adashDirectiveBanner');
+    if (!bannerEl) return;
+
+    const directives = Store.state.executiveDirectives || [];
+    if (directives.length === 0) {
+      bannerEl.innerHTML = '';
+      return;
+    }
+
+    const latest = directives[0];
+    bannerEl.innerHTML = `
+      <div style="background: linear-gradient(135deg, rgba(254, 243, 199, 0.45), rgba(239, 246, 255, 0.9)); border: 1px solid #fde68a; border-left: 4px solid var(--color-warning); border-radius: var(--radius-md); padding: 14px 18px; margin-bottom: 24px; box-shadow: var(--shadow-sm);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; gap: 8px;">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span style="background: #b45309; color: white; font-size: 10.5px; font-weight: 700; padding: 2px 9px; border-radius: 4px; text-transform: uppercase; letter-spacing: 0.5px; display: inline-flex; align-items: center; gap: 4px;">
+              <span data-icon="AlertCircle" data-icon-size="12"></span> Disposisi Arahan Kepala Bappeda
+            </span>
+            <span style="font-size: 11px; color: var(--color-text-muted);">Unit Target: <b style="color: var(--color-primary);">${latest.target}</b></span>
+          </div>
+          <span style="font-size: 11px; color: var(--color-text-muted);">${latest.tanggal}</span>
+        </div>
+        <p style="font-size: 13px; font-style: italic; color: #78350f; margin: 4px 0 8px 0; line-height: 1.5; font-weight: 500;">
+          "${latest.arahan}"
+        </p>
+        <div style="font-size: 11px; color: var(--color-text-muted); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; border-top: 1px dashed #fde68a; padding-top: 6px;">
+          <span>Instruksi Kedinasan: <i>Kasubbag Kepegawaian & Tim Verifikasi agar mengawal kepatuhan IDP pada unit tersebut.</i></span>
+          <span class="badge badge-warning" style="font-size: 10px;">Perlu Pengawalan</span>
+        </div>
+      </div>
+    `;
+    if (typeof lucide !== 'undefined' && lucide.createIcons) lucide.createIcons();
   },
 
   async renderAdminVerification() {
@@ -1879,7 +1970,7 @@ const App = {
     `).join('');
   },
 
-  submitExecutiveDirective() {
+  async submitExecutiveDirective() {
     const input = document.getElementById('newDirectiveInput');
     const target = document.getElementById('directiveTargetSelect')?.value || 'Seluruh Kepala Bidang & Sekretaris';
     if (!input || !input.value.trim()) {
@@ -1887,9 +1978,10 @@ const App = {
       return;
     }
 
-    Store.addExecutiveDirective(input.value.trim(), target);
+    await Store.addExecutiveDirective(input.value.trim(), target);
     input.value = '';
     this.renderExecutiveDirectivesList();
+    this.renderNotifications();
     App.toast('Arahan Kepala Badan berhasil diterbitkan dan disiarkan ke seluruh unit kerja!', 'success');
   },
 
