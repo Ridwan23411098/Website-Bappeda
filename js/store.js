@@ -1042,12 +1042,18 @@ const Store = {
   getExecutiveSummary() {
     const employees = this.state.employees || [];
     const totalPegawai = employees.length || 99;
-    const memenuhi20Jp = employees.filter(e => (e.jp || 0) >= 20).length || 87;
+    const memenuhi20Jp = employees.length > 0 
+      ? employees.filter(e => (e.jp || 0) >= 20).length 
+      : 60;
     const persenKepatuhan = Math.round((memenuhi20Jp / totalPegawai) * 100);
-    const idpDisetujui = employees.filter(e => e.statusIdp === 'Disetujui' || e.statusIdp === 'Final').length || 91;
-    const totalJp = employees.reduce((sum, e) => sum + (e.jp || 0), 0) || 2140;
-    const avgJp = totalPegawai > 0 ? (totalJp / totalPegawai).toFixed(1) : '21.6';
-    const totalEstimasiAnggaran = totalJp * 165000; // Standar SBU Pelatihan ASN
+    const idpDisetujui = employees.length > 0 
+      ? employees.filter(e => e.statusIdp === 'Disetujui' || e.statusIdp === 'Final').length 
+      : 60;
+    const totalJp = employees.length > 0 
+      ? employees.reduce((sum, e) => sum + (e.jp || 0), 0) 
+      : 1862;
+    const avgJp = totalPegawai > 0 ? (totalJp / totalPegawai).toFixed(1) : '18.8';
+    const totalEstimasiAnggaran = totalJp * 165000; // Standar SBU Pelatihan ASN 2026
 
     return {
       totalPegawai,
@@ -1058,7 +1064,7 @@ const Store = {
       totalJp,
       avgJp,
       totalEstimasiAnggaran,
-      perluTindakLanjut: Math.max(0, totalPegawai - idpDisetujui)
+      perluTindakLanjut: Math.max(0, totalPegawai - memenuhi20Jp)
     };
   },
 
@@ -1079,22 +1085,22 @@ const Store = {
       const total = emps.length || u.targetPegawai;
       const disetujui = emps.filter(e => e.statusIdp === 'Disetujui' || e.statusIdp === 'Final').length;
       const memenuhi20Jp = emps.filter(e => (e.jp || 0) >= 20).length;
-      const totalJp = emps.reduce((acc, e) => acc + (e.jp || 0), 0) || (total * 21);
-      const avgJp = total > 0 ? (totalJp / total).toFixed(1) : '21.0';
-      const pctKepatuhan = total > 0 && emps.length > 0 ? Math.round((memenuhi20Jp / total) * 100) : (u.name === 'Bidang PMPE (Rendalev)' ? 100 : 88);
-      const pctIdp = total > 0 && emps.length > 0 ? Math.round((disetujui / total) * 100) : 92;
+      const totalJp = emps.reduce((acc, e) => acc + (e.jp || 0), 0) || (total * 19);
+      const avgJp = total > 0 ? (totalJp / total).toFixed(1) : '18.8';
+      const pctKepatuhan = total > 0 && emps.length > 0 ? Math.round((memenuhi20Jp / total) * 100) : 61;
+      const pctIdp = total > 0 && emps.length > 0 ? Math.round((disetujui / total) * 100) : 61;
 
       return {
         unit: u.name,
         kabid: u.kabid,
         pegawai: total,
-        disetujui: disetujui || Math.round(total * 0.92),
-        memenuhi20Jp: memenuhi20Jp || Math.round(total * 0.88),
+        disetujui: emps.length > 0 ? disetujui : Math.round(total * 0.61),
+        memenuhi20Jp: emps.length > 0 ? memenuhi20Jp : Math.round(total * 0.61),
         totalJp,
         avgJp,
         pctKepatuhan,
         pctIdp,
-        tindakLanjut: Math.max(0, total - (disetujui || Math.round(total * 0.92)))
+        tindakLanjut: Math.max(0, total - (emps.length > 0 ? disetujui : Math.round(total * 0.61)))
       };
     });
   },
@@ -1761,3 +1767,10 @@ const Store = {
 
 // Initialize persistent store
 Store.init();
+
+if (typeof window !== 'undefined') {
+  window.Store = Store;
+}
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = Store;
+}

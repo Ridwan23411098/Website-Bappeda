@@ -2750,14 +2750,14 @@ const App = {
   renderExecutiveDashboard() {
     const summary = Store.getExecutiveSummary ? Store.getExecutiveSummary() : {
       totalPegawai: 99,
-      memenuhi20Jp: 87,
-      persenKepatuhan: 88,
-      idpDisetujui: 91,
-      persenDisetujui: 92,
-      totalJp: 2140,
-      avgJp: '21.6',
-      totalEstimasiAnggaran: 353100000,
-      perluTindakLanjut: 8
+      memenuhi20Jp: 60,
+      persenKepatuhan: 61,
+      idpDisetujui: 60,
+      persenDisetujui: 61,
+      totalJp: 1862,
+      avgJp: '18.8',
+      totalEstimasiAnggaran: 307230000,
+      perluTindakLanjut: 39
     };
 
     // Update Top Stat Elements if present with standard sizing and inline units
@@ -2805,15 +2805,42 @@ const App = {
       { label: 'Kurang (<10 JP)', value: Math.max(1, belumTerlaksana), color: 'var(--color-danger)' }
     ]);
 
-    // 3. Trend Line
-    Charts.renderTrendLine('executiveTrendChart', [180, 360, 590, 840, 1120, 1380, 1620, 1850, 1990, 2080, 2120, summary.totalJp], [
+    // 3. Trend Line (Akumulasi Kumulatif Menuju 1.862 JP)
+    Charts.renderTrendLine('executiveTrendChart', [160, 320, 510, 720, 960, 1180, 1390, 1580, 1720, 1810, 1845, summary.totalJp], [
       'Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'
     ]);
 
-    // 4. Render Executive Directives
+    // 4. Render Dynamic Executive Strategic Insights
+    const elInsights = document.getElementById('executiveStrategicInsights');
+    if (elInsights) {
+      elInsights.innerHTML = `
+        <div style="padding: 12px 14px; background: var(--color-surface-subtle); border-radius: var(--radius-md); border: 1px solid var(--color-border); border-left: 3px solid var(--color-primary);">
+          <div style="font-weight: 750; color: var(--color-primary); font-size: 13px;">Tingkat Kepatuhan Pengesahan IDP ${summary.persenDisetujui}%</div>
+          <p style="font-size: 12px; color: var(--color-text-secondary); margin-top: 4px; line-height: 1.5; margin-bottom: 0;">
+            ${summary.idpDisetujui} dari ${summary.totalPegawai} ASN telah memiliki dokumen IDP sah berstatus Final. UPTD Pusdatin (70%) dan Bidang PMPE (67%) memimpin capaian pengesahan.
+          </p>
+        </div>
+
+        <div style="padding: 12px 14px; background: var(--color-surface-subtle); border-radius: var(--radius-md); border: 1px solid var(--color-border); border-left: 3px solid var(--color-success);">
+          <div style="font-weight: 750; color: var(--color-success); font-size: 13px;">${summary.persenKepatuhan}% ASN Memenuhi Standar Minimal 20 JP</div>
+          <p style="font-size: 12px; color: var(--color-text-secondary); margin-top: 4px; line-height: 1.5; margin-bottom: 0;">
+            Akumulasi mencapai ${summary.totalJp.toLocaleString('id-ID')} JP dengan rata-rata ${summary.avgJp} JP per pegawai dari seluruh 7 unit kerja di lingkungan Bappeda Provinsi Lampung.
+          </p>
+        </div>
+
+        <div style="padding: 12px 14px; background: var(--color-surface-subtle); border-radius: var(--radius-md); border: 1px solid var(--color-border); border-left: 3px solid var(--color-warning);">
+          <div style="font-weight: 750; color: var(--color-warning); font-size: 13px;">${summary.perluTindakLanjut} ASN Memerlukan Tindak Lanjut Pengendalian</div>
+          <p style="font-size: 12px; color: var(--color-text-secondary); margin-top: 4px; line-height: 1.5; margin-bottom: 0;">
+            Disarankan menerbitkan disposisi pimpinan untuk percepatan pengajuan formulir IDP dan pemenuhan target 20 JP sebelum evaluasi akhir tahun.
+          </p>
+        </div>
+      `;
+    }
+
+    // 5. Render Executive Directives
     this.renderExecutiveDirectivesList();
 
-    // 5. Render 7-Unit Executive Table
+    // 6. Render 7-Unit Executive Table
     this.renderExecutiveUnitTable();
 
     // Re-create lucide icons inside rendered components
