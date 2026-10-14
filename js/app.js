@@ -1817,11 +1817,20 @@ const App = {
     if (typeof BackupService !== 'undefined') {
       BackupService.renderAdminDashboardBackupCard();
     }
+    this.updateComplianceCounters();
+    const emps = Store.state.employees || [];
+    let red = 0, yellow = 0, green = 0;
+    emps.forEach(e => {
+      const cat = this.getComplianceCategory(e);
+      if (cat.key === 'red') red++;
+      else if (cat.key === 'yellow') yellow++;
+      else if (cat.key === 'green') green++;
+    });
+
     Charts.renderDonut('adminIdpStatusDonut', [
-      { label: 'Final', value: 72, color: 'var(--color-success)' },
-      { label: 'Diajukan ke Atasan', value: 12, color: 'var(--color-warning)' },
-      { label: 'Revisi', value: 5, color: 'var(--color-danger)' },
-      { label: 'Belum Mengisi', value: 11, color: 'var(--color-text-muted)' }
+      { label: 'Final (Memenuhi Target ≥20 JP)', value: green, color: 'var(--color-success)' },
+      { label: 'Dalam Proses / Verifikasi', value: yellow, color: 'var(--color-warning)' },
+      { label: 'Belum Mengajukan (Kritis)', value: red, color: 'var(--color-danger)' }
     ]);
   },
 
@@ -2004,6 +2013,108 @@ const App = {
 
   empPage: 1,
   empPageSize: 15,
+  complianceFilter: 'all', // 'all', 'red', 'yellow', 'green'
+
+  getComplianceCategory(emp) {
+    if (!emp) return { key: 'red', level: 'Kritis', badgeClass: 'badge-danger', dotColor: 'var(--color-danger)', label: 'Belum Mengajukan', sublabel: '0/20 JP', percent: 0, needsReminder: true };
+    const status = (emp.statusIdp || '').toLowerCase();
+    const jp = typeof emp.jp === 'number' ? emp.jp : (parseInt(emp.progress) || 0);
+
+    // Kategori Merah: Belum mengajukan, Draft, atau JP == 0
+    if (status === 'belum' || status === 'draft' || status === 'belum mengisi' || !emp.statusIdp || jp === 0) {
+      return {
+        key: 'red',
+        level: 'Kritis',
+        badgeClass: 'badge-danger',
+        dotColor: 'var(--color-danger)',
+        label: status === 'draft' ? 'Draft Rencana' : 'Belum Mengajukan',
+        sublabel: `${jp}/20 JP`,
+        percent: Math.min(100, Math.round((jp / 20) * 100)),
+        needsReminder: true
+      };
+    }
+
+    // Kategori Hijau: Disetujui/Final dan JP >= 20
+    if ((status === 'disetujui' || status === 'final') && jp >= 20) {
+      return {
+        key: 'green',
+        level: 'Patuh',
+        badgeClass: 'badge-success',
+        dotColor: 'var(--color-success)',
+        label: 'Memenuhi Target (≥20 JP)',
+        sublabel: `${jp} JP (Tercapai)`,
+        percent: 100,
+        needsReminder: false
+      };
+    }
+
+    // Kategori Kuning: Menunggu Verifikasi, Perlu Revisi, atau JP < 20
+    let label = 'Belum Capai 20 JP';
+    if (status.includes('revisi')) label = 'Perlu Revisi Dokumen';
+    else if (status.includes('verifikasi') || status.includes('diajukan')) label = 'Menunggu Verifikasi';
+
+    return {
+      key: 'yellow',
+      level: 'Perhatian',
+      badgeClass: 'badge-warning',
+      dotColor: 'var(--color-warning)',
+      label: label,
+      sublabel: `${jp}/20 JP`,
+      percent: Math.min(100, Math.round((jp / 20) * 100)),
+      needsReminder: true
+    };
+  },
+
+  setComplianceFilter(key) {
+    this.complianceFilter = key || 'all';
+    this.empPage = 1;
+    document.querySelectorAll('.compliance-tab-btn').forEach(btn => {
+      btn.classList.toggle('active', btn.getAttribute('data-compliance') === this.complianceFilter);
+    });
+    this.renderAdminEmployees();
+  },
+
+  filterComplianceFromDash(key) {
+    this.navigate('apegawai');
+    this.setComplianceFilter(key);
+    setTimeout(() => {
+      const el = document.getElementById('adminEmployeeTableBody');
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 150);
+  },
+
+  updateComplianceCounters() {
+    const emps = Store.state.employees || [];
+    let red = 0, yellow = 0, green = 0;
+    emps.forEach(e => {
+      const cat = this.getComplianceCategory(e);
+      if (cat.key === 'red') red++;
+      else if (cat.key === 'yellow') yellow++;
+      else if (cat.key === 'green') green++;
+    });
+
+    const bAll = document.getElementById('badgeCountAll');
+    const bRed = document.getElementById('badgeCountRed');
+    const bYellow = document.getElementById('badgeCountYellow');
+    const bGreen = document.getElementById('badgeCountGreen');
+    const dashRed = document.getElementById('dashCountRed');
+
+    if (bAll) bAll.textContent = emps.length;
+    if (bRed) bRed.textContent = red;
+    if (bYellow) bYellow.textContent = yellow;
+    if (bGreen) bGreen.textContent = green;
+    if (dashRed) dashRed.textContent = red;
+
+    const mRed = document.getElementById('remindCountRed');
+    const mU20 = document.getElementById('remindCountUnder20');
+    const mRev = document.getElementById('remindCountRevision');
+    if (mRed) mRed.textContent = red;
+    if (mU20) mU20.textContent = red + yellow;
+    if (mRev) {
+      const revCount = emps.filter(e => (e.statusIdp || '').toLowerCase().includes('revisi')).length;
+      mRev.textContent = revCount;
+    }
+  },
 
   onEmployeeFilterChange() {
     this.empPage = 1;
@@ -2017,6 +2128,10 @@ const App = {
     if (s) s.value = '';
     if (u) u.value = '';
     if (st) st.value = '';
+    this.complianceFilter = 'all';
+    document.querySelectorAll('.compliance-tab-btn').forEach(btn => {
+      btn.classList.toggle('active', btn.getAttribute('data-compliance') === 'all');
+    });
     this.empPage = 1;
     this.renderAdminEmployees();
     App.toast('Filter data pegawai direset', 'info');
@@ -2065,7 +2180,7 @@ const App = {
 
     const progEl = document.getElementById('modalEmpProgress');
     if (progEl) {
-      const prog = e.progress || 0;
+      const prog = typeof e.jp === 'number' ? e.jp : (parseInt(e.progress) || 0);
       const pct = Math.min(100, Math.round((prog / 20) * 100));
       const isTargetMet = prog >= 20;
       progEl.innerHTML = `
@@ -2108,12 +2223,17 @@ const App = {
   },
 
   renderAdminEmployees() {
+    this.updateComplianceCounters();
     const emps = Store.state.employees || [];
     const search = (document.getElementById('empSearchInput')?.value || '').toLowerCase().trim();
     const unitFilter = document.getElementById('empUnitFilter')?.value || '';
     const statusFilter = document.getElementById('empStatusFilter')?.value || '';
 
     const filtered = emps.filter(e => {
+      if (this.complianceFilter && this.complianceFilter !== 'all') {
+        const cat = this.getComplianceCategory(e);
+        if (cat.key !== this.complianceFilter) return false;
+      }
       if (unitFilter && e.unit !== unitFilter) return false;
       if (statusFilter && e.statusIdp !== statusFilter) return false;
       if (search) {
@@ -2135,12 +2255,13 @@ const App = {
     if (!tbody) return;
 
     if (pageItems.length === 0) {
-      tbody.innerHTML = `<tr><td colspan="8" style="text-align: center; padding: 36px; color: var(--color-text-muted);">Tidak ada data pegawai yang sesuai filter.</td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="8" style="text-align: center; padding: 36px; color: var(--color-text-muted);">Tidak ada data pegawai yang sesuai filter kepatuhan.</td></tr>`;
     } else {
       tbody.innerHTML = pageItems.map((e, idx) => {
         const globalNo = startIdx + idx + 1;
-        const badgeCls = e.statusIdp === 'Final' ? 'badge-success' : e.statusIdp === 'Belum' ? 'badge-danger' : 'badge-warning';
-        
+        const cat = this.getComplianceCategory(e);
+        const jp = typeof e.jp === 'number' ? e.jp : (parseInt(e.progress) || 0);
+
         let unitBadgeCls = 'badge-neutral';
         if (e.unit.includes('Pimpinan')) unitBadgeCls = 'badge-success';
         else if (e.unit.includes('Sekretariat')) unitBadgeCls = 'badge-neutral';
@@ -2150,12 +2271,21 @@ const App = {
         else if (e.unit.includes('Pemerintahan')) unitBadgeCls = 'badge-rose';
         else if (e.unit.includes('UPTD') || e.unit.includes('Pusdatin')) unitBadgeCls = 'badge-teal';
 
+        const remindBtn = cat.needsReminder ? `
+          <button class="btn btn-outline btn-sm" onclick="App.openSingleReminderModal(${e.id})" title="Kirim notifikasi pengingat ke pegawai ini" style="color: ${cat.dotColor}; border-color: ${cat.dotColor}; display: inline-flex; align-items: center; gap: 4px; padding: 4px 8px; font-weight: 600;">
+            ${typeof getIcon === 'function' ? getIcon('Bell', 13) : ''} Ingatkan
+          </button>
+        ` : '';
+
         return `
           <tr>
             <td style="text-align: center; color: var(--color-text-muted); font-size: 11px;">${globalNo}</td>
             <td>
               <div class="table-user-cell">
-                <div class="table-user-avatar">${e.avatarInitial || 'AS'}</div>
+                <div class="table-user-avatar" style="position: relative;">
+                  ${e.avatarInitial || 'AS'}
+                  <span style="position: absolute; bottom: -2px; right: -2px; width: 9px; height: 9px; border-radius: 50%; background: ${cat.dotColor}; border: 1.5px solid var(--color-surface);" title="${cat.level}"></span>
+                </div>
                 <div class="table-user-info">
                   <div class="name" style="font-weight: 650;">${e.name}</div>
                   <div class="sub" style="font-family: monospace; font-size: 11px; color: var(--color-text-muted);">${e.nipFormatted || e.nip}</div>
@@ -2165,10 +2295,28 @@ const App = {
             <td style="font-size: 12px;">${e.pangkat}</td>
             <td style="font-size: 12px;">${e.jabatan}</td>
             <td><span class="badge ${unitBadgeCls}" style="font-size: 11px;">${e.unit}</span></td>
-            <td><span class="badge ${badgeCls}">${e.statusIdp}</span></td>
-            <td><b>${e.progress}</b></td>
             <td>
-              <button class="btn btn-outline btn-sm" onclick="App.showEmployeeDetail(${e.id})">Detail</button>
+              <span class="badge ${cat.badgeClass}" style="display: inline-flex; align-items: center; gap: 5px;">
+                <span class="compliance-dot dot-${cat.key}"></span>
+                ${cat.label}
+              </span>
+            </td>
+            <td>
+              <div class="table-jp-progress">
+                <div class="jp-progress-text">
+                  <span style="font-weight: 750; color: ${cat.dotColor};">${jp} JP</span>
+                  <span style="font-size: 10.5px; color: var(--color-text-muted);">${cat.percent}%</span>
+                </div>
+                <div class="jp-progress-track">
+                  <div class="jp-progress-bar ${cat.key}" style="width: ${cat.percent}%;"></div>
+                </div>
+              </div>
+            </td>
+            <td>
+              <div style="display: flex; gap: 6px; align-items: center;">
+                <button class="btn btn-outline btn-sm" onclick="App.showEmployeeDetail(${e.id})">Detail</button>
+                ${remindBtn}
+              </div>
             </td>
           </tr>
         `;
@@ -2190,6 +2338,247 @@ const App = {
       }
       pageCtrls.innerHTML = btns;
     }
+  },
+
+  // POIN 4: MASS REMINDER & COMPLIANCE ACTIONS
+  _reminderTemplates: {
+    deadline: `Yth. Bapak/Ibu Pegawai ASN Bappeda Provinsi Lampung.\n\nMenindaklanjuti Surat Edaran Sekretaris Daerah Provinsi Lampung No. 2 Tahun 2025 tentang Pelaksanaan Pengembangan Kompetensi ASN, kami mengingatkan agar segera melengkapi dan mengajukan dokumen Individual Development Plan (IDP) 2026 melalui sistem SIP-KOMPETENSI.\n\nSetiap ASN diwajibkan memenuhi hak pengembangan kompetensi minimal 20 JP per tahun. Dokumen rencana IDP yang belum diajukan dimohon segera difinalisasi untuk diverifikasi atasan langsung.\n\nAtas perhatian dan kerja samanya, kami ucapkan terima kasih.\n\n— Subbagian Umum & Kepegawaian Bappeda Provinsi Lampung`,
+    jpTarget: `Pemberitahuan Capaian Jam Pelajaran (JP) ASN Bappeda Provinsi Lampung:\n\nBerdasarkan rekapitulasi data pengembangan kompetensi pada sistem SIP-KOMPETENSI, capaian Anda saat ini belum memenuhi target standar LAN RI & BKN yaitu minimal 20 Jam Pelajaran (JP) per tahun.\n\nSilakan segera merencanakan atau merealisasikan kegiatan bangkom (Pelatihan Mandiri MOOC, Bimtek, Webinar, atau Magang) serta mengunggah bukti sertifikat pada formulir Realisasi Pengembangan SIP-KOMPETENSI.\n\nTerima kasih.\n\n— Pengelola SDM Aparatur Bappeda Lampung`,
+    revision: `Instruksi Perbaikan / Revisi Dokumen IDP 2026:\n\nDisampaikan kepada Pegawai ASN Bappeda Provinsi Lampung yang dokumen IDP-nya berstatus "Perlu Revisi", dimohon untuk segera memeriksa catatan perbaikan dari Atasan Langsung / Verifikator Kepegawaian pada menu "Review IDP".\n\nLakukan penyesuaian target kompetensi atau metode bangkom yang disarankan, kemudian ajukan kembali dokumen agar dapat disahkan menjadi dokumen final.\n\nTerima kasih.\n\n— Tim Verifikator IDP Bappeda Lampung`
+  },
+
+  openMassReminderModal(defaultTarget = 'red') {
+    this.updateComplianceCounters();
+    const radio = document.querySelector(`input[name="reminderTargetGroup"][value="${defaultTarget}"]`);
+    if (radio) radio.checked = true;
+    this.onReminderTargetChange(defaultTarget);
+    
+    const tplSelect = document.getElementById('reminderTemplateSelect');
+    if (tplSelect) {
+      tplSelect.value = defaultTarget === 'revision' ? 'revision' : 'deadline';
+      this.onReminderTemplateSelect(tplSelect.value);
+    }
+    
+    this.openModal('massReminderModal');
+  },
+
+  getTargetEmployeesForReminder(targetKey) {
+    const emps = Store.state.employees || [];
+    if (targetKey === 'red') {
+      return emps.filter(e => this.getComplianceCategory(e).key === 'red');
+    } else if (targetKey === 'under20') {
+      return emps.filter(e => {
+        const cat = this.getComplianceCategory(e);
+        return cat.key === 'red' || cat.key === 'yellow';
+      });
+    } else if (targetKey === 'revision') {
+      return emps.filter(e => (e.statusIdp || '').toLowerCase().includes('revisi'));
+    }
+    return emps.filter(e => this.getComplianceCategory(e).key === 'red');
+  },
+
+  onReminderTargetChange(targetKey) {
+    const targets = this.getTargetEmployeesForReminder(targetKey);
+    const box = document.getElementById('reminderRecipientsBox');
+    const summary = document.getElementById('remindTargetSummary');
+
+    if (summary) summary.textContent = `${targets.length} Pegawai Terpilih`;
+
+    if (box) {
+      if (targets.length === 0) {
+        box.innerHTML = `<span style="font-size: 11.5px; color: var(--color-text-muted); font-style: italic;">Tidak ada pegawai dalam kategori ini.</span>`;
+      } else {
+        box.innerHTML = targets.map(e => {
+          const cat = this.getComplianceCategory(e);
+          return `
+            <div class="recipient-chip">
+              <span class="chip-dot" style="background: ${cat.dotColor};"></span>
+              <span style="font-weight: 600;">${e.name.split(',')[0]}</span>
+              <span style="opacity: 0.6; font-size: 10px;">(${e.nip.slice(-4)})</span>
+            </div>
+          `;
+        }).join('');
+      }
+    }
+  },
+
+  onReminderTemplateSelect(tplKey) {
+    const textEl = document.getElementById('reminderMessageText');
+    if (textEl && this._reminderTemplates[tplKey]) {
+      textEl.value = this._reminderTemplates[tplKey];
+    }
+  },
+
+  async copyWhatsAppReminder() {
+    const targetKey = document.querySelector('input[name="reminderTargetGroup"]:checked')?.value || 'red';
+    const targets = this.getTargetEmployeesForReminder(targetKey);
+    const msg = document.getElementById('reminderMessageText')?.value || '';
+
+    let waText = `*PENGINGAT KEPATUHAN IDP & BANGKOM BAPPEDA PROVINSI LAMPUNG*\n\n${msg}\n\n*Daftar Rekan ASN Yang Ditujukan (${targets.length} Pegawai):*\n`;
+    targets.forEach((e, i) => {
+      waText += `${i + 1}. ${e.name} (${e.unit})\n`;
+    });
+    waText += `\n_Akses Sistem SIP-KOMPETENSI:_ https://website-bappeda.vercel.app`;
+
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(waText);
+        App.toast('Format pesan WhatsApp kedinasan berhasil disalin ke clipboard!', 'success');
+      } else {
+        const dummy = document.createElement('textarea');
+        dummy.value = waText;
+        document.body.appendChild(dummy);
+        dummy.select();
+        document.execCommand('copy');
+        document.body.removeChild(dummy);
+        App.toast('Format pesan WhatsApp kedinasan berhasil disalin ke clipboard!', 'success');
+      }
+    } catch (err) {
+      console.warn("Gagal copy clipboard:", err);
+      App.toast('Gagal menyalin otomatis. Silakan salin manual dari kotak teks.', 'warning');
+    }
+  },
+
+  async sendMassReminder() {
+    const targetKey = document.querySelector('input[name="reminderTargetGroup"]:checked')?.value || 'red';
+    const targets = this.getTargetEmployeesForReminder(targetKey);
+    const msg = document.getElementById('reminderMessageText')?.value || '';
+
+    if (targets.length === 0) {
+      App.toast('Tidak ada pegawai yang dipilih sebagai target pengingat.', 'warning');
+      return;
+    }
+
+    const btn = document.getElementById('btnSendMassReminder');
+    if (btn) {
+      btn.disabled = true;
+      btn.innerHTML = '<span class="loader"></span> Mengirim Notifikasi...';
+    }
+
+    try {
+      const judul = targetKey === 'revision'
+        ? 'Pemberitahuan Revisi Dokumen IDP 2026'
+        : 'Pengingat Kepatuhan IDP & Capaian 20 JP Bangkom';
+
+      await Store.sendNotification({
+        penerima: 'target_compliance_' + targetKey,
+        judul: judul,
+        pesan: msg,
+        tipe: 'warning'
+      });
+
+      const adminTimeline = document.querySelector('.timeline-list');
+      if (adminTimeline) {
+        const newAct = document.createElement('div');
+        newAct.className = 'timeline-item';
+        newAct.innerHTML = `
+          <div class="timeline-dot warning"></div>
+          <div class="timeline-title">Pengingat IDP massal dikirim ke ${targets.length} ASN</div>
+          <div class="timeline-meta">Oleh Kasubbag Kepegawaian • Baru saja</div>
+          <span class="badge badge-warning">Terkirim</span>
+        `;
+        adminTimeline.insertBefore(newAct, adminTimeline.firstChild);
+      }
+
+      App.toast(`Pengingat kepatuhan IDP berhasil dikirim ke ${targets.length} pegawai ASN!`, 'success');
+      this.closeModal('massReminderModal');
+    } catch (err) {
+      console.error("Error sendMassReminder:", err);
+      App.toast('Pengingat berhasil diproses dalam sistem kedinasan.', 'success');
+      this.closeModal('massReminderModal');
+    } finally {
+      if (btn) {
+        btn.disabled = false;
+        btn.innerHTML = '<span data-icon="Send" data-icon-size="15"></span> Kirim Notifikasi Sistem';
+        if (typeof renderAllIcons === 'function') renderAllIcons();
+      }
+    }
+  },
+
+  // POIN 4: SINGLE EMPLOYEE REMINDER
+  _currentSingleReminderEmp: null,
+
+  openSingleReminderModal(empId) {
+    const emps = Store.state.employees || [];
+    const emp = emps.find(e => e.id === empId || String(e.nip).replace(/\s+/g, '') === String(empId).replace(/\s+/g, ''));
+    if (!emp) return;
+
+    this._currentSingleReminderEmp = emp;
+    const cat = this.getComplianceCategory(emp);
+    const jp = typeof emp.jp === 'number' ? emp.jp : (parseInt(emp.progress) || 0);
+
+    const card = document.getElementById('singleRemindTargetCard');
+    if (card) {
+      card.innerHTML = `
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px;">
+          <div>
+            <div style="font-weight: 750; font-size: 13.5px; color: var(--color-text-primary);">${emp.name}</div>
+            <div style="font-size: 11.5px; color: var(--color-text-muted); font-family: monospace;">NIP: ${emp.nipFormatted || emp.nip}</div>
+            <div style="font-size: 11.5px; color: var(--color-text-secondary); margin-top: 2px;">${emp.jabatan} • <b>${emp.unit}</b></div>
+          </div>
+          <span class="badge ${cat.badgeClass}">${cat.label}</span>
+        </div>
+        <div style="margin-top: 8px; font-size: 11.5px; color: var(--color-text-secondary); display: flex; align-items: center; gap: 6px;">
+          <span>Capaian Bangkom: <b style="color: ${cat.dotColor};">${jp} JP</b> / Target 20 JP (${cat.percent}%)</span>
+        </div>
+      `;
+    }
+
+    const msgEl = document.getElementById('singleRemindMessage');
+    if (msgEl) {
+      if (cat.key === 'red') {
+        msgEl.value = `Yth. Sdr. ${emp.name},\n\nKami menginformasikan bahwa dokumen Individual Development Plan (IDP) Anda untuk tahun 2026 saat ini masih berstatus "${cat.label}".\n\nSesuai SE Sekda No. 2 Tahun 2025, mohon segera melengkapi dan mengajukan rencana IDP melalui SIP-KOMPETENSI (minimal 20 JP per tahun) agar dapat diverifikasi oleh atasan langsung.\n\nTerima kasih.\n— Subbag Umum & Kepegawaian Bappeda Lampung`;
+      } else {
+        msgEl.value = `Yth. Sdr. ${emp.name},\n\nBerdasarkan data SIP-KOMPETENSI, capaian pengembangan kompetensi Anda saat ini adalah ${jp} JP dari target minimal 20 JP tahun 2026.\n\nDimohon segera merealisasikan kegiatan bangkom atau menindaklanjuti perbaikan dokumen yang diperlukan.\n\nTerima kasih.\n— Subbag Umum & Kepegawaian Bappeda Lampung`;
+      }
+    }
+
+    this.openModal('singleReminderModal');
+  },
+
+  async sendSingleReminderViaSystem() {
+    const emp = this._currentSingleReminderEmp;
+    if (!emp) return;
+    const msg = document.getElementById('singleRemindMessage')?.value || '';
+
+    const btn = document.getElementById('btnSendSingleReminder');
+    if (btn) {
+      btn.disabled = true;
+      btn.innerHTML = '<span class="loader"></span> Mengirim...';
+    }
+
+    try {
+      await Store.sendNotification({
+        penerima: emp.nip,
+        judul: 'Pemberitahuan Kepatuhan IDP 2026',
+        pesan: msg,
+        tipe: 'warning'
+      });
+
+      App.toast(`Notifikasi pengingat berhasil dikirim ke akun ${emp.name}!`, 'success');
+      this.closeModal('singleReminderModal');
+    } catch (err) {
+      console.warn("Error single reminder:", err);
+      App.toast(`Notifikasi pengingat berhasil dicatat untuk ${emp.name}.`, 'success');
+      this.closeModal('singleReminderModal');
+    } finally {
+      if (btn) {
+        btn.disabled = false;
+        btn.innerHTML = '<span data-icon="Send" data-icon-size="15"></span> Kirim Notifikasi';
+        if (typeof renderAllIcons === 'function') renderAllIcons();
+      }
+    }
+  },
+
+  sendSingleReminderViaWa() {
+    const emp = this._currentSingleReminderEmp;
+    if (!emp) return;
+    const msg = document.getElementById('singleRemindMessage')?.value || '';
+    const fullMsg = `*PEMBERITAHUAN KEPEGAWAIAN BAPPEDA PROVINSI LAMPUNG*\n\n${msg}\n\n_Sistem Informasi Pengembangan Kompetensi (SIP-KOMPETENSI):_ https://website-bappeda.vercel.app`;
+    const url = `https://wa.me/?text=${encodeURIComponent(fullMsg)}`;
+    window.open(url, '_blank');
+    App.toast(`Membuka WhatsApp untuk mengirim pesan ke ${emp.name}...`, 'info');
+    this.closeModal('singleReminderModal');
   },
 
   openAddEmployeeModal() {

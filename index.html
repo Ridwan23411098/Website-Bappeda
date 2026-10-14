@@ -28,7 +28,7 @@
     rel="stylesheet">
 
   <!-- Core Stylesheet -->
-  <link rel="stylesheet" href="css/app.css?v=20261014_v12">
+  <link rel="stylesheet" href="css/app.css?v=20261014_v13">
 </head>
 
 <body>
@@ -1654,14 +1654,16 @@
               </div>
             </div>
 
-            <div class="stat-card">
+            <div class="stat-card danger" style="cursor: pointer; transition: transform var(--transition-fast), box-shadow var(--transition-fast);" onclick="App.filterComplianceFromDash('red')" title="Klik untuk memfilter dan ingatkan pegawai yang belum mengajukan IDP">
               <div class="stat-card-inner">
                 <div class="stat-card-info">
-                  <div class="stat-card-label">Belum Mengisi</div>
-                  <div class="stat-card-value">11</div>
-                  <div class="stat-card-desc">Perlu diingatkan Pengelola SDM</div>
+                  <div class="stat-card-label">Belum Mengajukan IDP</div>
+                  <div class="stat-card-value text-danger" id="dashCountRed">10</div>
+                  <div class="stat-card-desc" style="display: flex; align-items: center; gap: 4px; color: var(--color-danger); font-weight: 600;">
+                    <span data-icon="Bell" data-icon-size="12"></span> Klik untuk Ingatkan Pegawai
+                  </div>
                 </div>
-                <div class="stat-card-icon"><span data-icon="Users" data-icon-size="22"></span></div>
+                <div class="stat-card-icon" style="background: rgba(248, 113, 113, 0.12); color: var(--color-danger);"><span data-icon="AlertCircle" data-icon-size="22"></span></div>
               </div>
             </div>
           </div>
@@ -1733,6 +1735,9 @@
               </button>
               <button class="btn btn-secondary" onclick="App.openMasterBackupTab()">
                 <span data-icon="DatabaseBackup" data-icon-size="16"></span> Cadangan & Keamanan Data
+              </button>
+              <button class="btn btn-warning-gradient" onclick="App.openMassReminderModal()" title="Kirim notifikasi atau pesan resmi pengingat kepatuhan IDP">
+                <span data-icon="BellRing" data-icon-size="16"></span> Kirim Pengingat IDP
               </button>
             </div>
           </div>
@@ -1817,6 +1822,38 @@
           </div>
 
           <div class="card">
+            <!-- Poin 4: Segmented Traffic-Light Compliance Filter & Mass Reminder -->
+            <div class="compliance-filter-bar">
+              <div class="compliance-tabs">
+                <button type="button" class="compliance-tab-btn active" data-compliance="all" onclick="App.setComplianceFilter('all')">
+                  <span class="compliance-dot dot-all"></span>
+                  <span>Semua Pegawai</span>
+                  <span class="compliance-badge" id="badgeCountAll">99</span>
+                </button>
+                <button type="button" class="compliance-tab-btn" data-compliance="red" onclick="App.setComplianceFilter('red')" title="Pegawai berstatus Draft / Belum Mengajukan IDP">
+                  <span class="compliance-dot dot-red"></span>
+                  <span>Belum Mengajukan (Kritis)</span>
+                  <span class="compliance-badge" id="badgeCountRed" style="color: var(--color-danger);">10</span>
+                </button>
+                <button type="button" class="compliance-tab-btn" data-compliance="yellow" onclick="App.setComplianceFilter('yellow')" title="Pegawai dalam proses verifikasi, revisi, atau capaian < 20 JP">
+                  <span class="compliance-dot dot-yellow"></span>
+                  <span>Belum Capai 20 JP / Proses</span>
+                  <span class="compliance-badge" id="badgeCountYellow" style="color: var(--color-warning);">29</span>
+                </button>
+                <button type="button" class="compliance-tab-btn" data-compliance="green" onclick="App.setComplianceFilter('green')" title="Pegawai dengan IDP Disetujui dan capaian ≥ 20 JP">
+                  <span class="compliance-dot dot-green"></span>
+                  <span>Memenuhi Target (≥20 JP)</span>
+                  <span class="compliance-badge" id="badgeCountGreen" style="color: var(--color-success);">60</span>
+                </button>
+              </div>
+
+              <div class="compliance-actions">
+                <button type="button" class="btn btn-warning-gradient btn-sm" onclick="App.openMassReminderModal()" title="Kirim notifikasi atau pesan dinas massal ke pegawai yang belum patuh">
+                  <span data-icon="BellRing" data-icon-size="15"></span> Kirim Pengingat Massal
+                </button>
+              </div>
+            </div>
+
             <div class="table-toolbar">
               <div class="table-filter-group" style="flex-wrap: wrap; gap: 10px;">
                 <input type="text" id="empSearchInput" class="form-control" style="width: 250px;"
@@ -3602,6 +3639,145 @@
     </div>
   </div>
 
+  <!-- MODAL PENGINGAT MASSAL KEPATUHAN IDP (POIN 4) -->
+  <div class="modal-overlay" id="massReminderModal">
+    <div class="modal-card" style="max-width: 600px; width: 92%;">
+      <div class="modal-header">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <div style="width: 36px; height: 36px; border-radius: 8px; background: rgba(245, 158, 11, 0.12); color: #D97706; display: grid; place-items: center;">
+            <span data-icon="BellRing" data-icon-size="20"></span>
+          </div>
+          <div>
+            <h3 class="modal-title">Kirim Pengingat Kepatuhan IDP &amp; Bangkom</h3>
+            <p class="modal-subtitle">Pemberitahuan resmi Pengelola Kepegawaian Bappeda Provinsi Lampung</p>
+          </div>
+        </div>
+        <button class="btn-icon" onclick="App.closeModal('massReminderModal')" title="Tutup Modal">
+          <span data-icon="X" data-icon-size="18"></span>
+        </button>
+      </div>
+
+      <div class="modal-body" style="padding: 20px 24px;">
+        <!-- 1. Pilihan Sasaran Penerima -->
+        <div class="form-group">
+          <label class="form-label" style="font-weight: 650;">Target Penerima Pengingat</label>
+          <div style="display: flex; flex-direction: column; gap: 8px;">
+            <label style="display: flex; align-items: center; gap: 8px; font-size: 13px; cursor: pointer;">
+              <input type="radio" name="reminderTargetGroup" value="red" checked onchange="App.onReminderTargetChange(this.value)">
+              <span>🔴 <b>Kategori Merah:</b> Belum Mengajukan IDP (<span id="remindCountRed">10</span> Pegawai)</span>
+            </label>
+            <label style="display: flex; align-items: center; gap: 8px; font-size: 13px; cursor: pointer;">
+              <input type="radio" name="reminderTargetGroup" value="under20" onchange="App.onReminderTargetChange(this.value)">
+              <span>🟡 <b>Kategori Kuning &amp; Merah:</b> Belum Memenuhi 20 JP (<span id="remindCountUnder20">39</span> Pegawai)</span>
+            </label>
+            <label style="display: flex; align-items: center; gap: 8px; font-size: 13px; cursor: pointer;">
+              <input type="radio" name="reminderTargetGroup" value="revision" onchange="App.onReminderTargetChange(this.value)">
+              <span>⚠️ <b>Perlu Revisi:</b> Rencana IDP Dikembalikan (<span id="remindCountRevision">10</span> Pegawai)</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- 2. Preview Daftar Penerima -->
+        <div class="form-group">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+            <label class="form-label" style="margin-bottom: 0;">Daftar ASN Penerima (<span id="remindTargetSummary">10 Pegawai</span>)</label>
+            <span style="font-size: 11px; color: var(--color-text-muted);">Sistem otomatis mendeteksi NIP dinas</span>
+          </div>
+          <div class="recipient-box" id="reminderRecipientsBox">
+            <!-- Chip badges rendered dynamically -->
+          </div>
+        </div>
+
+        <!-- 3. Template Pesan Resmi -->
+        <div class="form-group">
+          <label class="form-label" for="reminderTemplateSelect">Pilih Template Pesan Kedinasan</label>
+          <select id="reminderTemplateSelect" class="form-select" onchange="App.onReminderTemplateSelect(this.value)">
+            <option value="deadline">1. Pengingat Batas Waktu Pengisian IDP (SE Sekda No. 2/2025)</option>
+            <option value="jpTarget">2. Pengingat Pemenuhan Target Minimal 20 JP Pengembangan</option>
+            <option value="revision">3. Instruksi Tindak Lanjut Perbaikan / Revisi Dokumen IDP</option>
+          </select>
+        </div>
+
+        <!-- 4. Isi Pesan -->
+        <div class="form-group">
+          <label class="form-label" for="reminderMessageText">Isi Pesan Notifikasi &amp; WhatsApp</label>
+          <textarea id="reminderMessageText" class="form-control" rows="4" style="resize: vertical; font-size: 12.5px; line-height: 1.5;"></textarea>
+          <div style="font-size: 11px; color: var(--color-text-muted); margin-top: 4px;">Pesan dapat disesuaikan jika ingin menambahkan tanggal tenggat atau instruksi khusus.</div>
+        </div>
+
+        <!-- 5. Saluran Notifikasi -->
+        <div class="form-group" style="margin-bottom: 0;">
+          <label class="form-label">Saluran Pengiriman</label>
+          <div style="display: flex; gap: 16px; flex-wrap: wrap;">
+            <label style="display: flex; align-items: center; gap: 6px; font-size: 12.5px; cursor: pointer;">
+              <input type="checkbox" id="channelAppNotif" checked disabled>
+              <span>Lonceng Notifikasi SIP-KOMPETENSI (Aktif)</span>
+            </label>
+            <label style="display: flex; align-items: center; gap: 6px; font-size: 12.5px; cursor: pointer;">
+              <input type="checkbox" id="channelWhatsApp" checked>
+              <span>Siapkan Teks WhatsApp Kedinasan</span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+        <button type="button" class="btn btn-outline" onclick="App.copyWhatsAppReminder()" title="Salin teks pesan dengan daftar penerima untuk dikirim ke grup WhatsApp Bappeda">
+          <span data-icon="Copy" data-icon-size="15"></span> Salin Format WhatsApp
+        </button>
+        <div style="display: flex; gap: 8px;">
+          <button type="button" class="btn btn-outline" onclick="App.closeModal('massReminderModal')">Batal</button>
+          <button type="button" class="btn btn-warning-gradient" id="btnSendMassReminder" onclick="App.sendMassReminder()">
+            <span data-icon="Send" data-icon-size="15"></span> Kirim Notifikasi Sistem
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL PENGINGAT INDIVIDU PEGAWAI (POIN 4) -->
+  <div class="modal-overlay" id="singleReminderModal">
+    <div class="modal-card" style="max-width: 520px; width: 92%;">
+      <div class="modal-header">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <div style="width: 36px; height: 36px; border-radius: 8px; background: rgba(56, 189, 248, 0.12); color: var(--color-primary); display: grid; place-items: center;">
+            <span data-icon="Bell" data-icon-size="20"></span>
+          </div>
+          <div>
+            <h3 class="modal-title">Kirim Pengingat Pegawai</h3>
+            <p class="modal-subtitle" id="singleRemindSubtitle">Pemberitahuan khusus kepatuhan IDP</p>
+          </div>
+        </div>
+        <button class="btn-icon" onclick="App.closeModal('singleReminderModal')" title="Tutup Modal">
+          <span data-icon="X" data-icon-size="18"></span>
+        </button>
+      </div>
+
+      <div class="modal-body" style="padding: 20px 24px;">
+        <div id="singleRemindTargetCard" style="padding: 12px 14px; border-radius: var(--radius-md); background: var(--color-surface-subtle); border: 1px solid var(--color-border); margin-bottom: 16px;">
+          <!-- Pegawai Info -->
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="singleRemindMessage">Pesan Pengingat</label>
+          <textarea id="singleRemindMessage" class="form-control" rows="4" style="resize: vertical; font-size: 12.5px; line-height: 1.5;"></textarea>
+        </div>
+      </div>
+
+      <div class="modal-footer" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+        <button type="button" class="btn btn-outline" onclick="App.sendSingleReminderViaWa()" title="Buka WhatsApp Web / Aplikasi">
+          <span data-icon="MessageSquare" data-icon-size="15"></span> Buka WhatsApp
+        </button>
+        <div style="display: flex; gap: 8px;">
+          <button type="button" class="btn btn-outline" onclick="App.closeModal('singleReminderModal')">Tutup</button>
+          <button type="button" class="btn btn-primary" id="btnSendSingleReminder" onclick="App.sendSingleReminderViaSystem()">
+            <span data-icon="Send" data-icon-size="15"></span> Kirim Notifikasi
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- TOAST CONTAINER -->
   <div class="toast-container" id="toastContainer"></div>
 
@@ -3618,7 +3794,7 @@
   <script src="js/bappeda_data.js?v=20261013_v8"></script>
   <script src="js/store.js?v=20261013_v8"></script>
   <script src="js/export.js?v=20261013_v8"></script>
-  <script src="js/app.js?v=20261014_v12"></script>
+  <script src="js/app.js?v=20261014_v13"></script>
 </body>
 
 </html>
