@@ -3367,3 +3367,191 @@ button[onclick*="quickLogin"]:hover {
   background: var(--color-surface);
   border-color: var(--color-border);
 }
+
+/* ==========================================================================
+   TAHAP 8 — EXECUTIVE PRESENTATION MODE (SLIDE PAPARAN RAPAT PIMPINAN)
+   ========================================================================== */
+.presentation-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 999999;
+  background: radial-gradient(circle at 50% 20%, #0d2137 0%, #06111e 75%, #03080f 100%);
+  color: #f8fafc;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  font-family: 'Plus Jakarta Sans', var(--font-sans);
+  animation: presFadeIn 250ms ease-out;
+}
+
+@keyframes presFadeIn {
+  from { opacity: 0; transform: scale(0.99); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.presentation-topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 28px;
+  background: rgba(6, 17, 30, 0.85);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  flex-shrink: 0;
+}
+
+.pres-brand-badge {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.pres-timer-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 999px;
+  font-family: monospace;
+  font-size: 13px;
+  font-weight: 700;
+  color: #fbbf24;
+}
+
+.pres-progress-bar-bg {
+  width: 100%;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.1);
+  position: relative;
+  overflow: hidden;
+}
+
+.pres-progress-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #f59e0b, #38bdf8);
+  transition: width 300ms ease;
+}
+
+.presentation-stage {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 32px;
+  overflow-y: auto;
+  position: relative;
+}
+
+.presentation-slide-card {
+  width: 100%;
+  max-width: 1140px;
+  min-height: 580px;
+  background: rgba(13, 27, 46, 0.7);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 20px;
+  padding: 38px 46px;
+  box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.6), 0 0 40px rgba(56, 189, 248, 0.05);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  position: relative;
+  animation: slideInMotion 300ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes slideInMotion {
+  from { opacity: 0; transform: translateY(12px) scale(0.99); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.presentation-bottombar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 32px;
+  background: rgba(6, 17, 30, 0.9);
+  backdrop-filter: blur(12px);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  flex-shrink: 0;
+}
+
+.pres-nav-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 18px;
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 650;
+  cursor: pointer;
+  transition: all 180ms ease;
+}
+
+.pres-nav-btn:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.4);
+  transform: translateY(-1px);
+}
+
+.pres-nav-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.pres-dots-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pres-dot-item {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.25);
+  cursor: pointer;
+  transition: all 250ms ease;
+}
+
+.pres-dot-item.active {
+  width: 28px;
+  border-radius: 999px;
+  background: #f59e0b;
+  box-shadow: 0 0 10px rgba(245, 158, 11, 0.6);
+}
+
+.pres-metric-box {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 14px;
+  padding: 20px 22px;
+  transition: transform 200ms ease, border-color 200ms ease;
+}
+
+.pres-metric-box:hover {
+  transform: translateY(-2px);
+  border-color: rgba(245, 158, 11, 0.4);
+}
+
+@media print {
+  .presentation-overlay {
+    position: static !important;
+    background: #ffffff !important;
+    color: #000000 !important;
+  }
+  .presentation-topbar, .presentation-bottombar {
+    display: none !important;
+  }
+  .presentation-slide-card {
+    box-shadow: none !important;
+    border: 1px solid #ccc !important;
+    background: #ffffff !important;
+    color: #000000 !important;
+    page-break-after: always;
+  }
+}

@@ -2076,4 +2076,731 @@ if (typeof window !== 'undefined') {
   window.AuditService = AuditService;
 }
 
+// ===========================================================================
+// TAHAP 8 — EXECUTIVE PRESENTATION SERVICE (SLIDE PAPARAN RAPAT PIMPINAN)
+// ===========================================================================
+
+const PresentationService = {
+  currentSlide: 1,
+  totalSlides: 6,
+  timerSeconds: 900, // 15 menit hitung mundur
+  timerInterval: null,
+  isTimerRunning: false,
+  keyHandlerBound: false,
+
+  openPresentation(startSlide = 1) {
+    this.currentSlide = startSlide;
+    this.timerSeconds = 900;
+    this.isTimerRunning = true;
+
+    let overlay = document.getElementById('presentationOverlay');
+    if (!overlay) {
+      overlay = document.createElement('div');
+      overlay.id = 'presentationOverlay';
+      overlay.className = 'presentation-overlay';
+      document.body.appendChild(overlay);
+    }
+    overlay.style.display = 'flex';
+
+    // Coba Fullscreen jika didukung browser
+    if (document.documentElement.requestFullscreen && !document.fullscreenElement) {
+      document.documentElement.requestFullscreen().catch(() => {});
+    }
+
+    // Keyboard navigation
+    if (!this.keyHandlerBound) {
+      this.handleKeydown = this.handleKeydown.bind(this);
+      window.addEventListener('keydown', this.handleKeydown);
+      this.keyHandlerBound = true;
+    }
+
+    this.startTimer();
+    this.renderSlide();
+
+    // Catat ke Log Audit Rekam Jejak Kedinasan
+    if (typeof AuditService !== 'undefined' && AuditService.log) {
+      AuditService.log('Otentikasi', 'Pembukaan Mode Paparan Rapat Pimpinan', 'Pimpinan / Admin membuka slide presentasi eksekutif evaluasi pengembangan kompetensi 99 ASN.');
+    }
+  },
+
+  closePresentation() {
+    const overlay = document.getElementById('presentationOverlay');
+    if (overlay) overlay.style.display = 'none';
+
+    if (this.timerInterval) {
+      clearInterval(this.timerInterval);
+      this.timerInterval = null;
+    }
+    this.isTimerRunning = false;
+
+    if (document.fullscreenElement && document.exitFullscreen) {
+      document.exitFullscreen().catch(() => {});
+    }
+
+    if (this.keyHandlerBound) {
+      window.removeEventListener('keydown', this.handleKeydown);
+      this.keyHandlerBound = false;
+    }
+  },
+
+  handleKeydown(e) {
+    if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') {
+      e.preventDefault();
+      PresentationService.nextSlide();
+    } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+      e.preventDefault();
+      PresentationService.prevSlide();
+    } else if (e.key === 'Escape') {
+      e.preventDefault();
+      PresentationService.closePresentation();
+    } else if (e.key === 'f' || e.key === 'F') {
+      PresentationService.toggleFullscreen();
+    }
+  },
+
+  toggleFullscreen() {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().catch(() => {});
+    } else if (document.exitFullscreen) {
+      document.exitFullscreen().catch(() => {});
+    }
+  },
+
+  nextSlide() {
+    if (this.currentSlide < this.totalSlides) {
+      this.currentSlide++;
+      this.renderSlide();
+    }
+  },
+
+  prevSlide() {
+    if (this.currentSlide > 1) {
+      this.currentSlide--;
+      this.renderSlide();
+    }
+  },
+
+  goToSlide(idx) {
+    if (idx >= 1 && idx <= this.totalSlides) {
+      this.currentSlide = idx;
+      this.renderSlide();
+    }
+  },
+
+  startTimer() {
+    if (this.timerInterval) clearInterval(this.timerInterval);
+    this.timerInterval = setInterval(() => {
+      if (this.isTimerRunning && this.timerSeconds > 0) {
+        this.timerSeconds--;
+        const el = document.getElementById('presTimerDisplay');
+        if (el) el.textContent = this.formatTimer(this.timerSeconds);
+      }
+    }, 1000);
+  },
+
+  toggleTimer() {
+    this.isTimerRunning = !this.isTimerRunning;
+    const iconSpan = document.getElementById('presTimerIcon');
+    if (iconSpan) {
+      iconSpan.setAttribute('data-icon', this.isTimerRunning ? 'Pause' : 'Play');
+      if (typeof renderAllIcons === 'function') renderAllIcons();
+    }
+  },
+
+  resetTimer() {
+    this.timerSeconds = 900;
+    const el = document.getElementById('presTimerDisplay');
+    if (el) el.textContent = this.formatTimer(this.timerSeconds);
+  },
+
+  formatTimer(sec) {
+    const m = Math.floor(sec / 60);
+    const s = sec % 60;
+    return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+  },
+
+  printPresentation() {
+    window.print();
+  },
+
+  renderSlide() {
+    const overlay = document.getElementById('presentationOverlay');
+    if (!overlay) return;
+
+    const summary = (typeof Store !== 'undefined' && Store.getExecutiveSummary) 
+      ? Store.getExecutiveSummary() 
+      : {
+        totalPegawai: 99,
+        memenuhi20Jp: 60,
+        persenKepatuhan: 61,
+        idpDisetujui: 60,
+        persenDisetujui: 61,
+        totalJp: 1862,
+        avgJp: '18.8',
+        totalEstimasiAnggaran: 307230000,
+        perluTindakLanjut: 39
+      };
+
+    const unitBreakdown = (typeof Store !== 'undefined' && Store.getUnitBreakdown) 
+      ? Store.getUnitBreakdown() 
+      : [];
+
+    const progressPct = Math.round((this.currentSlide / this.totalSlides) * 100);
+
+    overlay.innerHTML = `
+      <!-- Top Progress Bar -->
+      <div class="pres-progress-bar-bg">
+        <div class="pres-progress-bar-fill" style="width: ${progressPct}%;"></div>
+      </div>
+
+      <!-- Topbar Header -->
+      <div class="presentation-topbar">
+        <div class="pres-brand-badge">
+          <div style="width: 32px; height: 32px; border-radius: 8px; background: rgba(255, 255, 255, 0.1); display: flex; align-items: center; justify-content: center;">
+            <span data-icon="Presentation" data-icon-size="18" style="color: #f59e0b;"></span>
+          </div>
+          <div>
+            <div style="font-size: 13px; font-weight: 750; color: #ffffff; letter-spacing: 0.02em;">
+              SIP-KOMPETENSI — PAPARAN RAPAT PIMPINAN
+            </div>
+            <div style="font-size: 10.5px; color: rgba(255, 255, 255, 0.65);">
+              Bappeda Provinsi Lampung • Evaluasi Pengembangan Kompetensi 99 ASN 2026
+            </div>
+          </div>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 14px;">
+          <!-- Timer Pill -->
+          <div class="pres-timer-pill">
+            <span data-icon="Timer" data-icon-size="14"></span>
+            <span id="presTimerDisplay">${this.formatTimer(this.timerSeconds)}</span>
+            <button onclick="PresentationService.toggleTimer()" style="background:none;border:none;color:#fbbf24;cursor:pointer;padding:0;display:flex;align-items:center;" title="Jeda / Lanjutkan Waktu">
+              <span id="presTimerIcon" data-icon="${this.isTimerRunning ? 'Pause' : 'Play'}" data-icon-size="13"></span>
+            </button>
+          </div>
+
+          <!-- Slide Indicator -->
+          <div style="font-size: 12.5px; font-weight: 700; color: #94a3b8; background: rgba(255,255,255,0.06); padding: 5px 12px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.1);">
+            Slide <b style="color: #38bdf8;">${this.currentSlide}</b> / ${this.totalSlides}
+          </div>
+
+          <!-- Cetak Slide -->
+          <button class="btn btn-sm" style="background: rgba(255,255,255,0.1); color:#fff; border:1px solid rgba(255,255,255,0.2); font-size:12px;" onclick="PresentationService.printPresentation()" title="Cetak Slide ke Format Kertas A4 / PDF">
+            <span data-icon="Printer" data-icon-size="14"></span> Cetak
+          </button>
+
+          <!-- Toggle Fullscreen -->
+          <button class="btn btn-sm" style="background: rgba(255,255,255,0.1); color:#fff; border:1px solid rgba(255,255,255,0.2); font-size:12px;" onclick="PresentationService.toggleFullscreen()" title="Layar Penuh (F11 / F)">
+            <span data-icon="Maximize2" data-icon-size="14"></span>
+          </button>
+
+          <!-- Tutup Presentasi -->
+          <button class="btn btn-sm" style="background: rgba(239, 68, 68, 0.2); color:#fca5a5; border:1px solid rgba(239, 68, 68, 0.4); font-size:12px; font-weight:700;" onclick="PresentationService.closePresentation()" title="Keluar dari Mode Presentasi (Esc)">
+            ✕ Keluar
+          </button>
+        </div>
+      </div>
+
+      <!-- Presentation Stage (Canvas) -->
+      <div class="presentation-stage">
+        <div class="presentation-slide-card">
+          ${this.getSlideContent(this.currentSlide, summary, unitBreakdown)}
+        </div>
+      </div>
+
+      <!-- Bottombar Navigation -->
+      <div class="presentation-bottombar">
+        <div style="font-size: 11.5px; color: #64748b; display: flex; align-items: center; gap: 8px;">
+          <span>Navigasi:</span>
+          <kbd style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); padding: 2px 6px; border-radius: 4px; color: #e2e8f0; font-size: 10.5px;">←</kbd>
+          <kbd style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); padding: 2px 6px; border-radius: 4px; color: #e2e8f0; font-size: 10.5px;">→</kbd>
+          <kbd style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); padding: 2px 6px; border-radius: 4px; color: #e2e8f0; font-size: 10.5px;">Spasi</kbd>
+          <span>Ganti Slide</span>
+          <span style="margin: 0 4px;">•</span>
+          <kbd style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); padding: 2px 6px; border-radius: 4px; color: #e2e8f0; font-size: 10.5px;">Esc</kbd>
+          <span>Tutup</span>
+        </div>
+
+        <!-- Dots Navigation -->
+        <div class="pres-dots-wrapper">
+          ${Array.from({length: this.totalSlides}, (_, i) => i + 1).map(s => `
+            <div class="pres-dot-item ${s === this.currentSlide ? 'active' : ''}" onclick="PresentationService.goToSlide(${s})" title="Buka Slide ${s}"></div>
+          `).join('')}
+        </div>
+
+        <!-- Prev / Next Buttons -->
+        <div style="display: flex; gap: 10px;">
+          <button class="pres-nav-btn" onclick="PresentationService.prevSlide()" ${this.currentSlide === 1 ? 'disabled' : ''}>
+            <span data-icon="ChevronRight" data-icon-size="14" style="transform: rotate(180deg);"></span> Sebelumnya
+          </button>
+          <button class="pres-nav-btn" style="background: #f59e0b; color: #000; font-weight: 750; border-color: #fbbf24;" onclick="PresentationService.nextSlide()" ${this.currentSlide === this.totalSlides ? 'disabled' : ''}>
+            Selanjutnya <span data-icon="ChevronRight" data-icon-size="14"></span>
+          </button>
+        </div>
+      </div>
+    `;
+
+    if (typeof renderAllIcons === 'function') renderAllIcons();
+  },
+
+  getSlideContent(slideNum, summary, unitBreakdown) {
+    const lambang = (typeof window !== 'undefined' && window.LAMBANG_LAMPUNG_SVG) 
+      ? window.LAMBANG_LAMPUNG_SVG 
+      : '<div style="font-size:32px;">🏛️</div>';
+
+    switch (slideNum) {
+      // -------------------------------------------------------------
+      // SLIDE 1: COVER / JUDUL PAPARAN
+      // -------------------------------------------------------------
+      case 1:
+        return `
+          <div style="text-align: center; margin: auto 0; padding: 20px 0;">
+            <div style="display: flex; justify-content: center; align-items: center; gap: 18px; margin-bottom: 24px;">
+              <div style="width: 72px; height: 72px; display: flex; align-items: center; justify-content: center;">
+                ${lambang}
+              </div>
+              <div style="width: 2px; height: 50px; background: rgba(255,255,255,0.2);"></div>
+              <img src="Gambar/logo-idp.png" alt="Logo IDP" style="height: 60px; object-fit: contain;">
+            </div>
+
+            <div style="display: inline-block; padding: 4px 16px; border-radius: 999px; background: rgba(245, 158, 11, 0.15); border: 1px solid rgba(245, 158, 11, 0.4); color: #fbbf24; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 16px;">
+              RAPAT KOORDINASI &amp; PENGENDALIAN PIMPINAN
+            </div>
+
+            <h1 style="font-size: 30px; font-weight: 850; line-height: 1.3; color: #ffffff; margin: 0 0 14px; max-width: 900px; margin-left: auto; margin-right: auto; text-shadow: 0 4px 16px rgba(0,0,0,0.4);">
+              EVALUASI IMPLEMENTASI PENGEMBANGAN KOMPETENSI (IDP) 99 ASN BAPPEDA PROVINSI LAMPUNG
+            </h1>
+
+            <p style="font-size: 15px; color: #94a3b8; max-width: 760px; margin: 0 auto 32px; line-height: 1.6;">
+              Penyelarasan Standar Minimal 20 JP per Pegawai Berdasarkan Amanat UU No. 20 Tahun 2023 dan SE Gubernur Lampung No. 2 Tahun 2025 Menuju Perencanaan Pembangunan Daerah Berkualitas.
+            </p>
+
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; max-width: 820px; margin: 0 auto; text-align: left;">
+              <div style="background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 14px 18px;">
+                <div style="font-size: 11px; color: #94a3b8; text-transform: uppercase;">Pembina Eksekutif:</div>
+                <div style="font-size: 13px; font-weight: 750; color: #ffffff; margin-top: 4px;">Dr. ANANG RISGIYANTO, S.K.M., M.Kes.</div>
+                <div style="font-size: 11px; color: #38bdf8;">Kepala Bappeda Prov. Lampung</div>
+              </div>
+
+              <div style="background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 14px 18px;">
+                <div style="font-size: 11px; color: #94a3b8; text-transform: uppercase;">Koordinator Wilayah:</div>
+                <div style="font-size: 13px; font-weight: 750; color: #ffffff; margin-top: 4px;">ANDI ARAFAT, S.T., M.E.</div>
+                <div style="font-size: 11px; color: #38bdf8;">Sekretaris Bappeda Prov. Lampung</div>
+              </div>
+
+              <div style="background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 14px 18px;">
+                <div style="font-size: 11px; color: #94a3b8; text-transform: uppercase;">Pengelola Teknis SDM:</div>
+                <div style="font-size: 13px; font-weight: 750; color: #ffffff; margin-top: 4px;">CIK MARYA, S.E., M.M.</div>
+                <div style="font-size: 11px; color: #38bdf8;">Kasubbag Umum &amp; Kepegawaian</div>
+              </div>
+            </div>
+          </div>
+        `;
+
+      // -------------------------------------------------------------
+      // SLIDE 2: SCORECARD & 4 INDIKATOR KUNCI
+      // -------------------------------------------------------------
+      case 2:
+        return `
+          <div>
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px;">
+              <div>
+                <span class="badge" style="background: rgba(56, 189, 248, 0.15); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.3); font-size: 11px; font-weight: 700;">SCORECARD EKSEKUTIF</span>
+                <h2 style="font-size: 22px; font-weight: 800; color: #ffffff; margin: 6px 0 2px;">Capaian Akuntabilitas Pengembangan 99 ASN</h2>
+                <div style="font-size: 13px; color: #94a3b8;">Ringkasan komprehensif kepatuhan regulasi jam pelajaran (JP) dan pengesahan dokumen IDP</div>
+              </div>
+              <div style="text-align: right;">
+                <div style="font-size: 11px; color: #94a3b8;">Tingkat Kepatuhan Organisasi:</div>
+                <div style="font-size: 16px; font-weight: 800; color: #10b981; display: inline-flex; align-items: center; gap: 6px;">
+                  <span class="realtime-status-dot"></span> 61% (Kategori Memadai / Hijau)
+                </div>
+              </div>
+            </div>
+
+            <!-- 4 Grid Metric Cards -->
+            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; margin-bottom: 28px;">
+              <div class="pres-metric-box">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                  <span style="font-size: 12px; color: #94a3b8; font-weight: 600;">Total Populasi ASN</span>
+                  <span data-icon="Users" data-icon-size="18" style="color: #38bdf8;"></span>
+                </div>
+                <div style="font-size: 32px; font-weight: 850; color: #ffffff; line-height: 1;">${summary.totalPegawai} <span style="font-size: 14px; font-weight: 600; color: #94a3b8;">ASN</span></div>
+                <div style="font-size: 11.5px; color: #64748b; margin-top: 8px;">100% Tercatat Lengkap pada DUK 2026</div>
+              </div>
+
+              <div class="pres-metric-box" style="border-left: 3px solid #10b981;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                  <span style="font-size: 12px; color: #10b981; font-weight: 600;">Kepatuhan Standar ≥20 JP</span>
+                  <span data-icon="ShieldCheck" data-icon-size="18" style="color: #10b981;"></span>
+                </div>
+                <div style="font-size: 32px; font-weight: 850; color: #10b981; line-height: 1;">${summary.persenKepatuhan}%</div>
+                <div style="font-size: 11.5px; color: #94a3b8; margin-top: 8px;"><b>${summary.memenuhi20Jp} ASN</b> Telah Tuntas Beban Belajar</div>
+              </div>
+
+              <div class="pres-metric-box" style="border-left: 3px solid #38bdf8;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                  <span style="font-size: 12px; color: #38bdf8; font-weight: 600;">Akumulasi Jam Pelajaran</span>
+                  <span data-icon="Clock" data-icon-size="18" style="color: #38bdf8;"></span>
+                </div>
+                <div style="font-size: 32px; font-weight: 850; color: #38bdf8; line-height: 1;">${summary.totalJp.toLocaleString('id-ID')} <span style="font-size: 14px; font-weight: 600; color: #94a3b8;">JP</span></div>
+                <div style="font-size: 11.5px; color: #94a3b8; margin-top: 8px;">Rata-rata <b>${summary.avgJp} JP/ASN</b> di Seluruh Bidang</div>
+              </div>
+
+              <div class="pres-metric-box" style="border-left: 3px solid #f59e0b;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                  <span style="font-size: 12px; color: #f59e0b; font-weight: 600;">Estimasi Nilai Investasi</span>
+                  <span data-icon="Coins" data-icon-size="18" style="color: #f59e0b;"></span>
+                </div>
+                <div style="font-size: 28px; font-weight: 850; color: #f59e0b; line-height: 1;">Rp ${(summary.totalEstimasiAnggaran / 1000000).toFixed(1)} <span style="font-size: 14px; font-weight: 600; color: #94a3b8;">Jt</span></div>
+                <div style="font-size: 11.5px; color: #94a3b8; margin-top: 8px;">Standar Biaya Umum (SBU) Bangkom 2026</div>
+              </div>
+            </div>
+
+            <!-- Bottom Strategic Note -->
+            <div style="background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.25); border-radius: 12px; padding: 16px 20px; display: flex; align-items: center; justify-content: space-between;">
+              <div style="display: flex; align-items: center; gap: 14px;">
+                <div style="width: 38px; height: 38px; border-radius: 8px; background: rgba(16, 185, 129, 0.2); display: flex; align-items: center; justify-content: center; color: #10b981;">
+                  <span data-icon="ClipboardCheck" data-icon-size="20"></span>
+                </div>
+                <div>
+                  <div style="font-size: 13.5px; font-weight: 700; color: #ffffff;">Status Pengesahan Dokumen IDP Kedinasan</div>
+                  <div style="font-size: 12px; color: #cbd5e1;">Sebanyak <b>60 dari 99 ASN (61%)</b> telah mengantongi pengesahan resmi berstatus Final dari Kasubbag Kepegawaian &amp; Pimpinan.</div>
+                </div>
+              </div>
+              <span class="badge" style="background: #10b981; color: #ffffff; font-size: 11px; font-weight: 750;">Sah Secara Regulasi</span>
+            </div>
+          </div>
+        `;
+
+      // -------------------------------------------------------------
+      // SLIDE 3: MATRIKS KEPATUHAN 7 UNIT KERJA
+      // -------------------------------------------------------------
+      case 3:
+        return `
+          <div>
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px;">
+              <div>
+                <span class="badge" style="background: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3); font-size: 11px; font-weight: 700;">PERFORMA UNIT KERJA</span>
+                <h2 style="font-size: 22px; font-weight: 800; color: #ffffff; margin: 6px 0 2px;">Matriks Kepatuhan 20 JP per 7 Bidang Bappeda</h2>
+                <div style="font-size: 13px; color: #94a3b8;">Evaluasi kepatuhan beban belajar minimal berdasarkan DUK resmi 99 pegawai ASN</div>
+              </div>
+              <div style="font-size: 11px; color: #94a3b8; text-align: right;">
+                Target Minimum: <b style="color:#fbbf24;">20 JP/Pegawai/Tahun</b><br>
+                Total Pegawai: <b style="color:#38bdf8;">99 ASN Lengkap</b>
+              </div>
+            </div>
+
+            <!-- Table 7 Units -->
+            <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; overflow: hidden; margin-bottom: 16px;">
+              <table style="width: 100%; border-collapse: collapse; font-size: 12px; text-align: left;">
+                <thead>
+                  <tr style="background: rgba(255,255,255,0.06); border-bottom: 1px solid rgba(255,255,255,0.1); color: #cbd5e1;">
+                    <th style="padding: 10px 14px;">No</th>
+                    <th style="padding: 10px 14px;">Unit Kerja / Bidang</th>
+                    <th style="padding: 10px 14px;">Kepala Bidang / Penanggung Jawab</th>
+                    <th style="padding: 10px 14px; text-align: center;">ASN</th>
+                    <th style="padding: 10px 14px; text-align: center;">≥20 JP</th>
+                    <th style="padding: 10px 14px;">Progres Kepatuhan</th>
+                    <th style="padding: 10px 14px; text-align: center;">Rata-rata JP</th>
+                    <th style="padding: 10px 14px; text-align: center;">Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${unitBreakdown.map((u, i) => {
+                    const pct = u.pctKepatuhan;
+                    const badge = pct >= 70 
+                      ? '<span class="badge" style="background: rgba(16,185,129,0.2); color:#34d399; font-size:10px; font-weight:700;">Sangat Baik</span>'
+                      : pct >= 60 
+                      ? '<span class="badge" style="background: rgba(56,189,248,0.2); color:#38bdf8; font-size:10px; font-weight:700;">Baik</span>'
+                      : pct >= 50
+                      ? '<span class="badge" style="background: rgba(245,158,11,0.2); color:#fbbf24; font-size:10px; font-weight:700;">Cukup</span>'
+                      : '<span class="badge" style="background: rgba(239,68,68,0.2); color:#f87171; font-size:10px; font-weight:700;">Perlu Akselerasi</span>';
+
+                    return `
+                      <tr style="border-bottom: 1px solid rgba(255,255,255,0.05); color: #f1f5f9;">
+                        <td style="padding: 8px 14px; color: #94a3b8;">${i + 1}</td>
+                        <td style="padding: 8px 14px; font-weight: 700; color: #ffffff;">${u.unit}</td>
+                        <td style="padding: 8px 14px; color: #94a3b8; font-size: 11px;">${u.kabid}</td>
+                        <td style="padding: 8px 14px; text-align: center; font-weight: 650;">${u.pegawai}</td>
+                        <td style="padding: 8px 14px; text-align: center; color: #34d399; font-weight: 750;">${u.memenuhi20Jp}</td>
+                        <td style="padding: 8px 14px;">
+                          <div style="display: flex; align-items: center; gap: 8px;">
+                            <div style="flex: 1; height: 6px; background: rgba(255,255,255,0.1); border-radius: 999px; overflow: hidden;">
+                              <div style="width: ${pct}%; height: 100%; background: ${pct >= 60 ? '#10b981' : pct >= 50 ? '#f59e0b' : '#ef4444'};"></div>
+                            </div>
+                            <span style="font-weight: 700; font-size: 11px; width: 32px; text-align: right;">${pct}%</span>
+                          </div>
+                        </td>
+                        <td style="padding: 8px 14px; text-align: center; font-weight: 700; color: #38bdf8;">${u.avgJp} JP</td>
+                        <td style="padding: 8px 14px; text-align: center;">${badge}</td>
+                      </tr>
+                    `;
+                  }).join('')}
+                </tbody>
+              </table>
+            </div>
+
+            <div style="font-size: 11.5px; color: #94a3b8; text-align: right;">
+              * UPTD Pusdatin (70%) dan Bidang PMPE (67%) tercatat memimpin persentase kepatuhan tertinggi saat ini.
+            </div>
+          </div>
+        `;
+
+      // -------------------------------------------------------------
+      // SLIDE 4: DISTRIBUSI 25 METODE PENGEMBANGAN
+      // -------------------------------------------------------------
+      case 4:
+        return `
+          <div>
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 22px;">
+              <div>
+                <span class="badge" style="background: rgba(168, 85, 247, 0.15); color: #c084fc; border: 1px solid rgba(168, 85, 247, 0.3); font-size: 11px; font-weight: 700;">METODOLOGI &amp; BUKTI FISIK</span>
+                <h2 style="font-size: 22px; font-weight: 800; color: #ffffff; margin: 6px 0 2px;">Distribusi Metode Pengembangan &amp; Sertifikat Digital</h2>
+                <div style="font-size: 13px; color: #94a3b8;">Optimalisasi 25 metode pengembangan kompetensi resmi terakreditasi BKN &amp; LAN RI</div>
+              </div>
+              <div class="badge" style="background: rgba(16, 185, 129, 0.15); color: #34d399; font-size: 11px; font-weight: 700;">
+                <span class="realtime-status-dot"></span> Cloud Storage Aktif (Supabase)
+              </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; margin-bottom: 20px;">
+              <!-- Left: Realisasi Metode Terbesar -->
+              <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 14px; padding: 20px;">
+                <h3 style="font-size: 14px; font-weight: 750; color: #f8fafc; margin: 0 0 14px; display: flex; align-items: center; gap: 8px;">
+                  <span data-icon="FileBarChart" data-icon-size="16" style="color: #38bdf8;"></span> Realisasi Metode Terbanyak
+                </h3>
+                <div style="display: flex; flex-direction: column; gap: 12px;">
+                  <div>
+                    <div style="display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 4px;">
+                      <span style="color: #ffffff; font-weight: 650;">1. Diklat Teknis &amp; Fungsional Perencanaan</span>
+                      <span style="color: #38bdf8; font-weight: 750;">708 JP (38%)</span>
+                    </div>
+                    <div style="height: 6px; background: rgba(255,255,255,0.1); border-radius: 999px; overflow: hidden;">
+                      <div style="width: 38%; height: 100%; background: #38bdf8;"></div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <div style="display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 4px;">
+                      <span style="color: #ffffff; font-weight: 650;">2. Bimbingan Teknis &amp; Workshop SKP/SPBE</span>
+                      <span style="color: #10b981; font-weight: 750;">484 JP (26%)</span>
+                    </div>
+                    <div style="height: 6px; background: rgba(255,255,255,0.1); border-radius: 999px; overflow: hidden;">
+                      <div style="width: 26%; height: 100%; background: #10b981;"></div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <div style="display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 4px;">
+                      <span style="color: #ffffff; font-weight: 650;">3. Seminar, Lokakarya, &amp; Webinar Nasional</span>
+                      <span style="color: #f59e0b; font-weight: 750;">335 JP (18%)</span>
+                    </div>
+                    <div style="height: 6px; background: rgba(255,255,255,0.1); border-radius: 999px; overflow: hidden;">
+                      <div style="width: 18%; height: 100%; background: #f59e0b;"></div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <div style="display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 4px;">
+                      <span style="color: #ffffff; font-weight: 650;">4. Mentoring Kedinasan &amp; Pendampingan Kasubbag</span>
+                      <span style="color: #a855f7; font-weight: 750;">223 JP (12%)</span>
+                    </div>
+                    <div style="height: 6px; background: rgba(255,255,255,0.1); border-radius: 999px; overflow: hidden;">
+                      <div style="width: 12%; height: 100%; background: #a855f7;"></div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <div style="display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 4px;">
+                      <span style="color: #ffffff; font-weight: 650;">5. E-Learning Mandiri (MOOC LAN RI &amp; BKN)</span>
+                      <span style="color: #ec4899; font-weight: 750;">112 JP (6%)</span>
+                    </div>
+                    <div style="height: 6px; background: rgba(255,255,255,0.1); border-radius: 999px; overflow: hidden;">
+                      <div style="width: 6%; height: 100%; background: #ec4899;"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Right: Keamanan & Bukti Fisik -->
+              <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 14px; padding: 20px; display: flex; flex-direction: column; justify-content: space-between;">
+                <div>
+                  <h3 style="font-size: 14px; font-weight: 750; color: #f8fafc; margin: 0 0 12px; display: flex; align-items: center; gap: 8px;">
+                    <span data-icon="Lock" data-icon-size="16" style="color: #10b981;"></span> Keamanan Bukti Fisik Sertifikat
+                  </h3>
+                  <p style="font-size: 12.5px; color: #94a3b8; line-height: 1.5; margin-bottom: 14px;">
+                    Seluruh dokumen sertifikat ASN diunggah langsung ke <b>Cloud Bucket Supabase Storage (sertifikat_idp)</b>, terverifikasi keasliannya dan terhubung dengan tanda tangan digital barcode QR.
+                  </p>
+                  <div style="background: rgba(0,0,0,0.25); border-radius: 8px; padding: 12px 14px; border: 1px dashed rgba(255,255,255,0.15);">
+                    <div style="display: flex; justify-content: space-between; font-size: 11.5px; margin-bottom: 6px;">
+                      <span style="color: #94a3b8;">Format Berkas:</span>
+                      <span style="color: #38bdf8; font-weight: 700;">PDF, JPG, PNG (Maks 5 MB)</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; font-size: 11.5px; margin-bottom: 6px;">
+                      <span style="color: #94a3b8;">Enkripsi &amp; Hash:</span>
+                      <span style="color: #10b981; font-weight: 700;">SHA-256 Integritas Data</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; font-size: 11.5px;">
+                      <span style="color: #94a3b8;">Akses Audit:</span>
+                      <span style="color: #fbbf24; font-weight: 700;">Inspektorat &amp; BKN Siap Audit</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div style="font-size: 11px; color: #64748b; margin-top: 12px;">
+                  Dilengkapi cadangan terenkripsi mandiri (*auto-backup snapshot*) oleh Kasubbag Kepegawaian Bappeda.
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+
+      // -------------------------------------------------------------
+      // SLIDE 5: GAP ANALYSIS & TINDAK LANJUT 39 ASN
+      // -------------------------------------------------------------
+      case 5:
+        return `
+          <div>
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 22px;">
+              <div>
+                <span class="badge" style="background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); font-size: 11px; font-weight: 700;">GAP ANALYSIS &amp; RENCANA AKSI</span>
+                <h2 style="font-size: 22px; font-weight: 800; color: #ffffff; margin: 6px 0 2px;">Pemetaan Kendala &amp; Tindak Lanjut 39 ASN</h2>
+                <div style="font-size: 13px; color: #94a3b8;">Rencana aksi terukur percepatan pemenuhan target 20 JP sebelum evaluasi akhir tahun</div>
+              </div>
+              <div class="badge" style="background: rgba(245, 158, 11, 0.15); color: #fbbf24; font-size: 11px; font-weight: 700;">
+                Target Akhir: 100% ASN Tuntas
+              </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; margin-bottom: 20px;">
+              <!-- Left: Segmentasi 39 ASN -->
+              <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 14px; padding: 22px;">
+                <h3 style="font-size: 14px; font-weight: 750; color: #f8fafc; margin: 0 0 14px; display: flex; align-items: center; gap: 8px;">
+                  <span data-icon="AlertCircle" data-icon-size="16" style="color: #f59e0b;"></span> Segmentasi 39 ASN Belum Capai 20 JP
+                </h3>
+                
+                <div style="background: rgba(245, 158, 11, 0.08); border-left: 3px solid #f59e0b; border-radius: 8px; padding: 12px 14px; margin-bottom: 12px;">
+                  <div style="font-size: 13px; font-weight: 750; color: #fbbf24;">Kelompok Progres Menengah (25 ASN / 64%)</div>
+                  <div style="font-size: 12px; color: #cbd5e1; margin-top: 4px; line-height: 1.4;">
+                    Telah mengantongi <b>10–19 JP</b>. Hanya butuh 1 kali pelatihan singkat / bimbingan teknis 1 hari untuk mencapai target 20 JP.
+                  </div>
+                </div>
+
+                <div style="background: rgba(239, 68, 68, 0.08); border-left: 3px solid #ef4444; border-radius: 8px; padding: 12px 14px;">
+                  <div style="font-size: 13px; font-weight: 750; color: #f87171;">Kelompok Butuh Perhatian Khusus (14 ASN / 36%)</div>
+                  <div style="font-size: 12px; color: #cbd5e1; margin-top: 4px; line-height: 1.4;">
+                    Capaian <b>&lt;10 JP</b> atau baru dalam tahap penyusunan draft IDP. Mayoritas merupakan formasi pelaksana lapangan dan pegawai mutasi baru.
+                  </div>
+                </div>
+              </div>
+
+              <!-- Right: Tiga Solusi Konkret -->
+              <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 14px; padding: 22px;">
+                <h3 style="font-size: 14px; font-weight: 750; color: #f8fafc; margin: 0 0 14px; display: flex; align-items: center; gap: 8px;">
+                  <span data-icon="Send" data-icon-size="16" style="color: #38bdf8;"></span> 3 Langkah Aksi Percepatan Mandiri
+                </h3>
+
+                <div style="display: flex; flex-direction: column; gap: 10px;">
+                  <div style="display: flex; gap: 10px; align-items: flex-start;">
+                    <div style="width: 22px; height: 22px; border-radius: 50%; background: #38bdf8; color: #000; font-size: 11px; font-weight: 800; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px;">1</div>
+                    <div style="font-size: 12px; color: #cbd5e1; line-height: 1.4;">
+                      <b style="color: #ffffff;">Notifikasi Terjadwal WhatsApp Web:</b> Kasubbag Kepegawaian menyiarkan pesan pengingat resmi secara terarah kepada 39 ASN bersangkutan.
+                    </div>
+                  </div>
+
+                  <div style="display: flex; gap: 10px; align-items: flex-start;">
+                    <div style="width: 22px; height: 22px; border-radius: 50%; background: #10b981; color: #000; font-size: 11px; font-weight: 800; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px;">2</div>
+                    <div style="font-size: 12px; color: #cbd5e1; line-height: 1.4;">
+                      <b style="color: #ffffff;">Pemanfaatan E-Learning Tanpa Biaya:</b> Mendaftarkan 14 ASN prioritas ke portal MOOC ASN Unggul LAN RI &amp; webinar BPSDMD Provinsi Lampung.
+                    </div>
+                  </div>
+
+                  <div style="display: flex; gap: 10px; align-items: flex-start;">
+                    <div style="width: 22px; height: 22px; border-radius: 50%; background: #a855f7; color: #000; font-size: 11px; font-weight: 800; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px;">3</div>
+                    <div style="font-size: 12px; color: #cbd5e1; line-height: 1.4;">
+                      <b style="color: #ffffff;">Mentoring Tematik Internal:</b> Menugaskan Perencana Ahli Madya di tiap Bidang untuk memfasilitasi sesi pembelajaran internal (dihitung 4-8 JP resmi).
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+
+      // -------------------------------------------------------------
+      // SLIDE 6: DISPOSISI PIMPINAN & PENGESAHAN
+      // -------------------------------------------------------------
+      case 6:
+        return `
+          <div>
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 22px;">
+              <div>
+                <span class="badge" style="background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); font-size: 11px; font-weight: 700;">KEBIJAKAN &amp; DISPOSISI PIMPINAN</span>
+                <h2 style="font-size: 22px; font-weight: 800; color: #ffffff; margin: 6px 0 2px;">Arahan Strategis Kepala Badan &amp; Komitmen Bersama</h2>
+                <div style="font-size: 13px; color: #94a3b8;">Instruksi resmi kedinasan Bappeda Provinsi Lampung untuk menjamin 100% kepatuhan ASN</div>
+              </div>
+              <div class="badge" style="background: #f59e0b; color: #000; font-size: 11px; font-weight: 800;">
+                Berlaku Sah TA 2026
+              </div>
+            </div>
+
+            <!-- 3 Directives Box -->
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 24px;">
+              <div style="background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 18px;">
+                <div style="width: 32px; height: 32px; border-radius: 8px; background: rgba(56, 189, 248, 0.2); color: #38bdf8; display: flex; align-items: center; justify-content: center; font-weight: 800; margin-bottom: 12px;">1</div>
+                <div style="font-size: 13.5px; font-weight: 750; color: #ffffff; margin-bottom: 6px;">Batas Waktu Triwulan III</div>
+                <div style="font-size: 12px; color: #94a3b8; line-height: 1.5;">
+                  Seluruh Kepala Bidang wajib mengawal 39 ASN agar target minimal 20 JP terpenuhi paling lambat <b>30 September 2026</b>.
+                </div>
+              </div>
+
+              <div style="background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 18px;">
+                <div style="width: 32px; height: 32px; border-radius: 8px; background: rgba(16, 185, 129, 0.2); color: #10b981; display: flex; align-items: center; justify-content: center; font-weight: 800; margin-bottom: 12px;">2</div>
+                <div style="font-size: 13.5px; font-weight: 750; color: #ffffff; margin-bottom: 6px;">Integrasi Evaluasi SKP</div>
+                <div style="font-size: 12px; color: #94a3b8; line-height: 1.5;">
+                  Capaian minimal 20 JP diintegrasikan sebagai komponen penilaian perilaku kerja dan pertimbangan usul promosi jabatan.
+                </div>
+              </div>
+
+              <div style="background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 18px;">
+                <div style="width: 32px; height: 32px; border-radius: 8px; background: rgba(245, 158, 11, 0.2); color: #f59e0b; display: flex; align-items: center; justify-content: center; font-weight: 800; margin-bottom: 12px;">3</div>
+                <div style="font-size: 13.5px; font-weight: 750; color: #ffffff; margin-bottom: 6px;">Apresiasi Unit Terbaik</div>
+                <div style="font-size: 12px; color: #94a3b8; line-height: 1.5;">
+                  Pemberian piagam penghargaan kinerja dari Kepala Bappeda bagi Unit Kerja pertama yang mencapai 100% kepatuhan.
+                </div>
+              </div>
+            </div>
+
+            <!-- Signature & Validation Footer -->
+            <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 16px 24px; display: flex; justify-content: space-between; align-items: center;">
+              <div>
+                <div style="font-size: 11px; color: #94a3b8;">Ditetapkan &amp; Disahkan di:</div>
+                <div style="font-size: 13px; font-weight: 750; color: #ffffff; margin-top: 2px;">Bandar Lampung, 14 Oktober 2026</div>
+                <div style="font-size: 11px; color: #38bdf8; margin-top: 2px;">Kepala Badan Perencanaan Pembangunan Daerah</div>
+              </div>
+
+              <div style="text-align: right; display: flex; align-items: center; gap: 16px;">
+                <div>
+                  <div style="font-size: 13px; font-weight: 800; color: #ffffff;">Dr. ANANG RISGIYANTO, S.K.M., M.Kes.</div>
+                  <div style="font-size: 11px; color: #94a3b8;">Pembina Utama Madya (IV/d) • NIP. 197507312000031002</div>
+                  <div style="font-size: 10.5px; color: #10b981; font-weight: 650; margin-top: 3px;">Tanda Tangan Digital Terverifikasi SPBE</div>
+                </div>
+                <div style="width: 52px; height: 52px; background: #ffffff; border-radius: 8px; padding: 4px; display: flex; align-items: center; justify-content: center;">
+                  <img src="https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=VALID_BAPPEDA_IDP_2026_ANANG_RISGIYANTO" alt="QR Validasi" style="width: 100%; height: 100%; object-fit: contain;">
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+
+      default:
+        return `<div style="text-align: center; color: #94a3b8;">Slide tidak ditemukan.</div>`;
+    }
+  }
+};
+
+if (typeof window !== 'undefined') {
+  window.PresentationService = PresentationService;
+}
+
 

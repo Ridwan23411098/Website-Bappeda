@@ -28,7 +28,7 @@
     rel="stylesheet">
 
   <!-- Core Stylesheet -->
-  <link rel="stylesheet" href="css/app.css?v=20261014_v15">
+  <link rel="stylesheet" href="css/app.css?v=20261014_v16">
 </head>
 
 <body>
@@ -254,13 +254,18 @@
               <span data-icon="Smartphone" data-icon-size="14"></span> <span>Pasang di HP</span>
             </button>
 
+            <!-- Mode Paparan / Presentasi Rapat Pimpinan (Rapim) -->
+            <button class="btn-icon" id="topbarPresentationBtn" onclick="PresentationService.openPresentation()" title="Mode Paparan / Presentasi Rapat Pimpinan">
+              <span data-icon="Presentation" data-icon-size="18"></span>
+            </button>
+
             <!-- Dark Mode Toggle -->
             <button class="btn-icon" id="themeToggleBtn" onclick="App.toggleTheme()" title="Ubah Mode Tampilan">
               <span data-icon="Moon" data-icon-size="18"></span>
             </button>
 
             <!-- Help Icon (Buku Panduan & SOP Kedinasan) -->
-            <button class="btn-icon" onclick="App.openSopGuide()" title="Buku Panduan & SOP Kedinasan">
+            <button class="btn-icon" onclick="App.openSopGuide()" title="Buku Panduan &amp; SOP Kedinasan">
               <span data-icon="HelpCircle" data-icon-size="18"></span>
             </button>
 
@@ -1602,6 +1607,9 @@
                 Plan ASN Bappeda Provinsi Lampung.</p>
             </div>
             <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+              <button class="btn btn-warning btn-sm" onclick="PresentationService.openPresentation()" title="Buka Mode Paparan / Presentasi Rapat Pimpinan (Rapim)">
+                <span data-icon="Presentation" data-icon-size="14"></span> Paparan Rapim
+              </button>
               <button class="btn btn-outline btn-sm" onclick="App.openSopGuide('admin')" title="SOP Verifikasi &amp; Kepegawaian">
                 <span data-icon="BookOpen" data-icon-size="14"></span> SOP Verifikasi
               </button>
@@ -2080,6 +2088,9 @@
                 </div>
               </div>
               <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                <button class="btn" style="background: linear-gradient(135deg, #f59e0b, #d97706); color: #ffffff; font-weight: 750; border: none; font-size: 12px; box-shadow: 0 4px 14px rgba(245, 158, 11, 0.35); display: flex; align-items: center; gap: 6px;" onclick="PresentationService.openPresentation()" title="Buka Mode Paparan / Presentasi Rapat Pimpinan (Rapim)">
+                  <span data-icon="Presentation" data-icon-size="15"></span> Paparan Rapat Pimpinan
+                </button>
                 <button class="btn" style="background: rgba(255, 255, 255, 0.15); color: #ffffff; border: 1px solid rgba(255, 255, 255, 0.3); font-size: 12px; display: flex; align-items: center; gap: 6px;" onclick="App.openSopGuide('pimpinan')" title="Buku Panduan &amp; SOP Eksekutif">
                   <span data-icon="BookOpen" data-icon-size="15"></span> Buku Panduan &amp; SOP
                 </button>
@@ -3795,11 +3806,11 @@
   <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
   <script src="js/supabase.js?v=20261008_fix"></script>
   <script src="assets/lambang-lampung.js?v=20261013_v3"></script>
-  <script src="js/icons.js?v=20261014_v11"></script>
+  <script src="js/icons.js?v=20261014_v16"></script>
   <script src="js/charts.js?v=20261008_fix"></script>
   <script src="js/bappeda_data.js?v=20261013_v8"></script>
   <script src="js/store.js?v=20261014_v15"></script>
-  <script src="js/export.js?v=20261014_v15"></script>
+  <script src="js/export.js?v=20261014_v16"></script>
   <script src="js/app.js?v=20261014_v15"></script>
 </body>
 
