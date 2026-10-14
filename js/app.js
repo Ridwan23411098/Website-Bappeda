@@ -685,12 +685,11 @@ const App = {
     if (!input) return;
     if (input.type === 'password') {
       input.type = 'text';
-      if (btn) btn.innerHTML = '<span data-icon="EyeOff" data-icon-size="16"></span>';
+      if (btn) btn.innerHTML = getIcon('EyeOff', 16);
     } else {
       input.type = 'password';
-      if (btn) btn.innerHTML = '<span data-icon="Eye" data-icon-size="16"></span>';
+      if (btn) btn.innerHTML = getIcon('Eye', 16);
     }
-    if (window.lucide) window.lucide.createIcons();
   },
 
   checkPasswordStrength(inputVal) {
@@ -749,6 +748,195 @@ const App = {
       matchText.textContent = '✗ Kata Sandi Tidak Cocok';
       matchText.style.color = 'var(--color-danger)';
     }
+  },
+
+  // MODAL UBAH KATA SANDI (SECURITY MODAL MANDIRI)
+  openChangePasswordModal() {
+    const oldPassInput = document.getElementById('modalOldPassword');
+    const newPassInput = document.getElementById('modalNewPassword');
+    const confirmPassInput = document.getElementById('modalConfirmPassword');
+    const bar = document.getElementById('modalPassStrengthBar');
+    const text = document.getElementById('modalPassStrengthText');
+    const matchText = document.getElementById('modalPassMatchText');
+
+    if (oldPassInput) {
+      oldPassInput.value = '';
+      oldPassInput.type = 'password';
+    }
+    if (newPassInput) {
+      newPassInput.value = '';
+      newPassInput.type = 'password';
+    }
+    if (confirmPassInput) {
+      confirmPassInput.value = '';
+      confirmPassInput.type = 'password';
+    }
+    if (bar) {
+      bar.style.width = '0%';
+      bar.style.background = 'var(--color-danger)';
+    }
+    if (text) {
+      text.textContent = '-';
+      text.style.color = 'var(--color-text-muted)';
+    }
+    if (matchText) {
+      matchText.textContent = '-';
+      matchText.style.color = 'var(--color-text-muted)';
+    }
+
+    this.openModal('changePasswordModal');
+    setTimeout(() => {
+      if (oldPassInput) oldPassInput.focus();
+    }, 150);
+    if (typeof renderAllIcons === 'function') renderAllIcons();
+  },
+
+  async submitChangePasswordModal() {
+    const oldPassInput = document.getElementById('modalOldPassword');
+    const newPassInput = document.getElementById('modalNewPassword');
+    const confirmPassInput = document.getElementById('modalConfirmPassword');
+    const btnSubmit = document.getElementById('btnModalChangePassword');
+
+    if (!oldPassInput || !newPassInput || !confirmPassInput) return;
+
+    const oldVal = oldPassInput.value.trim();
+    const newVal = newPassInput.value.trim();
+    const confirmVal = confirmPassInput.value.trim();
+
+    if (!oldVal) {
+      App.toast('Mohon masukkan kata sandi Anda saat ini.', 'error');
+      oldPassInput.focus();
+      return;
+    }
+    if (!newVal) {
+      App.toast('Mohon masukkan kata sandi baru Anda.', 'error');
+      newPassInput.focus();
+      return;
+    }
+    if (newVal.length < 6) {
+      App.toast('Kata sandi baru minimal harus 6 karakter.', 'warning');
+      newPassInput.focus();
+      return;
+    }
+    if (newVal !== confirmVal) {
+      App.toast('Konfirmasi kata sandi baru tidak cocok dengan kata sandi baru.', 'error');
+      confirmPassInput.focus();
+      return;
+    }
+    if (oldVal === newVal) {
+      App.toast('Kata sandi baru tidak boleh sama dengan kata sandi saat ini.', 'warning');
+      newPassInput.focus();
+      return;
+    }
+
+    if (btnSubmit) {
+      btnSubmit.disabled = true;
+      btnSubmit.innerHTML = '<span class="loader"></span> Menyimpan Password...';
+    }
+
+    try {
+      await Store.changePassword(oldVal, newVal);
+      App.toast('Kata sandi Anda berhasil diperbarui dan tersimpan aman di cloud Supabase!', 'success');
+      this.closeModal('changePasswordModal');
+      this.renderEmployeeProfile();
+    } catch (err) {
+      App.toast(err.message || 'Gagal memperbarui kata sandi.', 'error');
+    } finally {
+      if (btnSubmit) {
+        btnSubmit.disabled = false;
+        btnSubmit.innerHTML = '<span data-icon="Check" data-icon-size="16"></span> Simpan Kata Sandi';
+        if (typeof renderAllIcons === 'function') renderAllIcons();
+      }
+    }
+  },
+
+  checkModalPasswordStrength(inputVal) {
+    const bar = document.getElementById('modalPassStrengthBar');
+    const text = document.getElementById('modalPassStrengthText');
+    if (!bar || !text) return;
+
+    if (!inputVal) {
+      bar.style.width = '0%';
+      text.textContent = '-';
+      text.style.color = 'var(--color-text-muted)';
+      return;
+    }
+
+    let score = 0;
+    if (inputVal.length >= 6) score += 33;
+    if (inputVal.length >= 10) score += 33;
+    if (/[A-Z]/.test(inputVal) && /[0-9]/.test(inputVal)) score += 34;
+
+    if (score <= 33) {
+      bar.style.width = '33%';
+      bar.style.background = 'var(--color-danger)';
+      text.textContent = 'Lemah (Min. 6 Karakter)';
+      text.style.color = 'var(--color-danger)';
+    } else if (score <= 66) {
+      bar.style.width = '66%';
+      bar.style.background = 'var(--color-warning)';
+      text.textContent = 'Sedang (Bisa Diperkuat)';
+      text.style.color = 'var(--color-warning)';
+    } else {
+      bar.style.width = '100%';
+      bar.style.background = 'var(--color-success)';
+      text.textContent = 'Sangat Kuat (Kombinasi Huruf & Angka)';
+      text.style.color = 'var(--color-success)';
+    }
+
+    this.checkModalPasswordMatch();
+  },
+
+  checkModalPasswordMatch() {
+    const newPass = document.getElementById('modalNewPassword')?.value || '';
+    const confirmPass = document.getElementById('modalConfirmPassword')?.value || '';
+    const matchText = document.getElementById('modalPassMatchText');
+    if (!matchText) return;
+
+    if (!confirmPass) {
+      matchText.textContent = '-';
+      matchText.style.color = 'var(--color-text-muted)';
+      return;
+    }
+
+    if (newPass === confirmPass) {
+      matchText.textContent = '✓ Kata Sandi Cocok';
+      matchText.style.color = 'var(--color-success)';
+    } else {
+      matchText.textContent = '✗ Kata Sandi Tidak Cocok';
+      matchText.style.color = 'var(--color-danger)';
+    }
+  },
+
+  // USER DROPDOWN IN TOPBAR
+  toggleUserDropdown() {
+    const menu = document.getElementById('userDropdownMenu');
+    if (!menu) return;
+    if (menu.style.display === 'none' || !menu.style.display) {
+      this.openUserDropdown();
+    } else {
+      this.closeUserDropdown();
+    }
+  },
+
+  openUserDropdown() {
+    const menu = document.getElementById('userDropdownMenu');
+    if (!menu) return;
+    const sessionUser = Store.state.user || Store.state.currentSession || {};
+    const nameEl = document.getElementById('userDropdownFullName');
+    const roleNipEl = document.getElementById('userDropdownRoleNip');
+    if (nameEl) nameEl.textContent = sessionUser.name || 'Pegawai Bappeda';
+    if (roleNipEl) {
+      const roleCfg = NAV_CONFIG[Store.state.currentRole || 'pegawai'] || { label: 'Pegawai ASN' };
+      roleNipEl.textContent = `${roleCfg.label} • NIP: ${sessionUser.nipFormatted || sessionUser.nip || '-'}`;
+    }
+    menu.style.display = 'block';
+    if (typeof renderAllIcons === 'function') renderAllIcons();
+  },
+
+  closeUserDropdown() {
+    const menu = document.getElementById('userDropdownMenu');
+    if (menu) menu.style.display = 'none';
   },
 
   renderCareerPlan() {
@@ -3083,6 +3271,7 @@ const App = {
     document.addEventListener('keydown', e => {
       if (e.key === 'Escape') {
         this.closeGlobalSearch();
+        this.closeUserDropdown();
         document.querySelectorAll('.modal-overlay.active').forEach(m => m.classList.remove('active'));
         document.querySelectorAll('.drawer-overlay.active').forEach(d => d.classList.remove('active'));
         const dd = document.getElementById('notificationDropdown');
@@ -3109,6 +3298,11 @@ const App = {
       const notifDd = document.getElementById('notificationDropdown');
       if (notifDd && notifBtn && !notifBtn.contains(e.target) && !notifDd.contains(e.target)) {
         notifDd.classList.remove('show');
+      }
+
+      const userMenuCont = document.getElementById('topbarUserMenuContainer');
+      if (userMenuCont && !userMenuCont.contains(e.target)) {
+        this.closeUserDropdown();
       }
     });
   }

@@ -28,7 +28,7 @@
     rel="stylesheet">
 
   <!-- Core Stylesheet -->
-  <link rel="stylesheet" href="css/app.css?v=20261014_v10">
+  <link rel="stylesheet" href="css/app.css?v=20261014_v11">
 </head>
 
 <body>
@@ -312,10 +312,40 @@
             </div>
           </div>
 
-          <!-- User Badge -->
-          <div class="topbar-user-badge" onclick="App.navigate('eprofil')">
-            <div style="font-size: 12.5px; font-weight: 650; margin-right: 4px;" id="topbarUserName">Rizky Aditya</div>
-            <span class="badge badge-blue" id="topbarRoleText" style="font-size: 10px; padding: 2px 7px;">Pegawai</span>
+          <!-- User Badge with Dropdown -->
+          <div class="user-menu-container" id="topbarUserMenuContainer">
+            <div class="topbar-user-badge" id="topbarUserBadge" onclick="App.toggleUserDropdown()" title="Menu Akun Kedinasan" style="cursor: pointer;">
+              <div style="font-size: 12.5px; font-weight: 650; margin-right: 4px;" id="topbarUserName">Rizky Aditya</div>
+              <span class="badge badge-blue" id="topbarRoleText" style="font-size: 10px; padding: 2px 7px;">Pegawai</span>
+              <span data-icon="ChevronDown" data-icon-size="13" style="color: var(--color-text-muted); margin-left: 2px;"></span>
+            </div>
+
+            <!-- User Dropdown Menu -->
+            <div id="userDropdownMenu" class="user-dropdown-card" style="display: none;">
+              <div class="user-dropdown-header">
+                <div class="user-dropdown-name" id="userDropdownFullName">Rizky Aditya Pratama</div>
+                <div class="user-dropdown-sub" id="userDropdownRoleNip">Pegawai ASN • NIP: 198701012010011001</div>
+              </div>
+              <div class="user-dropdown-items">
+                <button type="button" class="user-dropdown-item" onclick="App.navigate('eprofil'); App.closeUserDropdown();">
+                  <span data-icon="UserRound" data-icon-size="15"></span>
+                  <span>Profil Pegawai</span>
+                </button>
+                <button type="button" class="user-dropdown-item" onclick="App.openChangePasswordModal(); App.closeUserDropdown();">
+                  <span data-icon="Key" data-icon-size="15"></span>
+                  <span>Ubah Kata Sandi</span>
+                </button>
+                <button type="button" class="user-dropdown-item" onclick="App.toggleTheme(); App.closeUserDropdown();">
+                  <span data-icon="Moon" data-icon-size="15"></span>
+                  <span>Ganti Mode Tampilan</span>
+                </button>
+                <div class="user-dropdown-divider"></div>
+                <button type="button" class="user-dropdown-item text-danger" onclick="App.logout(); App.closeUserDropdown();">
+                  <span data-icon="LogOut" data-icon-size="15"></span>
+                  <span>Keluar Sistem</span>
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </header>
@@ -602,9 +632,14 @@
                 <div style="font-size: 12px; color: var(--color-text-muted);" id="profilHeaderNip"></div>
               </div>
             </div>
-            <button class="btn btn-outline" onclick="App.saveProfile()">
-              <span data-icon="Edit3" data-icon-size="16"></span> Simpan Perubahan Profil
-            </button>
+            <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+              <button type="button" class="btn btn-outline" onclick="App.openChangePasswordModal()" title="Ubah Kata Sandi Akun Mandiri">
+                <span data-icon="Key" data-icon-size="15"></span> Ubah Kata Sandi
+              </button>
+              <button type="button" class="btn btn-primary" onclick="App.saveProfile()">
+                <span data-icon="Edit3" data-icon-size="15"></span> Simpan Perubahan Profil
+              </button>
+            </div>
           </div>
 
           <!-- Section Data Identitas (2 columns) -->
@@ -3470,6 +3505,93 @@
     </div>
   </div>
 
+  <!-- ========================================================================
+       MODAL: UBAH KATA SANDI (SECURITY MODAL MANDIRI)
+       ======================================================================== -->
+  <div class="modal-overlay" id="changePasswordModal">
+    <div class="modal-card modal-sm" style="max-width: 460px;">
+      <div class="modal-header">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <div style="width: 38px; height: 38px; border-radius: 10px; background: rgba(56, 189, 248, 0.15); color: var(--color-primary); display: grid; place-items: center; flex-shrink: 0;">
+            <span data-icon="Key" data-icon-size="18"></span>
+          </div>
+          <div>
+            <h3 style="margin: 0; font-size: 16px; font-weight: 750; color: var(--color-text-primary);">Ubah Kata Sandi</h3>
+            <p style="margin: 2px 0 0; font-size: 11.5px; color: var(--color-text-muted);">Perbarui kata sandi akun kedinasan SIP-KOMPETENSI</p>
+          </div>
+        </div>
+        <button class="btn-icon" onclick="App.closeModal('changePasswordModal')" title="Tutup Modal">
+          <span data-icon="X" data-icon-size="18"></span>
+        </button>
+      </div>
+
+      <form onsubmit="event.preventDefault(); App.submitChangePasswordModal();">
+        <div class="modal-body" style="padding: 20px 24px;">
+          <!-- Alert Info -->
+          <div style="display: flex; align-items: flex-start; gap: 10px; padding: 10px 14px; background: var(--color-surface-subtle); border: 1px solid var(--color-border); border-radius: 8px; margin-bottom: 18px; font-size: 11.5px; color: var(--color-text-secondary); line-height: 1.45;">
+            <span data-icon="ShieldCheck" data-icon-size="16" style="color: var(--color-primary); flex-shrink: 0; margin-top: 1px;"></span>
+            <div>
+              Sandi baru akan dienkripsi dengan standar <b>SHA-256 Cloud Security</b> dan disinkronkan langsung ke server Supabase Bappeda.
+            </div>
+          </div>
+
+          <!-- 1. Kata Sandi Saat Ini -->
+          <div class="form-group" style="margin-bottom: 16px;">
+            <label class="form-label" for="modalOldPassword">Kata Sandi Saat Ini <span class="required" style="color: var(--color-danger);">*</span></label>
+            <div class="input-icon-wrapper">
+              <input type="password" id="modalOldPassword" class="form-control has-right" placeholder="Masukkan kata sandi saat ini" autocomplete="current-password" required>
+              <button type="button" class="btn-input-right" onclick="App.togglePasswordVisibility('modalOldPassword', this)" title="Lihat/Sembunyikan Sandi">
+                <span data-icon="Eye" data-icon-size="16"></span>
+              </button>
+            </div>
+          </div>
+
+          <!-- 2. Kata Sandi Baru -->
+          <div class="form-group" style="margin-bottom: 16px;">
+            <label class="form-label" for="modalNewPassword">Kata Sandi Baru <span class="required" style="color: var(--color-danger);">*</span></label>
+            <div class="input-icon-wrapper">
+              <input type="password" id="modalNewPassword" class="form-control has-right" placeholder="Minimal 6 karakter" autocomplete="new-password" oninput="App.checkModalPasswordStrength(this.value)" required>
+              <button type="button" class="btn-input-right" onclick="App.togglePasswordVisibility('modalNewPassword', this)" title="Lihat/Sembunyikan Sandi">
+                <span data-icon="Eye" data-icon-size="16"></span>
+              </button>
+            </div>
+            <!-- Strength meter -->
+            <div style="margin-top: 6px;">
+              <div style="height: 4px; background: var(--color-border); border-radius: 2px; overflow: hidden;">
+                <div id="modalPassStrengthBar" style="height: 100%; width: 0%; transition: all 300ms ease; background: var(--color-danger);"></div>
+              </div>
+              <div style="display: flex; justify-content: space-between; font-size: 10.5px; margin-top: 4px; color: var(--color-text-muted);">
+                <span>Kekuatan Kata Sandi:</span>
+                <b id="modalPassStrengthText">-</b>
+              </div>
+            </div>
+          </div>
+
+          <!-- 3. Konfirmasi Kata Sandi Baru -->
+          <div class="form-group" style="margin-bottom: 8px;">
+            <label class="form-label" for="modalConfirmPassword">Konfirmasi Kata Sandi Baru <span class="required" style="color: var(--color-danger);">*</span></label>
+            <div class="input-icon-wrapper">
+              <input type="password" id="modalConfirmPassword" class="form-control has-right" placeholder="Ketik ulang kata sandi baru" autocomplete="new-password" oninput="App.checkModalPasswordMatch()" required>
+              <button type="button" class="btn-input-right" onclick="App.togglePasswordVisibility('modalConfirmPassword', this)" title="Lihat/Sembunyikan Sandi">
+                <span data-icon="Eye" data-icon-size="16"></span>
+              </button>
+            </div>
+            <div style="margin-top: 5px; font-size: 11px; text-align: right;">
+              <span id="modalPassMatchText" style="color: var(--color-text-muted);">-</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer" style="display: flex; justify-content: space-between; align-items: center;">
+          <button type="button" class="btn btn-outline" onclick="App.closeModal('changePasswordModal')">Batal</button>
+          <button type="submit" id="btnModalChangePassword" class="btn btn-primary">
+            <span data-icon="Check" data-icon-size="16"></span> Simpan Kata Sandi
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <!-- TOAST CONTAINER -->
   <div class="toast-container" id="toastContainer"></div>
 
@@ -3481,12 +3603,12 @@
   <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
   <script src="js/supabase.js?v=20261008_fix"></script>
   <script src="assets/lambang-lampung.js?v=20261013_v3"></script>
-  <script src="js/icons.js?v=20261013_v8"></script>
+  <script src="js/icons.js?v=20261014_v11"></script>
   <script src="js/charts.js?v=20261008_fix"></script>
   <script src="js/bappeda_data.js?v=20261013_v8"></script>
   <script src="js/store.js?v=20261013_v8"></script>
   <script src="js/export.js?v=20261013_v8"></script>
-  <script src="js/app.js?v=20261014_v10"></script>
+  <script src="js/app.js?v=20261014_v11"></script>
 </body>
 
 </html>
