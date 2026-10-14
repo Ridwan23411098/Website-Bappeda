@@ -2779,18 +2779,14 @@ const App = {
       console.log('PWA installation prompt available');
 
       const topbarBtn = document.getElementById('pwaInstallBtn');
-      const sidebarBtn = document.getElementById('pwaSidebarInstallBtn');
       if (topbarBtn) topbarBtn.style.display = 'inline-flex';
-      if (sidebarBtn) sidebarBtn.style.display = 'flex';
       if (typeof lucide !== 'undefined' && lucide.createIcons) lucide.createIcons();
     });
 
     window.addEventListener('appinstalled', () => {
       this.deferredInstallPrompt = null;
       const topbarBtn = document.getElementById('pwaInstallBtn');
-      const sidebarBtn = document.getElementById('pwaSidebarInstallBtn');
       if (topbarBtn) topbarBtn.style.display = 'none';
-      if (sidebarBtn) sidebarBtn.style.display = 'none';
       this.toast('Aplikasi SIP-KOMPETENSI berhasil dipasang di layar utama perangkat Anda!', 'success');
     });
 
@@ -2798,9 +2794,7 @@ const App = {
     const isIos = /iphone|ipad|ipod/.test(window.navigator.userAgent.toLowerCase());
     if (isIos && !isStandalone) {
       const topbarBtn = document.getElementById('pwaInstallBtn');
-      const sidebarBtn = document.getElementById('pwaSidebarInstallBtn');
       if (topbarBtn) topbarBtn.style.display = 'inline-flex';
-      if (sidebarBtn) sidebarBtn.style.display = 'flex';
       if (typeof lucide !== 'undefined' && lucide.createIcons) lucide.createIcons();
     }
   },
@@ -2814,9 +2808,7 @@ const App = {
       }
       this.deferredInstallPrompt = null;
       const topbarBtn = document.getElementById('pwaInstallBtn');
-      const sidebarBtn = document.getElementById('pwaSidebarInstallBtn');
       if (topbarBtn) topbarBtn.style.display = 'none';
-      if (sidebarBtn) sidebarBtn.style.display = 'none';
       return;
     }
 
