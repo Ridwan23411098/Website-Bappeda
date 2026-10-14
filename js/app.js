@@ -2832,6 +2832,212 @@ const App = {
     }
   },
 
+  // ==========================================
+  // GLOBAL SEARCH (CTRL + K)
+  // ==========================================
+  searchSelectedIndex: -1,
+
+  escapeHtml(str) {
+    if (!str) return '';
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  },
+
+  handleGlobalSearch(query) {
+    const q = (query || '').trim().toLowerCase();
+    const dropdown = document.getElementById('topbarSearchResults');
+    const content = document.getElementById('searchResultsContent');
+    if (!dropdown || !content) return;
+
+    this.searchSelectedIndex = -1;
+
+    // Kumpulan Menu Sistem & Pintasan Cepat
+    const allSystemMenus = [
+      { id: 'edash', title: 'Dashboard Pegawai (ASN)', desc: 'Ringkasan capaian JP & rencana IDP pribadi', icon: 'LayoutDashboard', type: 'page' },
+      { id: 'eidp', title: 'Rencana IDP Pegawai', desc: 'Kelola dan susun usulan agenda bangkom tahunan', icon: 'FileText', type: 'page' },
+      { id: 'epelaksanaan', title: 'Realisasi Pelatihan & Sertifikat', desc: 'Unggah bukti kelulusan diklat dan jam pelajaran', icon: 'GraduationCap', type: 'page' },
+      { id: 'eprofil', title: 'Profil Pegawai ASN', desc: 'Data kepegawaian, pangkat, golongan & jabatan', icon: 'UserRound', type: 'page' },
+      { id: 'adash', title: 'Dashboard Pengelola SDM', desc: 'Statistik kepegawaian & antrean verifikasi', icon: 'LayoutDashboard', type: 'page' },
+      { id: 'averif', title: 'Verifikasi IDP ASN', desc: 'Pemeriksaan dan persetujuan berkas usulan', icon: 'ShieldCheck', type: 'page' },
+      { id: 'apegawai', title: 'Data 99 Pegawai Bappeda', desc: 'Direktori DUK 2026 seluruh aparatur Bappeda', icon: 'Users', type: 'page' },
+      { id: 'pdash', title: 'Dashboard Eksekutif Kepala Badan', desc: 'Pengendalian & kepatuhan 20 JP antar bidang', icon: 'TrendingUp', type: 'page' },
+      { id: 'pmonitoring', title: 'Monitoring Kepatuhan 7 Bidang', desc: 'Capaian bangkom Sekretariat & seluruh Bidang', icon: 'BarChart3', type: 'page' },
+      { id: 'plaporan', title: 'Laporan Eksekutif Capaian IDP', desc: 'Cetak dan ekspor laporan resmi berkop dinas', icon: 'FileSpreadsheet', type: 'page' },
+      { id: 'sopGuide', title: 'Buku Panduan Pengguna & SOP', desc: 'Standar operasional prosedur resmi Bappeda', icon: 'BookOpen', type: 'action' },
+      { id: 'backupModal', title: 'Cadangkan & Pulihkan Basis Data', desc: 'Backup JSON mandiri dan restore arsip', icon: 'Database', type: 'action' }
+    ];
+
+    const employees = Store.state.employees || (typeof BAPPEDA_DATA !== 'undefined' ? BAPPEDA_DATA.employees : []);
+
+    let matchedMenus = [];
+    let matchedEmployees = [];
+
+    if (q.length === 0) {
+      // Default Quick Suggestions
+      matchedMenus = allSystemMenus.slice(0, 4);
+      matchedEmployees = employees.slice(0, 4);
+    } else {
+      matchedMenus = allSystemMenus.filter(m => 
+        m.title.toLowerCase().includes(q) || m.desc.toLowerCase().includes(q)
+      ).slice(0, 4);
+
+      matchedEmployees = employees.filter(e => {
+        const nameMatch = (e.name || '').toLowerCase().includes(q);
+        const nipMatch = String(e.nip || '').includes(q) || String(e.nipFormatted || '').includes(q);
+        const unitMatch = (e.unit || '').toLowerCase().includes(q);
+        const jabatanMatch = (e.jabatan || '').toLowerCase().includes(q);
+        return nameMatch || nipMatch || unitMatch || jabatanMatch;
+      }).slice(0, 6);
+    }
+
+    if (matchedMenus.length === 0 && matchedEmployees.length === 0) {
+      content.innerHTML = `
+        <div style="padding: 24px 16px; text-align: center; color: var(--color-text-muted); font-size: 12.5px;">
+          <span data-icon="Search" data-icon-size="28" style="opacity: 0.35; display: block; margin: 0 auto 8px;"></span>
+          Tidak ditemukan data untuk "<b>${this.escapeHtml(query)}</b>"<br>
+          <span style="font-size: 11px; color: var(--color-text-muted);">Gunakan nama pegawai, NIP 18 digit, atau nama bidang</span>
+        </div>
+      `;
+      dropdown.style.display = 'block';
+      if (typeof renderAllIcons === 'function') renderAllIcons();
+      return;
+    }
+
+    let html = '';
+
+    // Group 1: Pegawai ASN
+    if (matchedEmployees.length > 0) {
+      html += `
+        <div class="search-group-header">
+          <span>Pegawai ASN (${matchedEmployees.length})</span>
+          <span style="font-size: 9.5px; text-transform: none; color: var(--color-text-muted);">Klik untuk detail</span>
+        </div>
+      `;
+      matchedEmployees.forEach(e => {
+        const initials = (e.name || 'ASN').split(' ').map(w => w[0]).filter(Boolean).slice(0, 2).join('').toUpperCase();
+        const highlightedName = this.highlightSearchMatch(e.name || '', q);
+        const highlightedNip = this.highlightSearchMatch(e.nipFormatted || e.nip || '', q);
+        const prog = e.progress || 0;
+        const progBadge = prog >= 20 
+          ? `<span class="badge badge-success" style="font-size: 10px; padding: 2px 6px;">${prog} JP (Tuntas)</span>`
+          : `<span class="badge badge-warning" style="font-size: 10px; padding: 2px 6px;">${prog} JP</span>`;
+
+        html += `
+          <div class="search-result-item" onclick="App.selectSearchResult('employee', ${e.id})">
+            <div class="search-item-left">
+              <div class="search-avatar-badge">${initials}</div>
+              <div class="search-item-info">
+                <div class="search-item-title">${highlightedName}</div>
+                <div class="search-item-subtitle">NIP. ${highlightedNip} &bull; ${e.unit || '-'}</div>
+              </div>
+            </div>
+            <div>${progBadge}</div>
+          </div>
+        `;
+      });
+    }
+
+    // Group 2: Menu & Fitur Sistem
+    if (matchedMenus.length > 0) {
+      html += `
+        <div class="search-group-header">
+          <span>Navigasi &amp; Fitur (${matchedMenus.length})</span>
+          <span style="font-size: 9.5px; text-transform: none; color: var(--color-text-muted);">Pintasan</span>
+        </div>
+      `;
+      matchedMenus.forEach(m => {
+        const highlightedTitle = this.highlightSearchMatch(m.title, q);
+        html += `
+          <div class="search-result-item" onclick="App.selectSearchResult('${m.type}', '${m.id}')">
+            <div class="search-item-left">
+              <div class="search-avatar-badge" style="background: rgba(37,99,235,0.08); color: var(--color-primary);">
+                <span data-icon="${m.icon}" data-icon-size="16"></span>
+              </div>
+              <div class="search-item-info">
+                <div class="search-item-title">${highlightedTitle}</div>
+                <div class="search-item-subtitle">${m.desc}</div>
+              </div>
+            </div>
+            <span style="font-size: 10px; color: var(--color-text-muted); background: var(--color-surface-subtle); padding: 2px 6px; border-radius: 4px; border: 1px solid var(--color-border);">Buka</span>
+          </div>
+        `;
+      });
+    }
+
+    content.innerHTML = html;
+    dropdown.style.display = 'block';
+    if (typeof renderAllIcons === 'function') renderAllIcons();
+  },
+
+  highlightSearchMatch(text, query) {
+    if (!query || !text) return this.escapeHtml(text);
+    const escapedText = this.escapeHtml(text);
+    const escapedQuery = this.escapeHtml(query);
+    const regex = new RegExp(`(${escapedQuery.replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&')})`, 'gi');
+    return escapedText.replace(regex, '<mark>$1</mark>');
+  },
+
+  selectSearchResult(type, id) {
+    this.closeGlobalSearch();
+    if (type === 'employee') {
+      this.showEmployeeDetail(Number(id));
+    } else if (type === 'page') {
+      this.navigate(id);
+    } else if (type === 'action') {
+      if (id === 'sopGuide') {
+        this.openSopGuide();
+      } else if (id === 'backupModal') {
+        if (typeof BackupService !== 'undefined') BackupService.openBackupModal();
+      }
+    }
+  },
+
+  closeGlobalSearch() {
+    const dropdown = document.getElementById('topbarSearchResults');
+    const input = document.getElementById('topbarSearchInput');
+    if (dropdown) dropdown.style.display = 'none';
+    if (input) input.blur();
+    this.searchSelectedIndex = -1;
+  },
+
+  handleSearchKeydown(e) {
+    const dropdown = document.getElementById('topbarSearchResults');
+    if (!dropdown || dropdown.style.display === 'none') {
+      if (e.key === 'Enter') {
+        this.handleGlobalSearch(e.target.value);
+      }
+      return;
+    }
+
+    const items = dropdown.querySelectorAll('.search-result-item');
+    if (items.length === 0) return;
+
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      this.searchSelectedIndex = (this.searchSelectedIndex + 1) % items.length;
+      items.forEach((it, idx) => it.classList.toggle('selected', idx === this.searchSelectedIndex));
+      items[this.searchSelectedIndex].scrollIntoView({ block: 'nearest' });
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      this.searchSelectedIndex = (this.searchSelectedIndex - 1 + items.length) % items.length;
+      items.forEach((it, idx) => it.classList.toggle('selected', idx === this.searchSelectedIndex));
+      items[this.searchSelectedIndex].scrollIntoView({ block: 'nearest' });
+    } else if (e.key === 'Enter') {
+      e.preventDefault();
+      if (this.searchSelectedIndex >= 0 && this.searchSelectedIndex < items.length) {
+        items[this.searchSelectedIndex].click();
+      } else if (items.length > 0) {
+        items[0].click();
+      }
+    } else if (e.key === 'Escape') {
+      this.closeGlobalSearch();
+    }
+  },
+
   bindGlobalEvents() {
     const unlock = () => this.unlockAudio();
     document.addEventListener('click', unlock, { passive: true });
@@ -2855,6 +3061,7 @@ const App = {
 
     document.addEventListener('keydown', e => {
       if (e.key === 'Escape') {
+        this.closeGlobalSearch();
         document.querySelectorAll('.modal-overlay.active').forEach(m => m.classList.remove('active'));
         document.querySelectorAll('.drawer-overlay.active').forEach(d => d.classList.remove('active'));
         const dd = document.getElementById('notificationDropdown');
@@ -2863,11 +3070,20 @@ const App = {
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
         e.preventDefault();
         const searchInput = document.getElementById('topbarSearchInput');
-        if (searchInput) searchInput.focus();
+        if (searchInput) {
+          searchInput.focus();
+          searchInput.select();
+          this.handleGlobalSearch(searchInput.value);
+        }
       }
     });
 
     document.addEventListener('click', e => {
+      const searchBox = document.querySelector('.topbar-center');
+      if (searchBox && !searchBox.contains(e.target)) {
+        this.closeGlobalSearch();
+      }
+
       const notifBtn = document.getElementById('notificationBtn');
       const notifDd = document.getElementById('notificationDropdown');
       if (notifDd && notifBtn && !notifBtn.contains(e.target) && !notifDd.contains(e.target)) {

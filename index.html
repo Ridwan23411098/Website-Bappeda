@@ -28,7 +28,7 @@
     rel="stylesheet">
 
   <!-- Core Stylesheet -->
-  <link rel="stylesheet" href="css/app.css?v=20261013_v8">
+  <link rel="stylesheet" href="css/app.css?v=20261014_v9">
 </head>
 
 <body>
@@ -229,12 +229,20 @@
         </div>
 
         <!-- Desktop Search Bar (Ctrl+K) -->
-        <div class="topbar-center">
+        <div class="topbar-center" style="position: relative;">
           <div class="topbar-search">
             <span class="search-icon" data-icon="Search" data-icon-size="15"></span>
-            <input type="text" id="topbarSearchInput" placeholder="Cari data pegawai, formulir IDP, atau diklat..."
-              onkeydown="if(event.key==='Enter') App.toast('Mencari data: ' + this.value, 'info')">
-            <span class="shortcut-badge">Ctrl K</span>
+            <input type="text" id="topbarSearchInput" placeholder="Cari pegawai, NIP, IDP, atau menu... (Ctrl+K)"
+              autocomplete="off"
+              oninput="App.handleGlobalSearch(this.value)"
+              onfocus="App.handleGlobalSearch(this.value)"
+              onkeydown="App.handleSearchKeydown(event)">
+            <span class="shortcut-badge" onclick="document.getElementById('topbarSearchInput').focus()">Ctrl K</span>
+          </div>
+
+          <!-- Live Global Search Results Dropdown -->
+          <div id="topbarSearchResults" class="search-results-dropdown" style="display: none;">
+            <div id="searchResultsContent"></div>
           </div>
         </div>
 
@@ -3442,7 +3450,7 @@
   <script src="js/bappeda_data.js?v=20261013_v8"></script>
   <script src="js/store.js?v=20261013_v8"></script>
   <script src="js/export.js?v=20261013_v8"></script>
-  <script src="js/app.js?v=20261013_v8"></script>
+  <script src="js/app.js?v=20261014_v9"></script>
 </body>
 
 </html>
