@@ -2117,7 +2117,7 @@ const App = {
       const totalJp = v.totalJp || 20;
 
       return `
-        <tr>
+        <tr id="verif-row-${v.id}">
           <td>
             <div class="table-user-cell">
               <div class="table-user-avatar">${initials}</div>
@@ -3612,15 +3612,20 @@ const App = {
       const timeStr = this.formatRelativeTime(n.created_at);
 
       return `
-        <div class="notification-item ${isUnread ? 'unread' : ''}" onclick="App.handleNotificationClick(${n.id}, '${n.tipe || 'info'}', '${(n.judul || '').replace(/'/g, "\\'")}')">
+        <div class="notification-item ${isUnread ? 'unread' : ''}" onclick="App.handleNotificationClick(${n.id})" title="Klik untuk membuka dokumen terkait" style="cursor: pointer;">
           <div class="notification-icon" style="background: ${iconBg}; color: ${iconColor};">
             ${getIcon(iconName, 16)}
           </div>
-          <div class="notification-content">
+          <div class="notification-content" style="flex: 1; min-width: 0;">
             <div class="notification-text" style="font-weight: ${isUnread ? '700' : '500'};">${n.pesan || n.judul}</div>
-            <div class="notification-time">
-              ${n.pengirim ? `<span style="font-weight: 600; color: var(--color-text-secondary);">${n.pengirim}</span> • ` : ''}
-              ${timeStr}
+            <div class="notification-time" style="display: flex; justify-content: space-between; align-items: center; margin-top: 4px;">
+              <span>
+                ${n.pengirim ? `<span style="font-weight: 600; color: var(--color-text-secondary);">${n.pengirim}</span> • ` : ''}
+                ${timeStr}
+              </span>
+              <span style="font-size: 11px; color: var(--color-primary); font-weight: 600; display: inline-flex; align-items: center; gap: 3px;">
+                Buka ${getIcon('ChevronRight', 12)}
+              </span>
             </div>
           </div>
         </div>
@@ -3628,29 +3633,190 @@ const App = {
     }).join('');
   },
 
-  async handleNotificationClick(id, tipe, judul) {
+  async handleNotificationClick(id) {
+    // 1. Tutup dropdown notifikasi agar layar langsung fokus ke halaman yang dituju
+    const dd = document.getElementById('notificationDropdown');
+    if (dd) dd.classList.remove('show');
+
+    // 2. Tandai notifikasi sebagai sudah dibaca
     await Store.markNotificationAsRead(id);
     this.renderNotifications();
 
-    const role = Store.state.user?.role || 'pegawai';
-    const lowerJudul = (judul || '').toLowerCase();
+    const notif = (Store.state.notifications || []).find(n => n.id == id);
+    if (!notif) return;
 
-    // Navigasi cerdas berdasarkan jenis notifikasi
-    if (lowerJudul.includes('idp') || lowerJudul.includes('pengajuan')) {
+    const role = Store.state.user?.role || Store.state.currentSession?.role || 'pegawai';
+    const judul = String(notif.judul || '').trim();
+    const pesan = String(notif.pesan || '').trim();
+    const pengirim = String(notif.pengirim || '').trim();
+    const fullText = `${judul} ${pesan} ${pengirim}`;
+    const lowerText = fullText.toLowerCase();
+
+    // 3. Ekstrak Tahun Anggaran dari notifikasi (misal: 2026, 2027)
+    const yrMatch = fullText.match(/\b(20\d\d)\b/);
+    const targetYear = yrMatch ? parseInt(yrMatch[1], 10) : Store.getActiveYear();
+
+    // Skenario A: Notifikasi Pengajuan / Verifikasi IDP
+    if (lowerText.includes('idp') || lowerText.includes('pengajuan') || lowerText.includes('rancangan') || lowerText.includes('formulir')) {
       if (role === 'admin') {
+        // Sinkronkan Tahun Anggaran bila notifikasi merujuk ke tahun tertentu
+        if (Number(Store.getActiveYear()) !== Number(targetYear)) {
+          this.handleYearChange(targetYear);
+        }
+
+        // Buka halaman Verifikasi IDP
         this.navigate('averif');
+
+        // Cari item verifikasi yang cocok
+        const senderClean = pengirim.toLowerCase().replace(/[^a-z0-9]/g, '');
+        const pesanClean = pesan.toLowerCase().replace(/[^a-z0-9]/g, '');
+
+        let matched = (Store.state.verifications || []).find(v => {
+          if (Number(v.tahun || 2026) !== Number(targetYear)) return false;
+          const vName = (v.pegawai || '').toLowerCase();
+          const vNameClean = vName.replace(/[^a-z0-9]/g, '');
+          const vNip = String(v.nip || '').replace(/\s+/g, '');
+
+          // Cocokkan pengirim notifikasi dengan nama pegawai verifikasi
+          if (senderClean && !senderClean.includes('sistem') && (senderClean.includes(vNameClean) || vNameClean.includes(senderClean))) {
+            return true;
+          }
+          // Cocokkan nama pegawai yang ada dalam isi teks pesan
+          if (vNameClean && pesanClean.includes(vNameClean)) {
+            return true;
+          }
+          const nameTokens = vName.split(/[\s,.]+/).filter(w => w.length >= 4);
+          if (nameTokens.some(tok => lowerText.includes(tok.toLowerCase()))) {
+            return true;
+          }
+          // Cocokkan NIP jika ada dalam teks
+          if (vNip && fullText.includes(vNip)) {
+            return true;
+          }
+          return false;
+        });
+
+        // Jika belum ada di lokal, coba sinkronisasi dari Supabase
+        if (!matched && typeof supabaseClient !== 'undefined') {
+          try {
+            await Store.syncVerificationsFromSupabase();
+            matched = (Store.state.verifications || []).find(v => {
+              if (Number(v.tahun || 2026) !== Number(targetYear)) return false;
+              const vName = (v.pegawai || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+              return senderClean && !senderClean.includes('sistem') && (senderClean.includes(vName) || vName.includes(senderClean));
+            });
+          } catch(e) {}
+        }
+
+        // Jika masih belum ada di verifikasi, cek apakah pegawai ada di data pegawai ASN
+        if (!matched) {
+          const emp = (Store.state.employees || []).find(e => {
+            const eNameClean = (e.name || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+            return senderClean && !senderClean.includes('sistem') && (senderClean.includes(eNameClean) || eNameClean.includes(senderClean));
+          });
+          if (emp) {
+            matched = {
+              id: Date.now(),
+              tahun: targetYear,
+              pegawai: emp.name,
+              nip: emp.nip,
+              jabatan: emp.jabatan,
+              jenisJabatan: emp.jenisJabatan || 'Struktural',
+              unitKerja: emp.unitKerja || 'Bappeda Provinsi Lampung',
+              targetKarier: `Pengembangan Kompetensi ${targetYear}`,
+              rencanaKarier: 'Peningkatan kompetensi aparatur dan pemenuhan standar kinerja organisasi.',
+              programCount: 2,
+              totalJp: 20,
+              estimasiBiaya: 'Rp1.500.000',
+              pengajuan: 'Hari Ini',
+              status: 'Diajukan ke Atasan',
+              notes: ''
+            };
+            if (!Store.state.verifications) Store.state.verifications = [];
+            Store.state.verifications.unshift(matched);
+            Store.save();
+          }
+        }
+
+        // Fallback jika tidak menemukan nama spesifik: ambil item verifikasi pertama pada tahun tersebut
+        if (!matched) {
+          matched = (Store.state.verifications || []).find(v => Number(v.tahun || 2026) === Number(targetYear));
+        }
+
+        // Reset filter input di averif agar baris pegawai yang dituju selalu tampak
+        const searchEl = document.getElementById('verifSearchInput');
+        const statusEl = document.getElementById('verifStatusSelect');
+        const unitEl = document.getElementById('verifUnitSelect');
+        if (searchEl && searchEl.value) searchEl.value = '';
+        if (statusEl && statusEl.value !== 'Semua Status') statusEl.value = 'Semua Status';
+        if (unitEl && unitEl.value !== 'Semua Unit Kerja') unitEl.value = 'Semua Unit Kerja';
+        this.renderAdminVerification();
+
+        if (matched) {
+          setTimeout(() => {
+            this.openReviewVerificationDrawer(matched.id);
+            const row = document.getElementById(`verif-row-${matched.id}`);
+            if (row) {
+              row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+              row.style.transition = 'background 0.4s';
+              row.style.background = 'rgba(59, 130, 246, 0.15)';
+              setTimeout(() => { row.style.background = ''; }, 2500);
+            }
+            this.toast(`Membuka pengajuan IDP ${matched.pegawai} (TA ${targetYear})`, 'info');
+          }, 150);
+        } else {
+          this.toast(`Menampilkan daftar Verifikasi IDP Pegawai TA ${targetYear}`, 'info');
+        }
+        return;
       } else if (role === 'pimpinan') {
+        if (Number(Store.getActiveYear()) !== Number(targetYear)) {
+          this.handleYearChange(targetYear);
+        }
         this.navigate('pmonitoring');
+        this.toast(`Menampilkan monitoring pengajuan IDP TA ${targetYear}`, 'info');
+        return;
       } else {
+        // Role Pegawai
+        if (Number(Store.getActiveYear()) !== Number(targetYear)) {
+          this.handleYearChange(targetYear);
+        }
         this.navigate('eidp');
+        this.toast(pesan || judul, notif.tipe || 'info');
+        return;
       }
-    } else if (lowerJudul.includes('realisasi') || lowerJudul.includes('sertifikat')) {
+    }
+
+    // Skenario B: Notifikasi Realisasi / Sertifikat
+    if (lowerText.includes('realisasi') || lowerText.includes('sertifikat') || lowerText.includes('pelatihan') || lowerText.includes('diklat')) {
+      if (Number(Store.getActiveYear()) !== Number(targetYear)) {
+        this.handleYearChange(targetYear);
+      }
       if (role === 'admin') {
         this.navigate('apelaksanaan');
       } else {
         this.navigate('epelaksanaan');
       }
+      this.toast(`Menampilkan Realisasi Pengembangan Kompetensi TA ${targetYear}`, 'info');
+      return;
     }
+
+    // Skenario C: Disposisi Arahan Kepala Bappeda
+    if (lowerText.includes('arahan') || lowerText.includes('disposisi')) {
+      if (role === 'admin') this.navigate('adash');
+      else if (role === 'pimpinan') this.navigate('pdash');
+      else this.navigate('edash');
+
+      setTimeout(() => {
+        const banner = document.getElementById('adashDirectiveBanner') || document.getElementById('edashDirectiveBanner');
+        if (banner) banner.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 150);
+      return;
+    }
+
+    // Fallback umum
+    if (role === 'admin') this.navigate('adash');
+    else if (role === 'pimpinan') this.navigate('pdash');
+    else this.navigate('edash');
   },
 
   async markAllNotificationsRead() {
