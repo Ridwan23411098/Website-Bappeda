@@ -28,7 +28,7 @@
     rel="stylesheet">
 
   <!-- Core Stylesheet -->
-  <link rel="stylesheet" href="css/app.css?v=20261014_v9">
+  <link rel="stylesheet" href="css/app.css?v=20261014_v10">
 </head>
 
 <body>
@@ -3367,67 +3367,103 @@
   </div>
 
   <!-- MODAL: DETAIL PEGAWAI BAPPEDA -->
+  <!-- MODAL: DETAIL PEGAWAI BAPPEDA -->
   <div class="modal-overlay" id="empDetailModal">
-    <div class="modal-card" style="max-width: 520px;">
+    <div class="modal-card" style="max-width: 620px; width: 95%;">
       <div class="modal-header">
-        <div>
-          <h3 style="margin: 0; font-size: 16px; font-weight: 700;" id="modalEmpName">Detail Pegawai Bappeda</h3>
-          <p style="margin: 2px 0 0; font-size: 12px; color: var(--color-text-muted);" id="modalEmpNip">NIP: -</p>
-        </div>
-        <button class="btn-icon" onclick="App.closeModal('empDetailModal')"><span data-icon="X"
-            data-icon-size="18"></span></button>
-      </div>
-      <div class="modal-body" style="padding: 18px 24px; max-height: 75vh; overflow-y: auto;">
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; font-size: 12.5px;">
-          <div>
-            <div style="color: var(--color-text-muted); font-size: 11px;">Unit Kerja / Bidang</div>
-            <div id="modalEmpUnit" style="font-weight: 600; color: var(--color-text-primary);">-</div>
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <div style="width: 44px; height: 44px; border-radius: 12px; background: rgba(30, 58, 95, 0.12); color: var(--color-primary); display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 16px; flex-shrink: 0;" id="modalEmpAvatarInitial">
+            ASN
           </div>
           <div>
-            <div style="color: var(--color-text-muted); font-size: 11px;">Jenis Jabatan</div>
-            <div id="modalEmpJenis" style="font-weight: 600; color: var(--color-text-primary);">-</div>
-          </div>
-          <div style="grid-column: span 2;">
-            <div style="color: var(--color-text-muted); font-size: 11px;">Jabatan Resmi & TMT</div>
-            <div id="modalEmpJabatan" style="font-weight: 600; color: var(--color-text-primary);">-</div>
-          </div>
-          <div>
-            <div style="color: var(--color-text-muted); font-size: 11px;">Pangkat / Golongan</div>
-            <div id="modalEmpPangkat" style="font-weight: 600; color: var(--color-text-primary);">-</div>
-          </div>
-          <div>
-            <div style="color: var(--color-text-muted); font-size: 11px;">TMT Pangkat</div>
-            <div id="modalEmpTmtPangkat" style="font-weight: 600; color: var(--color-text-primary);">-</div>
-          </div>
-          <div>
-            <div style="color: var(--color-text-muted); font-size: 11px;">Tempat, Tanggal Lahir</div>
-            <div id="modalEmpTtl" style="font-weight: 600; color: var(--color-text-primary);">-</div>
-          </div>
-          <div>
-            <div style="color: var(--color-text-muted); font-size: 11px;">Usia & Masa Kerja</div>
-            <div id="modalEmpUsiaMasaKerja" style="font-weight: 600; color: var(--color-text-primary);">-</div>
-          </div>
-          <div style="grid-column: span 2;">
-            <div style="color: var(--color-text-muted); font-size: 11px;">Pendidikan Umum Terakhir</div>
-            <div id="modalEmpPendidikan" style="font-weight: 600; color: var(--color-text-primary);">-</div>
-          </div>
-          <div style="grid-column: span 2;">
-            <div style="color: var(--color-text-muted); font-size: 11px;">Diklat Struktural</div>
-            <div id="modalEmpDiklat" style="font-weight: 600; color: var(--color-text-primary);">-</div>
-          </div>
-          <div>
-            <div style="color: var(--color-text-muted); font-size: 11px;">Status Formulir IDP</div>
-            <div id="modalEmpStatusIdp">-</div>
-          </div>
-          <div>
-            <div style="color: var(--color-text-muted); font-size: 11px;">Realisasi Bangkom (Target 20 JP)</div>
-            <div id="modalEmpProgress" style="font-weight: 700; color: var(--color-primary);">-</div>
+            <h3 style="margin: 0; font-size: 16px; font-weight: 750; color: var(--color-text-primary);" id="modalEmpName">Detail Pegawai Bappeda</h3>
+            <p style="margin: 2px 0 0; font-size: 12px; color: var(--color-text-muted);" id="modalEmpNip">NIP: -</p>
           </div>
         </div>
+        <button class="btn-icon" onclick="App.closeModal('empDetailModal')" title="Tutup Modal">
+          <span data-icon="X" data-icon-size="18"></span>
+        </button>
       </div>
+
+      <div class="modal-body" style="padding: 20px 24px; max-height: 72vh; overflow-y: auto;">
+        <!-- Card 1: Jabatan & Rumpun Organisasi -->
+        <div style="background: var(--color-surface-subtle); border: 1px solid var(--color-border); border-radius: 10px; padding: 14px 16px; margin-bottom: 14px;">
+          <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 10px;">
+            <span data-icon="Briefcase" data-icon-size="14" style="color: var(--color-primary);"></span>
+            <span style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; color: var(--color-text-muted);">Jabatan &amp; Rumpun Organisasi</span>
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; font-size: 12px;">
+            <div>
+              <div style="color: var(--color-text-muted); font-size: 10.5px;">Unit Kerja / Bidang</div>
+              <div id="modalEmpUnit" style="font-weight: 650; color: var(--color-text-primary); margin-top: 2px;">-</div>
+            </div>
+            <div>
+              <div style="color: var(--color-text-muted); font-size: 10.5px;">Jenis Jabatan</div>
+              <div id="modalEmpJenis" style="font-weight: 650; color: var(--color-text-primary); margin-top: 2px;">-</div>
+            </div>
+            <div style="grid-column: span 2;">
+              <div style="color: var(--color-text-muted); font-size: 10.5px;">Jabatan Resmi &amp; TMT</div>
+              <div id="modalEmpJabatan" style="font-weight: 650; color: var(--color-text-primary); margin-top: 2px; line-height: 1.4;">-</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 2: Kepegawaian & Riwayat Pendidikan -->
+        <div style="background: var(--color-surface-subtle); border: 1px solid var(--color-border); border-radius: 10px; padding: 14px 16px; margin-bottom: 14px;">
+          <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 10px;">
+            <span data-icon="User" data-icon-size="14" style="color: var(--color-primary);"></span>
+            <span style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; color: var(--color-text-muted);">Data Pangkat &amp; Profil</span>
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; font-size: 12px;">
+            <div>
+              <div style="color: var(--color-text-muted); font-size: 10.5px;">Pangkat / Golongan</div>
+              <div id="modalEmpPangkat" style="font-weight: 650; color: var(--color-text-primary); margin-top: 2px;">-</div>
+            </div>
+            <div>
+              <div style="color: var(--color-text-muted); font-size: 10.5px;">TMT Pangkat</div>
+              <div id="modalEmpTmtPangkat" style="font-weight: 650; color: var(--color-text-primary); margin-top: 2px;">-</div>
+            </div>
+            <div>
+              <div style="color: var(--color-text-muted); font-size: 10.5px;">Tempat, Tanggal Lahir</div>
+              <div id="modalEmpTtl" style="font-weight: 650; color: var(--color-text-primary); margin-top: 2px;">-</div>
+            </div>
+            <div>
+              <div style="color: var(--color-text-muted); font-size: 10.5px;">Usia &amp; Masa Kerja</div>
+              <div id="modalEmpUsiaMasaKerja" style="font-weight: 650; color: var(--color-text-primary); margin-top: 2px;">-</div>
+            </div>
+            <div style="grid-column: span 2;">
+              <div style="color: var(--color-text-muted); font-size: 10.5px;">Pendidikan Terakhir</div>
+              <div id="modalEmpPendidikan" style="font-weight: 650; color: var(--color-text-primary); margin-top: 2px;">-</div>
+            </div>
+            <div style="grid-column: span 2;">
+              <div style="color: var(--color-text-muted); font-size: 10.5px;">Diklat Struktural</div>
+              <div id="modalEmpDiklat" style="font-weight: 650; color: var(--color-text-primary); margin-top: 2px;">-</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 3: Status IDP & Capaian 20 JP -->
+        <div style="background: var(--color-surface-subtle); border: 1px solid var(--color-border); border-radius: 10px; padding: 14px 16px;">
+          <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 10px;">
+            <span data-icon="Award" data-icon-size="14" style="color: var(--color-primary);"></span>
+            <span style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; color: var(--color-text-muted);">Status IDP &amp; Capaian Kompetensi (20 JP)</span>
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; font-size: 12px; align-items: center;">
+            <div>
+              <div style="color: var(--color-text-muted); font-size: 10.5px; margin-bottom: 4px;">Status Formulir IDP</div>
+              <div id="modalEmpStatusIdp">-</div>
+            </div>
+            <div>
+              <div style="color: var(--color-text-muted); font-size: 10.5px; margin-bottom: 4px;">Realisasi Bangkom (Target 20 JP)</div>
+              <div id="modalEmpProgress">-</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div class="modal-footer" style="display: flex; justify-content: space-between; align-items: center;">
         <button class="btn btn-outline" onclick="App.printCurrentDetailEmployee()">
-          <span data-icon="Printer" data-icon-size="16"></span> Cetak Formulir IDP
+          <span data-icon="Printer" data-icon-size="15"></span> Cetak Formulir IDP (PDF)
         </button>
         <button class="btn btn-primary" onclick="App.closeModal('empDetailModal')">Tutup</button>
       </div>
@@ -3450,7 +3486,7 @@
   <script src="js/bappeda_data.js?v=20261013_v8"></script>
   <script src="js/store.js?v=20261013_v8"></script>
   <script src="js/export.js?v=20261013_v8"></script>
-  <script src="js/app.js?v=20261014_v9"></script>
+  <script src="js/app.js?v=20261014_v10"></script>
 </body>
 
 </html>

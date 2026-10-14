@@ -483,21 +483,21 @@ const App = {
 
     const latest = relevant[0];
     bannerEl.innerHTML = `
-      <div style="background: linear-gradient(135deg, rgba(239, 246, 255, 0.95), rgba(240, 253, 250, 0.95)); border: 1px solid #bfdbfe; border-left: 4px solid var(--color-primary); border-radius: var(--radius-md); padding: 14px 18px; margin-bottom: 24px; box-shadow: var(--shadow-sm);">
+      <div class="executive-directive-card">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; gap: 8px;">
           <div style="display: flex; align-items: center; gap: 8px;">
-            <span style="background: var(--color-primary); color: white; font-size: 10.5px; font-weight: 700; padding: 2px 9px; border-radius: 4px; text-transform: uppercase; letter-spacing: 0.5px; display: inline-flex; align-items: center; gap: 4px;">
+            <span class="badge badge-blue" style="font-weight: 750; text-transform: uppercase; letter-spacing: 0.5px; display: inline-flex; align-items: center; gap: 4px;">
               <span data-icon="Megaphone" data-icon-size="12"></span> Arahan Resmi Kepala Bappeda
             </span>
             <span style="font-size: 11px; color: var(--color-text-muted);">Sasaran: <b style="color: var(--color-primary);">${latest.target}</b></span>
           </div>
           <span style="font-size: 11px; color: var(--color-text-muted);">${latest.tanggal}</span>
         </div>
-        <p style="font-size: 13px; font-style: italic; color: #1e3a8a; margin: 4px 0 8px 0; line-height: 1.5; font-weight: 500;">
+        <p class="directive-quote">
           "${latest.arahan}"
         </p>
-        <div style="font-size: 11px; color: var(--color-text-muted); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; border-top: 1px dashed #dbeafe; padding-top: 6px;">
-          <span>Diterbitkan oleh: <b>${latest.penulis}</b> (${latest.jabatan})</span>
+        <div class="directive-footer">
+          <span>Diterbitkan oleh: <b style="color: var(--color-text-primary);">${latest.penulis}</b> (${latest.jabatan})</span>
           <span class="badge badge-success" style="font-size: 10px;">Status: ${latest.status}</span>
         </div>
       </div>
@@ -1427,21 +1427,21 @@ const App = {
 
     const latest = directives[0];
     bannerEl.innerHTML = `
-      <div style="background: linear-gradient(135deg, rgba(254, 243, 199, 0.45), rgba(239, 246, 255, 0.9)); border: 1px solid #fde68a; border-left: 4px solid var(--color-warning); border-radius: var(--radius-md); padding: 14px 18px; margin-bottom: 24px; box-shadow: var(--shadow-sm);">
+      <div class="admin-directive-card">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; gap: 8px;">
           <div style="display: flex; align-items: center; gap: 8px;">
-            <span style="background: #b45309; color: white; font-size: 10.5px; font-weight: 700; padding: 2px 9px; border-radius: 4px; text-transform: uppercase; letter-spacing: 0.5px; display: inline-flex; align-items: center; gap: 4px;">
+            <span class="badge badge-warning" style="font-weight: 750; text-transform: uppercase; letter-spacing: 0.5px; display: inline-flex; align-items: center; gap: 4px;">
               <span data-icon="AlertCircle" data-icon-size="12"></span> Disposisi Arahan Kepala Bappeda
             </span>
             <span style="font-size: 11px; color: var(--color-text-muted);">Unit Target: <b style="color: var(--color-primary);">${latest.target}</b></span>
           </div>
           <span style="font-size: 11px; color: var(--color-text-muted);">${latest.tanggal}</span>
         </div>
-        <p style="font-size: 13px; font-style: italic; color: #78350f; margin: 4px 0 8px 0; line-height: 1.5; font-weight: 500;">
+        <p class="directive-quote">
           "${latest.arahan}"
         </p>
-        <div style="font-size: 11px; color: var(--color-text-muted); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; border-top: 1px dashed #fde68a; padding-top: 6px;">
-          <span>Instruksi Kedinasan: <i>Kasubbag Kepegawaian & Tim Verifikasi agar mengawal kepatuhan IDP pada unit tersebut.</i></span>
+        <div class="directive-footer">
+          <span>Instruksi Kedinasan: <i>Kasubbag Kepegawaian &amp; Tim Verifikasi agar mengawal kepatuhan IDP pada unit tersebut.</i></span>
           <span class="badge badge-warning" style="font-size: 10px;">Perlu Pengawalan</span>
         </div>
       </div>
@@ -1620,20 +1620,17 @@ const App = {
   },
 
   showEmployeeDetail(id) {
-    const e = (Store.state.employees || []).find(x => x.id === id);
+    const e = (Store.state.employees || []).find(x => x.id === id || String(x.nip).replace(/\s+/g,'') === String(id).replace(/\s+/g,''));
     if (!e) return;
-    document.getElementById('modalEmpName').textContent = e.name;
-    document.getElementById('modalEmpNip').textContent = `NIP: ${e.nipFormatted || e.nip}`;
-    document.getElementById('modalEmpUnit').textContent = e.unit;
-    document.getElementById('modalEmpJabatan').textContent = `${e.jabatanLengkap || e.jabatan} (TMT: ${e.tmtJabatan || '-'})`;
-    document.getElementById('modalEmpPangkat').textContent = e.pangkat;
-    if (document.getElementById('modalEmpTmtPangkat')) {
-      document.getElementById('modalEmpTmtPangkat').textContent = e.tmtPangkat || '-';
-    }
-    document.getElementById('modalEmpJenis').textContent = e.jenis;
-    if (document.getElementById('modalEmpTtl')) {
-      document.getElementById('modalEmpTtl').textContent = e.ttl || '-';
-    }
+
+    if (document.getElementById('modalEmpName')) document.getElementById('modalEmpName').textContent = e.name;
+    if (document.getElementById('modalEmpNip')) document.getElementById('modalEmpNip').textContent = `NIP: ${e.nipFormatted || e.nip}`;
+    if (document.getElementById('modalEmpUnit')) document.getElementById('modalEmpUnit').textContent = e.unit || '-';
+    if (document.getElementById('modalEmpJabatan')) document.getElementById('modalEmpJabatan').textContent = `${e.jabatanLengkap || e.jabatan} (TMT: ${e.tmtJabatan || '-'})`;
+    if (document.getElementById('modalEmpPangkat')) document.getElementById('modalEmpPangkat').textContent = e.pangkat || '-';
+    if (document.getElementById('modalEmpTmtPangkat')) document.getElementById('modalEmpTmtPangkat').textContent = e.tmtPangkat || '-';
+    if (document.getElementById('modalEmpJenis')) document.getElementById('modalEmpJenis').textContent = e.jenis || '-';
+    if (document.getElementById('modalEmpTtl')) document.getElementById('modalEmpTtl').textContent = e.ttl || '-';
     if (document.getElementById('modalEmpUsiaMasaKerja')) {
       document.getElementById('modalEmpUsiaMasaKerja').textContent = `${e.usia || '-'} • Masa Kerja: ${e.masaKerja || '-'}`;
     }
@@ -1643,11 +1640,35 @@ const App = {
     if (document.getElementById('modalEmpDiklat')) {
       document.getElementById('modalEmpDiklat').textContent = e.diklat || '-';
     }
-    
+
+    const initialEl = document.getElementById('modalEmpAvatarInitial');
+    if (initialEl) {
+      const inits = (e.name || 'ASN').split(' ').map(w => w[0]).filter(Boolean).slice(0, 2).join('').toUpperCase();
+      initialEl.textContent = inits;
+    }
+
     const badgeCls = e.statusIdp === 'Final' ? 'badge-success' : e.statusIdp === 'Belum' ? 'badge-danger' : 'badge-warning';
-    document.getElementById('modalEmpStatusIdp').innerHTML = `<span class="badge ${badgeCls}">${e.statusIdp}</span>`;
+    const statusLabel = e.statusIdp === 'Final' ? 'Disetujui (Final)' : e.statusIdp === 'Draft' ? 'Draft Rencana' : e.statusIdp === 'Diajukan' ? 'Menunggu Verifikasi' : (e.statusIdp || 'Belum Diisi');
+    if (document.getElementById('modalEmpStatusIdp')) {
+      document.getElementById('modalEmpStatusIdp').innerHTML = `<span class="badge ${badgeCls}" style="font-size: 11px; padding: 3px 8px;">${statusLabel}</span>`;
+    }
+
+    const progEl = document.getElementById('modalEmpProgress');
+    if (progEl) {
+      const prog = e.progress || 0;
+      const pct = Math.min(100, Math.round((prog / 20) * 100));
+      const isTargetMet = prog >= 20;
+      progEl.innerHTML = `
+        <div style="display: flex; align-items: baseline; gap: 6px;">
+          <span style="font-size: 15px; font-weight: 800; color: ${isTargetMet ? 'var(--color-success)' : 'var(--color-warning)'};">${prog} JP</span>
+          <span style="font-size: 11px; color: var(--color-text-muted);">/ Target 20 JP (${pct}%)</span>
+        </div>
+      `;
+    }
+
     this._currentDetailEmployee = e;
     this.openModal('empDetailModal');
+    if (typeof renderAllIcons === 'function') renderAllIcons();
   },
 
   printCurrentDetailEmployee() {
