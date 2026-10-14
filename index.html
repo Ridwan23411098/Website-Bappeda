@@ -1626,7 +1626,7 @@
                 <span data-icon="BookOpen" data-icon-size="14"></span> SOP Verifikasi
               </button>
               <button class="btn btn-outline btn-sm" onclick="App.navigate('averif')">
-                <span data-icon="ShieldCheck" data-icon-size="14"></span> Verifikasi IDP (12)
+                <span data-icon="ShieldCheck" data-icon-size="14"></span> Verifikasi IDP (<span id="adashBtnVerifCount">12</span>)
               </button>
               <button class="btn btn-primary btn-sm" onclick="App.navigate('apegawai')">
                 <span data-icon="Users" data-icon-size="14"></span> Data Pegawai
@@ -1645,7 +1645,7 @@
               <div class="stat-card-inner">
                 <div class="stat-card-info">
                   <div class="stat-card-label">Diajukan ke Atasan</div>
-                  <div class="stat-card-value text-warning">12</div>
+                  <div class="stat-card-value text-warning" id="adashStatDiajukan">12</div>
                   <div class="stat-card-desc">IDP pegawai perlu diperiksa</div>
                 </div>
                 <div class="stat-card-icon"><span data-icon="Clock3" data-icon-size="22"></span></div>
@@ -1656,7 +1656,7 @@
               <div class="stat-card-inner">
                 <div class="stat-card-info">
                   <div class="stat-card-label">IDP Disetujui</div>
-                  <div class="stat-card-value text-success">72</div>
+                  <div class="stat-card-value text-success" id="adashStatDisetujui">72</div>
                   <div class="stat-card-desc">Periode <span class="dynamic-year">2026</span> berjalan</div>
                 </div>
                 <div class="stat-card-icon"><span data-icon="CircleCheck" data-icon-size="22"></span></div>
@@ -1667,7 +1667,7 @@
               <div class="stat-card-inner">
                 <div class="stat-card-info">
                   <div class="stat-card-label">Perlu Revisi</div>
-                  <div class="stat-card-value text-danger">5</div>
+                  <div class="stat-card-value text-danger" id="adashStatRevisi">5</div>
                   <div class="stat-card-desc">Menunggu perbaikan pegawai</div>
                 </div>
                 <div class="stat-card-icon"><span data-icon="AlertTriangle" data-icon-size="22"></span></div>
@@ -1770,7 +1770,7 @@
             <div>
               <h1 class="page-title">Verifikasi IDP Pegawai</h1>
               <p class="page-subtitle" style="margin-bottom: 0;">Pemeriksaan keselarasan antara kesenjangan kompetensi,
-                rencana karier, dan program pengembangan.</p>
+                rencana karier, dan program pengembangan ASN Tahun Anggaran <span class="dynamic-year">2026</span>.</p>
             </div>
           </div>
 
@@ -3845,9 +3845,9 @@
   <script src="js/icons.js?v=20261014_v16"></script>
   <script src="js/charts.js?v=20261008_fix"></script>
   <script src="js/bappeda_data.js?v=20261013_v8"></script>
-  <script src="js/store.js?v=20261014_v17"></script>
-  <script src="js/export.js?v=20261014_v17"></script>
-  <script src="js/app.js?v=20261014_v17"></script>
+  <script src="js/store.js?v=20261014_v18"></script>
+  <script src="js/export.js?v=20261014_v18"></script>
+  <script src="js/app.js?v=20261014_v18"></script>
 </body>
 
 </html>

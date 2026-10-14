@@ -442,25 +442,25 @@ const Store = {
 
         if (!this.state.verifications || this.state.verifications.length === 0) {
           this.state.verifications = JSON.parse(JSON.stringify(BAPPEDA_DATA.verifications || []));
-        } else {
-          // Bersihkan data corrupt di verifications (jika ada pegawai yang undefined)
-          this.state.verifications.forEach(v => {
-            if (!v.pegawai || v.pegawai === 'undefined') {
-              const cleanNip = String(v.nip || '').replace(/\s+/g, '');
-              const emp = (typeof BAPPEDA_DATA !== 'undefined' && BAPPEDA_DATA.employees) 
-                ? BAPPEDA_DATA.employees.find(e => String(e.nip).replace(/\s+/g, '') === cleanNip)
-                : null;
-              if (emp) {
-                v.pegawai = emp.name || emp.nama || 'Pegawai ASN Bappeda';
-                v.jabatan = v.jabatan || emp.jabatan || 'Aparatur Perencana';
-                v.jenisJabatan = v.jenisJabatan || emp.jenis || 'Struktural';
-                v.unitKerja = v.unitKerja || emp.unit || 'Bappeda Provinsi Lampung';
-              } else {
-                v.pegawai = 'Pegawai ASN Bappeda';
-              }
-            }
-          });
         }
+        // Pastikan setiap data verifikasi memiliki identitas tahun anggaran (default 2026 untuk baseline)
+        this.state.verifications.forEach(v => {
+          if (!v.tahun) v.tahun = 2026;
+          if (!v.pegawai || v.pegawai === 'undefined') {
+            const cleanNip = String(v.nip || '').replace(/\s+/g, '');
+            const emp = (typeof BAPPEDA_DATA !== 'undefined' && BAPPEDA_DATA.employees) 
+              ? BAPPEDA_DATA.employees.find(e => String(e.nip).replace(/\s+/g, '') === cleanNip)
+              : null;
+            if (emp) {
+              v.pegawai = emp.name || emp.nama || 'Pegawai ASN Bappeda';
+              v.jabatan = v.jabatan || emp.jabatan || 'Aparatur Perencana';
+              v.jenisJabatan = v.jenisJabatan || emp.jenis || 'Struktural';
+              v.unitKerja = v.unitKerja || emp.unit || 'Bappeda Provinsi Lampung';
+            } else {
+              v.pegawai = 'Pegawai ASN Bappeda';
+            }
+          }
+        });
         this.state.executiveMetrics = JSON.parse(JSON.stringify(this.defaultState.executiveMetrics));
       }
 
@@ -1009,17 +1009,23 @@ const Store = {
     const cleanNip = String(nip).trim();
 
     try {
-      // 1. Ambil status submission dari Supabase
+      // 1. Ambil status submission dari Supabase sesuai tahun aktif
+      const activeYr = String(this.getActiveYear());
       const { data: subData, error: subErr } = await supabaseClient
         .from('idp_submissions')
         .select('*')
         .eq('nip', cleanNip)
+        .eq('tahun', activeYr)
         .maybeSingle();
 
       if (!subErr && subData) {
         this.state.idpState.status = subData.status || 'Draft';
         this.state.idpState.progress = subData.progress || 0;
         this.state.idpState.verificationNote = subData.verification_note || '';
+      } else if (Number(activeYr) !== 2026) {
+        this.state.idpState.status = 'Draft';
+        this.state.idpState.progress = 0;
+        this.state.idpState.verificationNote = '';
       }
 
       // 2. Ambil rincian program dari Supabase
@@ -1090,27 +1096,53 @@ const Store = {
   },
 
   getExecutiveSummary() {
+    const activeYear = this.getActiveYear();
     const employees = this.state.employees || [];
     const totalPegawai = employees.length || 99;
-    const memenuhi20Jp = employees.length > 0 
-      ? employees.filter(e => (e.jp || 0) >= 20).length 
-      : 60;
-    const persenKepatuhan = Math.round((memenuhi20Jp / totalPegawai) * 100);
-    const idpDisetujui = employees.length > 0 
-      ? employees.filter(e => e.statusIdp === 'Disetujui' || e.statusIdp === 'Final').length 
-      : 60;
-    const totalJp = employees.length > 0 
-      ? employees.reduce((sum, e) => sum + (e.jp || 0), 0) 
-      : 1862;
-    const avgJp = totalPegawai > 0 ? (totalJp / totalPegawai).toFixed(1) : '18.8';
-    const totalEstimasiAnggaran = totalJp * 165000; // Standar SBU Pelatihan ASN 2026
+
+    // Jika tahun 2026, gunakan baseline data resmi 2026
+    if (Number(activeYear) === 2026) {
+      const memenuhi20Jp = employees.length > 0 
+        ? employees.filter(e => (e.jp || 0) >= 20).length 
+        : 60;
+      const persenKepatuhan = Math.round((memenuhi20Jp / totalPegawai) * 100);
+      const idpDisetujui = employees.length > 0 
+        ? employees.filter(e => e.statusIdp === 'Disetujui' || e.statusIdp === 'Final').length 
+        : 60;
+      const totalJp = employees.length > 0 
+        ? employees.reduce((sum, e) => sum + (e.jp || 0), 0) 
+        : 1862;
+      const avgJp = totalPegawai > 0 ? (totalJp / totalPegawai).toFixed(1) : '18.8';
+      const totalEstimasiAnggaran = totalJp * 165000;
+
+      return {
+        totalPegawai,
+        memenuhi20Jp,
+        persenKepatuhan,
+        idpDisetujui,
+        persenDisetujui: Math.round((idpDisetujui / totalPegawai) * 100),
+        totalJp,
+        avgJp,
+        totalEstimasiAnggaran,
+        perluTindakLanjut: Math.max(0, totalPegawai - memenuhi20Jp)
+      };
+    }
+
+    // Untuk tahun baru (2027, 2028, dst.), hitung dari berkas pengajuan tahun tersebut
+    const verifsInYear = (this.state.verifications || []).filter(v => Number(v.tahun || 2026) === Number(activeYear));
+    const idpDisetujui = verifsInYear.filter(v => v.status === 'Disetujui' || v.status === 'Final').length;
+    const memenuhi20Jp = verifsInYear.filter(v => (v.totalJp || 0) >= 20).length;
+    const totalJp = verifsInYear.reduce((sum, v) => sum + (v.totalJp || 0), 0);
+    const avgJp = totalPegawai > 0 ? (totalJp / totalPegawai).toFixed(1) : '0.0';
+    const totalEstimasiAnggaran = totalJp * 165000;
+    const persenKepatuhan = totalPegawai > 0 ? Math.round((memenuhi20Jp / totalPegawai) * 100) : 0;
 
     return {
       totalPegawai,
       memenuhi20Jp,
       persenKepatuhan,
       idpDisetujui,
-      persenDisetujui: Math.round((idpDisetujui / totalPegawai) * 100),
+      persenDisetujui: totalPegawai > 0 ? Math.round((idpDisetujui / totalPegawai) * 100) : 0,
       totalJp,
       avgJp,
       totalEstimasiAnggaran,
@@ -1119,6 +1151,7 @@ const Store = {
   },
 
   getUnitBreakdown() {
+    const activeYear = this.getActiveYear();
     const units = [
       { name: 'Sekretariat', kabid: 'ANDI ARAFAT S.T., M.E.', targetPegawai: 23 },
       { name: 'Bidang PMPE (Rendalev)', kabid: 'MEYDIANDRA EKA PUTRA S.P,MIP', targetPegawai: 9 },
@@ -1130,28 +1163,54 @@ const Store = {
     ];
 
     const employees = this.state.employees || [];
+    const verifsInYear = (this.state.verifications || []).filter(v => Number(v.tahun || 2026) === Number(activeYear));
+
     return units.map(u => {
       const emps = employees.filter(e => e.unit === u.name || (u.name === 'Sekretariat' && e.unit && e.unit.includes('Sekretariat')));
       const total = emps.length || u.targetPegawai;
-      const disetujui = emps.filter(e => e.statusIdp === 'Disetujui' || e.statusIdp === 'Final').length;
-      const memenuhi20Jp = emps.filter(e => (e.jp || 0) >= 20).length;
-      const totalJp = emps.reduce((acc, e) => acc + (e.jp || 0), 0) || (total * 19);
-      const avgJp = total > 0 ? (totalJp / total).toFixed(1) : '18.8';
-      const pctKepatuhan = total > 0 && emps.length > 0 ? Math.round((memenuhi20Jp / total) * 100) : 61;
-      const pctIdp = total > 0 && emps.length > 0 ? Math.round((disetujui / total) * 100) : 61;
 
-      return {
-        unit: u.name,
-        kabid: u.kabid,
-        pegawai: total,
-        disetujui: emps.length > 0 ? disetujui : Math.round(total * 0.61),
-        memenuhi20Jp: emps.length > 0 ? memenuhi20Jp : Math.round(total * 0.61),
-        totalJp,
-        avgJp,
-        pctKepatuhan,
-        pctIdp,
-        tindakLanjut: Math.max(0, total - (emps.length > 0 ? disetujui : Math.round(total * 0.61)))
-      };
+      if (Number(activeYear) === 2026) {
+        const disetujui = emps.filter(e => e.statusIdp === 'Disetujui' || e.statusIdp === 'Final').length;
+        const memenuhi20Jp = emps.filter(e => (e.jp || 0) >= 20).length;
+        const totalJp = emps.reduce((acc, e) => acc + (e.jp || 0), 0) || (total * 19);
+        const avgJp = total > 0 ? (totalJp / total).toFixed(1) : '18.8';
+        const pctKepatuhan = total > 0 && emps.length > 0 ? Math.round((memenuhi20Jp / total) * 100) : 61;
+        const pctIdp = total > 0 && emps.length > 0 ? Math.round((disetujui / total) * 100) : 61;
+
+        return {
+          unit: u.name,
+          kabid: u.kabid,
+          pegawai: total,
+          disetujui: emps.length > 0 ? disetujui : Math.round(total * 0.61),
+          memenuhi20Jp: emps.length > 0 ? memenuhi20Jp : Math.round(total * 0.61),
+          totalJp,
+          avgJp,
+          pctKepatuhan,
+          pctIdp,
+          tindakLanjut: Math.max(0, total - (emps.length > 0 ? disetujui : Math.round(total * 0.61)))
+        };
+      } else {
+        const uVerifs = verifsInYear.filter(v => (v.unitKerja || '').toLowerCase().includes(u.name.toLowerCase()));
+        const disetujui = uVerifs.filter(v => v.status === 'Disetujui' || v.status === 'Final').length;
+        const memenuhi20Jp = uVerifs.filter(v => (v.totalJp || 0) >= 20).length;
+        const totalJp = uVerifs.reduce((acc, v) => acc + (v.totalJp || 0), 0);
+        const avgJp = total > 0 ? (totalJp / total).toFixed(1) : '0.0';
+        const pctKepatuhan = total > 0 ? Math.round((memenuhi20Jp / total) * 100) : 0;
+        const pctIdp = total > 0 ? Math.round((disetujui / total) * 100) : 0;
+
+        return {
+          unit: u.name,
+          kabid: u.kabid,
+          pegawai: total,
+          disetujui,
+          memenuhi20Jp,
+          totalJp,
+          avgJp,
+          pctKepatuhan,
+          pctIdp,
+          tindakLanjut: Math.max(0, total - disetujui)
+        };
+      }
     });
   },
 
@@ -1299,13 +1358,36 @@ const Store = {
     const summary = this.getIdpSummary();
     const rawNip = this.state.user?.nip;
     const cleanUserNip = String(rawNip || '').replace(/\s+/g, '');
-
-    const v = this.state.verifications.find(x => String(x.nip).replace(/\s+/g, '') === cleanUserNip);
+    const activeYr = this.getActiveYear();
+    let v = this.state.verifications.find(x => 
+      String(x.nip).replace(/\s+/g, '') === cleanUserNip && 
+      Number(x.tahun || 2026) === Number(activeYr)
+    );
     if (v) {
       v.status = 'Diajukan ke Atasan';
       v.programCount = this.state.idpState.programs.length;
       v.totalJp = summary.totalJp;
       v.estimasiBiaya = `Rp${summary.totalCost.toLocaleString('id-ID')}`;
+      v.pengajuan = new Date().toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
+    } else {
+      const u = this.state.user || {};
+      this.state.verifications.unshift({
+        id: Date.now() + Math.floor(Math.random() * 1000),
+        tahun: activeYr,
+        pegawai: u.name || 'Pegawai ASN Bappeda',
+        nip: cleanUserNip,
+        jabatan: u.jabatan || 'Aparatur Perencana',
+        jenisJabatan: u.jenisJabatan || 'Struktural',
+        unitKerja: u.unitKerja || 'Bappeda Provinsi Lampung',
+        targetKarier: this.state.careerPlan?.jenjangTarget || `Pengembangan ${activeYr}`,
+        rencanaKarier: this.state.careerPlan?.rencana || 'Pengembangan kompetensi pegawai',
+        programCount: this.state.idpState.programs.length,
+        totalJp: summary.totalJp,
+        estimasiBiaya: `Rp${summary.totalCost.toLocaleString('id-ID')}`,
+        pengajuan: new Date().toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' }),
+        status: 'Diajukan ke Atasan',
+        notes: ''
+      });
     }
     this.save();
 
@@ -1392,7 +1474,11 @@ const Store = {
           const totalJp = progs.reduce((acc, curr) => acc + (parseInt(curr.jp) || 0), 0);
           const totalCost = progs.reduce((acc, curr) => acc + (parseInt(curr.estimasi) || 0), 0);
 
-          let v = this.state.verifications.find(x => String(x.nip).replace(/\s+/g, '') === cleanSubNip);
+          const subTahun = Number(sub.tahun) || 2026;
+          let v = this.state.verifications.find(x => 
+            String(x.nip).replace(/\s+/g, '') === cleanSubNip &&
+            Number(x.tahun || 2026) === subTahun
+          );
           
           const emp = (typeof BAPPEDA_DATA !== 'undefined' && BAPPEDA_DATA.employees) 
             ? BAPPEDA_DATA.employees.find(e => String(e.nip).replace(/\s+/g, '') === cleanSubNip)
@@ -1404,6 +1490,7 @@ const Store = {
           const empUnit = emp ? (emp.unit || 'Bappeda Provinsi Lampung') : 'Bappeda';
 
           if (v) {
+            v.tahun = subTahun;
             v.pegawai = empName;
             v.jabatan = empJabatan;
             v.jenisJabatan = empJenis;
@@ -1423,12 +1510,13 @@ const Store = {
           } else {
             this.state.verifications.unshift({
               id: Date.now() + Math.floor(Math.random() * 1000),
+              tahun: subTahun,
               pegawai: empName,
               nip: sub.nip,
               jabatan: empJabatan,
               jenisJabatan: empJenis,
               unitKerja: empUnit,
-              targetKarier: 'Pengembangan Kompetensi 2026',
+              targetKarier: `Pengembangan Kompetensi ${subTahun}`,
               rencanaKarier: 'Penguatan keahlian perencanaan pembangunan daerah',
               programCount: progCount > 0 ? progCount : 1,
               totalJp: totalJp > 0 ? totalJp : 20,
@@ -1463,6 +1551,7 @@ const Store = {
             .from('idp_submissions')
             .upsert({
               nip: item.nip,
+              tahun: String(item.tahun || this.getActiveYear()),
               status: newStatus,
               verification_note: note,
               verified_at: new Date().toISOString(),
@@ -1478,7 +1567,7 @@ const Store = {
       await this.sendNotification({
         penerima: item.nip,
         judul: 'IDP Berhasil Disetujui',
-        pesan: `Selamat! Dokumen rencana IDP Tahun ${this.getActiveYear()} Anda telah diverifikasi & disetujui resmi oleh ${this.state.user?.name || 'Pengelola SDM'}.`,
+        pesan: `Selamat! Dokumen rencana IDP Tahun ${item.tahun || this.getActiveYear()} Anda telah diverifikasi & disetujui resmi oleh ${this.state.user?.name || 'Pengelola SDM'}.`,
         tipe: 'success'
       });
     }
@@ -1501,6 +1590,7 @@ const Store = {
             .from('idp_submissions')
             .upsert({
               nip: item.nip,
+              tahun: String(item.tahun || this.getActiveYear()),
               status: 'Perlu Revisi',
               verification_note: note,
               verified_at: new Date().toISOString(),
