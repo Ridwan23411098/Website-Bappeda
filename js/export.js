@@ -112,7 +112,9 @@ const ExportService = {
    * Export IDP Realization Monitoring to CSV
    */
   exportMonitoring() {
-    const rList = Store.state.realizations;
+    const activeYear = Store.getActiveYear();
+    const allList = Store.state.realizations || [];
+    const rList = allList.filter(r => Number(r.tahun || 2026) === Number(activeYear));
     const headers = ['No', 'Pegawai', 'Program Pengembangan', 'Metode Diklat', 'Tanggal Pelaksanaan', 'Jam Pelajaran (JP)', 'Lembaga Penyelenggara', 'Bukti Dokumen', 'Status'];
     const rows = rList.map((r, idx) => [
       idx + 1,
@@ -125,8 +127,8 @@ const ExportService = {
       r.bukti,
       r.status
     ]);
-    this.downloadExcel('Monitoring_Realisasi_IDP_Bappeda_Lampung', 'Monitoring Realisasi', headers, rows);
-    App.toast('File Excel Laporan Monitoring Realisasi berhasil diunduh', 'success');
+    this.downloadExcel(`Monitoring_Realisasi_IDP_TA_${activeYear}_Bappeda_Lampung`, `Realisasi TA ${activeYear}`, headers, rows);
+    App.toast(`File Excel Laporan Monitoring Realisasi TA ${activeYear} berhasil diunduh`, 'success');
   },
 
   /**

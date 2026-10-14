@@ -485,22 +485,13 @@ const App = {
 
   refreshCharts() {
     if (Store.state.activePage === 'edash') {
-      Charts.renderCircularProgress('pegawaiCircularProgress', 85, 'Completed');
+      this.renderEmployeeDashboard();
     } else if (Store.state.activePage === 'ekompetensi') {
       Charts.renderRadar('competencyRadarChart', Store.state.competencies.radarData);
     } else if (Store.state.activePage === 'epelaksanaan' || Store.state.activePage === 'apelaksanaan') {
-      Charts.renderDonut('realizationDonutChart', [
-        { label: 'Terlaksana', value: 98, color: 'var(--color-success)' },
-        { label: 'Dalam Proses', value: 17, color: 'var(--color-warning)' },
-        { label: 'Belum', value: 35, color: 'var(--color-danger)' }
-      ]);
+      this.renderEmployeeRealization();
     } else if (Store.state.activePage === 'adash') {
-      Charts.renderDonut('adminIdpStatusDonut', [
-        { label: 'Final', value: 72, color: 'var(--color-success)' },
-        { label: 'Diajukan ke Atasan', value: 12, color: 'var(--color-warning)' },
-        { label: 'Revisi', value: 5, color: 'var(--color-danger)' },
-        { label: 'Belum Mengisi', value: 11, color: 'var(--color-text-muted)' }
-      ]);
+      this.renderAdminDashboard();
     } else if (Store.state.activePage === 'pdash') {
       this.renderExecutiveDashboard();
     }
@@ -519,13 +510,26 @@ const App = {
       greetEl.textContent = (Store.state.currentSession?.name || Store.state.user.name).split(',')[0];
     }
 
-    document.getElementById('edashIdpStatusVal').textContent = idpStatus === 'Final' ? '100%' : '85%';
-    document.getElementById('edashIdpStatusDesc').textContent = `Status Resmi: ${idpStatus}`;
-    document.getElementById('edashRencanaVal').textContent = summary.totalProgram;
-    document.getElementById('edashTerlaksanaVal').textContent = summary.completed;
-    document.getElementById('edashBelumVal').textContent = summary.totalProgram - summary.completed;
+    const pct = idpStatus === 'Final' || idpStatus === 'Disetujui' 
+      ? 100 
+      : (idpStatus === 'Draft' ? (summary.totalProgram > 0 ? summary.progressPct : 0) : 85);
 
-    Charts.renderCircularProgress('pegawaiCircularProgress', idpStatus === 'Final' ? 100 : 85, 'Completed');
+    const statusEl = document.getElementById('edashIdpStatusVal');
+    if (statusEl) statusEl.textContent = `${pct}%`;
+
+    const descEl = document.getElementById('edashIdpStatusDesc');
+    if (descEl) descEl.textContent = `Status Resmi: ${idpStatus}`;
+
+    const rencanaEl = document.getElementById('edashRencanaVal');
+    if (rencanaEl) rencanaEl.textContent = summary.totalProgram;
+
+    const terlaksanaEl = document.getElementById('edashTerlaksanaVal');
+    if (terlaksanaEl) terlaksanaEl.textContent = summary.completed;
+
+    const belumEl = document.getElementById('edashBelumVal');
+    if (belumEl) belumEl.textContent = Math.max(0, summary.totalProgram - summary.completed);
+
+    Charts.renderCircularProgress('pegawaiCircularProgress', pct, 'Completed');
     this.renderEmployeeDirectiveBanner();
   },
 
@@ -1298,9 +1302,11 @@ const App = {
     const myName = (currentUser.name || '').trim().toLowerCase();
     const myNip = String(currentUser.nip || '').trim().replace(/\s/g, '');
     const allRealizations = Store.state.realizations || [];
+    const activeYear = Number(Store.getActiveYear()) || 2026;
 
-    // Filter realisasi: data milik user aktif atau yang diinput secara manual
+    // Filter realisasi: data milik user aktif dan sesuai tahun anggaran aktif
     const myRealizations = allRealizations.filter(r => {
+      if (Number(r.tahun || 2026) !== activeYear) return false;
       if (r.isUserInput) return true;
       if (r.nip && myNip && String(r.nip).trim().replace(/\s/g, '') === myNip) return true;
       if (r.pegawai && myName) {
@@ -1520,33 +1526,71 @@ const App = {
   },
 
   renderEmployeeRealization() {
-    const rList = Store.state.realizations || [];
+    const activeYear = Number(Store.getActiveYear()) || 2026;
+    const allList = Store.state.realizations || [];
+    const rList = allList.filter(r => Number(r.tahun || 2026) === activeYear);
+
     const tbody = document.getElementById('realizationTableBody');
     if (!tbody) return;
-    tbody.innerHTML = rList.map(r => {
-      const docName = (r.bukti || 'Sertifikat.pdf').replace(/'/g, "\\'");
-      return `
+
+    if (rList.length === 0) {
+      tbody.innerHTML = `
         <tr>
-          <td class="font-semibold" data-label="Pegawai">${r.pegawai}</td>
-          <td data-label="Program IDP">${r.program}</td>
-          <td data-label="Metode"><span class="badge badge-blue">${r.metode}</span></td>
-          <td data-label="Tanggal">${r.tanggal}</td>
-          <td data-label="JP"><b>${r.jp}</b> JP</td>
-          <td data-label="Bukti">
-            <button class="btn btn-outline btn-sm" onclick="App.viewRealizationBukti(${r.id}, '${docName}', '${r.buktiUrl || ''}')">
-              <span data-icon="FileText" data-icon-size="14"></span> ${r.bukti}
-            </button>
+          <td colspan="7" style="text-align: center; padding: 48px 20px; color: var(--color-text-muted);">
+            <div style="display: flex; flex-direction: column; align-items: center; gap: 10px; max-width: 480px; margin: 0 auto;">
+              <span data-icon="Award" data-icon-size="32" style="opacity: 0.35;"></span>
+              <div style="font-size: 14.5px; font-weight: 700; color: var(--color-text-main);">
+                Belum Ada Realisasi Pengembangan Kompetensi di TA ${activeYear}
+              </div>
+              <p style="font-size: 12px; opacity: 0.8; margin-bottom: 8px;">
+                Belum ada sertifikat atau bukti keikutsertaan pelatihan yang diunggah untuk Tahun Anggaran ${activeYear}.
+              </p>
+              <button class="btn btn-primary btn-sm" onclick="App.openInputRealizationDrawer()">
+                + Unggah Bukti Pelatihan ${activeYear}
+              </button>
+            </div>
           </td>
-          <td data-label="Status"><span class="badge badge-success">${r.status}</span></td>
         </tr>
       `;
-    }).join('');
+      if (typeof renderAllIcons === 'function') renderAllIcons();
+    } else {
+      tbody.innerHTML = rList.map(r => {
+        const docName = (r.bukti || 'Sertifikat.pdf').replace(/'/g, "\\'");
+        return `
+          <tr>
+            <td class="font-semibold" data-label="Pegawai">${r.pegawai}</td>
+            <td data-label="Program IDP">${r.program}</td>
+            <td data-label="Metode"><span class="badge badge-blue">${r.metode}</span></td>
+            <td data-label="Tanggal">${r.tanggal}</td>
+            <td data-label="JP"><b>${r.jp}</b> JP</td>
+            <td data-label="Bukti">
+              <button class="btn btn-outline btn-sm" onclick="App.viewRealizationBukti(${r.id}, '${docName}', '${r.buktiUrl || ''}')">
+                <span data-icon="FileText" data-icon-size="14"></span> ${r.bukti}
+              </button>
+            </td>
+            <td data-label="Status"><span class="badge badge-success">${r.status}</span></td>
+          </tr>
+        `;
+      }).join('');
+      if (typeof renderAllIcons === 'function') renderAllIcons();
+    }
 
-    Charts.renderDonut('realizationDonutChart', [
-      { label: 'Terlaksana', value: 98, color: 'var(--color-success)' },
-      { label: 'Dalam Proses', value: 17, color: 'var(--color-warning)' },
-      { label: 'Belum', value: 35, color: 'var(--color-danger)' }
-    ]);
+    if (activeYear === 2026) {
+      Charts.renderDonut('realizationDonutChart', [
+        { label: 'Terlaksana', value: 98, color: 'var(--color-success)' },
+        { label: 'Dalam Proses', value: 17, color: 'var(--color-warning)' },
+        { label: 'Belum', value: 35, color: 'var(--color-danger)' }
+      ]);
+    } else {
+      const terlaksana = rList.filter(r => (r.status || '').toLowerCase().includes('verif') || (r.status || '').toLowerCase().includes('laksana')).length;
+      const proses = rList.filter(r => (r.status || '').toLowerCase().includes('proses')).length;
+      const belum = Math.max(0, 99 - (terlaksana + proses));
+      Charts.renderDonut('realizationDonutChart', [
+        { label: `Terlaksana: ${terlaksana}`, value: terlaksana, color: 'var(--color-success)' },
+        { label: `Dalam Proses: ${proses}`, value: proses, color: 'var(--color-warning)' },
+        { label: `Belum: ${belum}`, value: belum, color: 'var(--color-danger)' }
+      ]);
+    }
   },
 
   openRealizationForProgram(programId) {
@@ -2167,13 +2211,40 @@ const App = {
   empPageSize: 15,
   complianceFilter: 'all', // 'all', 'red', 'yellow', 'green'
 
+  getEmployeeYearData(emp, year) {
+    if (!emp) return { statusIdp: 'Belum Mengajukan', jp: 0 };
+    const activeYr = Number(year || Store.getActiveYear()) || 2026;
+    if (activeYr === 2026) {
+      return {
+        statusIdp: emp.statusIdp || 'Belum Mengajukan',
+        jp: typeof emp.jp === 'number' ? emp.jp : (parseInt(emp.progress) || 0)
+      };
+    }
+    const cleanNip = String(emp.nip || '').replace(/\s+/g, '');
+    const verif = (Store.state.verifications || []).find(v => 
+      String(v.nip || '').replace(/\s+/g, '') === cleanNip && 
+      Number(v.tahun || 2026) === activeYr
+    );
+    if (verif) {
+      return {
+        statusIdp: verif.status || 'Diajukan ke Atasan',
+        jp: verif.totalJp || 0
+      };
+    }
+    return {
+      statusIdp: 'Belum Mengajukan',
+      jp: 0
+    };
+  },
+
   getComplianceCategory(emp) {
     if (!emp) return { key: 'red', level: 'Kritis', badgeClass: 'badge-danger', dotColor: 'var(--color-danger)', label: 'Belum Mengajukan', sublabel: '0/20 JP', percent: 0, needsReminder: true };
-    const status = (emp.statusIdp || '').toLowerCase();
-    const jp = typeof emp.jp === 'number' ? emp.jp : (parseInt(emp.progress) || 0);
+    const yearData = this.getEmployeeYearData(emp);
+    const status = (yearData.statusIdp || '').toLowerCase();
+    const jp = yearData.jp;
 
     // Kategori Merah: Belum mengajukan, Draft, atau JP == 0
-    if (status === 'belum' || status === 'draft' || status === 'belum mengisi' || !emp.statusIdp || jp === 0) {
+    if (status === 'belum' || status === 'draft' || status === 'belum mengisi' || status === 'belum mengajukan' || !yearData.statusIdp || jp === 0) {
       return {
         key: 'red',
         level: 'Kritis',
@@ -2411,8 +2482,9 @@ const App = {
     } else {
       tbody.innerHTML = pageItems.map((e, idx) => {
         const globalNo = startIdx + idx + 1;
+        const yearData = this.getEmployeeYearData(e);
         const cat = this.getComplianceCategory(e);
-        const jp = typeof e.jp === 'number' ? e.jp : (parseInt(e.progress) || 0);
+        const jp = yearData.jp;
 
         let unitBadgeCls = 'badge-neutral';
         if (e.unit.includes('Pimpinan')) unitBadgeCls = 'badge-success';
@@ -3082,17 +3154,17 @@ const App = {
   },
 
   renderMonitoring() {
-    const units = Store.state.monitoringUnits && Store.state.monitoringUnits.length > 0
-      ? Store.state.monitoringUnits
-      : [
-        { unit: 'Sekretariat', pegawai: 23, terisi: '94%', realisasi: '82%', tindakLanjut: 2, kabid: 'ANDI ARAFAT S.T., M.E.' },
-        { unit: 'Bidang PMPE (Rendalev)', pegawai: 9, terisi: '100%', realisasi: '88%', tindakLanjut: 1, kabid: 'MEYDIANDRA EKA PUTRA S.P,MIP' },
-        { unit: 'Bidang Perekonomian', pegawai: 19, terisi: '92%', realisasi: '79%', tindakLanjut: 2, kabid: 'Ir. ENDANG WAHYUNI S.T., M.Si.' },
-        { unit: 'Bidang Infrastruktur & Kewilayahan', pegawai: 9, terisi: '95%', realisasi: '80%', tindakLanjut: 1, kabid: 'Ir. IDA SUSANTI S S.T., M.T' },
-        { unit: 'Bidang Pemerintahan & PM', pegawai: 28, terisi: '90%', realisasi: '76%', tindakLanjut: 3, kabid: 'RADIUS PRAWIRA NEGARA S.ST' },
-        { unit: 'UPTD Pusat Data & Informasi', pegawai: 10, terisi: '100%', realisasi: '90%', tindakLanjut: 0, kabid: 'YASIR WIJAYA S.Si.,M.Si' },
-        { unit: 'Pimpinan', pegawai: 1, terisi: '100%', realisasi: '100%', tindakLanjut: 0, kabid: 'Dr. ANANG RISGIYANTO S.K.M., M.Kes.' }
-      ];
+    const activeYear = Number(Store.getActiveYear()) || 2026;
+    const breakdown = Store.getUnitBreakdown ? Store.getUnitBreakdown() : [];
+
+    const units = breakdown.map(b => ({
+      unit: b.unit,
+      kabid: b.kabid,
+      pegawai: b.pegawai,
+      terisi: `${b.pctIdp}%`,
+      realisasi: `${b.pctKepatuhan}%`,
+      tindakLanjut: b.tindakLanjut
+    }));
 
     const filterUnit = document.getElementById('monUnitFilter')?.value || '';
     const displayedUnits = filterUnit ? units.filter(u => u.unit === filterUnit) : units;
@@ -3115,7 +3187,7 @@ const App = {
             <div class="progress-track" style="width: 80px; height: 6px;"><div class="progress-fill success" style="width: ${u.realisasi}"></div></div>
           </div>
         </td>
-        <td data-label="Tindak Lanjut"><span class="badge badge-warning">${u.tindakLanjut} Pegawai</span></td>
+        <td data-label="Tindak Lanjut"><span class="badge ${u.tindakLanjut > 0 ? 'badge-warning' : 'badge-success'}">${u.tindakLanjut} Pegawai</span></td>
       </tr>
     `).join('');
   },
@@ -3133,8 +3205,10 @@ const App = {
         tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; padding: 20px; color: var(--color-text-muted);">Tidak ada data pegawai pada unit ini.</td></tr>`;
       } else {
         tbody.innerHTML = members.map(m => {
-          const isFull = m.statusIdp === 'Final';
-          const badgeCls = isFull ? 'badge-success' : m.statusIdp === 'Belum' ? 'badge-danger' : 'badge-warning';
+          const yearData = this.getEmployeeYearData(m);
+          const cat = this.getComplianceCategory(m);
+          const isFull = yearData.statusIdp === 'Final' || yearData.statusIdp === 'Disetujui';
+          const badgeCls = isFull ? 'badge-success' : cat.key === 'red' ? 'badge-danger' : 'badge-warning';
           return `
             <tr>
               <td>
@@ -3143,8 +3217,8 @@ const App = {
               </td>
               <td style="font-size: 12px;">${m.jabatan}</td>
               <td style="text-align: center;"><b>20 JP</b></td>
-              <td style="text-align: center;"><b>${m.jp} JP</b></td>
-              <td><span class="badge ${badgeCls}">${m.statusIdp} (${m.progress.split(' ')[1] || ''})</span></td>
+              <td style="text-align: center;"><b>${yearData.jp} JP</b></td>
+              <td><span class="badge ${badgeCls}">${yearData.statusIdp}</span></td>
             </tr>
           `;
         }).join('');
@@ -3154,7 +3228,38 @@ const App = {
   },
 
   renderReporting() {
-    // Reporting view ready
+    const summary = Store.getExecutiveSummary ? Store.getExecutiveSummary() : null;
+    if (!summary) return;
+
+    const elTotalAsn = document.getElementById('plaporanTotalAsn');
+    const elTotalRencana = document.getElementById('plaporanTotalRencana');
+    const elTotalTerlaksana = document.getElementById('plaporanTotalTerlaksana');
+    const elDescTerlaksana = document.getElementById('plaporanDescTerlaksana');
+
+    const activeYear = Number(Store.getActiveYear()) || 2026;
+    let totalRencana = 150;
+    let totalTerlaksana = 98;
+    let pct = 65.3;
+
+    if (activeYear === 2026) {
+      totalRencana = 150;
+      totalTerlaksana = 98;
+      pct = 65.3;
+    } else {
+      const allRealiz = Store.state.realizations || [];
+      const yRealiz = allRealiz.filter(r => Number(r.tahun || 2026) === activeYear);
+      totalTerlaksana = yRealiz.filter(r => (r.status || '').toLowerCase().includes('verif') || (r.status || '').toLowerCase().includes('laksana')).length;
+
+      const allVerif = Store.state.verifications || [];
+      const yVerif = allVerif.filter(v => Number(v.tahun || 2026) === activeYear);
+      totalRencana = yVerif.reduce((sum, v) => sum + (v.programCount || 0), 0);
+      pct = totalRencana > 0 ? ((totalTerlaksana / totalRencana) * 100).toFixed(1) : '0.0';
+    }
+
+    if (elTotalAsn) elTotalAsn.textContent = summary.totalPegawai;
+    if (elTotalRencana) elTotalRencana.textContent = totalRencana;
+    if (elTotalTerlaksana) elTotalTerlaksana.textContent = totalTerlaksana;
+    if (elDescTerlaksana) elDescTerlaksana.textContent = `Capaian realisasi ${pct}%`;
   },
 
   // Official Export & Print Triggers

@@ -518,6 +518,24 @@ const Store = {
         this.state.idpState.programs = JSON.parse(JSON.stringify(this.defaultState.idpState.programs));
       }
 
+      // Pastikan isolasi IDP per tahun anggaran (idpByYear) terinisialisasi
+      if (!this.state.idpByYear || typeof this.state.idpByYear !== 'object') {
+        this.state.idpByYear = {};
+      }
+      if (!this.state.idpByYear['2026']) {
+        this.state.idpByYear['2026'] = JSON.parse(JSON.stringify(this.state.idpState));
+      }
+
+      // Pastikan seluruh data realisasi memiliki tahun anggaran
+      if (Array.isArray(this.state.realizations)) {
+        this.state.realizations.forEach(r => {
+          if (!r.tahun) {
+            const m = String(r.tanggal || '').match(/\b(20\d\d)\b/);
+            r.tahun = m ? Number(m[1]) : 2026;
+          }
+        });
+      }
+
       // SINKRONKAN STATUS IDP BERDASARKAN REALISASI SECARA AMAN (Bebas TypeError)
       this.syncIdpStatusWithRealizations();
 
@@ -693,11 +711,57 @@ const Store = {
   setActiveYear(year) {
     const y = parseInt(year, 10);
     if (!isNaN(y) && y >= 2020 && y <= 2040) {
+      const prevYear = this.state.activeYear || 2026;
+      if (!this.state.idpByYear) this.state.idpByYear = {};
+
+      // 1. Simpan kondisi formulir IDP tahun sebelumnya ke idpByYear
+      if (this.state.idpState) {
+        this.state.idpByYear[String(prevYear)] = JSON.parse(JSON.stringify(this.state.idpState));
+      }
+
       this.state.activeYear = y;
       if (this.state.careerPlan) {
         this.state.careerPlan.periode = String(y);
       }
+
+      // 2. Pulihkan atau inisialisasi formulir IDP sesuai tahun yang dipilih
+      if (this.state.idpByYear[String(y)]) {
+        this.state.idpState = JSON.parse(JSON.stringify(this.state.idpByYear[String(y)]));
+      } else {
+        // Cek apakah ada pengajuan di verifications untuk tahun ini
+        const currentAsn = this.state.user || this.state.currentSession || {};
+        const cleanNip = String(currentAsn.nip || '').replace(/\s+/g, '');
+        const verif = (this.state.verifications || []).find(v => 
+          String(v.nip || '').replace(/\s+/g, '') === cleanNip && 
+          Number(v.tahun || 2026) === y
+        );
+
+        if (verif) {
+          this.state.idpState = {
+            status: verif.status || 'Diajukan ke Atasan',
+            progress: verif.totalJp >= 20 ? 100 : Math.round((verif.totalJp / 20) * 100),
+            verificationNote: verif.notes || '',
+            programs: []
+          };
+        } else {
+          this.state.idpState = {
+            status: 'Draft',
+            progress: 0,
+            verificationNote: '',
+            programs: []
+          };
+        }
+        this.state.idpByYear[String(y)] = JSON.parse(JSON.stringify(this.state.idpState));
+      }
+
       this.save();
+
+      // 3. Coba sinkronisasi data user dari Supabase untuk tahun tersebut
+      const currentAsn = this.state.user || this.state.currentSession || {};
+      if (currentAsn.nip && typeof this.loadUserIdp === 'function') {
+        this.loadUserIdp(currentAsn.nip).catch(() => {});
+      }
+
       return y;
     }
     return this.getActiveYear();
@@ -1673,9 +1737,11 @@ const Store = {
     // File aslinya dibuka via IDBHelper.getFile(id)
     const storedBuktiUrl = uploadedToCloud ? fileUrl : '';
 
+    const activeYr = this.getActiveYear();
     const newRealizationObj = {
       id: newId,
       ...realizationData,
+      tahun: Number(realizationData.tahun) || activeYr,
       nip: entryNip,
       pegawai: entryPegawai,
       jp: parseInt(realizationData.jp) || 0,
@@ -1778,6 +1844,8 @@ const Store = {
   updateUserStats() {
     const summary = this.getIdpSummary();
     this.state.idpState.progress = summary.progressPct;
+    if (!this.state.idpByYear) this.state.idpByYear = {};
+    this.state.idpByYear[String(this.getActiveYear())] = JSON.parse(JSON.stringify(this.state.idpState));
     this.save();
   },
 
