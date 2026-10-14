@@ -1323,22 +1323,58 @@ const App = {
 
   saveProgramForm() {
     const id = document.getElementById('formProgramId').value;
+    const topikInput = document.getElementById('progTopik');
+    const topik = (topikInput ? topikInput.value : '').trim();
+
+    if (!topik || topik.length < 3) {
+      App.toast('Topik / nama kegiatan pengembangan wajib diisi (minimal 3 karakter).', 'warning');
+      if (topikInput) topikInput.focus();
+      return;
+    }
+
+    const jpInput = document.getElementById('progJp');
+    const jp = parseInt(jpInput ? jpInput.value : '0');
+    if (isNaN(jp) || jp < 1) {
+      App.toast('Jumlah JP minimal 1 Jam Pelajaran.', 'warning');
+      if (jpInput) jpInput.focus();
+      return;
+    }
+    if (jp > 100) {
+      App.toast('Jumlah JP tidak boleh melebihi 100 JP per program rencana.', 'warning');
+      if (jpInput) jpInput.focus();
+      return;
+    }
+
+    const mulai = document.getElementById('progPeriodeMulai').value;
+    const selesai = document.getElementById('progPeriodeSelesai').value;
+    if (mulai && selesai && selesai < mulai) {
+      App.toast('Tanggal selesai periode tidak boleh lebih awal dari tanggal mulai!', 'error');
+      document.getElementById('progPeriodeSelesai').focus();
+      return;
+    }
+
+    const estimasiInput = document.getElementById('progEstimasi');
+    const estimasi = parseInt(estimasiInput ? estimasiInput.value : '0') || 0;
+    if (estimasi < 0) {
+      App.toast('Estimasi biaya tidak boleh bernilai negatif.', 'warning');
+      if (estimasiInput) estimasiInput.focus();
+      return;
+    }
+
     const data = {
       kompetensi: document.getElementById('progKompetensi').value,
       metode: document.getElementById('progMetode').value,
-      topik: document.getElementById('progTopik').value || 'Program Pengembangan',
+      topik: topik,
       jenisDiklat: document.getElementById('progJenisDiklat').value,
-      jp: parseInt(document.getElementById('progJp').value) || 2,
+      jp: jp,
       penyelenggara: document.getElementById('progPenyelenggara').value,
       periode: (() => {
-        const mulai = document.getElementById('progPeriodeMulai').value;
-        const selesai = document.getElementById('progPeriodeSelesai').value;
         const fmt = (d) => { const dt = new Date(d + 'T00:00:00'); const bln = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agt','Sep','Okt','Nov','Des']; return bln[dt.getMonth()] + ' ' + dt.getFullYear(); };
         return mulai && selesai ? fmt(mulai) + ' – ' + fmt(selesai) : 'Tahun 2026';
       })(),
-      periodeMulai: document.getElementById('progPeriodeMulai').value,
-      periodeSelesai: document.getElementById('progPeriodeSelesai').value,
-      estimasi: parseInt(document.getElementById('progEstimasi').value) || 0,
+      periodeMulai: mulai,
+      periodeSelesai: selesai,
+      estimasi: estimasi,
       keterangan: document.getElementById('progKeterangan').value
     };
 
@@ -1481,6 +1517,7 @@ const App = {
     const tglInput = document.getElementById('realizTanggal');
     if (tglInput) tglInput.value = today;
 
+    this.resetCertificateDropzone();
     this.openDrawer('realizationDrawer');
   },
 
@@ -1493,8 +1530,9 @@ const App = {
     if (isCustom) {
       const customInput = document.getElementById('realizProgramCustom');
       prog = (customInput ? customInput.value : '').trim();
-      if (!prog) {
-        App.toast('Mohon masukkan nama kegiatan / pelatihan pengembangan!', 'warning');
+      if (!prog || prog.length < 3) {
+        App.toast('Mohon masukkan nama kegiatan / pelatihan (minimal 3 karakter)!', 'warning');
+        if (customInput) customInput.focus();
         return;
       }
     }
@@ -1504,15 +1542,50 @@ const App = {
       ? (customMetodeEl ? customMetodeEl.value : 'Diklat Teknis')
       : (opt ? opt.getAttribute('data-metode') : (prog.includes('Coaching') ? 'Coaching' : prog.includes('Workshop') ? 'Workshop' : prog.includes('Mentoring') ? 'Mentoring' : 'Diklat Teknis'));
 
-    const tgl = document.getElementById('realizTanggal').value || new Date().toISOString().split('T')[0];
-    const jp = parseInt(document.getElementById('realizJp').value) || 20;
-    const peny = document.getElementById('realizPenyelenggara').value || 'BPSDMD Provinsi Lampung';
+    const tglInput = document.getElementById('realizTanggal');
+    const tgl = tglInput ? tglInput.value : '';
+    if (!tgl) {
+      App.toast('Tanggal pelaksanaan kegiatan wajib diisi.', 'warning');
+      if (tglInput) tglInput.focus();
+      return;
+    }
+
+    const jpInput = document.getElementById('realizJp');
+    const jp = parseInt(jpInput ? jpInput.value : '0');
+    if (isNaN(jp) || jp < 1) {
+      App.toast('Jumlah JP minimal 1 Jam Pelajaran.', 'warning');
+      if (jpInput) jpInput.focus();
+      return;
+    }
+    if (jp > 100) {
+      App.toast('Jumlah JP tidak boleh melebihi 100 JP per satu kegiatan.', 'warning');
+      if (jpInput) jpInput.focus();
+      return;
+    }
+
+    const penyInput = document.getElementById('realizPenyelenggara');
+    const peny = (penyInput ? penyInput.value : '').trim();
+    if (!peny || peny.length < 2) {
+      App.toast('Lembaga penyelenggara kegiatan wajib diisi.', 'warning');
+      if (penyInput) penyInput.focus();
+      return;
+    }
     
     const fileInput = document.getElementById('realizFileInput');
     const file = fileInput && fileInput.files ? fileInput.files[0] : null;
 
     if (!file) {
       App.toast('Bukti Sertifikat wajib diunggah!', 'error');
+      const dropzone = document.getElementById('certDropzone');
+      if (dropzone) {
+        dropzone.classList.add('is-error');
+        setTimeout(() => dropzone.classList.remove('is-error'), 1500);
+      }
+      return;
+    }
+
+    // Validasi file (ukuran max 2 MB dan format PDF/JPG/PNG)
+    if (!this.validateAndSetCertificateFile(file)) {
       return;
     }
     
@@ -1520,7 +1593,7 @@ const App = {
     const btnSubmit = document.querySelector('#realizationDrawer .btn-primary');
     if (btnSubmit) {
       btnSubmit.disabled = true;
-      btnSubmit.innerHTML = 'Menyimpan Realisasi...';
+      btnSubmit.innerHTML = '<span class="loader"></span> Mengunggah Berkas ke Cloud...';
     }
 
     try {
@@ -1539,7 +1612,7 @@ const App = {
         bukti: file.name
       }, file);
 
-      App.toast('Realisasi pengembangan berhasil dicatat & sertifikat tersimpan!', 'success');
+      App.toast('Realisasi pengembangan berhasil dicatat & sertifikat tersimpan aman di cloud!', 'success');
       this.closeDrawer('realizationDrawer');
       this.renderEmployeeRealization();
       this.renderIdpSaya();
@@ -1551,11 +1624,160 @@ const App = {
         btnSubmit.disabled = false;
         btnSubmit.innerHTML = 'Simpan Realisasi';
       }
-      // Reset input file & custom program
-      if (fileInput) fileInput.value = '';
+      this.resetCertificateDropzone();
       const customInput = document.getElementById('realizProgramCustom');
       if (customInput) customInput.value = '';
-      document.getElementById('dropzoneFileName').textContent = 'Pilih atau letakkan file bukti di sini';
+    }
+  },
+
+  // CERTIFICATE FILE UPLOAD & VALIDATION HANDLERS (POIN 3)
+  handleCertificateFileSelect(input) {
+    if (!input || !input.files || !input.files[0]) return;
+    this.validateAndSetCertificateFile(input.files[0]);
+  },
+
+  handleDropzoneDragOver(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    const dropzone = document.getElementById('certDropzone');
+    if (dropzone) dropzone.classList.add('dragover');
+  },
+
+  handleDropzoneDragLeave(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    const dropzone = document.getElementById('certDropzone');
+    if (dropzone) dropzone.classList.remove('dragover');
+  },
+
+  handleDropzoneDrop(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    const dropzone = document.getElementById('certDropzone');
+    if (dropzone) dropzone.classList.remove('dragover');
+
+    const dt = e.dataTransfer;
+    if (dt && dt.files && dt.files.length > 0) {
+      const fileInput = document.getElementById('realizFileInput');
+      if (fileInput) {
+        fileInput.files = dt.files;
+        this.validateAndSetCertificateFile(dt.files[0]);
+      }
+    }
+  },
+
+  validateAndSetCertificateFile(file) {
+    const titleEl = document.getElementById('dropzoneFileName');
+    const descEl = document.getElementById('dropzoneDesc');
+    const iconEl = document.getElementById('dropzoneIcon');
+    const dropzone = document.getElementById('certDropzone');
+    const fileInput = document.getElementById('realizFileInput');
+
+    if (!file) {
+      this.resetCertificateDropzone();
+      return false;
+    }
+
+    const MAX_SIZE_BYTES = 2 * 1024 * 1024; // 2 MB
+    const ALLOWED_EXTENSIONS = ['pdf', 'jpg', 'jpeg', 'png'];
+    const ext = file.name.split('.').pop().toLowerCase();
+
+    // 1. Validasi Tipe Ekstensi File
+    if (!ALLOWED_EXTENSIONS.includes(ext)) {
+      if (fileInput) fileInput.value = '';
+      if (dropzone) {
+        dropzone.classList.remove('has-file');
+        dropzone.classList.add('is-error');
+      }
+      if (iconEl) iconEl.innerHTML = getIcon('AlertTriangle', 22);
+      if (titleEl) {
+        titleEl.textContent = 'Format File Tidak Didukung!';
+        titleEl.style.color = 'var(--color-danger)';
+      }
+      if (descEl) {
+        descEl.textContent = `File berformat .${ext} tidak diizinkan. Mohon pilih file PDF, JPG, atau PNG.`;
+        descEl.style.color = 'var(--color-danger)';
+      }
+      App.toast(`Format .${ext} tidak didukung! Mohon unggah dokumen PDF atau gambar JPG/PNG.`, 'error');
+      return false;
+    }
+
+    // 2. Validasi Batas Ukuran File (Maks. 2 MB)
+    if (file.size > MAX_SIZE_BYTES) {
+      if (fileInput) fileInput.value = '';
+      const sizeMB = (file.size / (1024 * 1024)).toFixed(2);
+      if (dropzone) {
+        dropzone.classList.remove('has-file');
+        dropzone.classList.add('is-error');
+      }
+      if (iconEl) iconEl.innerHTML = getIcon('AlertTriangle', 22);
+      if (titleEl) {
+        titleEl.textContent = 'Ukuran Berkas Melebihi Batas (Maks. 2 MB)';
+        titleEl.style.color = 'var(--color-danger)';
+      }
+      if (descEl) {
+        descEl.textContent = `Ukuran file Anda: ${sizeMB} MB. Silakan kompresi berkas sertifikat terlebih dahulu.`;
+        descEl.style.color = 'var(--color-danger)';
+      }
+      App.toast(`Ukuran file (${sizeMB} MB) melebihi batas 2 MB! Silakan kompres berkas sertifikat Anda.`, 'error');
+      return false;
+    }
+
+    // 3. File Valid -> Render Sukses
+    const sizeFormatted = file.size > 1024 * 1024
+      ? `${(file.size / (1024 * 1024)).toFixed(2)} MB`
+      : `${Math.round(file.size / 1024)} KB`;
+
+    if (dropzone) {
+      dropzone.classList.remove('is-error');
+      dropzone.classList.add('has-file');
+    }
+    if (iconEl) iconEl.innerHTML = getIcon('Check', 22);
+    if (titleEl) {
+      titleEl.textContent = file.name;
+      titleEl.style.color = 'var(--color-text-primary)';
+    }
+    if (descEl) {
+      descEl.textContent = `Ukuran: ${sizeFormatted} • Berkas siap diunggah ke cloud storage Supabase ✓`;
+      descEl.style.color = 'var(--color-success)';
+    }
+
+    App.toast(`Berkas "${file.name}" (${sizeFormatted}) tervalidasi dan siap disimpan.`, 'success');
+    return true;
+  },
+
+  resetCertificateDropzone() {
+    const titleEl = document.getElementById('dropzoneFileName');
+    const descEl = document.getElementById('dropzoneDesc');
+    const iconEl = document.getElementById('dropzoneIcon');
+    const dropzone = document.getElementById('certDropzone');
+    const fileInput = document.getElementById('realizFileInput');
+
+    if (fileInput) fileInput.value = '';
+    if (dropzone) {
+      dropzone.classList.remove('has-file');
+      dropzone.classList.remove('is-error');
+      dropzone.classList.remove('dragover');
+    }
+    if (iconEl) iconEl.innerHTML = getIcon('Upload', 22);
+    if (titleEl) {
+      titleEl.textContent = 'Pilih atau letakkan file bukti di sini';
+      titleEl.style.color = '';
+    }
+    if (descEl) {
+      descEl.textContent = 'Format PDF, JPG, atau PNG (Maksimal 2 MB)';
+      descEl.style.color = '';
+    }
+  },
+
+  validateJpInput(input) {
+    if (!input) return;
+    let val = parseInt(input.value);
+    if (isNaN(val)) return;
+    if (val < 1) input.value = 1;
+    if (val > 100) {
+      input.value = 100;
+      App.toast('Maksimal target 100 JP per satu kegiatan pelatihan.', 'warning');
     }
   },
 

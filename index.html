@@ -28,7 +28,7 @@
     rel="stylesheet">
 
   <!-- Core Stylesheet -->
-  <link rel="stylesheet" href="css/app.css?v=20261014_v11">
+  <link rel="stylesheet" href="css/app.css?v=20261014_v12">
 </head>
 
 <body>
@@ -2524,8 +2524,11 @@
             </div>
 
             <div class="form-group">
-              <label class="form-label">Jumlah JP <span class="required">*</span></label>
-              <input type="number" id="progJp" class="form-control" value="2" min="1" required>
+              <div style="display: flex; justify-content: space-between; align-items: baseline;">
+                <label class="form-label" for="progJp">Jumlah JP <span class="required" style="color: var(--color-danger);">*</span></label>
+                <span style="font-size: 10.5px; color: var(--color-text-muted);">Rentang: 1 – 100 JP</span>
+              </div>
+              <input type="number" id="progJp" class="form-control" value="2" min="1" max="100" placeholder="1 s/d 100 JP" oninput="App.validateJpInput(this)" required>
             </div>
 
             <div class="form-group">
@@ -2972,25 +2975,32 @@
             <input type="date" id="realizTanggal" class="form-control" value="2026-11-15">
           </div>
           <div class="form-group">
-            <label class="form-label">Jumlah JP Tercapai <span class="required">*</span></label>
-            <input type="number" id="realizJp" class="form-control" value="20" min="1">
+            <div style="display: flex; justify-content: space-between; align-items: baseline;">
+              <label class="form-label" for="realizJp">Jumlah JP Tercapai <span class="required" style="color: var(--color-danger);">*</span></label>
+              <span style="font-size: 10.5px; color: var(--color-text-muted);">Rentang: 1 – 100 JP</span>
+            </div>
+            <input type="number" id="realizJp" class="form-control" value="20" min="1" max="100" placeholder="1 s/d 100 JP" oninput="App.validateJpInput(this)" required>
           </div>
         </div>
 
         <div class="form-group">
-          <label class="form-label">Lembaga Penyelenggara</label>
-          <input type="text" id="realizPenyelenggara" class="form-control" value="BPSDMD Provinsi Lampung">
+          <label class="form-label" for="realizPenyelenggara">Lembaga Penyelenggara <span class="required" style="color: var(--color-danger);">*</span></label>
+          <input type="text" id="realizPenyelenggara" class="form-control" value="BPSDMD Provinsi Lampung" placeholder="Nama lembaga / instansi penyelenggara" required>
         </div>
 
-        <!-- File Upload Dropzone -->
+        <!-- File Upload Dropzone (Max 2 MB, PDF/JPG/PNG) -->
         <div class="form-group">
-          <label class="form-label">Upload Bukti Sertifikat / Formulir Kegiatan <span class="required">*</span></label>
-          <div class="file-dropzone" onclick="document.getElementById('realizFileInput').click()">
-            <input type="file" id="realizFileInput" style="display: none;"
-              onchange="if(this.files[0]) document.getElementById('dropzoneFileName').textContent = this.files[0].name;">
-            <div class="dropzone-icon"><span data-icon="Upload" data-icon-size="22"></span></div>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+            <label class="form-label" style="margin-bottom: 0;">Upload Bukti Sertifikat / Dokumen <span class="required" style="color: var(--color-danger);">*</span></label>
+            <span class="badge badge-neutral" style="font-size: 10px; font-weight: 600;">Maks. 2 MB • PDF / JPG / PNG</span>
+          </div>
+          <div class="file-dropzone" id="certDropzone" onclick="document.getElementById('realizFileInput').click()"
+            ondragover="App.handleDropzoneDragOver(event)" ondragleave="App.handleDropzoneDragLeave(event)" ondrop="App.handleDropzoneDrop(event)">
+            <input type="file" id="realizFileInput" style="display: none;" accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png"
+              onchange="App.handleCertificateFileSelect(this)">
+            <div class="dropzone-icon" id="dropzoneIcon"><span data-icon="Upload" data-icon-size="22"></span></div>
             <div class="dropzone-title" id="dropzoneFileName">Pilih atau letakkan file bukti di sini</div>
-            <div class="dropzone-desc">Format PDF, JPG, PNG maksimal 5 MB</div>
+            <div class="dropzone-desc" id="dropzoneDesc">Format PDF, JPG, atau PNG (Maksimal 2 MB)</div>
           </div>
         </div>
       </div>
@@ -3608,7 +3618,7 @@
   <script src="js/bappeda_data.js?v=20261013_v8"></script>
   <script src="js/store.js?v=20261013_v8"></script>
   <script src="js/export.js?v=20261013_v8"></script>
-  <script src="js/app.js?v=20261014_v11"></script>
+  <script src="js/app.js?v=20261014_v12"></script>
 </body>
 
 </html>
