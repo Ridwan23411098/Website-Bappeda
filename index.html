@@ -372,12 +372,17 @@
                 rencana pengembangan kompetensi Anda.</p>
             </div>
             <div style="display: flex; align-items: center; gap: 10px;">
-              <button class="btn btn-outline btn-sm" onclick="App.openSopGuide('pegawai')" title="Buku Panduan & SOP Pegawai">
+              <button class="btn btn-outline btn-sm" onclick="App.openSopGuide('pegawai')" title="Buku Panduan &amp; SOP Pegawai">
                 <span data-icon="BookOpen" data-icon-size="14"></span> Panduan IDP
               </button>
-              <select class="form-select" style="width: 110px;">
-                <option selected>2026</option>
-                <option>2025</option>
+              <select class="form-select year-select-dynamic" id="edashYearSelect" onchange="App.handleYearChange(this.value)" style="width: 120px;" title="Pilih Tahun Anggaran">
+                <option value="2024">2024</option>
+                <option value="2025">2025</option>
+                <option value="2026" selected>2026</option>
+                <option value="2027">2027</option>
+                <option value="2028">2028</option>
+                <option value="2029">2029</option>
+                <option value="2030">2030</option>
               </select>
               <button class="btn btn-primary btn-sm" onclick="App.navigate('eidp')">
                 <span data-icon="Plus" data-icon-size="14"></span> Kelola IDP
@@ -447,12 +452,12 @@
             </div>
           </div>
 
-          <!-- Row 2: Progress IDP 2026 (60%) + Rencana Terdekat (40%) -->
+          <!-- Row 2: Progress IDP Dinamis (60%) + Rencana Terdekat (40%) -->
           <div class="grid grid-cols-12" style="margin-bottom: 24px;">
             <div class="col-span-7 card">
               <div class="card-header">
                 <div>
-                  <h3 class="card-title">Progress IDP 2026</h3>
+                  <h3 class="card-title">Progress IDP <span class="dynamic-year">2026</span></h3>
                   <div style="font-size: 11.5px; color: var(--color-text-muted);">Kelengkapan formulir penyusunan
                     rencana individu</div>
                 </div>
@@ -495,25 +500,25 @@
             <div class="col-span-5 card">
               <div class="card-header">
                 <h3 class="card-title">Rencana Terdekat</h3>
-                <span class="badge badge-neutral">Tahun 2026</span>
+                <span class="badge badge-neutral">Tahun <span class="dynamic-year">2026</span></span>
               </div>
               <div class="timeline-list">
                 <div class="timeline-item">
                   <div class="timeline-dot warning"></div>
                   <div class="timeline-title">Coaching — Service Excellence</div>
-                  <div class="timeline-meta">Oktober 2026 • Internal Bappeda</div>
+                  <div class="timeline-meta">Oktober <span class="dynamic-year">2026</span> • Internal Bappeda</div>
                   <span class="badge badge-warning">Direncanakan</span>
                 </div>
                 <div class="timeline-item">
                   <div class="timeline-dot success"></div>
                   <div class="timeline-title">Pelatihan Analisis Data Perencanaan</div>
-                  <div class="timeline-meta">November 2026 • Eksternal (BPSDMD)</div>
+                  <div class="timeline-meta">November <span class="dynamic-year">2026</span> • Eksternal (BPSDMD)</div>
                   <span class="badge badge-success">Terlaksana</span>
                 </div>
                 <div class="timeline-item">
                   <div class="timeline-dot warning"></div>
                   <div class="timeline-title">Mentoring Manajemen Waktu</div>
-                  <div class="timeline-meta">Desember 2026 • Internal Bappeda</div>
+                  <div class="timeline-meta">Desember <span class="dynamic-year">2026</span> • Internal Bappeda</div>
                   <span class="badge badge-warning">Direncanakan</span>
                 </div>
               </div>
@@ -895,9 +900,16 @@
               <h3 class="card-title" style="margin-bottom: 16px;">Periode & Target Jabatan</h3>
               <div class="form-group">
                 <label class="form-label">Periode Rencana IDP</label>
-                <select id="careerPeriode" class="form-select">
-                  <option selected>2026</option>
-                  <option>2027</option>
+                <select id="careerPeriode" class="form-select year-select-dynamic" onchange="App.handleCareerPeriodChange(this.value)">
+                  <option value="2024">2024</option>
+                  <option value="2025">2025</option>
+                  <option value="2026" selected>2026</option>
+                  <option value="2027">2027</option>
+                  <option value="2028">2028</option>
+                  <option value="2029">2029</option>
+                  <option value="2030">2030</option>
+                  <option value="2031">2031</option>
+                  <option value="2032">2032</option>
                 </select>
               </div>
               <div class="form-group">
@@ -1295,7 +1307,7 @@
           <div class="card">
             <div class="card-header">
               <div>
-                <h3 class="card-title">Program Pengembangan Prioritas Tahun 2026</h3>
+                <h3 class="card-title">Program Pengembangan Prioritas Tahun <span class="dynamic-year">2026</span></h3>
                 <div style="font-size: 11.5px; color: var(--color-text-muted);">Daftar rencana kegiatan diklat,
                   bimbingan, maupun non-klasikal</div>
               </div>
@@ -1466,7 +1478,7 @@
                 </div>
                 <div style="display: flex; justify-content: space-between; font-size: 13px;">
                   <span class="text-secondary">Periode Realisasi:</span>
-                  <b>Tahun Anggaran 2026</b>
+                  <b>Tahun Anggaran <span class="dynamic-year">2026</span></b>
                 </div>
               </div>
 
@@ -1557,7 +1569,7 @@
             <div class="col-span-4 card">
               <div class="card-header">
                 <h3 class="card-title">Proporsi Capaian Realisasi</h3>
-                <span class="badge badge-neutral">Tahun 2026</span>
+                <span class="badge badge-neutral">Tahun <span class="dynamic-year">2026</span></span>
               </div>
               <div id="realizationDonutChart"></div>
             </div>
@@ -1645,7 +1657,7 @@
                 <div class="stat-card-info">
                   <div class="stat-card-label">IDP Disetujui</div>
                   <div class="stat-card-value text-success">72</div>
-                  <div class="stat-card-desc">Periode 2026 berjalan</div>
+                  <div class="stat-card-desc">Periode <span class="dynamic-year">2026</span> berjalan</div>
                 </div>
                 <div class="stat-card-icon"><span data-icon="CircleCheck" data-icon-size="22"></span></div>
               </div>
@@ -1782,9 +1794,16 @@
                 </select>
               </div>
               <div>
-                <select class="form-select" style="width: 100px;">
-                  <option selected>2026</option>
-                  <option>2025</option>
+                <select id="arekapYearSelect" class="form-select year-select-dynamic" onchange="App.handleYearChange(this.value)" style="width: 110px;" title="Pilih Tahun Anggaran">
+                  <option value="2024">2024</option>
+                  <option value="2025">2025</option>
+                  <option value="2026" selected>2026</option>
+                  <option value="2027">2027</option>
+                  <option value="2028">2028</option>
+                  <option value="2029">2029</option>
+                  <option value="2030">2030</option>
+                  <option value="2031">2031</option>
+                  <option value="2032">2032</option>
                 </select>
               </div>
             </div>
@@ -2080,7 +2099,17 @@
                   <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
                     <h1 style="font-size: 16px; font-weight: 700; margin: 0; color: #ffffff;">Dr. ANANG RISGIYANTO, S.K.M., M.Kes.</h1>
                     <span class="badge" style="background: rgba(255, 221, 89, 0.2); color: #ffdd59; border: 1px solid rgba(255, 221, 89, 0.4); font-size: 10px; font-weight: 700;">Kepala Bappeda</span>
-                    <span class="badge" style="background: rgba(255, 255, 255, 0.15); color: #ffffff; border: 1px solid rgba(255, 255, 255, 0.25); font-size: 10px;">TA 2026</span>
+                    <select id="pdashYearSelect" class="form-select year-select-dynamic" onchange="App.handleYearChange(this.value)" style="background: rgba(255, 255, 255, 0.2); color: #ffffff; border: 1px solid rgba(255, 255, 255, 0.4); font-size: 11px; font-weight: 700; border-radius: 6px; padding: 2px 8px; cursor: pointer;" title="Pilih Tahun Anggaran">
+                      <option value="2024" style="color:#000;">TA 2024</option>
+                      <option value="2025" style="color:#000;">TA 2025</option>
+                      <option value="2026" selected style="color:#000;">TA 2026</option>
+                      <option value="2027" style="color:#000;">TA 2027</option>
+                      <option value="2028" style="color:#000;">TA 2028</option>
+                      <option value="2029" style="color:#000;">TA 2029</option>
+                      <option value="2030" style="color:#000;">TA 2030</option>
+                      <option value="2031" style="color:#000;">TA 2031</option>
+                      <option value="2032" style="color:#000;">TA 2032</option>
+                    </select>
                   </div>
                   <p style="margin: 3px 0 0; font-size: 12px; color: rgba(255, 255, 255, 0.85); line-height: 1.4;">
                     Dashboard Eksekutif Pengendalian & Evaluasi Pengembangan Kompetensi (IDP) 99 ASN Bappeda Provinsi Lampung
@@ -2155,7 +2184,7 @@
                 <div class="stat-card-info">
                   <div class="stat-card-label">Investasi Bangkom</div>
                   <div class="stat-card-value text-warning" id="execEstimasiAnggaran"><span>Rp 307.2</span> <span class="unit">Jt</span></div>
-                  <div class="stat-card-desc">SBU Pelatihan ASN 2026</div>
+                  <div class="stat-card-desc">SBU Pelatihan ASN <span class="dynamic-year">2026</span></div>
                 </div>
                 <div class="stat-card-icon"><span data-icon="Coins" data-icon-size="20"></span></div>
               </div>
@@ -2241,9 +2270,9 @@
               <div class="card-header">
                 <div>
                   <h3 class="card-title">Trend Akumulasi Jam Pelajaran (JP) ASN</h3>
-                  <div style="font-size: 11.5px; color: var(--color-text-muted);">Progres kumulatif bulanan Jan – Des 2026</div>
+                  <div style="font-size: 11.5px; color: var(--color-text-muted);">Progres kumulatif bulanan Jan – Des <span class="dynamic-year">2026</span></div>
                 </div>
-                <span class="badge badge-success">+14% vs TA 2025</span>
+                <span class="badge badge-success">+14% vs TA <span class="dynamic-prev-year">2025</span></span>
               </div>
               <div id="executiveTrendChart"></div>
             </div>
@@ -2323,9 +2352,16 @@
             <div class="grid grid-cols-4">
               <div class="form-group" style="margin-bottom: 0;">
                 <label class="form-label">Tahun Anggaran</label>
-                <select class="form-select">
-                  <option selected>2026</option>
-                  <option>2025</option>
+                <select id="pmonYearSelect" class="form-select year-select-dynamic" onchange="App.handleYearChange(this.value)">
+                  <option value="2024">2024</option>
+                  <option value="2025">2025</option>
+                  <option value="2026" selected>2026</option>
+                  <option value="2027">2027</option>
+                  <option value="2028">2028</option>
+                  <option value="2029">2029</option>
+                  <option value="2030">2030</option>
+                  <option value="2031">2031</option>
+                  <option value="2032">2032</option>
                 </select>
               </div>
               <div class="form-group" style="margin-bottom: 0;">
@@ -2437,7 +2473,7 @@
           <div class="card" style="margin-bottom: 22px;">
             <div class="card-header">
               <h3 class="card-title">Rekapitulasi Berdasarkan Jenis Pengembangan</h3>
-              <span class="badge badge-blue">Tahun 2026</span>
+              <span class="badge badge-blue">Tahun <span class="dynamic-year">2026</span></span>
             </div>
             <div class="table-responsive mobile-cards">
               <table class="data-table">
@@ -3459,7 +3495,7 @@
       </div>
       <div class="modal-footer" style="display: flex; justify-content: space-between; align-items: center;">
         <span style="font-size: 11px; color: var(--color-text-muted);">Total 99 ASN Bappeda aktif terdaftar di sistem
-          (DUK 2026)</span>
+          (DUK <span class="dynamic-year">2026</span>)</span>
         <button class="btn btn-outline" onclick="App.closeModal('accountHelperModal')">Tutup</button>
       </div>
     </div>
@@ -3809,9 +3845,9 @@
   <script src="js/icons.js?v=20261014_v16"></script>
   <script src="js/charts.js?v=20261008_fix"></script>
   <script src="js/bappeda_data.js?v=20261013_v8"></script>
-  <script src="js/store.js?v=20261014_v15"></script>
-  <script src="js/export.js?v=20261014_v16"></script>
-  <script src="js/app.js?v=20261014_v15"></script>
+  <script src="js/store.js?v=20261014_v17"></script>
+  <script src="js/export.js?v=20261014_v17"></script>
+  <script src="js/app.js?v=20261014_v17"></script>
 </body>
 
 </html>

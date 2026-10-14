@@ -134,6 +134,7 @@ const Store = {
   // Initial State Seed
   defaultState: {
     theme: 'light',
+    activeYear: 2026,
     currentSession: null, // Logged in user object
     activePage: 'edash',
     unreadCount: 0,
@@ -558,6 +559,9 @@ const Store = {
       }
 
       if (!this.state.notifications) this.state.notifications = [];
+      if (!this.state.activeYear) {
+        this.state.activeYear = (this.state.careerPlan && this.state.careerPlan.periode) ? parseInt(this.state.careerPlan.periode, 10) : 2026;
+      }
       this.updateNotificationUnreadCount();
       this.updateUserStats();
 
@@ -669,6 +673,52 @@ const Store = {
         console.error('Critical: Failed to save state to localStorage even after sanitizing:', err2);
       }
     }
+  },
+
+  /**
+   * Mengambil Tahun Anggaran Aktif
+   * Default: Tahun saat ini (misal 2026) atau yang tersimpan di state
+   */
+  getActiveYear() {
+    if (!this.state.activeYear) {
+      this.state.activeYear = (new Date().getFullYear()) || 2026;
+    }
+    return Number(this.state.activeYear);
+  },
+
+  /**
+   * Mengatur Tahun Anggaran Aktif untuk seluruh sistem
+   * @param {number|string} year 
+   */
+  setActiveYear(year) {
+    const y = parseInt(year, 10);
+    if (!isNaN(y) && y >= 2020 && y <= 2040) {
+      this.state.activeYear = y;
+      if (this.state.careerPlan) {
+        this.state.careerPlan.periode = String(y);
+      }
+      this.save();
+      return y;
+    }
+    return this.getActiveYear();
+  },
+
+  /**
+   * Menghasilkan daftar tahun anggaran yang fleksibel untuk kebutuhan jangka panjang
+   * Rentang bergulir dinamis: 2024 s/d (Tahun Aktif + 6) minimal sampai 2032
+   * @returns {number[]}
+   */
+  getAvailableYears() {
+    const active = this.getActiveYear();
+    const current = (new Date().getFullYear()) || 2026;
+    const refYear = Math.max(active, current);
+    const start = Math.min(2024, refYear - 2);
+    const end = Math.max(2032, refYear + 6);
+    const years = [];
+    for (let y = start; y <= end; y++) {
+      years.push(y);
+    }
+    return years;
   },
 
   // ==========================================
@@ -1262,11 +1312,12 @@ const Store = {
     // Sync ke Supabase
     if (cleanUserNip && typeof supabaseClient !== 'undefined') {
       try {
+        const activeYr = String(this.getActiveYear());
         const { error } = await supabaseClient
           .from('idp_submissions')
           .upsert({
             nip: cleanUserNip,
-            tahun: '2026',
+            tahun: activeYr,
             status: 'Diajukan ke Atasan',
             progress: summary.progressPct,
             submitted_at: new Date().toISOString(),
@@ -1285,16 +1336,17 @@ const Store = {
 
     // Kirim notifikasi Real-time ke Admin & Pimpinan
     try {
+      const activeYr = this.getActiveYear();
       await this.sendNotification({
         penerima: 'admin',
         judul: 'Pengajuan IDP Baru',
-        pesan: `${this.state.user?.name || 'Pegawai'} mengajukan rancangan IDP Tahun 2026 (${summary.totalProgram} program, ${summary.totalJp} JP).`,
+        pesan: `${this.state.user?.name || 'Pegawai'} mengajukan rancangan IDP Tahun ${activeYr} (${summary.totalProgram} program, ${summary.totalJp} JP).`,
         tipe: 'info'
       });
       await this.sendNotification({
         penerima: 'pimpinan',
         judul: 'Pengajuan IDP Masuk',
-        pesan: `${this.state.user?.name || 'Pegawai'} telah mengajukan rencana pengembangan kompetensi (IDP 2026).`,
+        pesan: `${this.state.user?.name || 'Pegawai'} telah mengajukan rencana pengembangan kompetensi (IDP ${activeYr}).`,
         tipe: 'info'
       });
     } catch (e) {
@@ -1426,7 +1478,7 @@ const Store = {
       await this.sendNotification({
         penerima: item.nip,
         judul: 'IDP Berhasil Disetujui',
-        pesan: `Selamat! Dokumen rencana IDP Tahun 2026 Anda telah diverifikasi & disetujui resmi oleh ${this.state.user?.name || 'Pengelola SDM'}.`,
+        pesan: `Selamat! Dokumen rencana IDP Tahun ${this.getActiveYear()} Anda telah diverifikasi & disetujui resmi oleh ${this.state.user?.name || 'Pengelola SDM'}.`,
         tipe: 'success'
       });
     }
@@ -1587,7 +1639,7 @@ const Store = {
         jenisDiklat: realizationData.metode || 'Diklat Teknis',
         jp: parseInt(realizationData.jp) || 20,
         penyelenggara: realizationData.penyelenggara || 'BPSDMD Provinsi Lampung',
-        periode: 'Tahun 2026',
+        periode: 'Tahun ' + this.getActiveYear(),
         estimasi: 0,
         status: 'Terlaksana',
         isUserInput: true,

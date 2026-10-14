@@ -71,6 +71,7 @@ const App = {
     this.bindGlobalEvents();
     renderAllIcons();
     this.renderOfficialLogos();
+    this.initYearSystem();
 
     // Register Service Worker for PWA & Background Alerts
     if ('serviceWorker' in navigator) {
@@ -140,6 +141,78 @@ const App = {
     this.applyTheme(newTheme);
     this.refreshCharts();
     App.toast(`Mode ${newTheme === 'dark' ? 'Gelap' : 'Terang'} aktif`, 'info');
+  },
+
+  // ==========================================
+  // MULTI-YEAR SYSTEM (JANGKA PANJANG)
+  // ==========================================
+  initYearSystem() {
+    const activeYear = Store.getActiveYear();
+    this.populateAllYearSelects();
+    this.syncAllYearSelects(activeYear);
+    this.updateDynamicYears(activeYear);
+  },
+
+  populateAllYearSelects() {
+    const years = (typeof Store.getAvailableYears === 'function') 
+      ? Store.getAvailableYears() 
+      : [2024, 2025, 2026, 2027, 2028, 2029, 2030, 2031, 2032];
+    const activeYear = Store.getActiveYear();
+
+    document.querySelectorAll('.year-select-dynamic').forEach(sel => {
+      const isPdash = sel.id === 'pdashYearSelect';
+      sel.innerHTML = years.map(y => {
+        const isSel = Number(y) === Number(activeYear) ? 'selected' : '';
+        const label = isPdash ? `TA ${y}` : `${y}`;
+        const style = isPdash ? 'style="color:#000;"' : '';
+        return `<option value="${y}" ${isSel} ${style}>${label}</option>`;
+      }).join('');
+      sel.value = String(activeYear);
+    });
+  },
+
+  syncAllYearSelects(year) {
+    const yStr = String(year || Store.getActiveYear());
+    document.querySelectorAll('.year-select-dynamic').forEach(sel => {
+      sel.value = yStr;
+    });
+  },
+
+  updateDynamicYears(year) {
+    const y = Number(year) || Store.getActiveYear();
+    const prevY = y - 1;
+    document.querySelectorAll('.dynamic-year').forEach(el => {
+      el.textContent = y;
+    });
+    document.querySelectorAll('.dynamic-prev-year').forEach(el => {
+      el.textContent = prevY;
+    });
+  },
+
+  handleYearChange(year) {
+    const y = Store.setActiveYear(year);
+    this.syncAllYearSelects(y);
+    this.updateDynamicYears(y);
+
+    const careerPeriode = document.getElementById('careerPeriode');
+    if (careerPeriode) careerPeriode.value = String(y);
+
+    this.toast(`Tahun Anggaran aktif beralih ke TA ${y}`, 'info');
+
+    if (this.currentPage) {
+      this.renderPageData(this.currentPage);
+    }
+  },
+
+  handleCareerPeriodChange(year) {
+    const y = Store.setActiveYear(year);
+    if (Store.state.careerPlan) {
+      Store.state.careerPlan.periode = String(y);
+    }
+    Store.save();
+    this.syncAllYearSelects(y);
+    this.updateDynamicYears(y);
+    this.toast(`Periode Rencana IDP diubah ke Tahun ${y}`, 'success');
   },
 
   // Quick Role-Based Login (for demo / quick access)
@@ -234,6 +307,7 @@ const App = {
     document.getElementById('topbarRoleText').textContent = cfg.label;
 
     this.renderSidebarNav(role);
+    this.initYearSystem();
 
     // Muat data IDP resmi dari cloud Supabase
     if (sessionUser.nip) {
@@ -358,6 +432,8 @@ const App = {
   },
 
   renderPageData(pageId) {
+    this.syncAllYearSelects(Store.getActiveYear());
+    this.updateDynamicYears(Store.getActiveYear());
     switch (pageId) {
       case 'edash':
         this.renderEmployeeDashboard();
@@ -948,7 +1024,7 @@ const App = {
   renderCareerPlan() {
     const cp = Store.state.careerPlan;
     if (document.getElementById('careerPeriode')) {
-      document.getElementById('careerPeriode').value = cp.periode;
+      document.getElementById('careerPeriode').value = String(Store.getActiveYear());
     }
     this.setCareerJenjangValue(cp.jenjangTarget);
     this.updateCareerRoadmapTarget(cp.jenjangTarget);
@@ -1110,6 +1186,10 @@ const App = {
   },
 
   saveCareerPlan(isDraft = false) {
+    const cpPeriode = document.getElementById('careerPeriode');
+    if (cpPeriode) {
+      Store.setActiveYear(cpPeriode.value);
+    }
     Store.state.careerPlan.rencana = document.getElementById('careerRencanaText').value;
     Store.state.careerPlan.jenjangTarget = document.getElementById('careerJenjangTarget').value;
     Store.save();
@@ -1272,6 +1352,7 @@ const App = {
   openAddProgramModal() {
     document.getElementById('programModalTitle').textContent = 'Tambah Program Pengembangan';
     document.getElementById('programModalSub').textContent = 'Tambahkan rencana pengembangan ke formulir resmi IDP ASN.';
+    const activeYr = Store.getActiveYear();
     document.getElementById('formProgramId').value = '';
     document.getElementById('progKompetensi').value = 'Pelayanan Publik';
     document.getElementById('progMetode').value = 'Coaching';
@@ -1279,8 +1360,8 @@ const App = {
     document.getElementById('progJenisDiklat').value = '-';
     document.getElementById('progJp').value = '2';
     document.getElementById('progPenyelenggara').value = 'Internal Bappeda';
-    document.getElementById('progPeriodeMulai').value = '2026-10-01';
-    document.getElementById('progPeriodeSelesai').value = '2026-12-31';
+    document.getElementById('progPeriodeMulai').value = `${activeYr}-01-01`;
+    document.getElementById('progPeriodeSelesai').value = `${activeYr}-12-31`;
     document.getElementById('progEstimasi').value = '0';
     document.getElementById('progKeterangan').value = '';
 
@@ -1306,8 +1387,9 @@ const App = {
       document.getElementById('progPeriodeMulai').value = p.periodeMulai;
       document.getElementById('progPeriodeSelesai').value = p.periodeSelesai;
     } else {
-      document.getElementById('progPeriodeMulai').value = '2026-10-01';
-      document.getElementById('progPeriodeSelesai').value = '2026-12-31';
+      const activeYr = Store.getActiveYear();
+      document.getElementById('progPeriodeMulai').value = `${activeYr}-01-01`;
+      document.getElementById('progPeriodeSelesai').value = `${activeYr}-12-31`;
     }
     document.getElementById('progEstimasi').value = p.estimasi;
     document.getElementById('progKeterangan').value = p.keterangan || '';
@@ -1376,7 +1458,7 @@ const App = {
       penyelenggara: document.getElementById('progPenyelenggara').value,
       periode: (() => {
         const fmt = (d) => { const dt = new Date(d + 'T00:00:00'); const bln = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agt','Sep','Okt','Nov','Des']; return bln[dt.getMonth()] + ' ' + dt.getFullYear(); };
-        return mulai && selesai ? fmt(mulai) + ' – ' + fmt(selesai) : 'Tahun 2026';
+        return mulai && selesai ? fmt(mulai) + ' – ' + fmt(selesai) : ('Tahun ' + Store.getActiveYear());
       })(),
       periodeMulai: mulai,
       periodeSelesai: selesai,
@@ -1518,10 +1600,13 @@ const App = {
       updateFields();
     }
 
-    // Set tanggal default ke hari ini
-    const today = new Date().toISOString().split('T')[0];
+    // Set tanggal default ke tahun aktif
+    const activeYear = Store.getActiveYear();
+    const now = new Date();
+    const mm = String(now.getMonth() + 1).padStart(2, '0');
+    const dd = String(now.getDate()).padStart(2, '0');
     const tglInput = document.getElementById('realizTanggal');
-    if (tglInput) tglInput.value = today;
+    if (tglInput) tglInput.value = `${activeYear}-${mm}-${dd}`;
 
     this.resetCertificateDropzone();
     this.openDrawer('realizationDrawer');
@@ -1950,7 +2035,7 @@ const App = {
             </div>
           </td>
           <td>${v.jabatan || '-'}</td>
-          <td>${v.targetKarier || 'Pengembangan 2026'}</td>
+          <td>${v.targetKarier || ('Pengembangan ' + Store.getActiveYear())}</td>
           <td><b>${v.programCount || 1}</b> Program (${totalJp} JP)</td>
           <td>${v.pengajuan || 'Hari Ini'}</td>
           <td><span class="badge ${badgeCls}">${v.status || 'Diajukan ke Atasan'}</span></td>
@@ -1977,7 +2062,7 @@ const App = {
     const name = item.pegawai || 'Pegawai ASN Bappeda';
     document.getElementById('reviewDrawerEmployeeName').textContent = name;
     document.getElementById('reviewDrawerNip').textContent = `NIP: ${item.nip || '-'} • ${item.jabatan || ''} (${item.jenisJabatan || 'Struktural'})`;
-    document.getElementById('reviewDrawerTargetKarier').textContent = item.targetKarier || 'Pengembangan Kompetensi 2026';
+    document.getElementById('reviewDrawerTargetKarier').textContent = item.targetKarier || ('Pengembangan Kompetensi ' + Store.getActiveYear());
     document.getElementById('reviewDrawerRencanaKarier').textContent = item.rencanaKarier || 'Penguatan keahlian perencanaan pembangunan daerah.';
     document.getElementById('reviewDrawerTotalJp').textContent = `${item.totalJp || 20} JP`;
     document.getElementById('reviewDrawerEstimasiBiaya').textContent = item.estimasiBiaya || 'Rp0';
@@ -2359,10 +2444,22 @@ const App = {
   },
 
   // POIN 4: MASS REMINDER & COMPLIANCE ACTIONS
-  _reminderTemplates: {
-    deadline: `Yth. Bapak/Ibu Pegawai ASN Bappeda Provinsi Lampung.\n\nMenindaklanjuti Surat Edaran Sekretaris Daerah Provinsi Lampung No. 2 Tahun 2025 tentang Pelaksanaan Pengembangan Kompetensi ASN, kami mengingatkan agar segera melengkapi dan mengajukan dokumen Individual Development Plan (IDP) 2026 melalui sistem SIP-KOMPETENSI.\n\nSetiap ASN diwajibkan memenuhi hak pengembangan kompetensi minimal 20 JP per tahun. Dokumen rencana IDP yang belum diajukan dimohon segera difinalisasi untuk diverifikasi atasan langsung.\n\nAtas perhatian dan kerja samanya, kami ucapkan terima kasih.\n\n— Subbagian Umum & Kepegawaian Bappeda Provinsi Lampung`,
-    jpTarget: `Pemberitahuan Capaian Jam Pelajaran (JP) ASN Bappeda Provinsi Lampung:\n\nBerdasarkan rekapitulasi data pengembangan kompetensi pada sistem SIP-KOMPETENSI, capaian Anda saat ini belum memenuhi target standar LAN RI & BKN yaitu minimal 20 Jam Pelajaran (JP) per tahun.\n\nSilakan segera merencanakan atau merealisasikan kegiatan bangkom (Pelatihan Mandiri MOOC, Bimtek, Webinar, atau Magang) serta mengunggah bukti sertifikat pada formulir Realisasi Pengembangan SIP-KOMPETENSI.\n\nTerima kasih.\n\n— Pengelola SDM Aparatur Bappeda Lampung`,
-    revision: `Instruksi Perbaikan / Revisi Dokumen IDP 2026:\n\nDisampaikan kepada Pegawai ASN Bappeda Provinsi Lampung yang dokumen IDP-nya berstatus "Perlu Revisi", dimohon untuk segera memeriksa catatan perbaikan dari Atasan Langsung / Verifikator Kepegawaian pada menu "Review IDP".\n\nLakukan penyesuaian target kompetensi atau metode bangkom yang disarankan, kemudian ajukan kembali dokumen agar dapat disahkan menjadi dokumen final.\n\nTerima kasih.\n\n— Tim Verifikator IDP Bappeda Lampung`
+  getReminderTemplate(key) {
+    const yr = Store.getActiveYear();
+    const tpls = {
+      deadline: `Yth. Bapak/Ibu Pegawai ASN Bappeda Provinsi Lampung.\n\nMenindaklanjuti Surat Edaran Sekretaris Daerah Provinsi Lampung No. 2 Tahun 2025 tentang Pelaksanaan Pengembangan Kompetensi ASN, kami mengingatkan agar segera melengkapi dan mengajukan dokumen Individual Development Plan (IDP) Tahun ${yr} melalui sistem SIP-KOMPETENSI.\n\nSetiap ASN diwajibkan memenuhi hak pengembangan kompetensi minimal 20 JP per tahun. Dokumen rencana IDP yang belum diajukan dimohon segera difinalisasi untuk diverifikasi atasan langsung.\n\nAtas perhatian dan kerja samanya, kami ucapkan terima kasih.\n\n— Subbagian Umum & Kepegawaian Bappeda Provinsi Lampung`,
+      jpTarget: `Pemberitahuan Capaian Jam Pelajaran (JP) ASN Bappeda Provinsi Lampung:\n\nBerdasarkan rekapitulasi data pengembangan kompetensi pada sistem SIP-KOMPETENSI, capaian Anda saat ini belum memenuhi target standar LAN RI & BKN yaitu minimal 20 Jam Pelajaran (JP) per tahun.\n\nSilakan segera merencanakan atau merealisasikan kegiatan bangkom (Pelatihan Mandiri MOOC, Bimtek, Webinar, atau Magang) serta mengunggah bukti sertifikat pada formulir Realisasi Pengembangan SIP-KOMPETENSI.\n\nTerima kasih.\n\n— Pengelola SDM Aparatur Bappeda Lampung`,
+      revision: `Instruksi Perbaikan / Revisi Dokumen IDP ${yr}:\n\nDisampaikan kepada Pegawai ASN Bappeda Provinsi Lampung yang dokumen IDP-nya berstatus "Perlu Revisi", dimohon untuk segera memeriksa catatan perbaikan dari Atasan Langsung / Verifikator Kepegawaian pada menu "Review IDP".\n\nLakukan penyesuaian target kompetensi atau metode bangkom yang disarankan, kemudian ajukan kembali dokumen agar dapat disahkan menjadi dokumen final.\n\nTerima kasih.\n\n— Tim Verifikator IDP Bappeda Lampung`
+    };
+    return tpls[key] || tpls.deadline;
+  },
+
+  get _reminderTemplates() {
+    return {
+      deadline: this.getReminderTemplate('deadline'),
+      jpTarget: this.getReminderTemplate('jpTarget'),
+      revision: this.getReminderTemplate('revision')
+    };
   },
 
   openMassReminderModal(defaultTarget = 'red') {
@@ -2475,7 +2572,7 @@ const App = {
 
     try {
       const judul = targetKey === 'revision'
-        ? 'Pemberitahuan Revisi Dokumen IDP 2026'
+        ? `Pemberitahuan Revisi Dokumen IDP ${Store.getActiveYear()}`
         : 'Pengingat Kepatuhan IDP & Capaian 20 JP Bangkom';
 
       await Store.sendNotification({
@@ -2547,11 +2644,12 @@ const App = {
     }
 
     const msgEl = document.getElementById('singleRemindMessage');
+    const yr = Store.getActiveYear();
     if (msgEl) {
       if (cat.key === 'red') {
-        msgEl.value = `Yth. Sdr. ${emp.name},\n\nKami menginformasikan bahwa dokumen Individual Development Plan (IDP) Anda untuk tahun 2026 saat ini masih berstatus "${cat.label}".\n\nSesuai SE Sekda No. 2 Tahun 2025, mohon segera melengkapi dan mengajukan rencana IDP melalui SIP-KOMPETENSI (minimal 20 JP per tahun) agar dapat diverifikasi oleh atasan langsung.\n\nTerima kasih.\n— Subbag Umum & Kepegawaian Bappeda Lampung`;
+        msgEl.value = `Yth. Sdr. ${emp.name},\n\nKami menginformasikan bahwa dokumen Individual Development Plan (IDP) Anda untuk tahun ${yr} saat ini masih berstatus "${cat.label}".\n\nSesuai SE Sekda No. 2 Tahun 2025, mohon segera melengkapi dan mengajukan rencana IDP melalui SIP-KOMPETENSI (minimal 20 JP per tahun) agar dapat diverifikasi oleh atasan langsung.\n\nTerima kasih.\n— Subbag Umum & Kepegawaian Bappeda Lampung`;
       } else {
-        msgEl.value = `Yth. Sdr. ${emp.name},\n\nBerdasarkan data SIP-KOMPETENSI, capaian pengembangan kompetensi Anda saat ini adalah ${jp} JP dari target minimal 20 JP tahun 2026.\n\nDimohon segera merealisasikan kegiatan bangkom atau menindaklanjuti perbaikan dokumen yang diperlukan.\n\nTerima kasih.\n— Subbag Umum & Kepegawaian Bappeda Lampung`;
+        msgEl.value = `Yth. Sdr. ${emp.name},\n\nBerdasarkan data SIP-KOMPETENSI, capaian pengembangan kompetensi Anda saat ini adalah ${jp} JP dari target minimal 20 JP tahun ${yr}.\n\nDimohon segera merealisasikan kegiatan bangkom atau menindaklanjuti perbaikan dokumen yang diperlukan.\n\nTerima kasih.\n— Subbag Umum & Kepegawaian Bappeda Lampung`;
       }
     }
 
@@ -2572,7 +2670,7 @@ const App = {
     try {
       await Store.sendNotification({
         penerima: emp.nip,
-        judul: 'Pemberitahuan Kepatuhan IDP 2026',
+        judul: `Pemberitahuan Kepatuhan IDP ${Store.getActiveYear()}`,
         pesan: msg,
         tipe: 'warning'
       });
@@ -3412,7 +3510,7 @@ const App = {
     const role = user?.role || 'pegawai';
     const sampleMsg = role === 'pegawai' 
       ? 'Dokumen IDP Anda telah disetujui resmi oleh Atasan Bappeda.' 
-      : 'Pengajuan dokumen IDP 2026 baru dari pegawai telah diterima.';
+      : `Pengajuan dokumen IDP ${Store.getActiveYear()} baru dari pegawai telah diterima.`;
 
     await Store.sendNotification({
       penerima: role,
@@ -3739,7 +3837,7 @@ const App = {
       { id: 'eprofil', title: 'Profil Pegawai ASN', desc: 'Data kepegawaian, pangkat, golongan & jabatan', icon: 'UserRound', type: 'page' },
       { id: 'adash', title: 'Dashboard Pengelola SDM', desc: 'Statistik kepegawaian & antrean verifikasi', icon: 'LayoutDashboard', type: 'page' },
       { id: 'averif', title: 'Verifikasi IDP ASN', desc: 'Pemeriksaan dan persetujuan berkas usulan', icon: 'ShieldCheck', type: 'page' },
-      { id: 'apegawai', title: 'Data 99 Pegawai Bappeda', desc: 'Direktori DUK 2026 seluruh aparatur Bappeda', icon: 'Users', type: 'page' },
+      { id: 'apegawai', title: 'Data 99 Pegawai Bappeda', desc: 'Direktori DUK seluruh aparatur Bappeda', icon: 'Users', type: 'page' },
       { id: 'pdash', title: 'Dashboard Eksekutif Kepala Badan', desc: 'Pengendalian & kepatuhan 20 JP antar bidang', icon: 'TrendingUp', type: 'page' },
       { id: 'pmonitoring', title: 'Monitoring Kepatuhan 7 Bidang', desc: 'Capaian bangkom Sekretariat & seluruh Bidang', icon: 'BarChart3', type: 'page' },
       { id: 'plaporan', title: 'Laporan Eksekutif Capaian IDP', desc: 'Cetak dan ekspor laporan resmi berkop dinas', icon: 'FileSpreadsheet', type: 'page' },

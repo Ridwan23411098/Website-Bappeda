@@ -293,7 +293,7 @@ const ExportService = {
             <td>${p.jenisDiklat || 'Non-Klasikal'}</td>
             <td style="text-align: center; font-weight: 700;">${p.jp || 0} JP</td>
             <td>${p.penyelenggara || 'Internal Bappeda'}</td>
-            <td style="text-align: center;">${p.periode || 'Tahun 2026'}</td>
+            <td style="text-align: center;">${p.periode || ('Tahun ' + Store.getActiveYear())}</td>
             <td style="text-align: right;">Rp${(p.estimasi || 0).toLocaleString('id-ID')}</td>
             <td style="text-align: center;">${statusBadge}</td>
           </tr>
@@ -323,7 +323,7 @@ const ExportService = {
           </div>
           <div style="text-align: right;">
             <div><b>Lampiran:</b> 1 (Satu) Berkas Rencana IDP</div>
-            <div><b>Tahun Anggaran:</b> 2026</div>
+            <div><b>Tahun Anggaran:</b> ${Store.getActiveYear()}</div>
             <div><b>Status Verifikasi:</b> <span style="font-weight: 700; color: #0b5394;">${idpStatus.toUpperCase()}</span></div>
           </div>
         </div>
@@ -402,7 +402,7 @@ const ExportService = {
 
         <!-- BAGIAN III: PROGRAM PENGEMBANGAN PRIORITAS (MATRIKS 20 JP) -->
         <div class="print-section-title" style="margin-top: 14px; display: flex; justify-content: space-between; align-items: center;">
-          <span>III. MATRIKS PROGRAM PENGEMBANGAN KOMPETENSI (TAHUN 2026)</span>
+          <span>III. MATRIKS PROGRAM PENGEMBANGAN KOMPETENSI (TAHUN ${Store.getActiveYear()})</span>
           ${jpBadgeHtml}
         </div>
         <table class="print-table-data">
@@ -480,7 +480,7 @@ const ExportService = {
             <b>SIP-IDP BAPPEDA PROVINSI LAMPUNG</b> &bull; Dokumen sah yang diproduksi otomatis oleh sistem manajemen kompetensi aparatur.
           </div>
           <div>
-            Kode Otentikasi: <b>IDP-2026-${cleanNip ? cleanNip.slice(-6) : 'VERIF'}-SAH</b>
+            Kode Otentikasi: <b>IDP-${Store.getActiveYear()}-${cleanNip ? cleanNip.slice(-6) : 'VERIF'}-SAH</b>
           </div>
         </div>
       </div>
@@ -589,7 +589,7 @@ const ExportService = {
           </div>
           <div style="text-align: right;">
             <div><b>Perihal:</b> Laporan Eksekutif Capaian IDP & Kepatuhan Bangkom ASN</div>
-            <div><b>Tahun Anggaran:</b> 2026</div>
+            <div><b>Tahun Anggaran:</b> ${Store.getActiveYear()}</div>
             <div><b>Tanggal:</b> ${tanggalSurat}</div>
           </div>
         </div>
@@ -601,7 +601,7 @@ const ExportService = {
             BADAN PERENCANAAN PEMBANGUNAN DAERAH PROVINSI LAMPUNG
           </h2>
           <div style="font-size: 10px; font-weight: 650; color: #222; margin-top: 2px;">
-            PERIODE TAHUN ANGGARAN 2026 &bull; STANDAR MINIMAL 20 JAM PELAJARAN (JP) PER PEGAWAI
+            PERIODE TAHUN ANGGARAN ${Store.getActiveYear()} &bull; STANDAR MINIMAL 20 JAM PELAJARAN (JP) PER PEGAWAI
           </div>
         </div>
 
@@ -733,7 +733,7 @@ const ExportService = {
       `${u.pctKepatuhan}%`,
       u.pctKepatuhan >= 90 ? 'Sangat Baik' : u.pctKepatuhan >= 80 ? 'Baik' : 'Perlu Pembinaan'
     ]);
-    this.downloadExcel('Rekap_Eksekutif_Pengembangan_SDM_Bappeda_2026', 'Rekapitulasi Eksekutif', headers, rows);
+    this.downloadExcel(`Rekap_Eksekutif_Pengembangan_SDM_Bappeda_${Store.getActiveYear()}`, 'Rekapitulasi Eksekutif', headers, rows);
     if (typeof App !== 'undefined' && App.toast) {
       App.toast('File Excel Rekapitulasi Eksekutif berhasil diunduh', 'success');
     }
@@ -1362,7 +1362,7 @@ const BackupService = {
       ];
     });
 
-    ExportService.downloadExcel('Rekap_Audit_Kepegawaian_Bappeda_2026', 'Audit Basis Data', headers, rows);
+    ExportService.downloadExcel(`Rekap_Audit_Kepegawaian_Bappeda_${Store.getActiveYear()}`, 'Audit Basis Data', headers, rows);
     if (typeof App !== 'undefined' && App.toast) {
       App.toast('File Excel Rekapitulasi Audit Kepegawaian berhasil diunduh', 'success');
     }
@@ -1854,7 +1854,7 @@ const AuditService = {
       l.status
     ]);
 
-    ExportService.downloadExcel('Log_Audit_Kedinasan_Bappeda_2026', 'Jejak Rekam SPBE', headers, rows);
+    ExportService.downloadExcel(`Log_Audit_Kedinasan_Bappeda_${Store.getActiveYear()}`, 'Jejak Rekam SPBE', headers, rows);
     if (typeof App !== 'undefined' && App.toast) {
       App.toast('Berkas Excel Log Audit Kedinasan berhasil diunduh', 'success');
     }
@@ -2264,7 +2264,7 @@ const PresentationService = {
               SIP-KOMPETENSI — PAPARAN RAPAT PIMPINAN
             </div>
             <div style="font-size: 10.5px; color: rgba(255, 255, 255, 0.65);">
-              Bappeda Provinsi Lampung • Evaluasi Pengembangan Kompetensi 99 ASN 2026
+              Bappeda Provinsi Lampung • Evaluasi Pengembangan Kompetensi 99 ASN ${Store.getActiveYear()}
             </div>
           </div>
         </div>
@@ -2452,7 +2452,7 @@ const PresentationService = {
                   <span data-icon="Coins" data-icon-size="18" style="color: #f59e0b;"></span>
                 </div>
                 <div style="font-size: 28px; font-weight: 850; color: #f59e0b; line-height: 1;">Rp ${(summary.totalEstimasiAnggaran / 1000000).toFixed(1)} <span style="font-size: 14px; font-weight: 600; color: #94a3b8;">Jt</span></div>
-                <div style="font-size: 11.5px; color: #94a3b8; margin-top: 8px;">Standar Biaya Umum (SBU) Bangkom 2026</div>
+                <div style="font-size: 11.5px; color: #94a3b8; margin-top: 8px;">Standar Biaya Umum (SBU) Bangkom ${Store.getActiveYear()}</div>
               </div>
             </div>
 
@@ -2740,7 +2740,7 @@ const PresentationService = {
                 <div style="font-size: 13px; color: #94a3b8;">Instruksi resmi kedinasan Bappeda Provinsi Lampung untuk menjamin 100% kepatuhan ASN</div>
               </div>
               <div class="badge" style="background: #f59e0b; color: #000; font-size: 11px; font-weight: 800;">
-                Berlaku Sah TA 2026
+                Berlaku Sah TA ${Store.getActiveYear()}
               </div>
             </div>
 
@@ -2750,7 +2750,7 @@ const PresentationService = {
                 <div style="width: 32px; height: 32px; border-radius: 8px; background: rgba(56, 189, 248, 0.2); color: #38bdf8; display: flex; align-items: center; justify-content: center; font-weight: 800; margin-bottom: 12px;">1</div>
                 <div style="font-size: 13.5px; font-weight: 750; color: #ffffff; margin-bottom: 6px;">Batas Waktu Triwulan III</div>
                 <div style="font-size: 12px; color: #94a3b8; line-height: 1.5;">
-                  Seluruh Kepala Bidang wajib mengawal 39 ASN agar target minimal 20 JP terpenuhi paling lambat <b>30 September 2026</b>.
+                  Seluruh Kepala Bidang wajib mengawal 39 ASN agar target minimal 20 JP terpenuhi paling lambat <b>30 September ${Store.getActiveYear()}</b>.
                 </div>
               </div>
 
@@ -2775,7 +2775,7 @@ const PresentationService = {
             <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 16px 24px; display: flex; justify-content: space-between; align-items: center;">
               <div>
                 <div style="font-size: 11px; color: #94a3b8;">Ditetapkan &amp; Disahkan di:</div>
-                <div style="font-size: 13px; font-weight: 750; color: #ffffff; margin-top: 2px;">Bandar Lampung, 14 Oktober 2026</div>
+                <div style="font-size: 13px; font-weight: 750; color: #ffffff; margin-top: 2px;">Bandar Lampung, 14 Oktober ${Store.getActiveYear()}</div>
                 <div style="font-size: 11px; color: #38bdf8; margin-top: 2px;">Kepala Badan Perencanaan Pembangunan Daerah</div>
               </div>
 
