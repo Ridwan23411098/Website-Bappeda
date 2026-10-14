@@ -185,6 +185,9 @@ const App = {
       // Tunggu hasil dari Supabase
       const sessionUser = await Store.authenticate(nipInput.value, passInput.value);
       this.restoreSession(sessionUser);
+      if (typeof AuditService !== 'undefined') {
+        AuditService.log('Otentikasi', 'Login Sesi Portal', `Pengguna ${sessionUser.name} (${sessionUser.nip}) berhasil masuk sistem.`, 'Sukses', sessionUser);
+      }
       App.toast(`Autentikasi berhasil. Selamat datang, ${sessionUser.name}`, 'success');
     } catch (error) {
       if (errAlert) {
@@ -836,6 +839,9 @@ const App = {
 
     try {
       await Store.changePassword(oldVal, newVal);
+      if (typeof AuditService !== 'undefined') {
+        AuditService.log('Keamanan', 'Pembaruan Kata Sandi Akun', 'Kata sandi akun dinas berhasil diperbarui dengan enkripsi SHA-256 cloud.', 'Sukses');
+      }
       App.toast('Kata sandi Anda berhasil diperbarui dan tersimpan aman di cloud Supabase!', 'success');
       this.closeModal('changePasswordModal');
       this.renderEmployeeProfile();
@@ -1612,6 +1618,10 @@ const App = {
         bukti: file.name
       }, file);
 
+      if (typeof AuditService !== 'undefined') {
+        AuditService.log('Realisasi', 'Unggah Berkas Sertifikat Realisasi', `Mencatat realisasi kegiatan "${prog}" (${jp} JP) dengan bukti berkas: ${file.name}`, 'Sukses');
+      }
+
       App.toast('Realisasi pengembangan berhasil dicatat & sertifikat tersimpan aman di cloud!', 'success');
       this.closeDrawer('realizationDrawer');
       this.renderEmployeeRealization();
@@ -1985,7 +1995,11 @@ const App = {
 
   approveVerification(id, newStatus = 'Final') {
     const note = document.getElementById('verifNotesInput').value;
+    const v = (Store.state.verifications || []).find(x => x.id === id);
     Store.approveIdp(id, note || 'Disetujui tanpa catatan perbaikan.', newStatus);
+    if (typeof AuditService !== 'undefined') {
+      AuditService.log('Verifikasi', `Verifikasi Dokumen IDP (${newStatus})`, `Menyetujui IDP pegawai ${v?.pegawai || 'ASN'} dengan status ${newStatus}. Catatan: ${note || 'Sesuai standar'}`, 'Sukses');
+    }
     this.closeDrawer('reviewDrawer');
     App.toast(`IDP Pegawai resmi diperbarui (Status: ${newStatus})`, 'success');
     this.renderAdminVerification();
@@ -2004,7 +2018,11 @@ const App = {
       return;
     }
 
+    const v = (Store.state.verifications || []).find(x => x.id === id);
     Store.rejectIdp(id, reason);
+    if (typeof AuditService !== 'undefined') {
+      AuditService.log('Verifikasi', 'Pengembalian IDP untuk Revisi', `Mengembalikan berkas IDP ${v?.pegawai || 'ASN'} dengan catatan perbaikan: "${reason}"`, 'Peringatan');
+    }
     this.closeModal('revisionReasonModal');
     this.closeDrawer('reviewDrawer');
     App.toast('IDP telah dikembalikan kepada pegawai untuk direvisi', 'info');
@@ -2467,6 +2485,10 @@ const App = {
         tipe: 'warning'
       });
 
+      if (typeof AuditService !== 'undefined') {
+        AuditService.log('Notifikasi', 'Pengiriman Pengingat Massal IDP', `Menyebarkan notifikasi & draft WhatsApp pengingat ke ${targets.length} ASN sasaran (${targetKey}).`, 'Sukses');
+      }
+
       const adminTimeline = document.querySelector('.timeline-list');
       if (adminTimeline) {
         const newAct = document.createElement('div');
@@ -2554,6 +2576,10 @@ const App = {
         pesan: msg,
         tipe: 'warning'
       });
+
+      if (typeof AuditService !== 'undefined') {
+        AuditService.log('Notifikasi', 'Pengiriman Pengingat Personal', `Mengirimkan notifikasi pengingat kepatuhan IDP ke pegawai: ${emp.name} (${emp.nip})`, 'Sukses');
+      }
 
       App.toast(`Notifikasi pengingat berhasil dikirim ke akun ${emp.name}!`, 'success');
       this.closeModal('singleReminderModal');
@@ -2682,7 +2708,7 @@ const App = {
   },
 
   switchMasterTab(tabName) {
-    const tabs = ['metode', 'rumpun', 'jenjang', 'backup'];
+    const tabs = ['metode', 'rumpun', 'jenjang', 'backup', 'audit'];
     tabs.forEach(t => {
       const cap = t.charAt(0).toUpperCase() + t.slice(1);
       const btn = document.getElementById(`tabBtn${cap}`);
@@ -2692,6 +2718,9 @@ const App = {
     });
     if (tabName === 'backup' && typeof BackupService !== 'undefined') {
       BackupService.renderBackupTab();
+    }
+    if (tabName === 'audit' && typeof AuditService !== 'undefined') {
+      AuditService.renderAuditTab();
     }
     renderAllIcons();
   },

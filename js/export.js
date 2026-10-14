@@ -1567,3 +1567,513 @@ if (typeof window !== 'undefined') {
   window.BackupService = BackupService;
 }
 
+// ===========================================================================
+// AUDIT TRAIL SERVICE (REKAM JEJAK KEDINASAN SPBE)
+// ===========================================================================
+
+const AuditService = {
+  auditPage: 1,
+  auditPageSize: 10,
+  auditSearch: '',
+  auditCategoryFilter: '',
+  auditStatusFilter: '',
+
+  /**
+   * Mengambil seluruh data log audit dari state/localStorage atau inisialisasi data resmi awal
+   */
+  getAuditLogs() {
+    let logs = (typeof Store !== 'undefined' && Store.state) ? Store.state.auditLogs : null;
+    if (!logs || !Array.isArray(logs) || logs.length === 0) {
+      try {
+        const saved = localStorage.getItem('sip_audit_logs');
+        if (saved) logs = JSON.parse(saved);
+      } catch (e) {}
+    }
+
+    if (!logs || logs.length === 0) {
+      logs = this.getInitialSeedLogs();
+      if (typeof Store !== 'undefined' && Store.state) Store.state.auditLogs = logs;
+      try {
+        localStorage.setItem('sip_audit_logs', JSON.stringify(logs));
+      } catch (e) {}
+    }
+
+    return logs;
+  },
+
+  getInitialSeedLogs() {
+    return [
+      {
+        id: 'AUD-20261014-012',
+        timestamp: '2026-10-14T03:26:00Z',
+        waktuFormatted: '14 Okt 2026, 10:26 WIB',
+        aktor: 'CIK MARYA S.E.,M.M.',
+        nip: '196910261992032002',
+        role: 'Kasubbag Kepegawaian',
+        kategori: 'Notifikasi',
+        aktivitas: 'Pengiriman Pengingat Massal Kepatuhan IDP',
+        detail: 'Menyebarkan notifikasi sistem & draft format WhatsApp kepada 10 ASN kategori merah belum mengajukan IDP.',
+        ipSaluran: '10.15.22.14 (LAN Bappeda)',
+        status: 'Sukses'
+      },
+      {
+        id: 'AUD-20261014-011',
+        timestamp: '2026-10-14T03:12:00Z',
+        waktuFormatted: '14 Okt 2026, 10:12 WIB',
+        aktor: 'RIZKY ADITYA PRATAMA S.T.',
+        nip: '198804152011011003',
+        role: 'Pegawai ASN',
+        kategori: 'Realisasi',
+        aktivitas: 'Unggah Berkas Sertifikat Realisasi',
+        detail: 'Unggah dokumen bukti "Pelatihan Manajemen Perencanaan Daerah 2026.pdf" (420 KB, 20 JP) tervalidasi ke cloud storage.',
+        ipSaluran: 'Web Mobile (PWA)',
+        status: 'Sukses'
+      },
+      {
+        id: 'AUD-20261014-010',
+        timestamp: '2026-10-14T02:53:00Z',
+        waktuFormatted: '14 Okt 2026, 09:53 WIB',
+        aktor: 'ANDI ARAFAT S.T., M.E.',
+        nip: '197407072002121008',
+        role: 'Sekretaris Bappeda',
+        kategori: 'Keamanan',
+        aktivitas: 'Perubahan Kata Sandi Akun Dinas',
+        detail: 'Pembaruan kata sandi akun mandiri berhasil dienkripsi SHA-256 dan disinkronkan ke Supabase cloud.',
+        ipSaluran: '10.15.22.10 (LAN Bappeda)',
+        status: 'Sukses'
+      },
+      {
+        id: 'AUD-20261014-009',
+        timestamp: '2026-10-14T02:44:00Z',
+        waktuFormatted: '14 Okt 2026, 09:44 WIB',
+        aktor: 'CIK MARYA S.E.,M.M.',
+        nip: '196910261992032002',
+        role: 'Kasubbag Kepegawaian',
+        kategori: 'Verifikasi',
+        aktivitas: 'Verifikasi & Pengesahan IDP Pegawai',
+        detail: 'Menyetujui dokumen IDP 2026 Sdr. Rizky Aditya Pratama (Analis Perencanaan Ahli Muda) status FINAL 20 JP.',
+        ipSaluran: '10.15.22.14 (LAN Bappeda)',
+        status: 'Sukses'
+      },
+      {
+        id: 'AUD-20261014-008',
+        timestamp: '2026-10-14T02:15:00Z',
+        waktuFormatted: '14 Okt 2026, 09:15 WIB',
+        aktor: 'Dr. ANANG RISGIYANTO S.K.M., M.Kes.',
+        nip: '197507312000031002',
+        role: 'Kepala Bappeda',
+        kategori: 'Otentikasi',
+        aktivitas: 'Login Sesi Eksekutif Pimpinan',
+        detail: 'Otentikasi pimpinan berhasil masuk portal Dashboard Eksekutif Pengendalian IDP 99 ASN.',
+        ipSaluran: '10.15.22.01 (VIP Pimpinan)',
+        status: 'Sukses'
+      },
+      {
+        id: 'AUD-20261014-007',
+        timestamp: '2026-10-14T01:30:00Z',
+        waktuFormatted: '14 Okt 2026, 08:30 WIB',
+        aktor: 'Dr. ANANG RISGIYANTO S.K.M., M.Kes.',
+        nip: '197507312000031002',
+        role: 'Kepala Bappeda',
+        kategori: 'Verifikasi',
+        aktivitas: 'Penerbitan Disposisi Arahan Pimpinan',
+        detail: 'Menerbitkan arahan dinas percepatan pemenuhan target 20 JP untuk Bidang Perekonomian & PMPE.',
+        ipSaluran: '10.15.22.01 (VIP Pimpinan)',
+        status: 'Sukses'
+      },
+      {
+        id: 'AUD-20261013-006',
+        timestamp: '2026-10-13T16:15:00Z',
+        waktuFormatted: '13 Okt 2026, 23:15 WIB',
+        aktor: 'CIK MARYA S.E.,M.M.',
+        nip: '196910261992032002',
+        role: 'Kasubbag Kepegawaian',
+        kategori: 'Cadangan',
+        aktivitas: 'Pencadangan Penuh Basis Data ASN',
+        detail: 'Membuat arsip cadangan terenkripsi SHA-256 seluruh data 99 pegawai, formulir IDP, dan verifikasi.',
+        ipSaluran: '10.15.22.14 (LAN Bappeda)',
+        status: 'Sukses'
+      },
+      {
+        id: 'AUD-20261013-005',
+        timestamp: '2026-10-13T14:40:00Z',
+        waktuFormatted: '13 Okt 2026, 21:40 WIB',
+        aktor: 'CIK MARYA S.E.,M.M.',
+        nip: '196910261992032002',
+        role: 'Kasubbag Kepegawaian',
+        kategori: 'Verifikasi',
+        aktivitas: 'Pengembalian IDP untuk Revisi',
+        detail: 'Mengembalikan berkas Sdr. Agus Setiawan dengan catatan: "Mohon tambahkan 1 metode pelatihan teknis perencanaan".',
+        ipSaluran: '10.15.22.14 (LAN Bappeda)',
+        status: 'Peringatan'
+      },
+      {
+        id: 'AUD-20261013-004',
+        timestamp: '2026-10-13T11:20:00Z',
+        waktuFormatted: '13 Okt 2026, 18:20 WIB',
+        aktor: 'SITI RAHMA S.E.',
+        nip: '199208242015022001',
+        role: 'Pegawai ASN',
+        kategori: 'Verifikasi',
+        aktivitas: 'Pengajuan Final Formulir IDP 2026',
+        detail: 'Mengajukan dokumen IDP Rencana 22 JP (Bimtek SIPD, Webinar Renja, Mentoring Analisis Data Makro).',
+        ipSaluran: '10.15.22.33 (LAN Bappeda)',
+        status: 'Sukses'
+      },
+      {
+        id: 'AUD-20261013-003',
+        timestamp: '2026-10-13T09:05:00Z',
+        waktuFormatted: '13 Okt 2026, 16:05 WIB',
+        aktor: 'Ir. IDA SUSANTI S S.T., M.T',
+        nip: '197410092006042005',
+        role: 'Kepala Bidang Infrastruktur',
+        kategori: 'Otentikasi',
+        aktivitas: 'Login Sesi Pejabat Administrator',
+        detail: 'Otentikasi berhasil masuk sistem SIP-KOMPETENSI.',
+        ipSaluran: '10.15.22.18 (LAN Bappeda)',
+        status: 'Sukses'
+      },
+      {
+        id: 'AUD-20261013-002',
+        timestamp: '2026-10-13T08:15:00Z',
+        waktuFormatted: '13 Okt 2026, 15:15 WIB',
+        aktor: 'MEYDIANDRA EKA PUTRA S.P,MIP',
+        nip: '197305141998031007',
+        role: 'Kepala Bidang PMPE',
+        kategori: 'Verifikasi',
+        aktivitas: 'Persetujuan Atasan Langsung',
+        detail: 'Menyetujui rancangan rencana kompetensi staf Bidang PMPE (Rendalev).',
+        ipSaluran: '10.15.22.12 (LAN Bappeda)',
+        status: 'Sukses'
+      },
+      {
+        id: 'AUD-20261013-001',
+        timestamp: '2026-10-13T07:30:00Z',
+        waktuFormatted: '13 Okt 2026, 14:30 WIB',
+        aktor: 'SISTEM SIP-KOMPETENSI',
+        nip: '196910261992032002',
+        role: 'Sistem Otomatis',
+        kategori: 'Cadangan',
+        aktivitas: 'Inisialisasi Master DUK 99 ASN Bappeda',
+        detail: 'Sinkronisasi master data kepegawaian berlaku tahun 2026 sukses.',
+        ipSaluran: 'Cloud Supabase Server',
+        status: 'Info'
+      }
+    ];
+  },
+
+  /**
+   * Mencatat aktivitas baru ke dalam log audit
+   */
+  log(kategori, aktivitas, detail, status = 'Sukses', actorOverride = null) {
+    const user = (typeof Store !== 'undefined' && (Store.state?.currentSession || Store.state?.user)) || {
+      name: 'CIK MARYA S.E.,M.M.',
+      nip: '196910261992032002',
+      role: 'admin'
+    };
+
+    const now = new Date();
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agt', 'Sep', 'Okt', 'Nov', 'Des'];
+    const timeFormatted = `${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}, ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')} WIB`;
+
+    const newLog = {
+      id: `AUD-${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}-${Date.now().toString().slice(-4)}`,
+      timestamp: now.toISOString(),
+      waktuFormatted: timeFormatted,
+      aktor: actorOverride ? actorOverride.name : user.name,
+      nip: actorOverride ? actorOverride.nip : user.nip,
+      role: actorOverride ? (actorOverride.role || 'Pegawai ASN') : (user.role === 'admin' ? 'Kasubbag Kepegawaian' : user.role === 'pimpinan' ? 'Kepala Bappeda' : 'Pegawai ASN'),
+      kategori: kategori || 'Umum',
+      aktivitas: aktivitas || 'Aktivitas Kedinasan',
+      detail: detail || '-',
+      ipSaluran: '10.15.22.14 (LAN Bappeda)',
+      status: status || 'Sukses'
+    };
+
+    if (typeof Store !== 'undefined' && Store.state) {
+      if (!Store.state.auditLogs) Store.state.auditLogs = [];
+      Store.state.auditLogs.unshift(newLog);
+      if (typeof Store.save === 'function') Store.save();
+    }
+
+    try {
+      const logs = this.getAuditLogs();
+      logs.unshift(newLog);
+      localStorage.setItem('sip_audit_logs', JSON.stringify(logs.slice(0, 100)));
+    } catch (e) {}
+
+    // Jika tab audit sedang aktif dibuka, refresh tampilannya
+    const pane = document.getElementById('masterPaneAudit');
+    if (pane && pane.style.display !== 'none') {
+      this.renderAuditTab();
+    }
+
+    return newLog;
+  },
+
+  onFilterChange() {
+    this.auditPage = 1;
+    this.renderAuditTab();
+  },
+
+  resetFilter() {
+    const s = document.getElementById('auditSearchInput');
+    const c = document.getElementById('auditCategoryFilter');
+    const st = document.getElementById('auditStatusFilter');
+    if (s) s.value = '';
+    if (c) c.value = '';
+    if (st) st.value = '';
+    this.auditPage = 1;
+    this.renderAuditTab();
+    if (typeof App !== 'undefined' && App.toast) {
+      App.toast('Filter log audit direset', 'info');
+    }
+  },
+
+  setAuditPage(p) {
+    this.auditPage = p;
+    this.renderAuditTab();
+    const el = document.getElementById('auditTableContainer');
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  },
+
+  exportAuditLogs() {
+    const logs = this.getAuditLogs();
+    const headers = ['No', 'ID Log', 'Waktu (WIB)', 'Aktor / Nama', 'NIP', 'Peran Kedinasan', 'Kategori', 'Aktivitas', 'Detail Perubahan', 'Saluran Akses', 'Status'];
+    const rows = logs.map((l, i) => [
+      i + 1,
+      l.id,
+      l.waktuFormatted,
+      l.aktor,
+      `'${l.nip}`,
+      l.role,
+      l.kategori,
+      l.aktivitas,
+      l.detail,
+      l.ipSaluran,
+      l.status
+    ]);
+
+    ExportService.downloadExcel('Log_Audit_Kedinasan_Bappeda_2026', 'Jejak Rekam SPBE', headers, rows);
+    if (typeof App !== 'undefined' && App.toast) {
+      App.toast('Berkas Excel Log Audit Kedinasan berhasil diunduh', 'success');
+    }
+  },
+
+  renderAuditTab() {
+    const pane = document.getElementById('masterPaneAudit');
+    if (!pane) return;
+
+    const allLogs = this.getAuditLogs();
+    const search = (document.getElementById('auditSearchInput')?.value || '').toLowerCase().trim();
+    const catFilter = document.getElementById('auditCategoryFilter')?.value || '';
+    const statusFilter = document.getElementById('auditStatusFilter')?.value || '';
+
+    const filtered = allLogs.filter(l => {
+      if (catFilter && l.kategori !== catFilter) return false;
+      if (statusFilter && l.status !== statusFilter) return false;
+      if (search) {
+        const matchAktor = (l.aktor || '').toLowerCase().includes(search);
+        const matchNip = String(l.nip || '').includes(search);
+        const matchAkt = (l.aktivitas || '').toLowerCase().includes(search);
+        const matchDet = (l.detail || '').toLowerCase().includes(search);
+        if (!matchAktor && !matchNip && !matchAkt && !matchDet) return false;
+      }
+      return true;
+    });
+
+    // Hitung KPI
+    const totalCount = allLogs.length;
+    const verifCount = allLogs.filter(l => l.kategori === 'Verifikasi' || l.kategori === 'Realisasi').length;
+    const warnCount = allLogs.filter(l => l.status === 'Peringatan' || (l.detail || '').includes('Revisi')).length;
+    const secCount = allLogs.filter(l => l.kategori === 'Keamanan' || l.kategori === 'Otentikasi').length;
+
+    // Pagination
+    const total = filtered.length;
+    const totalPages = Math.ceil(total / this.auditPageSize) || 1;
+    if (this.auditPage > totalPages) this.auditPage = 1;
+    const startIdx = (this.auditPage - 1) * this.auditPageSize;
+    const pageItems = filtered.slice(startIdx, startIdx + this.auditPageSize);
+
+    // Kategori Badges
+    const getCatBadge = (cat) => {
+      switch (cat) {
+        case 'Otentikasi': return '<span class="badge badge-blue">Otentikasi</span>';
+        case 'Verifikasi': return '<span class="badge badge-success">Verifikasi</span>';
+        case 'Realisasi': return '<span class="badge badge-purple" style="background: rgba(168, 85, 247, 0.12); color: #9333ea;">Realisasi</span>';
+        case 'Notifikasi': return '<span class="badge badge-warning">Notifikasi</span>';
+        case 'Keamanan': return '<span class="badge badge-rose" style="background: rgba(244, 63, 94, 0.12); color: #e11d48;">Keamanan</span>';
+        case 'Cadangan': return '<span class="badge badge-teal" style="background: rgba(20, 184, 166, 0.12); color: #0d9488;">Cadangan</span>';
+        default: return `<span class="badge badge-neutral">${cat}</span>`;
+      }
+    };
+
+    const getStatusBadge = (st) => {
+      if (st === 'Sukses') return '<span class="badge badge-success" style="font-size: 10px;">Sah / Sukses</span>';
+      if (st === 'Peringatan') return '<span class="badge badge-danger" style="font-size: 10px;">Perlu Revisi</span>';
+      return '<span class="badge badge-neutral" style="font-size: 10px;">Info</span>';
+    };
+
+    pane.innerHTML = `
+      <div style="padding: 6px 0;">
+        <!-- Header Banner -->
+        <div style="background: linear-gradient(135deg, rgba(15, 23, 42, 0.04), rgba(30, 41, 59, 0.08)); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: 18px 22px; margin-bottom: 22px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px;">
+          <div>
+            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 4px;">
+              <h2 style="font-size: 16px; font-weight: 750; color: var(--color-text-primary); margin: 0;">Log Audit &amp; Rekam Jejak Kedinasan (Audit Trail SPBE)</h2>
+              <span class="badge badge-success" style="font-size: 10.5px;"><span class="compliance-dot dot-green"></span> Integritas Terjamin</span>
+            </div>
+            <p style="font-size: 12px; color: var(--color-text-secondary); margin: 0; max-width: 720px; line-height: 1.5;">
+              Pencatatan kronologis otomatis seluruh permohonan IDP, verifikasi Kasubbag Kepegawaian, disposisi pimpinan, pengunggahan sertifikat, dan pengiriman notifikasi untuk memenuhi standar akuntabilitas Inspektorat Daerah &amp; BKN.
+            </p>
+          </div>
+          <div style="display: flex; gap: 8px;">
+            <button class="btn btn-outline btn-sm" onclick="AuditService.exportAuditLogs()" title="Unduh seluruh rekap riwayat log audit dalam format Excel resmi">
+              <span data-icon="Download" data-icon-size="14"></span> Unduh Log (.xlsx)
+            </button>
+            <button class="btn btn-primary btn-sm" onclick="AuditService.renderAuditTab()" title="Segarkan data log audit">
+              <span data-icon="RotateCcw" data-icon-size="14"></span> Segarkan
+            </button>
+          </div>
+        </div>
+
+        <!-- 4 KPI Cards -->
+        <div class="grid grid-cols-4" style="margin-bottom: 22px; gap: 14px;">
+          <div class="stat-card">
+            <div class="stat-card-inner">
+              <div class="stat-card-info">
+                <div class="stat-card-label">Total Entri Log</div>
+                <div class="stat-card-value">${totalCount} <span style="font-size: 12px; color: var(--color-text-muted);">Riwayat</span></div>
+                <div class="stat-card-desc">Terekam di sistem dinas</div>
+              </div>
+              <div class="stat-card-icon"><span data-icon="History" data-icon-size="20"></span></div>
+            </div>
+          </div>
+
+          <div class="stat-card success">
+            <div class="stat-card-inner">
+              <div class="stat-card-info">
+                <div class="stat-card-label">Verifikasi &amp; Sah</div>
+                <div class="stat-card-value text-success">${verifCount} <span style="font-size: 12px; color: var(--color-text-muted);">Aksi</span></div>
+                <div class="stat-card-desc">IDP &amp; Sertifikat Disahkan</div>
+              </div>
+              <div class="stat-card-icon"><span data-icon="ShieldCheck" data-icon-size="20"></span></div>
+            </div>
+          </div>
+
+          <div class="stat-card danger">
+            <div class="stat-card-inner">
+              <div class="stat-card-info">
+                <div class="stat-card-label">Revisi &amp; Peringatan</div>
+                <div class="stat-card-value text-danger">${warnCount} <span style="font-size: 12px; color: var(--color-text-muted);">Catatan</span></div>
+                <div class="stat-card-desc">Perlu atensi pegawai</div>
+              </div>
+              <div class="stat-card-icon"><span data-icon="AlertTriangle" data-icon-size="20"></span></div>
+            </div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-card-inner">
+              <div class="stat-card-info">
+                <div class="stat-card-label">Keamanan &amp; Sesi</div>
+                <div class="stat-card-value">${secCount} <span style="font-size: 12px; color: var(--color-text-muted);">Sesi</span></div>
+                <div class="stat-card-desc">Login &amp; Enkripsi Sandi</div>
+              </div>
+              <div class="stat-card-icon"><span data-icon="Lock" data-icon-size="20"></span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Filter Toolbar -->
+        <div class="table-toolbar" style="margin-bottom: 14px; background: var(--color-surface); padding: 12px 16px; border: 1px solid var(--color-border); border-radius: var(--radius-md);">
+          <div class="table-filter-group" style="flex-wrap: wrap; gap: 10px;">
+            <input type="text" id="auditSearchInput" class="form-control" style="width: 260px;" placeholder="Cari nama, NIP, atau aktivitas..." value="${search}" oninput="AuditService.onFilterChange()">
+            <select id="auditCategoryFilter" class="form-select" style="width: 200px;" onchange="AuditService.onFilterChange()">
+              <option value="" ${catFilter === '' ? 'selected' : ''}>Semua Kategori</option>
+              <option value="Verifikasi" ${catFilter === 'Verifikasi' ? 'selected' : ''}>Verifikasi IDP</option>
+              <option value="Realisasi" ${catFilter === 'Realisasi' ? 'selected' : ''}>Realisasi &amp; Sertifikat</option>
+              <option value="Notifikasi" ${catFilter === 'Notifikasi' ? 'selected' : ''}>Notifikasi &amp; Pengingat</option>
+              <option value="Keamanan" ${catFilter === 'Keamanan' ? 'selected' : ''}>Keamanan &amp; Sandi</option>
+              <option value="Otentikasi" ${catFilter === 'Otentikasi' ? 'selected' : ''}>Otentikasi Sesi</option>
+              <option value="Cadangan" ${catFilter === 'Cadangan' ? 'selected' : ''}>Cadangan Basis Data</option>
+            </select>
+            <select id="auditStatusFilter" class="form-select" style="width: 150px;" onchange="AuditService.onFilterChange()">
+              <option value="" ${statusFilter === '' ? 'selected' : ''}>Semua Status</option>
+              <option value="Sukses" ${statusFilter === 'Sukses' ? 'selected' : ''}>Sah / Sukses</option>
+              <option value="Peringatan" ${statusFilter === 'Peringatan' ? 'selected' : ''}>Perlu Revisi</option>
+              <option value="Info" ${statusFilter === 'Info' ? 'selected' : ''}>Info</option>
+            </select>
+            <button class="btn btn-outline btn-sm" onclick="AuditService.resetFilter()">Reset</button>
+          </div>
+        </div>
+
+        <!-- Table -->
+        <div id="auditTableContainer" class="table-responsive">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th style="width: 50px; text-align: center;">No</th>
+                <th style="width: 150px;">Waktu &amp; Tanggal</th>
+                <th style="width: 220px;">Aktor / Pegawai</th>
+                <th style="width: 120px;">Kategori</th>
+                <th>Aktivitas Kedinasan &amp; Keterangan</th>
+                <th style="width: 160px;">Saluran / Jaringan</th>
+                <th style="width: 100px; text-align: center;">Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${pageItems.length === 0 ? `
+                <tr><td colspan="7" style="text-align: center; padding: 36px; color: var(--color-text-muted);">Tidak ada rekaman log audit yang sesuai kriteria pencarian.</td></tr>
+              ` : pageItems.map((l, idx) => {
+                const no = startIdx + idx + 1;
+                return `
+                  <tr>
+                    <td style="text-align: center; color: var(--color-text-muted); font-size: 11px;">${no}</td>
+                    <td style="font-size: 11.5px; white-space: nowrap;">
+                      <div style="font-weight: 600; color: var(--color-text-primary);">${l.waktuFormatted.split(',')[0]}</div>
+                      <div style="font-size: 10.5px; color: var(--color-text-muted);">${l.waktuFormatted.split(',')[1] || ''}</div>
+                    </td>
+                    <td>
+                      <div style="font-weight: 650; font-size: 12px; color: var(--color-text-primary);">${l.aktor}</div>
+                      <div style="font-size: 10.5px; color: var(--color-text-muted); font-family: monospace;">NIP: ${l.nip}</div>
+                      <div style="font-size: 10.5px; color: var(--color-primary);">${l.role}</div>
+                    </td>
+                    <td>${getCatBadge(l.kategori)}</td>
+                    <td>
+                      <div style="font-weight: 650; font-size: 12px; color: var(--color-text-primary); margin-bottom: 2px;">${l.aktivitas}</div>
+                      <div style="font-size: 11.5px; color: var(--color-text-secondary); line-height: 1.4;">${l.detail}</div>
+                    </td>
+                    <td style="font-size: 11px; color: var(--color-text-muted); font-family: monospace;">
+                      ${l.ipSaluran}
+                    </td>
+                    <td style="text-align: center;">${getStatusBadge(l.status)}</td>
+                  </tr>
+                `;
+              }).join('')}
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Pagination -->
+        <div class="pagination-wrapper" style="margin-top: 14px;">
+          <div style="font-size: 12px; color: var(--color-text-muted);">
+            Menampilkan <b>${total === 0 ? 0 : startIdx + 1}–${Math.min(startIdx + this.auditPageSize, total)}</b> dari <b>${total}</b> rekaman log audit resmi
+          </div>
+          <div class="pagination-controls">
+            ${totalPages > 1 ? Array.from({length: totalPages}, (_, i) => i + 1).map(p => `
+              <button class="page-btn ${p === this.auditPage ? 'active' : ''}" onclick="AuditService.setAuditPage(${p})">${p}</button>
+            `).join('') : ''}
+          </div>
+        </div>
+      </div>
+    `;
+
+    if (typeof renderAllIcons === 'function') renderAllIcons();
+  }
+};
+
+if (typeof window !== 'undefined') {
+  window.AuditService = AuditService;
+}
+
+

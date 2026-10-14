@@ -28,7 +28,7 @@
     rel="stylesheet">
 
   <!-- Core Stylesheet -->
-  <link rel="stylesheet" href="css/app.css?v=20261014_v13">
+  <link rel="stylesheet" href="css/app.css?v=20261014_v14">
 </head>
 
 <body>
@@ -1991,7 +1991,10 @@
                 Jenjang Target & Level Jabatan
               </button>
               <button class="tab-btn" id="tabBtnBackup" onclick="App.switchMasterTab('backup')">
-                <span data-icon="DatabaseBackup" data-icon-size="14" style="margin-right: 4px;"></span> Cadangan & Keamanan Data
+                <span data-icon="DatabaseBackup" data-icon-size="14" style="margin-right: 4px;"></span> Cadangan &amp; Keamanan Data
+              </button>
+              <button class="tab-btn" id="tabBtnAudit" onclick="App.switchMasterTab('audit')">
+                <span data-icon="History" data-icon-size="14" style="margin-right: 4px;"></span> Log Audit &amp; Rekam Jejak
               </button>
             </div>
 
@@ -2046,6 +2049,9 @@
 
             <!-- Tab 4: Pusat Cadangan & Keamanan Data (Tahap 6) -->
             <div id="masterPaneBackup" style="display: none;"></div>
+
+            <!-- Tab 5: Log Audit & Rekam Jejak Kedinasan (Audit Trail) -->
+            <div id="masterPaneAudit" style="display: none;"></div>
           </div>
         </section>
 
@@ -2104,8 +2110,8 @@
               <div class="stat-card-inner">
                 <div class="stat-card-info">
                   <div class="stat-card-label">Kepatuhan 20 JP ASN</div>
-                  <div class="stat-card-value text-success" id="execKepatuhanJp"><span>88%</span></div>
-                  <div class="stat-card-desc" id="execKepatuhanJpCount">87 ASN Memenuhi Target</div>
+                  <div class="stat-card-value text-success" id="execKepatuhanJp"><span>61%</span></div>
+                  <div class="stat-card-desc" id="execKepatuhanJpCount">60 ASN Memenuhi Target (≥20 JP)</div>
                 </div>
                 <div class="stat-card-icon"><span data-icon="ShieldCheck" data-icon-size="20"></span></div>
               </div>
@@ -2115,8 +2121,8 @@
               <div class="stat-card-inner">
                 <div class="stat-card-info">
                   <div class="stat-card-label">IDP Disahkan (Final)</div>
-                  <div class="stat-card-value text-primary" id="execIdpDisahkan"><span>91</span> <span class="unit">ASN</span></div>
-                  <div class="stat-card-desc" id="execIdpDisahkanPct">91.9% Dokumen Sah</div>
+                  <div class="stat-card-value text-primary" id="execIdpDisahkan"><span>60</span> <span class="unit">ASN</span></div>
+                  <div class="stat-card-desc" id="execIdpDisahkanPct">61% Dokumen Sah</div>
                 </div>
                 <div class="stat-card-icon"><span data-icon="ClipboardCheck" data-icon-size="20"></span></div>
               </div>
@@ -2126,8 +2132,8 @@
               <div class="stat-card-inner">
                 <div class="stat-card-info">
                   <div class="stat-card-label">Total Akumulasi JP</div>
-                  <div class="stat-card-value" id="execTotalJp"><span>2.140</span> <span class="unit">JP</span></div>
-                  <div class="stat-card-desc" id="execAvgJp">Rata-rata 21.6 JP/ASN</div>
+                  <div class="stat-card-value" id="execTotalJp"><span>1.862</span> <span class="unit">JP</span></div>
+                  <div class="stat-card-desc" id="execAvgJp">Rata-rata 18.8 JP/ASN</div>
                 </div>
                 <div class="stat-card-icon"><span data-icon="Clock" data-icon-size="20"></span></div>
               </div>
@@ -2137,7 +2143,7 @@
               <div class="stat-card-inner">
                 <div class="stat-card-info">
                   <div class="stat-card-label">Investasi Bangkom</div>
-                  <div class="stat-card-value text-warning" id="execEstimasiAnggaran"><span>Rp 353.1</span> <span class="unit">Jt</span></div>
+                  <div class="stat-card-value text-warning" id="execEstimasiAnggaran"><span>Rp 307.2</span> <span class="unit">Jt</span></div>
                   <div class="stat-card-desc">SBU Pelatihan ASN 2026</div>
                 </div>
                 <div class="stat-card-icon"><span data-icon="Coins" data-icon-size="20"></span></div>
@@ -3793,8 +3799,8 @@
   <script src="js/charts.js?v=20261008_fix"></script>
   <script src="js/bappeda_data.js?v=20261013_v8"></script>
   <script src="js/store.js?v=20261013_v8"></script>
-  <script src="js/export.js?v=20261013_v8"></script>
-  <script src="js/app.js?v=20261014_v13"></script>
+  <script src="js/export.js?v=20261014_v14"></script>
+  <script src="js/app.js?v=20261014_v14"></script>
 </body>
 
 </html>
