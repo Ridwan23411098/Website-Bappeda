@@ -1120,7 +1120,7 @@ a {
   position: absolute;
   top: calc(100% + 10px);
   right: 0;
-  width: 250px;
+  width: 265px;
   background: var(--color-surface, #ffffff);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg, 14px);
@@ -2393,14 +2393,6 @@ a {
     margin: 0 10px;
     min-width: 190px;
     max-width: 400px;
-  }
-
-  #pwaInstallBtn span:last-child {
-    display: none;
-  }
-
-  #pwaInstallBtn {
-    padding: 6px 8px;
   }
 
   #topbarRoleText {

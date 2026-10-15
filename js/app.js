@@ -134,6 +134,12 @@ const App = {
     if (themeBtn) {
       themeBtn.innerHTML = theme === 'dark' ? getIcon('Sun', 18) : getIcon('Moon', 18);
     }
+    const ddThemeBtn = document.getElementById('userDropdownThemeBtn');
+    if (ddThemeBtn) {
+      ddThemeBtn.innerHTML = theme === 'dark'
+        ? `${getIcon('Sun', 15)} <span>Ganti ke Mode Terang</span>`
+        : `${getIcon('Moon', 15)} <span>Ganti ke Mode Gelap</span>`;
+    }
   },
 
   toggleTheme() {
@@ -4104,7 +4110,7 @@ const App = {
       console.log('PWA installation prompt available');
 
       const topbarBtn = document.getElementById('pwaInstallBtn');
-      if (topbarBtn) topbarBtn.style.display = 'inline-flex';
+      if (topbarBtn) topbarBtn.style.display = 'flex';
       if (typeof lucide !== 'undefined' && lucide.createIcons) lucide.createIcons();
     });
 
@@ -4119,7 +4125,7 @@ const App = {
     const isIos = /iphone|ipad|ipod/.test(window.navigator.userAgent.toLowerCase());
     if (isIos && !isStandalone) {
       const topbarBtn = document.getElementById('pwaInstallBtn');
-      if (topbarBtn) topbarBtn.style.display = 'inline-flex';
+      if (topbarBtn) topbarBtn.style.display = 'flex';
       if (typeof lucide !== 'undefined' && lucide.createIcons) lucide.createIcons();
     }
   },

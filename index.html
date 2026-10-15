@@ -28,7 +28,7 @@
     rel="stylesheet">
 
   <!-- Core Stylesheet -->
-  <link rel="stylesheet" href="css/app.css?v=20261015_v24">
+  <link rel="stylesheet" href="css/app.css?v=20261015_v25">
 </head>
 
 <body>
@@ -249,26 +249,6 @@
         <!-- Topbar Right Actions -->
         <div class="topbar-right">
           <div class="topbar-actions">
-            <!-- PWA Install Button -->
-            <button class="btn btn-outline btn-sm" id="pwaInstallBtn" onclick="App.triggerPwaInstall()" style="display: none; align-items: center; gap: 5px; font-size: 11px; padding: 4px 10px; border-radius: 6px; border-color: var(--color-primary); color: var(--color-primary);" title="Pasang Aplikasi di Layar Utama HP / Desktop">
-              <span data-icon="Smartphone" data-icon-size="14"></span> <span>Pasang di HP</span>
-            </button>
-
-            <!-- Mode Paparan / Presentasi Rapat Pimpinan (Rapim) -->
-            <button class="btn-icon" id="topbarPresentationBtn" onclick="PresentationService.openPresentation()" title="Mode Paparan / Presentasi Rapat Pimpinan">
-              <span data-icon="Presentation" data-icon-size="18"></span>
-            </button>
-
-            <!-- Dark Mode Toggle -->
-            <button class="btn-icon" id="themeToggleBtn" onclick="App.toggleTheme()" title="Ubah Mode Tampilan">
-              <span data-icon="Moon" data-icon-size="18"></span>
-            </button>
-
-            <!-- Help Icon (Buku Panduan & SOP Kedinasan) -->
-            <button class="btn-icon" onclick="App.openSopGuide()" title="Buku Panduan &amp; SOP Kedinasan">
-              <span data-icon="HelpCircle" data-icon-size="18"></span>
-            </button>
-
             <!-- Notification Bell with Dropdown -->
             <div class="notification-container">
               <button class="btn-icon" id="notificationBtn" onclick="App.toggleNotificationDropdown()"
@@ -340,11 +320,28 @@
                   <span data-icon="Key" data-icon-size="15"></span>
                   <span>Ubah Kata Sandi</span>
                 </button>
-                <button type="button" class="user-dropdown-item" onclick="App.toggleTheme(); App.closeUserDropdown();">
-                  <span data-icon="Moon" data-icon-size="15"></span>
-                  <span>Ganti Mode Tampilan</span>
-                </button>
+
                 <div class="user-dropdown-divider"></div>
+
+                <button type="button" class="user-dropdown-item" id="userDropdownThemeBtn" onclick="App.toggleTheme(); App.closeUserDropdown();">
+                  <span data-icon="Moon" data-icon-size="15"></span>
+                  <span>Ganti Mode Gelap / Terang</span>
+                </button>
+                <button type="button" class="user-dropdown-item" onclick="PresentationService.openPresentation(); App.closeUserDropdown();">
+                  <span data-icon="Presentation" data-icon-size="15"></span>
+                  <span>Mode Paparan Rapat Pimpinan</span>
+                </button>
+                <button type="button" class="user-dropdown-item" onclick="App.openSopGuide(); App.closeUserDropdown();">
+                  <span data-icon="BookOpen" data-icon-size="15"></span>
+                  <span>Buku Panduan &amp; SOP Kedinasan</span>
+                </button>
+                <button type="button" class="user-dropdown-item" id="pwaInstallBtn" onclick="App.triggerPwaInstall(); App.closeUserDropdown();" style="display: none;">
+                  <span data-icon="Smartphone" data-icon-size="15"></span>
+                  <span>Pasang Aplikasi (PWA)</span>
+                </button>
+
+                <div class="user-dropdown-divider"></div>
+
                 <button type="button" class="user-dropdown-item" onclick="App.confirmResetDemoData(); App.closeUserDropdown();" style="color: var(--color-warning);">
                   <span data-icon="RotateCcw" data-icon-size="15"></span>
                   <span>Reset Data Demo Baseline</span>
@@ -3851,7 +3848,7 @@
   <script src="js/bappeda_data.js?v=20261013_v8"></script>
   <script src="js/store.js?v=20261015_v21"></script>
   <script src="js/export.js?v=20261015_v21"></script>
-  <script src="js/app.js?v=20261015_v24"></script>
+  <script src="js/app.js?v=20261015_v25"></script>
 </body>
 
 </html>
