@@ -509,6 +509,23 @@ a {
   border-color: #cbd5e1;
 }
 
+.btn-outline-primary {
+  background: #ffffff;
+  border: 1.5px solid #1E3A5F;
+  color: #1E3A5F;
+  font-weight: 650;
+  box-shadow: 0 1px 3px rgba(30, 58, 95, 0.08);
+  transition: all 0.2s ease;
+}
+
+.btn-outline-primary:hover {
+  background: #EBF3FA;
+  border-color: #0F2E4A;
+  color: #0F2E4A;
+  box-shadow: 0 3px 8px rgba(30, 58, 95, 0.16);
+  transform: translateY(-1px);
+}
+
 .btn-success {
   background: var(--color-success);
   color: #FFFFFF;
@@ -3379,6 +3396,18 @@ button[onclick*="quickLogin"]:hover {
 
 [data-theme="dark"] .btn-outline:hover {
   background: var(--color-hover) !important;
+}
+
+[data-theme="dark"] .btn-outline-primary {
+  background: rgba(56, 189, 248, 0.08) !important;
+  border-color: #38bdf8 !important;
+  color: #38bdf8 !important;
+}
+
+[data-theme="dark"] .btn-outline-primary:hover {
+  background: rgba(56, 189, 248, 0.18) !important;
+  border-color: #7dd3fc !important;
+  color: #7dd3fc !important;
 }
 
 [data-theme="dark"] .page-title,

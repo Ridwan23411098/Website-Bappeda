@@ -28,7 +28,7 @@
     rel="stylesheet">
 
   <!-- Core Stylesheet -->
-  <link rel="stylesheet" href="css/app.css?v=20261015_v30">
+  <link rel="stylesheet" href="css/app.css?v=20261015_v31">
 
   <!-- Critical Inlined CSS (Ensures 100% Instant & Flawless Mobile / PWA Rendering) -->
   <style>
@@ -1438,8 +1438,8 @@
                 Bappeda Provinsi Lampung.</p>
             </div>
             <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-              <button class="btn btn-outline" onclick="ExportService.showPrintDialog()">
-                <span data-icon="Download" data-icon-size="16"></span> Cetak Dokumen Resmi
+              <button class="btn btn-outline-primary" onclick="ExportService.showPrintDialog()" style="border: 1.5px solid #1E3A5F; color: #1E3A5F; font-weight: 650; display: inline-flex; align-items: center; gap: 8px;">
+                <span data-icon="Printer" data-icon-size="16"></span> Cetak Dokumen Resmi
               </button>
             </div>
           </div>
@@ -1687,8 +1687,8 @@
               </div>
 
               <div style="display: flex; gap: 10px;">
-                <button class="btn btn-outline" style="flex: 1;" onclick="ExportService.showPrintDialog()">
-                  <span data-icon="Download" data-icon-size="14"></span> Cetak PDF
+                <button class="btn btn-outline-primary" style="flex: 1; border: 1.5px solid #1E3A5F; color: #1E3A5F; font-weight: 650;" onclick="ExportService.showPrintDialog()">
+                  <span data-icon="Printer" data-icon-size="14"></span> Cetak PDF
                 </button>
                 <button class="btn btn-primary" style="flex: 2;" onclick="App.openSubmitIdpModal()">
                   <span data-icon="ShieldCheck" data-icon-size="16"></span> Ajukan IDP
@@ -3971,7 +3971,7 @@
   <script src="js/bappeda_data.js?v=20261013_v8"></script>
   <script src="js/store.js?v=20261015_v21"></script>
   <script src="js/export.js?v=20261015_v21"></script>
-  <script src="js/app.js?v=20261015_v30"></script>
+  <script src="js/app.js?v=20261015_v31"></script>
 </body>
 
 </html>
