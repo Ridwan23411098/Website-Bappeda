@@ -86,6 +86,12 @@ const App = {
     // Initialize PWA Installation & Mobile Capabilities
     this.initPwaInstaller();
 
+    // Safety: ensure all modals are closed and hidden on load
+    document.querySelectorAll('.modal-overlay').forEach(m => {
+      m.classList.remove('active');
+      m.style.display = 'none';
+    });
+
     // Kosongkan form input login secara agresif untuk mencegah autofill browser
     this.clearLoginFields();
     setTimeout(() => this.clearLoginFields(), 150);
@@ -3352,12 +3358,18 @@ const App = {
 
   openModal(modalId) {
     const m = document.getElementById(modalId);
-    if (m) m.classList.add('active');
+    if (m) {
+      m.style.display = 'flex';
+      setTimeout(() => m.classList.add('active'), 10);
+    }
   },
 
   closeModal(modalId) {
     const m = document.getElementById(modalId);
-    if (m) m.classList.remove('active');
+    if (m) {
+      m.classList.remove('active');
+      m.style.display = 'none';
+    }
   },
 
   openDrawer(drawerId) {
@@ -4403,7 +4415,10 @@ const App = {
       if (e.key === 'Escape') {
         this.closeGlobalSearch();
         this.closeUserDropdown();
-        document.querySelectorAll('.modal-overlay.active').forEach(m => m.classList.remove('active'));
+        document.querySelectorAll('.modal-overlay.active').forEach(m => {
+          m.classList.remove('active');
+          m.style.display = 'none';
+        });
         document.querySelectorAll('.drawer-overlay.active').forEach(d => d.classList.remove('active'));
         const dd = document.getElementById('notificationDropdown');
         if (dd) dd.classList.remove('show');
@@ -4420,6 +4435,11 @@ const App = {
     });
 
     document.addEventListener('click', e => {
+      if (e.target && e.target.classList && e.target.classList.contains('modal-overlay')) {
+        e.target.classList.remove('active');
+        e.target.style.display = 'none';
+      }
+
       const searchBox = document.querySelector('.topbar-center');
       if (searchBox && !searchBox.contains(e.target)) {
         this.closeGlobalSearch();

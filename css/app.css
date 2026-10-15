@@ -3,9 +3,6 @@
    BAPPEDA PROVINSI LAMPUNG
    Enterprise Design System & Token Stylesheet
    ========================================================================== */
-
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
-
 :root {
   /* Primary & Brand Colors */
   --color-primary: #0F2E4A;
@@ -1998,8 +1995,8 @@ a {
   inset: 0;
   background: rgba(8, 20, 30, 0.55);
   backdrop-filter: blur(4px);
-  z-index: 100;
-  display: flex;
+  z-index: 1000;
+  display: none;
   align-items: center;
   justify-content: center;
   padding: 20px;
@@ -2009,6 +2006,7 @@ a {
 }
 
 .modal-overlay.active {
+  display: flex !important;
   opacity: 1;
   visibility: visible;
 }
