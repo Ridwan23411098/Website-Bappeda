@@ -28,7 +28,7 @@
     rel="stylesheet">
 
   <!-- Core Stylesheet -->
-  <link rel="stylesheet" href="css/app.css?v=20261015_v25">
+  <link rel="stylesheet" href="css/app.css?v=20261015_v26">
 </head>
 
 <body>
@@ -249,6 +249,11 @@
         <!-- Topbar Right Actions -->
         <div class="topbar-right">
           <div class="topbar-actions">
+            <!-- Dark Mode Toggle -->
+            <button class="btn-icon" id="themeToggleBtn" onclick="App.toggleTheme()" title="Ubah Mode Tampilan (Gelap / Terang)">
+              <span data-icon="Moon" data-icon-size="18"></span>
+            </button>
+
             <!-- Notification Bell with Dropdown -->
             <div class="notification-container">
               <button class="btn-icon" id="notificationBtn" onclick="App.toggleNotificationDropdown()"
@@ -3848,7 +3853,7 @@
   <script src="js/bappeda_data.js?v=20261013_v8"></script>
   <script src="js/store.js?v=20261015_v21"></script>
   <script src="js/export.js?v=20261015_v21"></script>
-  <script src="js/app.js?v=20261015_v25"></script>
+  <script src="js/app.js?v=20261015_v26"></script>
 </body>
 
 </html>
