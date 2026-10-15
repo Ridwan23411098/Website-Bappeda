@@ -4246,10 +4246,19 @@ const App = {
         const initials = (e.name || 'ASN').split(' ').map(w => w[0]).filter(Boolean).slice(0, 2).join('').toUpperCase();
         const highlightedName = this.highlightSearchMatch(e.name || '', q);
         const highlightedNip = this.highlightSearchMatch(e.nipFormatted || e.nip || '', q);
-        const prog = e.progress || 0;
-        const progBadge = prog >= 20 
-          ? `<span class="badge badge-success" style="font-size: 10px; padding: 2px 6px;">${prog} JP (Tuntas)</span>`
-          : `<span class="badge badge-warning" style="font-size: 10px; padding: 2px 6px;">${prog} JP</span>`;
+        let jpVal = 0;
+        if (typeof e.jp === 'number') {
+          jpVal = e.jp;
+        } else if (typeof e.progress === 'number') {
+          jpVal = e.progress;
+        } else if (typeof e.progress === 'string') {
+          const m = e.progress.match(/^(\d+)/);
+          jpVal = m ? parseInt(m[1], 10) : (parseInt(e.progress, 10) || 0);
+        }
+        const isTuntas = jpVal >= 20 || (typeof e.progress === 'string' && e.progress.includes('100%'));
+        const progBadge = isTuntas 
+          ? `<span class="badge badge-success" style="font-size: 10px; padding: 2px 7px; white-space: nowrap; flex-shrink: 0;">${jpVal} JP (Tuntas)</span>`
+          : `<span class="badge badge-warning" style="font-size: 10px; padding: 2px 7px; white-space: nowrap; flex-shrink: 0;">${jpVal} JP</span>`;
 
         html += `
           <div class="search-result-item" onclick="App.selectSearchResult('employee', ${e.id})">
@@ -4260,7 +4269,7 @@ const App = {
                 <div class="search-item-subtitle">NIP. ${highlightedNip} &bull; ${e.unit || '-'}</div>
               </div>
             </div>
-            <div>${progBadge}</div>
+            <div style="flex-shrink: 0;">${progBadge}</div>
           </div>
         `;
       });
@@ -4287,7 +4296,7 @@ const App = {
                 <div class="search-item-subtitle">${m.desc}</div>
               </div>
             </div>
-            <span style="font-size: 10px; color: var(--color-text-muted); background: var(--color-surface-subtle); padding: 2px 6px; border-radius: 4px; border: 1px solid var(--color-border);">Buka</span>
+            <span style="font-size: 10px; color: var(--color-text-muted); background: var(--color-surface-subtle); padding: 2px 6px; border-radius: 4px; border: 1px solid var(--color-border); white-space: nowrap; flex-shrink: 0;">Buka</span>
           </div>
         `;
       });

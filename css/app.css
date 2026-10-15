@@ -881,9 +881,11 @@ a {
 }
 
 .topbar-center {
-  flex: 1;
-  max-width: 440px;
-  margin: 0 24px;
+  flex: 1 1 320px;
+  min-width: 220px;
+  max-width: 480px;
+  margin: 0 16px;
+  position: relative;
 }
 
 .topbar-search {
@@ -940,21 +942,25 @@ a {
   position: absolute;
   top: calc(100% + 8px);
   left: 0;
-  right: 0;
-  max-height: 440px;
+  width: 460px;
+  min-width: 360px;
+  max-width: min(480px, calc(100vw - 32px));
+  max-height: 480px;
   overflow-y: auto;
+  overflow-x: hidden;
   background: var(--color-surface, #ffffff);
   border: 1px solid var(--color-border, #E2E8F0);
-  border-radius: 12px;
-  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.16);
+  border-radius: 14px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.18);
   z-index: 1050;
   padding: 8px 0;
-  backdrop-filter: blur(8px);
+  backdrop-filter: blur(12px);
+  box-sizing: border-box;
 }
 
 .search-group-header {
-  padding: 6px 14px 4px;
-  font-size: 10.5px;
+  padding: 8px 16px 4px;
+  font-size: 11px;
   font-weight: 700;
   color: var(--color-text-muted, #64748B);
   text-transform: uppercase;
@@ -963,7 +969,8 @@ a {
   align-items: center;
   justify-content: space-between;
   border-top: 1px solid var(--color-border, #E2E8F0);
-  margin-top: 4px;
+  margin-top: 6px;
+  white-space: nowrap;
 }
 
 .search-group-header:first-child {
@@ -975,10 +982,11 @@ a {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 8px 14px;
+  padding: 9px 16px;
   cursor: pointer;
   transition: all 120ms ease;
   border-left: 3px solid transparent;
+  gap: 12px;
 }
 
 .search-result-item:hover,
@@ -990,30 +998,33 @@ a {
 .search-item-left {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
   min-width: 0;
+  flex: 1 1 auto;
 }
 
 .search-avatar-badge {
-  width: 32px;
-  height: 32px;
+  width: 34px;
+  height: 34px;
   border-radius: 8px;
   background: rgba(30, 58, 95, 0.08);
   color: #1E3A5F;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 11px;
+  font-size: 11.5px;
   font-weight: 700;
   flex-shrink: 0;
 }
 
 .search-item-info {
   min-width: 0;
+  flex: 1 1 auto;
+  overflow: hidden;
 }
 
 .search-item-title {
-  font-size: 12.5px;
+  font-size: 13px;
   font-weight: 650;
   color: var(--color-text-primary, #1E293B);
   white-space: nowrap;
@@ -2367,6 +2378,58 @@ a {
 /* ==========================================================================
    RESPONSIVE DESIGN
    ========================================================================== */
+@media (max-width: 1280px) {
+  .topbar {
+    padding-left: 14px;
+    padding-right: 14px;
+  }
+
+  .breadcrumb-nav .brand-name,
+  .breadcrumb-nav .separator {
+    display: none;
+  }
+
+  .topbar-center {
+    margin: 0 10px;
+    min-width: 190px;
+    max-width: 400px;
+  }
+
+  #pwaInstallBtn span:last-child {
+    display: none;
+  }
+
+  #pwaInstallBtn {
+    padding: 6px 8px;
+  }
+
+  #topbarRoleText {
+    display: none;
+  }
+
+  #topbarUserName {
+    max-width: 110px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    display: inline-block;
+  }
+
+  .topbar-right {
+    gap: 8px;
+  }
+
+  .topbar-actions {
+    gap: 4px;
+  }
+
+  .search-results-dropdown {
+    width: 420px;
+    min-width: 320px;
+    max-width: calc(100vw - 40px);
+  }
+}
+
 @media (max-width: 1024px) {
   :root {
     --sidebar-width: 72px;
