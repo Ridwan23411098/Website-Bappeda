@@ -343,6 +343,19 @@ const App = {
     App.toast('Sesi Anda telah berhasil diakhiri dengan aman.', 'info');
   },
 
+  confirmResetDemoData() {
+    const isConfirmed = window.confirm(
+      'Konfirmasi Reset Data Demo:\n\nApakah Anda ingin mengembalikan seluruh data sistem ke baseline resmi TA 2026?\nSeluruh data pengajuan uji coba akan dibersihkan agar aplikasi siap dipresentasikan secara rapi ke Pimpinan.'
+    );
+    if (!isConfirmed) return;
+
+    Store.resetDemoData();
+    App.toast('Data simulasi berhasil direset ke baseline resmi 2026!', 'success');
+    setTimeout(() => {
+      window.location.reload();
+    }, 600);
+  },
+
   // Navigation
   renderSidebarNav(role) {
     const cfg = NAV_CONFIG[role];
@@ -3024,19 +3037,36 @@ const App = {
       { label: 'Kurang (<10 JP)', value: Math.max(1, belumTerlaksana), color: 'var(--color-danger)' }
     ]);
 
-    // 3. Trend Line (Akumulasi Kumulatif Menuju 1.862 JP)
-    Charts.renderTrendLine('executiveTrendChart', [160, 320, 510, 720, 960, 1180, 1390, 1580, 1720, 1810, 1845, summary.totalJp], [
+    // 3. Trend Line (Akumulasi Kumulatif Menuju Target JP)
+    const activeYr = Number(Store.getActiveYear()) || 2026;
+    let trendValues;
+    if (activeYr === 2026) {
+      trendValues = [160, 320, 510, 720, 960, 1180, 1390, 1580, 1720, 1810, 1845, summary.totalJp];
+    } else {
+      const curJp = summary.totalJp || 0;
+      trendValues = [
+        Math.round(curJp * 0.1), Math.round(curJp * 0.2), Math.round(curJp * 0.35),
+        Math.round(curJp * 0.45), Math.round(curJp * 0.55), Math.round(curJp * 0.65),
+        Math.round(curJp * 0.75), Math.round(curJp * 0.85), Math.round(curJp * 0.9),
+        Math.round(curJp * 0.95), Math.round(curJp * 0.98), curJp
+      ];
+    }
+    Charts.renderTrendLine('executiveTrendChart', trendValues, [
       'Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'
     ]);
 
     // 4. Render Dynamic Executive Strategic Insights
     const elInsights = document.getElementById('executiveStrategicInsights');
     if (elInsights) {
+      const sortedUnits = [...unitBreakdown].filter(u => u.pegawai > 0).sort((a,b) => (b.pctIdp || 0) - (a.pctIdp || 0));
+      const top1 = sortedUnits[0] ? `${sortedUnits[0].unit} (${sortedUnits[0].pctIdp}%)` : 'Unit Kerja Bappeda';
+      const top2 = sortedUnits[1] ? ` dan ${sortedUnits[1].unit} (${sortedUnits[1].pctIdp}%)` : '';
+
       elInsights.innerHTML = `
         <div style="padding: 12px 14px; background: var(--color-surface-subtle); border-radius: var(--radius-md); border: 1px solid var(--color-border); border-left: 3px solid var(--color-primary);">
-          <div style="font-weight: 750; color: var(--color-primary); font-size: 13px;">Tingkat Kepatuhan Pengesahan IDP ${summary.persenDisetujui}%</div>
+          <div style="font-weight: 750; color: var(--color-primary); font-size: 13px;">Tingkat Kepatuhan Pengesahan IDP ${summary.persenDisetujui}% (TA ${activeYr})</div>
           <p style="font-size: 12px; color: var(--color-text-secondary); margin-top: 4px; line-height: 1.5; margin-bottom: 0;">
-            ${summary.idpDisetujui} dari ${summary.totalPegawai} ASN telah memiliki dokumen IDP sah berstatus Final. UPTD Pusdatin (70%) dan Bidang PMPE (67%) memimpin capaian pengesahan.
+            ${summary.idpDisetujui} dari ${summary.totalPegawai} ASN telah memiliki dokumen IDP sah berstatus Final. ${summary.idpDisetujui > 0 ? `${top1}${top2} memimpin capaian pengesahan.` : `Pada TA ${activeYr}, pendaftaran usulan IDP pegawai baru dimulai.`}
           </p>
         </div>
 
@@ -3050,7 +3080,7 @@ const App = {
         <div style="padding: 12px 14px; background: var(--color-surface-subtle); border-radius: var(--radius-md); border: 1px solid var(--color-border); border-left: 3px solid var(--color-warning);">
           <div style="font-weight: 750; color: var(--color-warning); font-size: 13px;">${summary.perluTindakLanjut} ASN Memerlukan Tindak Lanjut Pengendalian</div>
           <p style="font-size: 12px; color: var(--color-text-secondary); margin-top: 4px; line-height: 1.5; margin-bottom: 0;">
-            Disarankan menerbitkan disposisi pimpinan untuk percepatan pengajuan formulir IDP dan pemenuhan target 20 JP sebelum evaluasi akhir tahun.
+            Disarankan menerbitkan disposisi pimpinan untuk percepatan pengajuan formulir IDP dan pemenuhan target 20 JP sebelum evaluasi akhir tahun anggaran ${activeYr}.
           </p>
         </div>
       `;
@@ -3447,6 +3477,7 @@ const App = {
               // Cek apakah notifikasi ini ditujukan untuk user ini
               const isForMe =
                 newRow.penerima === 'all' ||
+                newRow.penerima === 'semua' ||
                 newRow.penerima === role ||
                 cleanRowPenerima === cleanUserNip ||
                 ((role === 'admin' || role === 'pimpinan') && (newRow.penerima === 'all_admin' || newRow.penerima === 'admin'));

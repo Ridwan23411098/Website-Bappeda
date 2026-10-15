@@ -1296,7 +1296,7 @@ const Store = {
     // Broadcast ke Notifikasi Lonceng (Top Bar Bell)
     try {
       await this.sendNotification({
-        penerima: 'semua',
+        penerima: 'all',
         judul: `📢 Arahan Kepala Bappeda (${target})`,
         pesan: `"${text.trim().substring(0, 120)}${text.trim().length > 120 ? '...' : ''}"`,
         tipe: 'warning'
@@ -1867,9 +1867,9 @@ const Store = {
           .limit(30);
 
         if (role === 'admin' || role === 'pimpinan') {
-          query = query.or(`penerima.eq.all,penerima.eq.${role},penerima.eq.all_admin,penerima.eq.${nip}`);
+          query = query.or(`penerima.eq.all,penerima.eq.semua,penerima.eq.${role},penerima.eq.all_admin,penerima.eq.${nip}`);
         } else {
-          query = query.or(`penerima.eq.all,penerima.eq.pegawai,penerima.eq.${nip}`);
+          query = query.or(`penerima.eq.all,penerima.eq.semua,penerima.eq.pegawai,penerima.eq.${nip}`);
         }
 
         const { data, error } = await query;
@@ -1972,6 +1972,29 @@ const Store = {
   updateNotificationUnreadCount() {
     if (!this.state.notifications) this.state.notifications = [];
     this.state.unreadCount = this.state.notifications.filter(n => !n.dibaca).length;
+  },
+
+  resetDemoData() {
+    try {
+      localStorage.removeItem(STORAGE_KEY);
+      const oldKeys = ['sip_kompetensi_bappeda_db_v3', 'sip_kompetensi_bappeda_db_v2', 'sip_kompetensi_bappeda_db'];
+      oldKeys.forEach(k => localStorage.removeItem(k));
+      sessionStorage.removeItem(SESSION_KEY);
+      localStorage.removeItem(SESSION_KEY);
+      localStorage.removeItem('sip_active_year');
+    } catch(e) {}
+
+    const fresh = JSON.parse(JSON.stringify(this.defaultState));
+    if (typeof BAPPEDA_DATA !== 'undefined') {
+      fresh.employees = BAPPEDA_DATA.employees;
+      fresh.monitoringUnits = BAPPEDA_DATA.monitoringUnits;
+      fresh.verifications = JSON.parse(JSON.stringify(BAPPEDA_DATA.verifications || []));
+      fresh.realizations = JSON.parse(JSON.stringify(BAPPEDA_DATA.realizations || []));
+    }
+    fresh.activeYear = 2026;
+    this.state = fresh;
+    this.save();
+    return true;
   }
 };
 
