@@ -28,7 +28,187 @@
     rel="stylesheet">
 
   <!-- Core Stylesheet -->
-  <link rel="stylesheet" href="css/app.css?v=20261015_v26">
+  <link rel="stylesheet" href="css/app.css?v=20261015_v27">
+
+  <!-- Critical Inlined CSS (Ensures 100% Instant & Flawless Mobile / PWA Rendering) -->
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+      width: 100%;
+      min-height: 100vh;
+      font-family: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background-color: #F0F4F8;
+      color: #1E293B;
+      -webkit-font-smoothing: antialiased;
+    }
+    .login-screen-centered {
+      min-height: 100vh;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 32px 16px;
+      position: relative;
+      background: #F0F4F8 url('Gambar/bg-login.jpg') center / cover no-repeat;
+    }
+    .login-screen-centered::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: rgba(248, 250, 252, 0.93);
+      backdrop-filter: blur(4px);
+      z-index: 1;
+    }
+    .login-content-wrapper {
+      position: relative;
+      z-index: 2;
+      width: 100%;
+      max-width: 460px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .login-header-centered {
+      text-align: center;
+      margin-bottom: 20px;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .gov-badge-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 12px;
+      background: rgba(30, 58, 95, 0.05);
+      border: 1px solid rgba(30, 58, 95, 0.12);
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 700;
+      color: #334E68;
+      letter-spacing: 0.06em;
+      margin-bottom: 10px;
+      text-transform: uppercase;
+    }
+    .login-headline-centered {
+      font-size: 24px;
+      line-height: 1.35;
+      font-weight: 800;
+      color: #1E3A5F;
+      margin: 0 0 8px;
+      text-align: center;
+      font-family: inherit;
+    }
+    .login-subheadline-centered {
+      font-size: 13px;
+      line-height: 1.6;
+      color: #486581;
+      text-align: center;
+      margin: 0 0 16px;
+      padding: 0 8px;
+    }
+    .login-card {
+      width: 100% !important;
+      background: #FFFFFF;
+      border-radius: 20px;
+      padding: 28px 22px;
+      box-shadow: 0 16px 40px -10px rgba(16, 42, 67, 0.08);
+      border: 1px solid rgba(217, 226, 236, 0.9);
+      box-sizing: border-box;
+    }
+    #loginForm {
+      width: 100% !important;
+      display: block;
+    }
+    .form-group {
+      margin-bottom: 16px;
+      width: 100% !important;
+    }
+    .form-label {
+      display: block;
+      font-size: 12px;
+      font-weight: 650;
+      color: #334E68;
+      margin-bottom: 6px;
+    }
+    .input-icon-wrapper {
+      position: relative;
+      width: 100% !important;
+      display: flex;
+      align-items: center;
+    }
+    .input-icon-wrapper .input-icon-left {
+      position: absolute;
+      left: 12px;
+      color: #627D98;
+      pointer-events: none;
+      display: flex;
+      align-items: center;
+      z-index: 2;
+    }
+    .input-icon-wrapper .input-icon-right {
+      position: absolute;
+      right: 12px;
+      color: #627D98;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      z-index: 2;
+    }
+    .form-control {
+      width: 100% !important;
+      height: 44px;
+      border: 1px solid #CBD5E1;
+      border-radius: 10px;
+      padding: 10px 14px 10px 38px;
+      background: #FFFFFF;
+      color: #1E293B;
+      font-size: 13.5px;
+      line-height: 1.4;
+      outline: none;
+      box-sizing: border-box !important;
+      -webkit-appearance: none;
+      font-family: inherit;
+    }
+    .form-control.has-right {
+      padding-right: 38px;
+    }
+    .form-control:focus {
+      border-color: #2F80ED;
+      box-shadow: 0 0 0 3px rgba(47, 128, 237, 0.15);
+    }
+    .btn-block {
+      width: 100% !important;
+      display: flex !important;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    .btn-primary {
+      height: 46px;
+      border: none;
+      border-radius: 10px;
+      color: #FFFFFF;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: inherit;
+    }
+    .custom-checkbox {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+    }
+    @media (max-width: 480px) {
+      .login-screen-centered { padding: 18px 12px; }
+      .login-card { padding: 22px 16px; border-radius: 16px; }
+      .login-headline-centered { font-size: 21px; }
+      .login-subheadline-centered { font-size: 12px; }
+    }
+  </style>
 </head>
 
 <body>
@@ -3853,7 +4033,7 @@
   <script src="js/bappeda_data.js?v=20261013_v8"></script>
   <script src="js/store.js?v=20261015_v21"></script>
   <script src="js/export.js?v=20261015_v21"></script>
-  <script src="js/app.js?v=20261015_v26"></script>
+  <script src="js/app.js?v=20261015_v27"></script>
 </body>
 
 </html>

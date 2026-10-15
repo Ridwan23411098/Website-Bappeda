@@ -1,7 +1,7 @@
 // SIP-KOMPETENSI — Bappeda Provinsi Lampung
 // Service Worker for PWA & Background Push Notifications
 
-const CACHE_NAME = 'sip-bappeda-v2026-10-v21';
+const CACHE_NAME = 'sip-bappeda-v2026-10-v22';
 
 self.addEventListener('install', event => {
   self.skipWaiting();
@@ -22,20 +22,28 @@ self.addEventListener('fetch', event => {
   if (event.request.method !== 'GET') return;
   const url = new URL(event.request.url);
 
-  // Jangan cache request ke Supabase API secara statis
+  // Jangan intercept request ke Supabase API
   if (url.hostname.includes('supabase.co')) return;
 
   if (url.origin === self.location.origin) {
     event.respondWith(
       fetch(event.request)
         .then(response => {
-          if (response.status === 200) {
+          if (response && response.status === 200) {
             const respClone = response.clone();
             caches.open(CACHE_NAME).then(cache => cache.put(event.request, respClone));
           }
           return response;
         })
-        .catch(() => caches.match(event.request))
+        .catch(async () => {
+          const cached = await caches.match(event.request, { ignoreSearch: true });
+          if (cached) return cached;
+          if (event.request.mode === 'navigate') {
+            const indexCached = await caches.match('/index.html', { ignoreSearch: true });
+            if (indexCached) return indexCached;
+          }
+          return new Response('', { status: 404, statusText: 'Resource Not Available' });
+        })
     );
   }
 });
