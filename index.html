@@ -28,7 +28,7 @@
     rel="stylesheet">
 
   <!-- Core Stylesheet -->
-  <link rel="stylesheet" href="css/app.css?v=20261015_v31">
+  <link rel="stylesheet" href="css/app.css?v=20261019_v32">
 
   <!-- Critical Inlined CSS (Ensures 100% Instant & Flawless Mobile / PWA Rendering) -->
   <style>
@@ -186,13 +186,13 @@
       justify-content: center;
       gap: 8px;
     }
-    .btn-primary {
-      height: 46px;
+    .login-card .btn-primary {
+      height: 44px;
       border: none;
-      border-radius: 10px;
+      border-radius: 8px;
       color: #FFFFFF;
-      font-size: 14px;
-      font-weight: 700;
+      font-size: 13.5px;
+      font-weight: 650;
       cursor: pointer;
       font-family: inherit;
     }
@@ -571,7 +571,7 @@
               <button class="btn btn-outline btn-sm" onclick="App.openSopGuide('pegawai')" title="Buku Panduan &amp; SOP Pegawai">
                 <span data-icon="BookOpen" data-icon-size="14"></span> Panduan IDP
               </button>
-              <select class="form-select year-select-dynamic" id="edashYearSelect" onchange="App.handleYearChange(this.value)" style="width: 120px;" title="Pilih Tahun Anggaran">
+              <select class="form-select year-select-dynamic" id="edashYearSelect" onchange="App.handleYearChange(this.value)" style="width: auto; height: 30px; padding: 4px 10px; font-size: 11.5px; border-radius: 5px;" title="Pilih Tahun Anggaran">
                 <option value="2024">2024</option>
                 <option value="2025">2025</option>
                 <option value="2026" selected>2026</option>
@@ -1437,9 +1437,9 @@
               <p class="page-subtitle" style="margin-bottom: 0;">Rencana program pengembangan kompetensi prioritas resmi
                 Bappeda Provinsi Lampung.</p>
             </div>
-            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-              <button class="btn btn-outline-primary" onclick="ExportService.showPrintDialog()" style="border: 1.5px solid #1E3A5F; color: #1E3A5F; font-weight: 650; display: inline-flex; align-items: center; gap: 8px;">
-                <span data-icon="Printer" data-icon-size="16"></span> Cetak Dokumen Resmi
+            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+              <button class="btn btn-outline-primary btn-sm" onclick="ExportService.showPrintDialog()" style="border: 1.5px solid #1E3A5F; color: #1E3A5F; font-weight: 650; display: inline-flex; align-items: center; gap: 6px;">
+                <span data-icon="Printer" data-icon-size="14"></span> Cetak Dokumen Resmi
               </button>
             </div>
           </div>
@@ -2306,15 +2306,15 @@
                   </p>
                 </div>
               </div>
-              <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                <button class="btn" style="background: rgba(255, 255, 255, 0.15); color: #ffffff; border: 1px solid rgba(255, 255, 255, 0.3); font-size: 12px; display: flex; align-items: center; gap: 6px;" onclick="App.openSopGuide('pimpinan')" title="Buku Panduan &amp; SOP Eksekutif">
-                  <span data-icon="BookOpen" data-icon-size="15"></span> Buku Panduan &amp; SOP
+              <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
+                <button class="btn btn-sm" style="background: rgba(255, 255, 255, 0.15); color: #ffffff; border: 1px solid rgba(255, 255, 255, 0.3); font-size: 11.5px; display: inline-flex; align-items: center; gap: 6px; border-radius: 5px;" onclick="App.openSopGuide('pimpinan')" title="Buku Panduan &amp; SOP Eksekutif">
+                  <span data-icon="BookOpen" data-icon-size="13"></span> Buku Panduan &amp; SOP
                 </button>
-                <button class="btn" style="background: #ffffff; color: #0b2545; font-weight: 700; border: none; font-size: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); display: flex; align-items: center; gap: 6px;" onclick="ExportService.showExecutivePrintDialog()">
-                  <span data-icon="Printer" data-icon-size="15"></span> Cetak Laporan Eksekutif (PDF)
+                <button class="btn btn-sm" style="background: #ffffff; color: #0b2545; font-weight: 650; border: none; font-size: 11.5px; box-shadow: 0 2px 6px rgba(0,0,0,0.12); display: inline-flex; align-items: center; gap: 6px; border-radius: 5px;" onclick="ExportService.showExecutivePrintDialog()">
+                  <span data-icon="Printer" data-icon-size="13"></span> Cetak Laporan Eksekutif (PDF)
                 </button>
-                <button class="btn" style="background: rgba(255, 255, 255, 0.15); color: #ffffff; border: 1px solid rgba(255, 255, 255, 0.3); font-size: 12px; display: flex; align-items: center; gap: 6px;" onclick="ExportService.exportExecutiveMatrix()">
-                  <span data-icon="Download" data-icon-size="15"></span> Unduh Matriks (.xlsx)
+                <button class="btn btn-sm" style="background: rgba(255, 255, 255, 0.15); color: #ffffff; border: 1px solid rgba(255, 255, 255, 0.3); font-size: 11.5px; display: inline-flex; align-items: center; gap: 6px; border-radius: 5px;" onclick="ExportService.exportExecutiveMatrix()">
+                  <span data-icon="Download" data-icon-size="13"></span> Unduh Matriks (.xlsx)
                 </button>
               </div>
             </div>
@@ -3971,7 +3971,7 @@
   <script src="js/bappeda_data.js?v=20261013_v8"></script>
   <script src="js/store.js?v=20261015_v21"></script>
   <script src="js/export.js?v=20261015_v21"></script>
-  <script src="js/app.js?v=20261015_v31"></script>
+  <script src="js/app.js?v=20261019_v32"></script>
 </body>
 
 </html>
