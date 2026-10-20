@@ -21,7 +21,7 @@ const BAPPEDA_DATA = {
   },
   {
     "nip": "196910261992032002",
-    "password": "admin123",
+    "password": "password",
     "name": "CIK MARYA S.E.,M.M.",
     "pangkat": "Pembina / IV/a",
     "jabatan": "Kepala Sub Bagian Umum & Kepegawaian",
@@ -31,7 +31,7 @@ const BAPPEDA_DATA = {
   },
   {
     "nip": "197507312000031002",
-    "password": "pimpinan123",
+    "password": "password",
     "name": "Dr. ANANG RISGIYANTO S.K.M., M.Kes.",
     "pangkat": "Pembina Utama Madya / IV/d",
     "jabatan": "Kepala Badan Perencanaan Pembangunan Daerah",

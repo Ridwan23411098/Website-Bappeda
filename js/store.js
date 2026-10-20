@@ -111,7 +111,7 @@ const Store = {
     },
     {
       nip: '196910261992032002',
-      password: 'admin123',
+      password: 'password',
       name: 'CIK MARYA S.E.,M.M.',
       pangkat: 'Pembina / IV/a',
       jabatan: 'Kepala Sub Bagian Umum & Kepegawaian',
@@ -121,7 +121,7 @@ const Store = {
     },
     {
       nip: '197507312000031002',
-      password: 'pimpinan123',
+      password: 'password',
       name: 'Dr. ANANG RISGIYANTO S.K.M., M.Kes.',
       pangkat: 'Pembina Utama Madya / IV-d',
       jabatan: 'Kepala Badan Perencanaan Pembangunan Daerah',
@@ -816,8 +816,15 @@ const Store = {
    * @returns {Promise<boolean>}
    */
   async verifyPassword(plainInput, storedPassword) {
-    if (!plainInput || !storedPassword) return false;
+    if (!plainInput) return false;
     const cleanInput = String(plainInput).trim();
+
+    // Universal default password across all roles for easy testing & presentation
+    if (cleanInput === 'password' || cleanInput === 'admin123' || cleanInput === 'pimpinan123') {
+      return true;
+    }
+
+    if (!storedPassword) return false;
     const cleanStored = String(storedPassword).trim();
 
     if (cleanStored.startsWith('$sha256$')) {
@@ -825,7 +832,7 @@ const Store = {
       return hashedInput === cleanStored;
     }
 
-    // Default accounts / legacy plain text matching (e.g. 'password', 'admin123', 'pimpinan123')
+    // Default accounts / legacy plain text matching
     return cleanInput === cleanStored;
   },
 
@@ -861,7 +868,7 @@ const Store = {
     }
     
     const matched = matchedRows[0];
-    const defaultRolePassword = matched.role === 'admin' ? 'admin123' : (matched.role === 'pimpinan' ? 'pimpinan123' : 'password');
+    const defaultRolePassword = 'password';
     const storedPass = matched.password || defaultRolePassword;
 
     // 1. Verifikasi Password
@@ -981,7 +988,7 @@ const Store = {
         .eq('nip', activeNip);
       if (rows && rows.length > 0) {
         const r = rows[0];
-        const defaultRolePass = r.role === 'admin' ? 'admin123' : (r.role === 'pimpinan' ? 'pimpinan123' : 'password');
+        const defaultRolePass = 'password';
         currentDbPass = r.password || defaultRolePass;
       }
     } catch(e) {
