@@ -438,7 +438,19 @@ const Store = {
         this.state.masterData.jenjang = BAPPEDA_DATA.masterJenjang;
         this.state.masterData.metode = BAPPEDA_DATA.masterMetode;
         this.state.masterData.rumpun = BAPPEDA_DATA.masterRumpun;
-        this.state.employees = BAPPEDA_DATA.employees;
+        // Sinkronkan nomor WhatsApp kustom yang pernah diinput pegawai dari localStorage terpisah
+        let customWaMap = {};
+        try {
+          customWaMap = JSON.parse(localStorage.getItem('sip_custom_employee_wa') || '{}');
+        } catch(e) {}
+
+        this.state.employees = (BAPPEDA_DATA.employees || []).map(e => {
+          const cleanN = String(e.nip || '').replace(/\s+/g, '');
+          if (customWaMap[cleanN]) {
+            return Object.assign({}, e, { noWa: customWaMap[cleanN], phone: customWaMap[cleanN] });
+          }
+          return Object.assign({}, e);
+        });
         this.state.monitoringUnits = BAPPEDA_DATA.monitoringUnits;
 
         // PERTAHANKAN SEMUA REALISASI YANG SUDAH TERSIMPAN DI STATE (jangan pernah buang data lokal!)

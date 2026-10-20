@@ -309,6 +309,13 @@ const App = {
     Store.state.user.nineBox = sessionUser.nineBox || 5;
     Store.state.user.avatarInitial = sessionUser.avatarInitial || '';
     Store.state.user.role = role;
+    
+    // Sinkronkan nomor WA kustom pegawai
+    const cleanSessNip = String(sessionUser.nip || '').replace(/\s+/g, '');
+    let customWaMap = {};
+    try { customWaMap = JSON.parse(localStorage.getItem('sip_custom_employee_wa') || '{}'); } catch(e) {}
+    Store.state.user.noWa = customWaMap[cleanSessNip] || sessionUser.noWa || '';
+    
     Store.save();
 
     // Update Topbar and Sidebar User Info
@@ -716,8 +723,19 @@ const App = {
     if (waInput) {
       const waVal = waInput.value.trim();
       Store.state.user.noWa = waVal;
-      const emp = (Store.state.employees || []).find(e => e.nip === Store.state.user.nip);
-      if (emp) emp.noWa = waVal;
+      const cleanUserNip = String(Store.state.user.nip || '').replace(/\s+/g, '');
+      const emp = (Store.state.employees || []).find(e => String(e.nip || '').replace(/\s+/g, '') === cleanUserNip);
+      if (emp) {
+        emp.noWa = waVal;
+        emp.phone = waVal;
+      }
+      
+      // Simpan nomor WA ke penyimpanan persisten terpisah
+      try {
+        const savedMap = JSON.parse(localStorage.getItem('sip_custom_employee_wa') || '{}');
+        savedMap[cleanUserNip] = waVal;
+        localStorage.setItem('sip_custom_employee_wa', JSON.stringify(savedMap));
+      } catch(e) {}
     }
     Store.save();
     App.toast('Data profil kepegawaian & kontak WhatsApp berhasil disimpan.', 'success');
@@ -2861,7 +2879,36 @@ const App = {
       statusBadge.textContent = '✅ Pengiriman Selesai 100%';
     }
     if (pulseDot) pulseDot.style.display = 'none';
-    if (resultAlert) resultAlert.style.display = 'flex';
+    if (resultAlert) {
+      resultAlert.style.display = 'flex';
+      if (!waCfg.token) {
+        resultAlert.innerHTML = `
+          <div style="display:flex; flex-direction:column; gap:8px; width:100%;">
+            <div style="display:flex; align-items:center; gap:8px;">
+              <span data-icon="AlertCircle" data-icon-size="20" style="color: #D97706; flex-shrink: 0;"></span>
+              <b>Pemberitahuan Sistem: Simulasi Pengiriman Berhasil</b>
+            </div>
+            <div style="font-size: 11.5px; color: var(--color-text-secondary); line-height: 1.5;">
+              Pengingat telah tercatat di sistem seluruh ${total} ASN. Agar pesan otomatis <b>langsung masuk dan berdering di handphone fisik pegawai</b>, hubungkan Token WhatsApp Gateway (Fonnte/Wablas) atau gunakan tombol <b>WA Langsung</b> di tabel pegawai.
+            </div>
+            <div style="display:flex; gap:8px; margin-top:2px;">
+              <button class="btn btn-warning-gradient btn-sm" onclick="App.openWaGatewaySettingsModal()" style="font-size:11.5px; padding:4px 10px;">
+                <span data-icon="Key" data-icon-size="13"></span> Hubungkan Token Fonnte (Gratis)
+              </button>
+            </div>
+          </div>
+        `;
+      } else {
+        resultAlert.innerHTML = `
+          <span data-icon="CheckCircle" data-icon-size="20" style="color: #10B981; flex-shrink: 0;"></span>
+          <div>
+            <b>Pengiriman Selesai!</b> Seluruh notifikasi resmi kedinasan telah berhasil diteruskan melalui WhatsApp Gateway ke nomor fisik masing-masing ASN.
+          </div>
+        `;
+      }
+      if (typeof renderAllIcons === 'function') renderAllIcons();
+      else if (window.lucide && window.lucide.createIcons) window.lucide.createIcons();
+    }
     if (closeBtn) closeBtn.disabled = false;
 
     // Bunyikan synth chime
@@ -3085,6 +3132,12 @@ const App = {
         headers: { 'Authorization': waCfg.token },
         body: new URLSearchParams({ target: phone, message: fullMsg })
       }).catch(() => {});
+      App.toast(`Notifikasi terkirim via Gateway ke WhatsApp ${emp.name} (${emp.noWa || phone})!`, 'success');
+    } else {
+      // Jika token gateway belum dihubungkan, buka WhatsApp langsung ke nomor HP pegawai
+      const url = phone ? `https://wa.me/${phone}?text=${encodeURIComponent(fullMsg)}` : `https://wa.me/?text=${encodeURIComponent(fullMsg)}`;
+      window.open(url, '_blank');
+      App.toast(`Membuka WhatsApp ke ${emp.name} (${emp.noWa || phone})...`, 'success');
     }
 
     try {
@@ -3186,6 +3239,12 @@ const App = {
         headers: { 'Authorization': waCfg.token },
         body: new URLSearchParams({ target: phone, message: msg })
       }).catch(() => {});
+      App.toast(`Hasil verifikasi terkirim via Gateway ke WhatsApp ${v.pegawai || emp?.name} (${emp?.noWa || phone})!`, 'success');
+    } else {
+      // Jika token gateway belum dihubungkan, buka WhatsApp langsung ke nomor HP pegawai
+      const url = phone ? `https://wa.me/${phone}?text=${encodeURIComponent(msg)}` : `https://wa.me/?text=${encodeURIComponent(msg)}`;
+      window.open(url, '_blank');
+      App.toast(`Membuka WhatsApp hasil verifikasi ke ${v.pegawai || emp?.name} (${emp?.noWa || phone})...`, 'success');
     }
 
     try {
