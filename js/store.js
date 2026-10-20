@@ -930,6 +930,7 @@ const Store = {
         sessionUser.golongan = empMaster.golongan || '';
         sessionUser.tmtPangkat = empMaster.tmtPangkat || '';
         sessionUser.tmtJabatan = empMaster.tmtJabatan || '';
+        sessionUser.noWa = empMaster.noWa || '0812-7912-3401';
       }
     }
 

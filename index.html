@@ -893,6 +893,10 @@
                   <option>Struktural</option>
                 </select>
               </div>
+              <div class="form-group">
+                <label class="form-label">Nomor WhatsApp / HP Aktif <span style="color:#16a34a; font-weight:700;">(Notifikasi IDP)</span></label>
+                <input type="text" id="profNoWa" class="form-control" placeholder="Contoh: 0812-7912-3401">
+              </div>
             </div>
             <div style="display: flex; justify-content: flex-end; margin-top: 10px;">
               <button class="btn btn-primary" onclick="App.saveProfile()">Simpan Data Identitas</button>
@@ -2969,6 +2973,10 @@
               <option>Struktural</option>
             </select>
           </div>
+          <div class="form-group">
+            <label class="form-label">Nomor WhatsApp / HP Aktif</label>
+            <input type="text" id="newEmpWa" class="form-control" placeholder="Contoh: 0812-7911-xxxx">
+          </div>
         </div>
       </div>
       <div class="modal-footer">
@@ -3138,6 +3146,9 @@
         <button class="btn btn-outline" onclick="App.closeDrawer('reviewDrawer')">Tutup</button>
         <button class="btn btn-outline" onclick="ExportService.printReviewDrawerIdp()" style="display: inline-flex; align-items: center; gap: 5px;">
           <span data-icon="FileText" data-icon-size="14"></span> Cetak PDF Resmi
+        </button>
+        <button class="btn btn-sm" id="btnVerifWaNotify" style="background: #25D366; color: #ffffff; border: none; font-weight: 650; display: inline-flex; align-items: center; gap: 6px;" title="Kirim Hasil Verifikasi Langsung ke WhatsApp Pegawai">
+          <span data-icon="MessageSquare" data-icon-size="13"></span> Notifikasi WA
         </button>
         <button class="btn btn-danger" id="btnRejectVerif">Minta Revisi</button>
         <button class="btn btn-warning" id="btnApproveAtasanVerif" style="color:white; border-color:var(--color-warning); background:var(--color-warning);">Setujui sbg Atasan</button>
@@ -3705,7 +3716,7 @@
         </div>
 
         <!-- Card 3: Status IDP & Capaian 20 JP -->
-        <div style="background: var(--color-surface-subtle); border: 1px solid var(--color-border); border-radius: 10px; padding: 14px 16px;">
+        <div style="background: var(--color-surface-subtle); border: 1px solid var(--color-border); border-radius: 10px; padding: 14px 16px; margin-bottom: 14px;">
           <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 10px;">
             <span data-icon="Award" data-icon-size="14" style="color: var(--color-primary);"></span>
             <span style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; color: var(--color-text-muted);">Status IDP &amp; Capaian Kompetensi (20 JP)</span>
@@ -3720,6 +3731,22 @@
               <div id="modalEmpProgress">-</div>
             </div>
           </div>
+        </div>
+
+        <!-- Card 4: Kontak WhatsApp Kedinasan -->
+        <div style="background: rgba(37, 211, 102, 0.06); border: 1px solid rgba(37, 211, 102, 0.3); border-radius: 10px; padding: 14px 16px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <div style="width: 36px; height: 36px; border-radius: 8px; background: #25D366; color: #ffffff; display: grid; place-items: center; flex-shrink: 0;">
+              <span data-icon="MessageSquare" data-icon-size="18"></span>
+            </div>
+            <div>
+              <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: #16a34a;">Kontak WhatsApp Resmi</div>
+              <div id="modalEmpWa" style="font-weight: 750; font-size: 13.5px; color: var(--color-text-primary); margin-top: 2px;">-</div>
+            </div>
+          </div>
+          <button type="button" id="modalEmpWaBtn" class="btn btn-sm" style="background: #25D366; color: #ffffff; font-weight: 650; border: none; display: inline-flex; align-items: center; gap: 6px;">
+            <span data-icon="Send" data-icon-size="13"></span> Chat WhatsApp
+          </button>
         </div>
       </div>
 
@@ -3902,9 +3929,14 @@
       </div>
 
       <div class="modal-footer" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-        <button type="button" class="btn btn-outline" onclick="App.copyWhatsAppReminder()" title="Salin teks pesan dengan daftar penerima untuk dikirim ke grup WhatsApp Bappeda">
-          <span data-icon="Copy" data-icon-size="15"></span> Salin Format WhatsApp
-        </button>
+        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+          <button type="button" class="btn btn-outline btn-sm" onclick="App.copyWhatsAppReminder()" title="Salin teks pesan dengan daftar penerima untuk dikirim ke grup WhatsApp Bappeda">
+            <span data-icon="Copy" data-icon-size="14"></span> Salin Teks
+          </button>
+          <button type="button" class="btn btn-sm" onclick="App.openWhatsAppBroadcast()" style="background: #25D366; color: #ffffff; border: none; font-weight: 650; display: inline-flex; align-items: center; gap: 6px;" title="Kirim Pesan Siaran Langsung ke WhatsApp">
+            <span data-icon="MessageSquare" data-icon-size="14"></span> Siarkan ke WA
+          </button>
+        </div>
         <div style="display: flex; gap: 8px;">
           <button type="button" class="btn btn-outline" onclick="App.closeModal('massReminderModal')">Batal</button>
           <button type="button" class="btn btn-warning-gradient" id="btnSendMassReminder" onclick="App.sendMassReminder()">
@@ -3945,13 +3977,13 @@
       </div>
 
       <div class="modal-footer" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-        <button type="button" class="btn btn-outline" onclick="App.sendSingleReminderViaWa()" title="Buka WhatsApp Web / Aplikasi">
-          <span data-icon="MessageSquare" data-icon-size="15"></span> Buka WhatsApp
+        <button type="button" class="btn btn-sm" onclick="App.sendSingleReminderViaWa()" style="background: #25D366; color: #ffffff; font-weight: 650; border: none; display: inline-flex; align-items: center; gap: 6px;" title="Buka WhatsApp Pegawai">
+          <span data-icon="MessageSquare" data-icon-size="14"></span> Kirim via WhatsApp
         </button>
         <div style="display: flex; gap: 8px;">
           <button type="button" class="btn btn-outline" onclick="App.closeModal('singleReminderModal')">Tutup</button>
           <button type="button" class="btn btn-primary" id="btnSendSingleReminder" onclick="App.sendSingleReminderViaSystem()">
-            <span data-icon="Send" data-icon-size="15"></span> Kirim Notifikasi
+            <span data-icon="Send" data-icon-size="14"></span> Kirim Notifikasi Sistem
           </button>
         </div>
       </div>
@@ -3968,10 +4000,10 @@
   <script src="assets/lambang-lampung.js?v=20261013_v3"></script>
   <script src="js/icons.js?v=20261014_v16"></script>
   <script src="js/charts.js?v=20261008_fix"></script>
-  <script src="js/bappeda_data.js?v=20261020_v9"></script>
-  <script src="js/store.js?v=20261020_v22"></script>
+  <script src="js/bappeda_data.js?v=20261020_v10"></script>
+  <script src="js/store.js?v=20261020_v23"></script>
   <script src="js/export.js?v=20261015_v21"></script>
-  <script src="js/app.js?v=20261020_v33"></script>
+  <script src="js/app.js?v=20261020_v34"></script>
 </body>
 
 </html>
