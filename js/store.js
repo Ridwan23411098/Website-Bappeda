@@ -424,6 +424,14 @@ const Store = {
         this.state = JSON.parse(JSON.stringify(this.defaultState));
       }
 
+      // WhatsApp Gateway Configuration
+      try {
+        const savedWa = localStorage.getItem('sip_wa_gateway_config');
+        this.waConfig = savedWa ? JSON.parse(savedWa) : { provider: 'fonnte', token: '', apiUrl: 'https://api.fonnte.com/send' };
+      } catch (waErr) {
+        this.waConfig = { provider: 'fonnte', token: '', apiUrl: 'https://api.fonnte.com/send' };
+      }
+
       // Ensure official master data is always synchronized
       if (typeof BAPPEDA_DATA !== 'undefined') {
         if (!this.state.masterData) this.state.masterData = {};
@@ -2003,6 +2011,14 @@ const Store = {
     this.state = fresh;
     this.save();
     return true;
+  },
+
+  saveWaConfig(cfg) {
+    this.waConfig = Object.assign({}, this.waConfig || {}, cfg);
+    try {
+      localStorage.setItem('sip_wa_gateway_config', JSON.stringify(this.waConfig));
+    } catch(e) {}
+    return this.waConfig;
   }
 };
 
