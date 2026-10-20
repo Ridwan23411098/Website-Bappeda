@@ -424,33 +424,13 @@ const Store = {
         this.state = JSON.parse(JSON.stringify(this.defaultState));
       }
 
-      // WhatsApp Gateway Configuration
-      try {
-        const savedWa = localStorage.getItem('sip_wa_gateway_config');
-        this.waConfig = savedWa ? JSON.parse(savedWa) : { provider: 'fonnte', token: '', apiUrl: 'https://api.fonnte.com/send' };
-      } catch (waErr) {
-        this.waConfig = { provider: 'fonnte', token: '', apiUrl: 'https://api.fonnte.com/send' };
-      }
-
       // Ensure official master data is always synchronized
       if (typeof BAPPEDA_DATA !== 'undefined') {
         if (!this.state.masterData) this.state.masterData = {};
         this.state.masterData.jenjang = BAPPEDA_DATA.masterJenjang;
         this.state.masterData.metode = BAPPEDA_DATA.masterMetode;
         this.state.masterData.rumpun = BAPPEDA_DATA.masterRumpun;
-        // Sinkronkan nomor WhatsApp kustom yang pernah diinput pegawai dari localStorage terpisah
-        let customWaMap = {};
-        try {
-          customWaMap = JSON.parse(localStorage.getItem('sip_custom_employee_wa') || '{}');
-        } catch(e) {}
-
-        this.state.employees = (BAPPEDA_DATA.employees || []).map(e => {
-          const cleanN = String(e.nip || '').replace(/\s+/g, '');
-          if (customWaMap[cleanN]) {
-            return Object.assign({}, e, { noWa: customWaMap[cleanN], phone: customWaMap[cleanN] });
-          }
-          return Object.assign({}, e);
-        });
+        this.state.employees = BAPPEDA_DATA.employees;
         this.state.monitoringUnits = BAPPEDA_DATA.monitoringUnits;
 
         // PERTAHANKAN SEMUA REALISASI YANG SUDAH TERSIMPAN DI STATE (jangan pernah buang data lokal!)
@@ -950,7 +930,6 @@ const Store = {
         sessionUser.golongan = empMaster.golongan || '';
         sessionUser.tmtPangkat = empMaster.tmtPangkat || '';
         sessionUser.tmtJabatan = empMaster.tmtJabatan || '';
-        sessionUser.noWa = empMaster.noWa || '0812-7912-3401';
       }
     }
 
@@ -2023,14 +2002,6 @@ const Store = {
     this.state = fresh;
     this.save();
     return true;
-  },
-
-  saveWaConfig(cfg) {
-    this.waConfig = Object.assign({}, this.waConfig || {}, cfg);
-    try {
-      localStorage.setItem('sip_wa_gateway_config', JSON.stringify(this.waConfig));
-    } catch(e) {}
-    return this.waConfig;
   }
 };
 

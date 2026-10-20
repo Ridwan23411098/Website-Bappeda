@@ -239,8 +239,7 @@ const App = {
       jabatan: account.jabatan,
       unitKerja: account.unitKerja,
       role: account.role,
-      avatarInitial: account.avatarInitial,
-      noWa: account.noWa || '0812-7912-3401'
+      avatarInitial: account.avatarInitial
     };
     Store.state.currentSession = sessionUser;
     try {
@@ -309,13 +308,6 @@ const App = {
     Store.state.user.nineBox = sessionUser.nineBox || 5;
     Store.state.user.avatarInitial = sessionUser.avatarInitial || '';
     Store.state.user.role = role;
-    
-    // Sinkronkan nomor WA kustom pegawai
-    const cleanSessNip = String(sessionUser.nip || '').replace(/\s+/g, '');
-    let customWaMap = {};
-    try { customWaMap = JSON.parse(localStorage.getItem('sip_custom_employee_wa') || '{}'); } catch(e) {}
-    Store.state.user.noWa = customWaMap[cleanSessNip] || sessionUser.noWa || '';
-    
     Store.save();
 
     // Update Topbar and Sidebar User Info
@@ -657,7 +649,6 @@ const App = {
     if (document.getElementById('profJabatan')) document.getElementById('profJabatan').value = u.jabatan || '';
     if (document.getElementById('profUnit')) document.getElementById('profUnit').value = u.unitKerja || '';
     if (document.getElementById('profJenisJabatan')) document.getElementById('profJenisJabatan').value = u.jenisJabatan || '';
-    if (document.getElementById('profNoWa')) document.getElementById('profNoWa').value = u.noWa || u.phone || '';
 
     // Update card header agar sesuai dengan akun yang login
     const headerNama = document.getElementById('profilHeaderNama');
@@ -719,26 +710,8 @@ const App = {
     Store.state.user.pendidikan = document.getElementById('profPendidikan').value;
     Store.state.user.masaKerja = document.getElementById('profMasaKerja').value;
     Store.state.user.jabatan = document.getElementById('profJabatan').value;
-    const waInput = document.getElementById('profNoWa');
-    if (waInput) {
-      const waVal = waInput.value.trim();
-      Store.state.user.noWa = waVal;
-      const cleanUserNip = String(Store.state.user.nip || '').replace(/\s+/g, '');
-      const emp = (Store.state.employees || []).find(e => String(e.nip || '').replace(/\s+/g, '') === cleanUserNip);
-      if (emp) {
-        emp.noWa = waVal;
-        emp.phone = waVal;
-      }
-      
-      // Simpan nomor WA ke penyimpanan persisten terpisah
-      try {
-        const savedMap = JSON.parse(localStorage.getItem('sip_custom_employee_wa') || '{}');
-        savedMap[cleanUserNip] = waVal;
-        localStorage.setItem('sip_custom_employee_wa', JSON.stringify(savedMap));
-      } catch(e) {}
-    }
     Store.save();
-    App.toast('Data profil kepegawaian & kontak WhatsApp berhasil disimpan.', 'success');
+    App.toast('Data profil kepegawaian berhasil diperbarui secara permanen.', 'success');
   },
 
   // ==========================================
@@ -2219,10 +2192,6 @@ const App = {
       btnAtasan.onclick = () => App.approveVerification(item.id, 'Disetujui Atasan');
     }
     document.getElementById('btnRejectVerif').onclick = () => App.requestRevisionModal(item.id);
-    const btnWa = document.getElementById('btnVerifWaNotify');
-    if (btnWa) {
-      btnWa.onclick = () => App.sendVerifResultViaWaDirect(item.id);
-    }
 
     this.openDrawer('reviewDrawer');
   },
@@ -2384,11 +2353,9 @@ const App = {
     if (bGreen) bGreen.textContent = green;
     if (dashRed) dashRed.textContent = red;
 
-    const mAll = document.getElementById('remindCountAll');
     const mRed = document.getElementById('remindCountRed');
     const mU20 = document.getElementById('remindCountUnder20');
     const mRev = document.getElementById('remindCountRevision');
-    if (mAll) mAll.textContent = emps.length;
     if (mRed) mRed.textContent = red;
     if (mU20) mU20.textContent = red + yellow;
     if (mRev) {
@@ -2445,15 +2412,6 @@ const App = {
     }
     if (document.getElementById('modalEmpDiklat')) {
       document.getElementById('modalEmpDiklat').textContent = e.diklat || '-';
-    }
-
-    const waNumber = e.noWa || '0812-7911-00' + String(e.id).padStart(2, '0');
-    if (document.getElementById('modalEmpWa')) {
-      document.getElementById('modalEmpWa').textContent = waNumber;
-    }
-    const waBtn = document.getElementById('modalEmpWaBtn');
-    if (waBtn) {
-      waBtn.onclick = () => App.openDirectWaChat(e.nip);
     }
 
     const initialEl = document.getElementById('modalEmpAvatarInitial');
@@ -2580,9 +2538,6 @@ const App = {
                 <div class="table-user-info">
                   <div class="name" style="font-weight: 650;">${e.name}</div>
                   <div class="sub" style="font-family: monospace; font-size: 11px; color: var(--color-text-muted);">${e.nipFormatted || e.nip}</div>
-                  <div style="font-size: 10.5px; color: #16a34a; font-weight: 600; display: inline-flex; align-items: center; gap: 3px; margin-top: 1px;">
-                    <span data-icon="Phone" data-icon-size="10"></span> ${e.noWa || '-'}
-                  </div>
                 </div>
               </div>
             </td>
@@ -2609,9 +2564,6 @@ const App = {
             <td>
               <div style="display: flex; gap: 6px; align-items: center;">
                 <button class="btn btn-outline btn-sm" onclick="App.showEmployeeDetail(${e.id})">Detail</button>
-                <button class="btn btn-outline btn-sm" onclick="App.openDirectWaChat('${e.nip}')" title="Kirim Pesan WhatsApp ke ${e.name} (${e.noWa || '-'})" style="color: #16a34a; border-color: rgba(37,211,102,0.6); display: inline-flex; align-items: center; gap: 3px; padding: 3px 7px; font-weight: 600;">
-                  <span data-icon="MessageSquare" data-icon-size="12"></span> WA
-                </button>
                 ${remindBtn}
               </div>
             </td>
@@ -2641,24 +2593,22 @@ const App = {
   getReminderTemplate(key) {
     const yr = Store.getActiveYear();
     const tpls = {
-      all: `Pemberitahuan Resmi Kedinasan Bappeda Provinsi Lampung:\n\nDisampaikan kepada seluruh Pegawai ASN Bappeda Provinsi Lampung terkait kewajiban pemenuhan target pengembangan kompetensi minimal 20 JP per tahun sesuai amanat UU ASN & LAN RI untuk Tahun Anggaran ${yr}.\n\nBagi rekan-rekan yang belum mengajukan formulir IDP atau capaian bangkomnya belum mencapai 20 JP, dimohon segera melengkapi rencana pengembangan kompetensi dan mengunggah sertifikat pelatihan di portal SIP-KOMPETENSI.\n\nTerima kasih atas kerja sama dan dedikasi rekan-rekan ASN Bappeda.\n\n— Subbagian Umum & Kepegawaian Bappeda Provinsi Lampung`,
       deadline: `Yth. Bapak/Ibu Pegawai ASN Bappeda Provinsi Lampung.\n\nMenindaklanjuti Surat Edaran Sekretaris Daerah Provinsi Lampung No. 2 Tahun 2025 tentang Pelaksanaan Pengembangan Kompetensi ASN, kami mengingatkan agar segera melengkapi dan mengajukan dokumen Individual Development Plan (IDP) Tahun ${yr} melalui sistem SIP-KOMPETENSI.\n\nSetiap ASN diwajibkan memenuhi hak pengembangan kompetensi minimal 20 JP per tahun. Dokumen rencana IDP yang belum diajukan dimohon segera difinalisasi untuk diverifikasi atasan langsung.\n\nAtas perhatian dan kerja samanya, kami ucapkan terima kasih.\n\n— Subbagian Umum & Kepegawaian Bappeda Provinsi Lampung`,
       jpTarget: `Pemberitahuan Capaian Jam Pelajaran (JP) ASN Bappeda Provinsi Lampung:\n\nBerdasarkan rekapitulasi data pengembangan kompetensi pada sistem SIP-KOMPETENSI, capaian Anda saat ini belum memenuhi target standar LAN RI & BKN yaitu minimal 20 Jam Pelajaran (JP) per tahun.\n\nSilakan segera merencanakan atau merealisasikan kegiatan bangkom (Pelatihan Mandiri MOOC, Bimtek, Webinar, atau Magang) serta mengunggah bukti sertifikat pada formulir Realisasi Pengembangan SIP-KOMPETENSI.\n\nTerima kasih.\n\n— Pengelola SDM Aparatur Bappeda Lampung`,
       revision: `Instruksi Perbaikan / Revisi Dokumen IDP ${yr}:\n\nDisampaikan kepada Pegawai ASN Bappeda Provinsi Lampung yang dokumen IDP-nya berstatus "Perlu Revisi", dimohon untuk segera memeriksa catatan perbaikan dari Atasan Langsung / Verifikator Kepegawaian pada menu "Review IDP".\n\nLakukan penyesuaian target kompetensi atau metode bangkom yang disarankan, kemudian ajukan kembali dokumen agar dapat disahkan menjadi dokumen final.\n\nTerima kasih.\n\n— Tim Verifikator IDP Bappeda Lampung`
     };
-    return tpls[key] || tpls.all;
+    return tpls[key] || tpls.deadline;
   },
 
   get _reminderTemplates() {
     return {
-      all: this.getReminderTemplate('all'),
       deadline: this.getReminderTemplate('deadline'),
       jpTarget: this.getReminderTemplate('jpTarget'),
       revision: this.getReminderTemplate('revision')
     };
   },
 
-  openMassReminderModal(defaultTarget = 'all') {
+  openMassReminderModal(defaultTarget = 'red') {
     this.updateComplianceCounters();
     const radio = document.querySelector(`input[name="reminderTargetGroup"][value="${defaultTarget}"]`);
     if (radio) radio.checked = true;
@@ -2666,7 +2616,7 @@ const App = {
     
     const tplSelect = document.getElementById('reminderTemplateSelect');
     if (tplSelect) {
-      tplSelect.value = defaultTarget === 'revision' ? 'revision' : (defaultTarget === 'all' ? 'all' : 'deadline');
+      tplSelect.value = defaultTarget === 'revision' ? 'revision' : 'deadline';
       this.onReminderTemplateSelect(tplSelect.value);
     }
     
@@ -2675,9 +2625,7 @@ const App = {
 
   getTargetEmployeesForReminder(targetKey) {
     const emps = Store.state.employees || [];
-    if (targetKey === 'all') {
-      return emps;
-    } else if (targetKey === 'red') {
+    if (targetKey === 'red') {
       return emps.filter(e => this.getComplianceCategory(e).key === 'red');
     } else if (targetKey === 'under20') {
       return emps.filter(e => {
@@ -2687,19 +2635,15 @@ const App = {
     } else if (targetKey === 'revision') {
       return emps.filter(e => (e.statusIdp || '').toLowerCase().includes('revisi'));
     }
-    return emps;
+    return emps.filter(e => this.getComplianceCategory(e).key === 'red');
   },
 
   onReminderTargetChange(targetKey) {
     const targets = this.getTargetEmployeesForReminder(targetKey);
     const box = document.getElementById('reminderRecipientsBox');
     const summary = document.getElementById('remindTargetSummary');
-    const btnLabel = document.getElementById('btnBlastWhatsAppLabel');
 
     if (summary) summary.textContent = `${targets.length} Pegawai Terpilih`;
-    if (btnLabel) {
-      btnLabel.textContent = `🚀 Kirim Langsung ke WA (${targets.length} Pegawai)`;
-    }
 
     if (box) {
       if (targets.length === 0) {
@@ -2707,12 +2651,11 @@ const App = {
       } else {
         box.innerHTML = targets.map(e => {
           const cat = this.getComplianceCategory(e);
-          const cleanWa = e.noWa ? e.noWa.replace(/^08/, '08..') : '-';
           return `
-            <div class="recipient-chip" title="${e.name} • WA: ${e.noWa || '-'}">
+            <div class="recipient-chip">
               <span class="chip-dot" style="background: ${cat.dotColor};"></span>
               <span style="font-weight: 600;">${e.name.split(',')[0]}</span>
-              <span style="opacity: 0.7; font-size: 10px; color: #16a34a;">WA</span>
+              <span style="opacity: 0.6; font-size: 10px;">(${e.nip.slice(-4)})</span>
             </div>
           `;
         }).join('');
@@ -2728,13 +2671,13 @@ const App = {
   },
 
   async copyWhatsAppReminder() {
-    const targetKey = document.querySelector('input[name="reminderTargetGroup"]:checked')?.value || 'all';
+    const targetKey = document.querySelector('input[name="reminderTargetGroup"]:checked')?.value || 'red';
     const targets = this.getTargetEmployeesForReminder(targetKey);
     const msg = document.getElementById('reminderMessageText')?.value || '';
 
     let waText = `*PENGINGAT KEPATUHAN IDP & BANGKOM BAPPEDA PROVINSI LAMPUNG*\n\n${msg}\n\n*Daftar Rekan ASN Yang Ditujukan (${targets.length} Pegawai):*\n`;
     targets.forEach((e, i) => {
-      waText += `${i + 1}. ${e.name} (${e.unit} • ${e.noWa || '-'})\n`;
+      waText += `${i + 1}. ${e.name} (${e.unit})\n`;
     });
     waText += `\n_Akses Sistem SIP-KOMPETENSI:_ https://website-bappeda.vercel.app`;
 
@@ -2755,212 +2698,6 @@ const App = {
       console.warn("Gagal copy clipboard:", err);
       App.toast('Gagal menyalin otomatis. Silakan salin manual dari kotak teks.', 'warning');
     }
-  },
-
-  async startMassWhatsAppBlast() {
-    const targetKey = document.querySelector('input[name="reminderTargetGroup"]:checked')?.value || 'all';
-    const targets = this.getTargetEmployeesForReminder(targetKey);
-    const msg = document.getElementById('reminderMessageText')?.value || '';
-
-    if (!targets || targets.length === 0) {
-      App.toast('Tidak ada pegawai yang dipilih sebagai target pengingat.', 'warning');
-      return;
-    }
-
-    // 1. Tutup modal konfigurasi pengingat dan buka modal visual dispatch progress
-    this.closeModal('massReminderModal');
-    this.openModal('waBlastProgressModal');
-
-    const total = targets.length;
-    const progressBar = document.getElementById('blastProgressBar');
-    const percentText = document.getElementById('blastPercentText');
-    const countSent = document.getElementById('blastCounterSent');
-    const countTotal = document.getElementById('blastCounterTotal');
-    const logBox = document.getElementById('blastTerminalLog');
-    const statusBadge = document.getElementById('blastStatusBadge');
-    const pulseDot = document.getElementById('blastPulseDot');
-    const resultAlert = document.getElementById('blastResultAlert');
-    const closeBtn = document.getElementById('btnBlastClose');
-    const channelName = document.getElementById('blastChannelName');
-
-    if (countTotal) countTotal.textContent = `${total} ASN`;
-    if (countSent) countSent.textContent = `0 ASN`;
-    if (percentText) percentText.textContent = `0%`;
-    if (progressBar) progressBar.style.width = '0%';
-    if (resultAlert) resultAlert.style.display = 'none';
-    if (closeBtn) closeBtn.disabled = true;
-    if (statusBadge) {
-      statusBadge.className = 'badge badge-success';
-      statusBadge.textContent = 'Sedang Mengirim Notifikasi WhatsApp...';
-    }
-    if (pulseDot) pulseDot.style.display = 'inline-block';
-
-    const waCfg = (typeof Store !== 'undefined' && Store.waConfig) ? Store.waConfig : { token: '' };
-    if (channelName) {
-      channelName.textContent = waCfg.token ? 'API Gateway (Aktif)' : 'Direct Multi-Sender';
-    }
-
-    const nowStr = new Date().toLocaleTimeString('id-ID');
-    if (logBox) {
-      logBox.innerHTML = `
-        <div style="color: #38BDF8;">[${nowStr}] 🚀 Memulai Engine Pengiriman Otomatis WhatsApp SIP-KOMPETENSI...</div>
-        <div style="color: #94A3B8;">[${nowStr}] 📡 Menyiapkan antrean pesan resmi kedinasan (${total} ASN sasaran)...</div>
-      `;
-    }
-
-    // 2. Jika ada token API Fonnte/Wablas dinas, kirim batch riil via API di background
-    if (waCfg.token) {
-      try {
-        const phoneList = targets.map(e => this.formatPhoneForWa(e.noWa || e.phone)).filter(Boolean);
-        const fullMsg = `*PEMBERITAHUAN KEDINASAN BAPPEDA PROVINSI LAMPUNG*\n\n${msg}\n\n_Akses Portal SIP-KOMPETENSI:_ https://website-bappeda.vercel.app`;
-        fetch('https://api.fonnte.com/send', {
-          method: 'POST',
-          headers: { 'Authorization': waCfg.token },
-          body: new URLSearchParams({
-            target: phoneList.join(','),
-            message: fullMsg
-          })
-        }).then(r => r.json()).then(res => {
-          console.log('WA Gateway API Dispatch Result:', res);
-        }).catch(err => console.warn('Gateway dispatch error:', err));
-      } catch (err) {
-        console.warn('Gagal memicu request gateway:', err);
-      }
-    }
-
-    // 3. Simpan notifikasi sistem & catat Audit Log
-    try {
-      const judul = targetKey === 'all'
-        ? `Pengumuman Kepatuhan IDP & Capaian 20 JP ASN ${Store.getActiveYear()}`
-        : targetKey === 'revision'
-        ? `Pemberitahuan Revisi Dokumen IDP ${Store.getActiveYear()}`
-        : 'Pengingat Kepatuhan IDP & Capaian 20 JP Bangkom';
-
-      Store.sendNotification({
-        penerima: targetKey === 'all' ? 'all' : ('target_compliance_' + targetKey),
-        judul: judul,
-        pesan: msg,
-        tipe: 'warning'
-      }).catch(() => {});
-
-      if (typeof AuditService !== 'undefined') {
-        AuditService.log('WhatsApp', 'Broadcast Otomatis WhatsApp', `Mengirimkan notifikasi WhatsApp kedinasan secara otomatis ke ${total} ASN Bappeda Provinsi Lampung (${targetKey}).`, 'Sukses');
-      }
-    } catch(e) {}
-
-    // 4. Jalankan sekuens animasi pengiriman real-time per pegawai dengan micro-delay
-    const delayPerItem = total > 50 ? 25 : 50;
-    let sentCount = 0;
-
-    for (let i = 0; i < targets.length; i++) {
-      await new Promise(resolve => setTimeout(resolve, delayPerItem));
-      const emp = targets[i];
-      sentCount++;
-      const pct = Math.round((sentCount / total) * 100);
-
-      if (progressBar) progressBar.style.width = `${pct}%`;
-      if (percentText) percentText.textContent = `${pct}%`;
-      if (countSent) countSent.textContent = `${sentCount} ASN`;
-
-      if (logBox) {
-        const timeStr = new Date().toLocaleTimeString('id-ID');
-        const itemEl = document.createElement('div');
-        itemEl.style.color = '#4ADE80';
-        const cleanWa = emp.noWa || ('0812-7911-' + String(emp.id).padStart(4, '0'));
-        itemEl.innerHTML = `[${timeStr}] 🟢 <b>[${cleanWa}]</b> ${emp.name.split(',')[0]} ➔ <i>WhatsApp Terkirim</i>`;
-        logBox.appendChild(itemEl);
-        logBox.scrollTop = logBox.scrollHeight;
-      }
-    }
-
-    // 5. Tandai selesai
-    if (statusBadge) {
-      statusBadge.className = 'badge badge-success';
-      statusBadge.textContent = '✅ Pengiriman Selesai 100%';
-    }
-    if (pulseDot) pulseDot.style.display = 'none';
-    if (resultAlert) {
-      resultAlert.style.display = 'flex';
-      if (!waCfg.token) {
-        resultAlert.innerHTML = `
-          <div style="display:flex; flex-direction:column; gap:8px; width:100%;">
-            <div style="display:flex; align-items:center; gap:8px;">
-              <span data-icon="AlertCircle" data-icon-size="20" style="color: #D97706; flex-shrink: 0;"></span>
-              <b>Pemberitahuan Sistem: Simulasi Pengiriman Berhasil</b>
-            </div>
-            <div style="font-size: 11.5px; color: var(--color-text-secondary); line-height: 1.5;">
-              Pengingat telah tercatat di sistem seluruh ${total} ASN. Agar pesan otomatis <b>langsung masuk dan berdering di handphone fisik pegawai</b>, hubungkan Token WhatsApp Gateway (Fonnte/Wablas) atau gunakan tombol <b>WA Langsung</b> di tabel pegawai.
-            </div>
-            <div style="display:flex; gap:8px; margin-top:2px;">
-              <button class="btn btn-warning-gradient btn-sm" onclick="App.openWaGatewaySettingsModal()" style="font-size:11.5px; padding:4px 10px;">
-                <span data-icon="Key" data-icon-size="13"></span> Hubungkan Token Fonnte (Gratis)
-              </button>
-            </div>
-          </div>
-        `;
-      } else {
-        resultAlert.innerHTML = `
-          <span data-icon="CheckCircle" data-icon-size="20" style="color: #10B981; flex-shrink: 0;"></span>
-          <div>
-            <b>Pengiriman Selesai!</b> Seluruh notifikasi resmi kedinasan telah berhasil diteruskan melalui WhatsApp Gateway ke nomor fisik masing-masing ASN.
-          </div>
-        `;
-      }
-      if (typeof renderAllIcons === 'function') renderAllIcons();
-      else if (window.lucide && window.lucide.createIcons) window.lucide.createIcons();
-    }
-    if (closeBtn) closeBtn.disabled = false;
-
-    // Bunyikan synth chime
-    try {
-      const ctx = new (window.AudioContext || window.webkitAudioContext)();
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(523.25, ctx.currentTime);
-      osc.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.18);
-      gain.gain.setValueAtTime(0.2, ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.4);
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-      osc.start();
-      osc.stop(ctx.currentTime + 0.4);
-    } catch(e) {}
-
-    App.toast(`Berhasil! Notifikasi WhatsApp telah terkirim langsung ke seluruh ${total} pegawai ASN!`, 'success');
-
-    // Update timeline dashboard jika elemennya ada
-    const adminTimeline = document.querySelector('.timeline-list');
-    if (adminTimeline) {
-      const newAct = document.createElement('div');
-      newAct.className = 'timeline-item';
-      newAct.innerHTML = `
-        <div class="timeline-dot success"></div>
-        <div class="timeline-title">Broadcast WhatsApp kedinasan terkirim ke ${total} ASN</div>
-        <div class="timeline-meta">Oleh Pengelola SDM • Baru saja</div>
-        <span class="badge badge-success">WA Terkirim</span>
-      `;
-      adminTimeline.insertBefore(newAct, adminTimeline.firstChild);
-    }
-  },
-
-  openWaGatewaySettingsModal() {
-    const cfg = (typeof Store !== 'undefined' && Store.waConfig) ? Store.waConfig : { provider: 'fonnte', token: '' };
-    const provEl = document.getElementById('waGatewayProvider');
-    const tokEl = document.getElementById('waGatewayToken');
-    if (provEl) provEl.value = cfg.provider || 'fonnte';
-    if (tokEl) tokEl.value = cfg.token || '';
-    this.openModal('waGatewaySettingsModal');
-  },
-
-  saveWaGatewaySettings() {
-    const prov = document.getElementById('waGatewayProvider')?.value || 'fonnte';
-    const tok = document.getElementById('waGatewayToken')?.value?.trim() || '';
-    if (typeof Store !== 'undefined' && Store.saveWaConfig) {
-      Store.saveWaConfig({ provider: prov, token: tok });
-    }
-    this.closeModal('waGatewaySettingsModal');
-    App.toast('Pengaturan WhatsApp Gateway dinas berhasil disimpan!', 'success');
   },
 
   async sendMassReminder() {
@@ -3046,11 +2783,8 @@ const App = {
           </div>
           <span class="badge ${cat.badgeClass}">${cat.label}</span>
         </div>
-        <div style="margin-top: 10px; font-size: 11.5px; color: var(--color-text-secondary); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 6px; border-top: 1px dashed var(--color-border); padding-top: 8px;">
+        <div style="margin-top: 8px; font-size: 11.5px; color: var(--color-text-secondary); display: flex; align-items: center; gap: 6px;">
           <span>Capaian Bangkom: <b style="color: ${cat.dotColor};">${jp} JP</b> / Target 20 JP (${cat.percent}%)</span>
-          <span style="display: inline-flex; align-items: center; gap: 4px; color: #16a34a; font-weight: 650; font-size: 12px;">
-            <span data-icon="Phone" data-icon-size="12"></span> WhatsApp: <b>${emp.noWa || '0812-7911-00' + String(emp.id).padStart(2, '0')}</b>
-          </span>
         </div>
       `;
     }
@@ -3059,7 +2793,7 @@ const App = {
     const yr = Store.getActiveYear();
     if (msgEl) {
       if (cat.key === 'red') {
-        msgEl.value = `Yth. Sdr. ${emp.name},\n\nKami menginformasikan bahwa dokumen Individual Development Plan (IDP) Anda untuk tahun ${yr} saat ini masih berstatus "${cat.label}".\n\nSesuai amanat UU ASN & SE Sekda Prov. Lampung, mohon segera melengkapi dan mengajukan rencana IDP melalui portal SIP-KOMPETENSI (minimal 20 JP per tahun) agar dapat diverifikasi oleh atasan langsung.\n\nTerima kasih.\n— Subbag Umum & Kepegawaian Bappeda Lampung`;
+        msgEl.value = `Yth. Sdr. ${emp.name},\n\nKami menginformasikan bahwa dokumen Individual Development Plan (IDP) Anda untuk tahun ${yr} saat ini masih berstatus "${cat.label}".\n\nSesuai SE Sekda No. 2 Tahun 2025, mohon segera melengkapi dan mengajukan rencana IDP melalui SIP-KOMPETENSI (minimal 20 JP per tahun) agar dapat diverifikasi oleh atasan langsung.\n\nTerima kasih.\n— Subbag Umum & Kepegawaian Bappeda Lampung`;
       } else {
         msgEl.value = `Yth. Sdr. ${emp.name},\n\nBerdasarkan data SIP-KOMPETENSI, capaian pengembangan kompetensi Anda saat ini adalah ${jp} JP dari target minimal 20 JP tahun ${yr}.\n\nDimohon segera merealisasikan kegiatan bangkom atau menindaklanjuti perbaikan dokumen yang diperlukan.\n\nTerima kasih.\n— Subbag Umum & Kepegawaian Bappeda Lampung`;
       }
@@ -3091,7 +2825,7 @@ const App = {
         AuditService.log('Notifikasi', 'Pengiriman Pengingat Personal', `Mengirimkan notifikasi pengingat kepatuhan IDP ke pegawai: ${emp.name} (${emp.nip})`, 'Sukses');
       }
 
-      App.toast(`Notifikasi sistem berhasil dikirim ke akun ${emp.name}!`, 'success');
+      App.toast(`Notifikasi pengingat berhasil dikirim ke akun ${emp.name}!`, 'success');
       this.closeModal('singleReminderModal');
     } catch (err) {
       console.warn("Error single reminder:", err);
@@ -3100,199 +2834,21 @@ const App = {
     } finally {
       if (btn) {
         btn.disabled = false;
-        btn.innerHTML = '<span data-icon="Send" data-icon-size="14"></span> Kirim Notifikasi Sistem';
+        btn.innerHTML = '<span data-icon="Send" data-icon-size="15"></span> Kirim Notifikasi';
         if (typeof renderAllIcons === 'function') renderAllIcons();
       }
     }
-  },
-
-  formatPhoneForWa(phoneRaw) {
-    if (!phoneRaw) return '';
-    let p = String(phoneRaw).replace(/[^0-9]/g, '');
-    if (p.startsWith('0')) {
-      p = '62' + p.substring(1);
-    } else if (p.startsWith('8')) {
-      p = '62' + p;
-    }
-    return p;
-  },
-
-  sendSingleReminderViaWaDirect() {
-    const emp = this._currentSingleReminderEmp;
-    if (!emp) return;
-    const msg = document.getElementById('singleRemindMessage')?.value || '';
-    const phone = this.formatPhoneForWa(emp.noWa || emp.phone);
-    const yr = Store.getActiveYear();
-    const fullMsg = `*PEMBERITAHUAN KEDINASAN BAPPEDA PROVINSI LAMPUNG*\n\n${msg}\n\n_Akses Portal SIP-KOMPETENSI:_ https://website-bappeda.vercel.app`;
-
-    const waCfg = (typeof Store !== 'undefined' && Store.waConfig) ? Store.waConfig : { token: '' };
-    if (waCfg.token && phone) {
-      fetch('https://api.fonnte.com/send', {
-        method: 'POST',
-        headers: { 'Authorization': waCfg.token },
-        body: new URLSearchParams({ target: phone, message: fullMsg })
-      }).catch(() => {});
-      App.toast(`Notifikasi terkirim via Gateway ke WhatsApp ${emp.name} (${emp.noWa || phone})!`, 'success');
-    } else {
-      // Jika token gateway belum dihubungkan, buka WhatsApp langsung ke nomor HP pegawai
-      const url = phone ? `https://wa.me/${phone}?text=${encodeURIComponent(fullMsg)}` : `https://wa.me/?text=${encodeURIComponent(fullMsg)}`;
-      window.open(url, '_blank');
-      App.toast(`Membuka WhatsApp ke ${emp.name} (${emp.noWa || phone})...`, 'success');
-    }
-
-    try {
-      Store.sendNotification({
-        penerima: emp.nip,
-        judul: `Pemberitahuan Kepatuhan IDP ${yr}`,
-        pesan: msg,
-        tipe: 'warning'
-      }).catch(() => {});
-      if (typeof AuditService !== 'undefined') {
-        AuditService.log('WhatsApp', 'Pengiriman Notifikasi WhatsApp', `Mengirimkan notifikasi WhatsApp kedinasan langsung ke ${emp.name} (${emp.noWa || phone})`, 'Sukses');
-      }
-    } catch(e) {}
-
-    // Bunyikan synth chime
-    try {
-      const ctx = new (window.AudioContext || window.webkitAudioContext)();
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(659.25, ctx.currentTime);
-      gain.gain.setValueAtTime(0.15, ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.25);
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-      osc.start();
-      osc.stop(ctx.currentTime + 0.25);
-    } catch(e) {}
-
-    App.toast(`Notifikasi berhasil dikirim langsung ke WhatsApp ${emp.name} (${emp.noWa || phone})!`, 'success');
-    this.closeModal('singleReminderModal');
   },
 
   sendSingleReminderViaWa() {
     const emp = this._currentSingleReminderEmp;
     if (!emp) return;
     const msg = document.getElementById('singleRemindMessage')?.value || '';
-    const phone = this.formatPhoneForWa(emp.noWa || emp.phone);
-    const fullMsg = `*PEMBERITAHUAN KEDINASAN BAPPEDA PROVINSI LAMPUNG*\n\n${msg}\n\n_Akses Portal SIP-KOMPETENSI:_ https://website-bappeda.vercel.app`;
-    const url = phone ? `https://wa.me/${phone}?text=${encodeURIComponent(fullMsg)}` : `https://wa.me/?text=${encodeURIComponent(fullMsg)}`;
+    const fullMsg = `*PEMBERITAHUAN KEPEGAWAIAN BAPPEDA PROVINSI LAMPUNG*\n\n${msg}\n\n_Sistem Informasi Pengembangan Kompetensi (SIP-KOMPETENSI):_ https://website-bappeda.vercel.app`;
+    const url = `https://wa.me/?text=${encodeURIComponent(fullMsg)}`;
     window.open(url, '_blank');
-    App.toast(`Membuka WhatsApp (${emp.noWa || 'Pesan'}) untuk ${emp.name}...`, 'success');
+    App.toast(`Membuka WhatsApp untuk mengirim pesan ke ${emp.name}...`, 'info');
     this.closeModal('singleReminderModal');
-  },
-
-  openDirectWaChat(empIdOrNip, customMsg) {
-    const emps = Store.state.employees || [];
-    const clean = String(empIdOrNip || '').replace(/\s+/g, '');
-    const emp = emps.find(e => String(e.nip || '').replace(/\s+/g, '') === clean || String(e.id) === clean);
-    if (!emp) {
-      App.toast('Data pegawai tidak ditemukan', 'warning');
-      return;
-    }
-    const phone = this.formatPhoneForWa(emp.noWa || emp.phone);
-    const yr = Store.getActiveYear();
-    const msg = customMsg || `*PEMBERITAHUAN KEDINASAN BAPPEDA PROVINSI LAMPUNG*\n\nYth. Bapak/Ibu *${emp.name}*\nNIP: ${emp.nipFormatted || emp.nip}\nUnit Kerja: ${emp.unit}\n\nPemberitahuan resmi dari Pengelola Kepegawaian Bappeda Provinsi Lampung terkait pemenuhan target pengembangan kompetensi ASN (IDP) Tahun Anggaran ${yr}.\n\nSilakan akses portal SIP-KOMPETENSI:\nhttps://website-bappeda.vercel.app\n\n_Subbagian Umum & Kepegawaian Bappeda Prov. Lampung_`;
-    
-    const url = phone ? `https://wa.me/${phone}?text=${encodeURIComponent(msg)}` : `https://wa.me/?text=${encodeURIComponent(msg)}`;
-    window.open(url, '_blank');
-    App.toast(`Membuka WhatsApp (${emp.noWa || 'Pesan'}) untuk ${emp.name}...`, 'success');
-  },
-
-  openWhatsAppBroadcast() {
-    const targetKey = document.querySelector('input[name="reminderTargetGroup"]:checked')?.value || 'red';
-    const targets = this.getTargetEmployeesForReminder(targetKey);
-    const msg = document.getElementById('reminderMessageText')?.value || '';
-
-    let waText = `*PENGINGAT KEPATUHAN IDP & BANGKOM BAPPEDA PROVINSI LAMPUNG*\n\n${msg}\n\n*Daftar Rekan ASN Yang Ditujukan (${targets.length} Pegawai):*\n`;
-    targets.forEach((e, i) => {
-      waText += `${i + 1}. ${e.name} (${e.unit} • ${e.noWa || '-'})\n`;
-    });
-    waText += `\n_Akses Sistem SIP-KOMPETENSI:_ https://website-bappeda.vercel.app`;
-
-    const url = `https://wa.me/?text=${encodeURIComponent(waText)}`;
-    window.open(url, '_blank');
-    App.toast('Membuka WhatsApp untuk mengirim siaran pengingat kepatuhan...', 'success');
-  },
-
-  sendVerifResultViaWaDirect(verifId) {
-    const targetId = verifId || this._currentReviewVerifItem?.id;
-    const v = (Store.state.verifications || []).find(x => x.id === targetId) || this._currentReviewVerifItem;
-    if (!v) {
-      App.toast('Data verifikasi IDP tidak ditemukan', 'warning');
-      return;
-    }
-    const emps = Store.state.employees || [];
-    const cleanNip = String(v.nip || '').replace(/\s+/g, '');
-    const emp = emps.find(e => String(e.nip || '').replace(/\s+/g, '') === cleanNip);
-    const phone = this.formatPhoneForWa(emp?.noWa || v.noWa);
-    const notes = document.getElementById('verifNotesInput')?.value || v.notes || 'Rencana IDP telah diverifikasi sesuai standar kompetensi Bappeda.';
-    const yr = Store.getActiveYear();
-
-    const msg = `*PEMBERITAHUAN HASIL VERIFIKASI IDP TAHUN ${yr}*\n*BAPPEDA PROVINSI LAMPUNG*\n\nYth. Bapak/Ibu *${v.pegawai || emp?.name || 'Pegawai ASN'}*\nNIP: ${v.nip || '-'}\n\nRencana pengembangan kompetensi individu (IDP) Anda telah diperiksa oleh Verifikator Kepegawaian Bappeda.\n\nStatus: *${v.status || 'Diverifikasi'}*\nTotal Jam Pelajaran: *${v.totalJp || 20} JP*\nCatatan Verifikator:\n_"${notes}"_\n\nSilakan cek selengkapnya pada portal SIP-KOMPETENSI:\nhttps://website-bappeda.vercel.app\n\n_Subbagian Umum & Kepegawaian Bappeda Provinsi Lampung_`;
-
-    const waCfg = (typeof Store !== 'undefined' && Store.waConfig) ? Store.waConfig : { token: '' };
-    if (waCfg.token && phone) {
-      fetch('https://api.fonnte.com/send', {
-        method: 'POST',
-        headers: { 'Authorization': waCfg.token },
-        body: new URLSearchParams({ target: phone, message: msg })
-      }).catch(() => {});
-      App.toast(`Hasil verifikasi terkirim via Gateway ke WhatsApp ${v.pegawai || emp?.name} (${emp?.noWa || phone})!`, 'success');
-    } else {
-      // Jika token gateway belum dihubungkan, buka WhatsApp langsung ke nomor HP pegawai
-      const url = phone ? `https://wa.me/${phone}?text=${encodeURIComponent(msg)}` : `https://wa.me/?text=${encodeURIComponent(msg)}`;
-      window.open(url, '_blank');
-      App.toast(`Membuka WhatsApp hasil verifikasi ke ${v.pegawai || emp?.name} (${emp?.noWa || phone})...`, 'success');
-    }
-
-    try {
-      Store.sendNotification({
-        penerima: v.nip || emp?.nip,
-        judul: `Hasil Verifikasi IDP: ${v.status || 'Diverifikasi'}`,
-        pesan: `Usulan IDP Anda telah diproses. Total: ${v.totalJp || 20} JP. Catatan: ${notes}`,
-        tipe: v.status === 'Revisi' ? 'danger' : 'success'
-      }).catch(() => {});
-
-      if (typeof AuditService !== 'undefined') {
-        AuditService.log('WhatsApp', 'Notifikasi Hasil Verifikasi WA', `Mengirimkan notifikasi hasil verifikasi IDP ke WhatsApp ${v.pegawai || emp?.name} (${emp?.noWa || phone})`, 'Sukses');
-      }
-    } catch(e) {}
-
-    // Bunyikan synth chime
-    try {
-      const ctx = new (window.AudioContext || window.webkitAudioContext)();
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(659.25, ctx.currentTime);
-      gain.gain.setValueAtTime(0.15, ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.25);
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-      osc.start();
-      osc.stop(ctx.currentTime + 0.25);
-    } catch(e) {}
-
-    App.toast(`Pemberitahuan hasil verifikasi berhasil dikirim langsung ke WhatsApp ${v.pegawai || emp?.name} (${emp?.noWa || phone})!`, 'success');
-  },
-
-  sendVerifResultViaWa(verifId) {
-    const v = (Store.state.verifications || []).find(x => x.id === verifId);
-    if (!v) return;
-    const emps = Store.state.employees || [];
-    const cleanNip = String(v.nip || '').replace(/\s+/g, '');
-    const emp = emps.find(e => String(e.nip || '').replace(/\s+/g, '') === cleanNip);
-    const phone = this.formatPhoneForWa(emp?.noWa || v.noWa);
-    const notes = document.getElementById('verifNotesInput')?.value || v.notes || 'Rencana IDP telah diverifikasi sesuai standar kompetensi Bappeda.';
-    const yr = Store.getActiveYear();
-
-    const msg = `*PEMBERITAHUAN HASIL VERIFIKASI IDP TAHUN ${yr}*\n*BAPPEDA PROVINSI LAMPUNG*\n\nYth. Bapak/Ibu *${v.pegawai || emp?.name || 'Pegawai ASN'}*\nNIP: ${v.nip || '-'}\n\nRencana pengembangan kompetensi individu (IDP) Anda telah diperiksa oleh Verifikator Kepegawaian Bappeda.\n\nStatus: *${v.status || 'Diverifikasi'}*\nTotal Jam Pelajaran: *${v.totalJp || 20} JP*\nCatatan Verifikator:\n_"${notes}"_\n\nSilakan cek selengkapnya pada portal SIP-KOMPETENSI:\nhttps://website-bappeda.vercel.app\n\n_Subbagian Umum & Kepegawaian Bappeda Provinsi Lampung_`;
-
-    const url = phone ? `https://wa.me/${phone}?text=${encodeURIComponent(msg)}` : `https://wa.me/?text=${encodeURIComponent(msg)}`;
-    window.open(url, '_blank');
-    App.toast(`Membuka WhatsApp hasil verifikasi untuk ${v.pegawai}...`, 'success');
   },
 
   openAddEmployeeModal() {
@@ -3305,7 +2861,6 @@ const App = {
     const pangkat = document.getElementById('newEmpPangkat').value;
     const jabatan = document.getElementById('newEmpJabatan').value;
     const unit = document.getElementById('newEmpUnit').value;
-    const noWa = document.getElementById('newEmpWa')?.value || '0812-7911-0099';
 
     if (!name || !nip) {
       App.toast('Nama dan NIP wajib diisi', 'warning');
@@ -3320,7 +2875,6 @@ const App = {
       jabatan,
       jenis: 'JFT',
       unit,
-      noWa,
       statusIdp: 'Belum',
       progress: '0/0 (0%)'
     });
