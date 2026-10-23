@@ -2099,18 +2099,76 @@
               <p class="page-subtitle" style="margin-bottom: 0;">Master basis data kepegawaian Bappeda yang menjadi
                 sumber data profil IDP.</p>
             </div>
-            <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
-              <button class="btn btn-outline btn-sm" onclick="ExportService.downloadDukTemplate()" title="Unduh format tabel Excel standar DUK Bappeda / SIASN BKN">
-                <span data-icon="FileSpreadsheet" data-icon-size="14"></span> Template DUK
-              </button>
-              <button class="btn btn-outline btn-sm" onclick="App.openImportEmployeeModal()" title="Unggah berkas Excel / CSV DUK Bappeda untuk sinkronisasi massal">
-                <span data-icon="Upload" data-icon-size="14"></span> Sinkronkan DUK (.xlsx)
-              </button>
-              <button class="btn btn-outline btn-sm" onclick="ExportService.exportBkdRecap()" title="Unduh laporan rekapitulasi kepatuhan 20 JP & IDP format resmi BKD / BPSDMD">
-                <span data-icon="Download" data-icon-size="14"></span> Rekapitulasi BKD (.xlsx)
-              </button>
-              <button class="btn btn-primary btn-sm" onclick="App.openAddEmployeeModal()">
-                <span data-icon="Plus" data-icon-size="14"></span> Tambah Pegawai
+            <div style="display: flex; gap: 10px; align-items: center; position: relative;">
+              <!-- Dropdown Menu Kelola DUK & Ekspor -->
+              <div style="position: relative;" id="dukActionDropdownContainer">
+                <button type="button" class="btn btn-outline" onclick="App.toggleDukActionDropdown()" id="btnDukActionDropdown" style="display: flex; align-items: center; gap: 6px;">
+                  <span data-icon="FileSpreadsheet" data-icon-size="16"></span>
+                  <span>Kelola DUK &amp; Ekspor</span>
+                  <span data-icon="ChevronDown" data-icon-size="14" style="opacity: 0.7;"></span>
+                </button>
+
+                <!-- Floating Dropdown Card Menu -->
+                <div id="dukActionDropdownMenu" class="user-dropdown-card" style="display: none; width: 290px; right: 0; top: calc(100% + 8px); box-shadow: 0 12px 32px -4px rgba(0,0,0,0.18);">
+                  <div class="user-dropdown-header">
+                    <div class="user-dropdown-name">Integrasi &amp; Ekspor DUK</div>
+                    <div class="user-dropdown-sub">SIASN BKN &bull; BKD &bull; BPSDMD Lampung</div>
+                  </div>
+                  
+                  <div class="user-dropdown-items" style="padding: 6px;">
+                    <!-- Aksi 1: Import DUK -->
+                    <button type="button" class="user-dropdown-item" onclick="App.openImportEmployeeModal(); App.closeDukActionDropdown();" style="display: flex; align-items: flex-start; gap: 10px; padding: 10px 12px; border-radius: 8px; text-align: left; width: 100%;">
+                      <div style="width: 32px; height: 32px; border-radius: 6px; background: rgba(47, 128, 237, 0.12); color: var(--color-primary); display: grid; place-items: center; flex-shrink: 0; margin-top: 2px;">
+                        <span data-icon="UploadCloud" data-icon-size="16"></span>
+                      </div>
+                      <div>
+                        <div style="font-weight: 700; font-size: 12.5px; color: var(--color-text-main);">Sinkronkan DUK (.xlsx)</div>
+                        <div style="font-size: 10.5px; color: var(--color-text-muted);">Import massal berkas Excel DUK BKD</div>
+                      </div>
+                    </button>
+
+                    <!-- Aksi 2: Template DUK -->
+                    <button type="button" class="user-dropdown-item" onclick="ExportService.downloadDukTemplate(); App.closeDukActionDropdown();" style="display: flex; align-items: flex-start; gap: 10px; padding: 10px 12px; border-radius: 8px; text-align: left; width: 100%;">
+                      <div style="width: 32px; height: 32px; border-radius: 6px; background: rgba(16, 185, 129, 0.12); color: var(--color-success); display: grid; place-items: center; flex-shrink: 0; margin-top: 2px;">
+                        <span data-icon="FileSpreadsheet" data-icon-size="16"></span>
+                      </div>
+                      <div>
+                        <div style="font-weight: 700; font-size: 12.5px; color: var(--color-text-main);">Unduh Template DUK</div>
+                        <div style="font-size: 10.5px; color: var(--color-text-muted);">Format standar baku pengisian profil</div>
+                      </div>
+                    </button>
+
+                    <div class="user-dropdown-divider" style="margin: 4px 0;"></div>
+
+                    <!-- Aksi 3: Rekapitulasi BKD -->
+                    <button type="button" class="user-dropdown-item" onclick="ExportService.exportBkdRecap(); App.closeDukActionDropdown();" style="display: flex; align-items: flex-start; gap: 10px; padding: 10px 12px; border-radius: 8px; text-align: left; width: 100%;">
+                      <div style="width: 32px; height: 32px; border-radius: 6px; background: rgba(245, 158, 11, 0.12); color: #d97706; display: grid; place-items: center; flex-shrink: 0; margin-top: 2px;">
+                        <span data-icon="FileCheck" data-icon-size="16"></span>
+                      </div>
+                      <div>
+                        <div style="font-weight: 700; font-size: 12.5px; color: var(--color-text-main);">Rekapitulasi BKD (.xlsx)</div>
+                        <div style="font-size: 10.5px; color: var(--color-text-muted);">Evaluasi kepatuhan 20 JP &amp; Nine-Box ASN</div>
+                      </div>
+                    </button>
+
+                    <!-- Aksi 4: Ekspor Sederhana -->
+                    <button type="button" class="user-dropdown-item" onclick="ExportService.exportEmployees(); App.closeDukActionDropdown();" style="display: flex; align-items: flex-start; gap: 10px; padding: 10px 12px; border-radius: 8px; text-align: left; width: 100%;">
+                      <div style="width: 32px; height: 32px; border-radius: 6px; background: rgba(100, 116, 139, 0.12); color: #64748b; display: grid; place-items: center; flex-shrink: 0; margin-top: 2px;">
+                        <span data-icon="Download" data-icon-size="16"></span>
+                      </div>
+                      <div>
+                        <div style="font-weight: 700; font-size: 12.5px; color: var(--color-text-main);">Ekspor Data Pegawai (.xlsx)</div>
+                        <div style="font-size: 10.5px; color: var(--color-text-muted);">Daftar tabel master 99 pegawai dinas</div>
+                      </div>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Button Primary: Tambah Pegawai -->
+              <button class="btn btn-primary" onclick="App.openAddEmployeeModal()" style="display: flex; align-items: center; gap: 6px;">
+                <span data-icon="Plus" data-icon-size="16"></span>
+                <span>Tambah Pegawai</span>
               </button>
             </div>
           </div>
@@ -4188,9 +4246,9 @@
   <script src="js/icons.js?v=20261014_v16"></script>
   <script src="js/charts.js?v=20261008_fix"></script>
   <script src="js/bappeda_data.js?v=20261020_v11"></script>
-  <script src="js/store.js?v=20261023_v46"></script>
-  <script src="js/export.js?v=20261023_v46"></script>
-  <script src="js/app.js?v=20261023_v46"></script>
+  <script src="js/store.js?v=20261023_v47"></script>
+  <script src="js/export.js?v=20261023_v47"></script>
+  <script src="js/app.js?v=20261023_v47"></script>
 </body>
 
 </html>

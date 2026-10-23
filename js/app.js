@@ -1051,6 +1051,22 @@ const App = {
     if (menu) menu.style.display = 'none';
   },
 
+  // DUK & EXPORT ACTION DROPDOWN
+  toggleDukActionDropdown() {
+    const menu = document.getElementById('dukActionDropdownMenu');
+    if (!menu) return;
+    const isShown = menu.style.display === 'block';
+    menu.style.display = isShown ? 'none' : 'block';
+    if (!isShown && typeof renderAllIcons === 'function') {
+      renderAllIcons();
+    }
+  },
+
+  closeDukActionDropdown() {
+    const menu = document.getElementById('dukActionDropdownMenu');
+    if (menu) menu.style.display = 'none';
+  },
+
   renderCareerPlan() {
     const cp = Store.state.careerPlan;
     if (document.getElementById('careerPeriode')) {
@@ -5357,6 +5373,11 @@ const App = {
       const userMenuCont = document.getElementById('topbarUserMenuContainer');
       if (userMenuCont && !userMenuCont.contains(e.target)) {
         this.closeUserDropdown();
+      }
+
+      const dukDropdownCont = document.getElementById('dukActionDropdownContainer');
+      if (dukDropdownCont && !dukDropdownCont.contains(e.target)) {
+        this.closeDukActionDropdown();
       }
     });
   }
