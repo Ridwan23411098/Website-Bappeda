@@ -20,6 +20,7 @@ const NAV_CONFIG = {
           { id: 'ekarier', icon: 'TrendingUp', label: 'Rencana Karier' },
           { id: 'ekompetensi', icon: 'Target', label: 'Kompetensi' },
           { id: 'eidp', icon: 'ClipboardCheck', label: 'IDP Saya' },
+          { id: 'ekalender', icon: 'Calendar', label: 'Kalender Diklat' },
           { id: 'epelaksanaan', icon: 'CircleCheck', label: 'Pelaksanaan SDM' }
         ]
       }
@@ -39,6 +40,7 @@ const NAV_CONFIG = {
         items: [
           { id: 'averif', icon: 'ShieldCheck', label: 'Verifikasi IDP' },
           { id: 'apegawai', icon: 'Users', label: 'Data Pegawai' },
+          { id: 'ekalender', icon: 'Calendar', label: 'Kalender Diklat' },
           { id: 'apelaksanaan', icon: 'CircleCheck', label: 'Pelaksanaan SDM' },
           { id: 'amaster', icon: 'Settings2', label: 'Master Data' }
         ]
@@ -58,7 +60,8 @@ const NAV_CONFIG = {
         title: 'MONITORING & EVALUASI',
         items: [
           { id: 'pmonitoring', icon: 'ChartNoAxesCombined', label: 'Monitoring' },
-          { id: 'plaporan', icon: 'FileBarChart', label: 'Laporan' }
+          { id: 'plaporan', icon: 'FileBarChart', label: 'Laporan' },
+          { id: 'ekalender', icon: 'Calendar', label: 'Kalender Diklat' }
         ]
       }
     ]
@@ -395,9 +398,9 @@ const App = {
     // Role-Based Guard: Proteksi Akses Halaman berdasarkan Peran ASN
     const userRole = Store.state.currentSession?.role || Store.state.user?.role || 'pegawai';
     const roleAllowedPages = {
-      pegawai: ['edash', 'eprofil', 'ekarier', 'ekompetensi', 'eidp', 'ereview', 'epelaksanaan'],
-      admin: ['adash', 'averif', 'apegawai', 'apelaksanaan', 'amaster', 'eprofil'],
-      pimpinan: ['pdash', 'pmonitoring', 'plaporan', 'eprofil']
+      pegawai: ['edash', 'eprofil', 'ekarier', 'ekompetensi', 'eidp', 'ekalender', 'ereview', 'epelaksanaan'],
+      admin: ['adash', 'averif', 'apegawai', 'ekalender', 'apelaksanaan', 'amaster', 'eprofil'],
+      pimpinan: ['pdash', 'pmonitoring', 'plaporan', 'ekalender', 'eprofil']
     };
 
     const allowed = roleAllowedPages[userRole] || roleAllowedPages['pegawai'];
@@ -430,6 +433,7 @@ const App = {
       ekarier: 'Rencana Karier',
       ekompetensi: 'Pemetaan Kompetensi',
       eidp: 'Formulir IDP Saya',
+      ekalender: 'Kalender Diklat Terpadu 2026',
       ereview: 'Review & Pengajuan IDP',
       epelaksanaan: 'Pelaksanaan Pengembangan SDM',
       adash: 'Dashboard Pengelola SDM',
@@ -475,6 +479,9 @@ const App = {
         break;
       case 'eidp':
         this.renderIdpSaya();
+        break;
+      case 'ekalender':
+        this.renderTrainingCalendar();
         break;
       case 'ereview':
         this.renderReviewPage();
@@ -1943,7 +1950,348 @@ const App = {
           </tr>
         `;
       }).join('');
+  },
+
+  // =========================================================================
+  // TAHAP 3: KALENDER TERPADU DIKLAT & PELATIHAN ASN (BPSDMD & BAPPENAS)
+  // =========================================================================
+  calendarFilter: {
+    triwulan: 'all',
+    institusi: 'all',
+    moda: 'all',
+    kategoriKompetensi: 'all',
+    search: ''
+  },
+
+  setCalendarFilter(key, value) {
+    if (!this.calendarFilter) {
+      this.calendarFilter = { triwulan: 'all', institusi: 'all', moda: 'all', kategoriKompetensi: 'all', search: '' };
     }
+    this.calendarFilter[key] = value;
+    this.renderTrainingCalendar();
+  },
+
+  handleCalendarSearch(query) {
+    if (!this.calendarFilter) {
+      this.calendarFilter = { triwulan: 'all', institusi: 'all', moda: 'all', kategoriKompetensi: 'all', search: '' };
+    }
+    this.calendarFilter.search = query || '';
+    this.renderTrainingCalendar();
+  },
+
+  renderTrainingCalendar() {
+    if (!this.calendarFilter) {
+      this.calendarFilter = { triwulan: 'all', institusi: 'all', moda: 'all', kategoriKompetensi: 'all', search: '' };
+    }
+
+    const stats = Store.getKalenderStats();
+    const courses = Store.getKalenderDiklat(this.calendarFilter);
+    const activeYear = Store.getActiveYear() || 2026;
+
+    // 1. Update Metric Cards in DOM
+    const elTotalProg = document.getElementById('calMetricTotalPrograms');
+    const elTotalJp = document.getElementById('calMetricTotalJp');
+    const elBpsdmd = document.getElementById('calMetricBpsdmd');
+    const elBappenas = document.getElementById('calMetricBappenas');
+    const elMyEnrolled = document.getElementById('calMetricMyEnrolled');
+
+    if (elTotalProg) elTotalProg.textContent = `${stats.totalPrograms} Diklat`;
+    if (elTotalJp) elTotalJp.textContent = `${stats.totalJp} JP`;
+    if (elBpsdmd) elBpsdmd.textContent = `${stats.bpsdmdCount} Agenda`;
+    if (elBappenas) elBappenas.textContent = `${stats.bappenasCount} Agenda`;
+    if (elMyEnrolled) elMyEnrolled.textContent = `${stats.myEnrolledCount} Program (${stats.myEnrolledJp} JP)`;
+
+    // 2. Update Personal IDP Status Callout
+    const bannerContainer = document.getElementById('calMyIdpStatusBanner');
+    if (bannerContainer) {
+      const isMet = stats.myEnrolledJp >= 20;
+      if (stats.myEnrolledCount > 0) {
+        bannerContainer.innerHTML = `
+          <div class="calendar-user-status-card ${isMet ? 'status-met' : 'status-warning'}">
+            <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+              <span style="font-size: 24px;">${isMet ? '🛡️' : '📌'}</span>
+              <div>
+                <div style="font-weight: 750; font-size: 13.5px; color: ${isMet ? '#166534' : '#92400e'};">
+                  Partisipasi Anda: <b>${stats.myEnrolledCount} Program Diklat Resmi</b> Terdaftar di IDP (${stats.myEnrolledJp} JP)
+                </div>
+                <div style="font-size: 12px; color: ${isMet ? '#15803d' : '#b45309'}; margin-top: 2px;">
+                  ${isMet 
+                    ? `✓ Target minimal 20 JP tahunan (UU No. 20/2023) telah terpenuhi secara sah.` 
+                    : `⚠️ Masih kurang <b>${20 - stats.myEnrolledJp} JP</b> untuk mencapai standar minimal 20 JP hak belajar ASN. Pilih program lain di bawah ini.`}
+                </div>
+              </div>
+            </div>
+            <button class="btn btn-sm btn-outline-primary" onclick="App.navigate('eidp')" style="font-weight: 600; white-space: nowrap;">
+              Lihat Formulir IDP Saya →
+            </button>
+          </div>
+        `;
+      } else {
+        bannerContainer.innerHTML = `
+          <div class="calendar-user-status-card status-info">
+            <div style="display: flex; align-items: center; gap: 12px;">
+              <span style="font-size: 24px;">💡</span>
+              <div>
+                <div style="font-weight: 750; font-size: 13.5px; color: #1e40af;">
+                  Katalog Resmi Diklat & Pelatihan Terakreditasi TA ${activeYear}
+                </div>
+                <div style="font-size: 12px; color: #1d4ed8; margin-top: 2px;">
+                  Pilih pelatihan yang sesuai dengan kompetensi jabatan Anda, lalu klik tombol <b>"+ Daftarkan ke IDP"</b> untuk otomatis memasukkan ke rencana tahunan Anda.
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+    }
+
+    // 3. Update active filter tab UI
+    const quarterTabs = document.querySelectorAll('.cal-tab-quarter');
+    quarterTabs.forEach(tab => {
+      const q = tab.getAttribute('data-quarter');
+      tab.classList.toggle('active', q === this.calendarFilter.triwulan);
+    });
+
+    const instSelect = document.getElementById('calFilterInstitusi');
+    if (instSelect && instSelect.value !== this.calendarFilter.institusi) {
+      instSelect.value = this.calendarFilter.institusi;
+    }
+
+    const modaSelect = document.getElementById('calFilterModa');
+    if (modaSelect && modaSelect.value !== this.calendarFilter.moda) {
+      modaSelect.value = this.calendarFilter.moda;
+    }
+
+    const searchInput = document.getElementById('calSearchInput');
+    if (searchInput && searchInput.value !== this.calendarFilter.search) {
+      searchInput.value = this.calendarFilter.search;
+    }
+
+    // 4. Render Grid of Courses
+    const grid = document.getElementById('calTrainingGrid');
+    if (!grid) return;
+
+    if (courses.length === 0) {
+      grid.innerHTML = `
+        <div style="grid-column: 1 / -1; text-align: center; padding: 48px 16px; background: var(--color-surface); border-radius: var(--radius-lg); border: 1px dashed var(--color-border);">
+          <div style="font-size: 32px; margin-bottom: 8px;">🔍</div>
+          <div style="font-weight: 700; font-size: 15px; margin-bottom: 4px;">Tidak Ada Jadwal Diklat Ditemukan</div>
+          <p style="font-size: 12.5px; color: var(--color-text-muted); margin-bottom: 16px;">Coba atur ulang kata kunci pencarian atau filter triwulan/penyelenggara.</p>
+          <button class="btn btn-outline btn-sm" onclick="App.resetCalendarFilters()">Reset Semua Filter</button>
+        </div>
+      `;
+      return;
+    }
+
+    grid.innerHTML = courses.map(item => {
+      const isEnrolled = Store.isTrainingEnrolled(item.id);
+      
+      // Color and badge mapping for institutions
+      let instClass = 'inst-badge-bpsdmd';
+      let instLabel = 'BPSDMD Prov. Lampung';
+      if (item.institusiKategori === 'bappenas') {
+        instClass = 'inst-badge-bappenas';
+        instLabel = 'Pusbindiklatren Bappenas';
+      } else if (item.institusiKategori === 'lan') {
+        instClass = 'inst-badge-lan';
+        instLabel = 'LAN RI';
+      } else if (item.institusiKategori === 'internal') {
+        instClass = 'inst-badge-internal';
+        instLabel = 'Internal Bappeda';
+      }
+
+      // Quota percent
+      const quotaPct = Math.min(100, Math.round(((item.kuotaTerisi || 0) / (item.kuota || 40)) * 100));
+
+      return `
+        <div class="training-card ${isEnrolled ? 'is-enrolled' : ''}" id="tcard-${item.id}">
+          <div class="training-card-header">
+            <div style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap;">
+              <span class="badge badge-quarter">${item.triwulan} 2026</span>
+              <span class="inst-badge ${instClass}">${instLabel}</span>
+            </div>
+            <span class="badge badge-neutral" style="font-size: 10.5px;">${item.kategoriKompetensi}</span>
+          </div>
+
+          <h3 class="training-card-title">${item.judul}</h3>
+          <div class="training-card-code">${item.kode} &bull; ${item.biaya}</div>
+
+          <div class="training-card-metrics">
+            <div class="tc-metric">
+              <span class="tc-metric-label">Beban Belajar</span>
+              <span class="tc-metric-val highlight">⚡ ${item.jp} JP</span>
+            </div>
+            <div class="tc-metric">
+              <span class="tc-metric-label">Moda Belajar</span>
+              <span class="tc-metric-val">${item.metode}</span>
+            </div>
+            <div class="tc-metric">
+              <span class="tc-metric-label">Kuota Peserta</span>
+              <span class="tc-metric-val">${item.kuotaTerisi}/${item.kuota} ASN</span>
+            </div>
+          </div>
+
+          <div class="tc-quota-bar-wrap" title="${quotaPct}% Kuota Terisi">
+            <div class="tc-quota-bar" style="width: ${quotaPct}%;"></div>
+          </div>
+
+          <div class="training-card-details">
+            <div class="tc-detail-row">
+              <span class="tc-detail-icon">📅</span>
+              <span><b>${item.periodeTeks}</b></span>
+            </div>
+            <div class="tc-detail-row">
+              <span class="tc-detail-icon">📍</span>
+              <span style="font-size: 11.5px;">${item.tempat}</span>
+            </div>
+            <div class="tc-detail-row">
+              <span class="tc-detail-icon">🎯</span>
+              <span style="font-size: 11.5px; color: var(--color-text-secondary);">${item.sasaranPeserta}</span>
+            </div>
+          </div>
+
+          <div class="training-card-footer">
+            <button class="btn btn-outline btn-sm" onclick="App.openTrainingDetailModal('${item.id}')" title="Lihat Kurikulum & Silabus">
+              Silabus & Syarat
+            </button>
+            ${isEnrolled ? `
+              <button class="btn btn-sm btn-enrolled" disabled title="Pelatihan ini sudah tercatat dalam formulir IDP Anda">
+                ✓ Terdaftar di IDP
+              </button>
+            ` : `
+              <button class="btn btn-sm btn-primary btn-enroll" onclick="App.enrollFromCalendar('${item.id}')" title="Tambahkan langsung ke formulir IDP Saya">
+                + Daftarkan ke IDP
+              </button>
+            `}
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    if (typeof renderAllIcons === 'function') renderAllIcons();
+  },
+
+  resetCalendarFilters() {
+    this.calendarFilter = {
+      triwulan: 'all',
+      institusi: 'all',
+      moda: 'all',
+      kategoriKompetensi: 'all',
+      search: ''
+    };
+    this.renderTrainingCalendar();
+  },
+
+  enrollFromCalendar(trainingId) {
+    const res = Store.enrollProgramToIdp(trainingId);
+    if (!res.success) {
+      App.toast(res.message, 'warning');
+      return;
+    }
+
+    App.toast(`✓ Sukses! Program "${res.training.judul}" (${res.training.jp} JP) berhasil ditambahkan ke IDP Anda!`, 'success');
+    this.renderTrainingCalendar();
+
+    // Trigger visual feedback on card
+    const card = document.getElementById(`tcard-${trainingId}`);
+    if (card) {
+      card.classList.add('just-enrolled');
+      setTimeout(() => card.classList.remove('just-enrolled'), 1500);
+    }
+
+    // Play subtle notification chime
+    if (typeof this.playNotificationSound === 'function') {
+      try { this.playNotificationSound(); } catch (e) {}
+    }
+  },
+
+  openTrainingDetailModal(trainingId) {
+    const item = Store.getTrainingById(trainingId);
+    if (!item) {
+      App.toast('Data rincian pelatihan tidak ditemukan.', 'error');
+      return;
+    }
+
+    const titleEl = document.getElementById('trainingDetailModalTitle');
+    const bodyEl = document.getElementById('trainingDetailModalBody');
+    const footerEl = document.getElementById('trainingDetailModalFooter');
+
+    if (titleEl) titleEl.textContent = item.judul;
+
+    const isEnrolled = Store.isTrainingEnrolled(item.id);
+    const syllabusHtml = (item.silabus && item.silabus.length > 0)
+      ? item.silabus.map((s, idx) => `<li style="margin-bottom: 6px; line-height: 1.45;"><b>${idx + 1}.</b> ${s}</li>`).join('')
+      : '<li>Silabus detail mengacu pada kurikulum resmi lembaga penyelenggara.</li>';
+
+    if (bodyEl) {
+      bodyEl.innerHTML = `
+        <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; align-items: center;">
+          <span class="badge badge-quarter" style="font-size: 11px;">${item.triwulan} 2026</span>
+          <span class="badge badge-blue" style="font-size: 11px;">${item.institusi}</span>
+          <span class="badge badge-success" style="font-size: 11px;">⚡ ${item.jp} JP</span>
+          <span class="badge badge-neutral" style="font-size: 11px;">Moda: ${item.metode}</span>
+          <span class="badge badge-neutral" style="font-size: 11px;">Kode: ${item.kode}</span>
+        </div>
+
+        <div style="background: var(--color-surface-subtle); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 14px; margin-bottom: 18px;">
+          <h4 style="font-size: 13.5px; font-weight: 750; margin-bottom: 8px; color: var(--color-text-primary);">🎯 Sasaran & Kualifikasi Peserta</h4>
+          <p style="font-size: 12.5px; color: var(--color-text-secondary); margin-bottom: 8px; line-height: 1.5;">${item.sasaranPeserta}</p>
+          <div style="font-size: 11.5px; color: var(--color-text-muted); line-height: 1.4;">
+            <b>Persyaratan:</b> ${item.persyaratan}
+          </div>
+        </div>
+
+        <div style="margin-bottom: 18px;">
+          <h4 style="font-size: 13.5px; font-weight: 750; margin-bottom: 8px; color: var(--color-text-primary);">📚 Kurikulum & Silabus Agenda Pelatihan</h4>
+          <ul style="list-style: none; padding-left: 0; font-size: 12.5px; color: var(--color-text-secondary);">
+            ${syllabusHtml}
+          </ul>
+        </div>
+
+        <div class="grid grid-cols-2" style="gap: 12px; margin-bottom: 18px;">
+          <div style="background: var(--color-surface-subtle); border-radius: var(--radius-sm); padding: 10px 12px; border: 1px solid var(--color-border);">
+            <div style="font-size: 11px; color: var(--color-text-muted);">Jadwal Pelaksanaan</div>
+            <div style="font-weight: 700; font-size: 12.5px; color: var(--color-text-primary); margin-top: 2px;">${item.periodeTeks}</div>
+          </div>
+          <div style="background: var(--color-surface-subtle); border-radius: var(--radius-sm); padding: 10px 12px; border: 1px solid var(--color-border);">
+            <div style="font-size: 11px; color: var(--color-text-muted);">Biaya & Pembiayaan</div>
+            <div style="font-weight: 700; font-size: 12.5px; color: var(--color-success); margin-top: 2px;">${item.biaya}</div>
+          </div>
+          <div style="background: var(--color-surface-subtle); border-radius: var(--radius-sm); padding: 10px 12px; border: 1px solid var(--color-border);">
+            <div style="font-size: 11px; color: var(--color-text-muted);">Lokasi / Kampus</div>
+            <div style="font-weight: 600; font-size: 12px; color: var(--color-text-primary); margin-top: 2px;">${item.tempat}</div>
+          </div>
+          <div style="background: var(--color-surface-subtle); border-radius: var(--radius-sm); padding: 10px 12px; border: 1px solid var(--color-border);">
+            <div style="font-size: 11px; color: var(--color-text-muted);">Narahubung (PIC)</div>
+            <div style="font-weight: 600; font-size: 12px; color: var(--color-text-primary); margin-top: 2px;">${item.kontakPIC}</div>
+          </div>
+        </div>
+
+        <div style="font-size: 11.5px; color: var(--color-text-muted); display: flex; align-items: center; justify-content: space-between; border-top: 1px solid var(--color-border); padding-top: 12px;">
+          <span>Status Pendaftaran: <b>${item.statusRegistrasi}</b></span>
+          <a href="${item.linkPendaftaran}" target="_blank" rel="noopener noreferrer" style="color: var(--color-primary); text-decoration: underline; font-weight: 600;">
+            Kunjungi Laman Resmi Penyelenggara ↗
+          </a>
+        </div>
+      `;
+    }
+
+    if (footerEl) {
+      footerEl.innerHTML = `
+        <button class="btn btn-outline" onclick="App.closeModal('trainingDetailModal')">Tutup</button>
+        ${isEnrolled ? `
+          <button class="btn btn-success" disabled style="opacity: 0.9; cursor: default;">
+            ✓ Sudah Terdaftar di Formulir IDP
+          </button>
+        ` : `
+          <button class="btn btn-primary" onclick="App.enrollFromCalendar('${item.id}'); App.closeModal('trainingDetailModal');">
+            + Daftarkan ke IDP Saya (1-Klik)
+          </button>
+        `}
+      `;
+    }
+
+    this.openModal('trainingDetailModal');
   },
 
   openAddProgramModal() {

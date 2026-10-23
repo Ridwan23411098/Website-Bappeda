@@ -1572,7 +1572,10 @@
                 <div style="font-size: 11.5px; color: var(--color-text-muted);">Daftar rencana kegiatan diklat,
                   bimbingan, maupun non-klasikal</div>
               </div>
-              <div style="display: flex; gap: 8px;">
+              <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                <button class="btn btn-outline-primary btn-sm" onclick="App.navigate('ekalender')" title="Pilih &amp; daftarkan dari jadwal resmi BPSDMD &amp; Bappenas">
+                  <span data-icon="Calendar" data-icon-size="14"></span> Kalender Diklat BPSDMD
+                </button>
                 <button class="btn btn-outline btn-sm" onclick="App.openInputRealizationDrawer()" style="border-color: #16a34a; color: #16a34a;">
                   <span data-icon="Upload" data-icon-size="14"></span> Upload Bukti Realisasi
                 </button>
@@ -1867,6 +1870,138 @@
               </div>
             </div>
           </div>
+        </section>
+
+        <!-- 7. KALENDER TERPADU DIKLAT & PELATIHAN ASN (ekalender) -->
+        <section id="page-ekalender" class="page-view">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 12px;">
+            <div>
+              <h1 class="page-title">Kalender Terpadu Jadwal Diklat & Pelatihan ASN</h1>
+              <p class="page-subtitle" style="margin-bottom: 0;">
+                Katalog kurikulum resmi BPSDMD Provinsi Lampung, Pusbindiklatren Bappenas RI, LAN RI, dan Internal Bappeda Tahun Anggaran <span class="dynamic-year">2026</span>.
+              </p>
+            </div>
+            <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+              <button class="btn btn-outline btn-sm" onclick="App.navigate('eidp')">
+                <span data-icon="ClipboardCheck" data-icon-size="14"></span> Buka IDP Saya
+              </button>
+              <button class="btn btn-outline btn-sm" onclick="window.print()">
+                <span data-icon="Printer" data-icon-size="14"></span> Cetak Jadwal
+              </button>
+            </div>
+          </div>
+
+          <!-- Summary Metric Cards -->
+          <div class="grid grid-cols-5" style="margin-bottom: 20px;">
+            <div class="stat-card" style="border-top: 3px solid var(--color-primary);">
+              <div class="stat-card-inner">
+                <div class="stat-card-info">
+                  <div class="stat-card-label">Total Diklat Tersedia</div>
+                  <div class="stat-card-value text-primary" id="calMetricTotalPrograms">12 Diklat</div>
+                  <div class="stat-card-desc">Tahun Anggaran <span class="dynamic-year">2026</span></div>
+                </div>
+                <div class="stat-card-icon" style="color: var(--color-primary);"><span data-icon="GraduationCap" data-icon-size="20"></span></div>
+              </div>
+            </div>
+
+            <div class="stat-card" style="border-top: 3px solid #16a34a;">
+              <div class="stat-card-inner">
+                <div class="stat-card-info">
+                  <div class="stat-card-label">Total Akumulasi JP</div>
+                  <div class="stat-card-value text-success" id="calMetricTotalJp">468 JP</div>
+                  <div class="stat-card-desc">Beban jam pembelajaran</div>
+                </div>
+                <div class="stat-card-icon" style="color: #16a34a;"><span data-icon="Award" data-icon-size="20"></span></div>
+              </div>
+            </div>
+
+            <div class="stat-card" style="border-top: 3px solid #d97706;">
+              <div class="stat-card-inner">
+                <div class="stat-card-info">
+                  <div class="stat-card-label">BPSDMD Prov. Lampung</div>
+                  <div class="stat-card-value text-warning" id="calMetricBpsdmd">4 Agenda</div>
+                  <div class="stat-card-desc">PKA, EBPM, RKPD, SIPD</div>
+                </div>
+                <div class="stat-card-icon" style="color: #d97706;"><span data-icon="Calendar" data-icon-size="20"></span></div>
+              </div>
+            </div>
+
+            <div class="stat-card" style="border-top: 3px solid #2563eb;">
+              <div class="stat-card-inner">
+                <div class="stat-card-info">
+                  <div class="stat-card-label">Pusbindiklatren Bappenas</div>
+                  <div class="stat-card-value text-blue" id="calMetricBappenas">4 Agenda</div>
+                  <div class="stat-card-desc">PPD Madya, GIS, Risiko, Dampak</div>
+                </div>
+                <div class="stat-card-icon" style="color: #2563eb;"><span data-icon="BookOpen" data-icon-size="20"></span></div>
+              </div>
+            </div>
+
+            <div class="stat-card" style="border-top: 3px solid #9333ea;">
+              <div class="stat-card-inner">
+                <div class="stat-card-info">
+                  <div class="stat-card-label">Terdaftar di IDP Anda</div>
+                  <div class="stat-card-value" style="color: #9333ea;" id="calMetricMyEnrolled">0 Program (0 JP)</div>
+                  <div class="stat-card-desc">Status keikutsertaan Anda</div>
+                </div>
+                <div class="stat-card-icon" style="color: #9333ea;"><span data-icon="CircleCheck" data-icon-size="20"></span></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Personal IDP Status Callout -->
+          <div id="calMyIdpStatusBanner" style="margin-bottom: 24px;"></div>
+
+          <!-- Filter & Search Toolbar Card -->
+          <div class="card" style="margin-bottom: 24px; padding: 16px 20px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap;">
+              <!-- Triwulan Tabs -->
+              <div class="quarter-tabs-wrapper">
+                <button class="quarter-tab cal-tab-quarter active" data-quarter="all" onclick="App.setCalendarFilter('triwulan', 'all')">Semua Triwulan</button>
+                <button class="quarter-tab cal-tab-quarter" data-quarter="Q1" onclick="App.setCalendarFilter('triwulan', 'Q1')">Q1 (Jan–Mar)</button>
+                <button class="quarter-tab cal-tab-quarter" data-quarter="Q2" onclick="App.setCalendarFilter('triwulan', 'Q2')">Q2 (Apr–Jun)</button>
+                <button class="quarter-tab cal-tab-quarter" data-quarter="Q3" onclick="App.setCalendarFilter('triwulan', 'Q3')">Q3 (Jul–Sep)</button>
+                <button class="quarter-tab cal-tab-quarter" data-quarter="Q4" onclick="App.setCalendarFilter('triwulan', 'Q4')">Q4 (Okt–Des)</button>
+              </div>
+
+              <!-- Quick Search Input -->
+              <div style="position: relative; min-width: 240px; flex: 1; max-width: 360px;">
+                <input type="text" id="calSearchInput" class="form-control form-control-sm" placeholder="Cari nama diklat, institusi, topik..." style="padding-left: 32px;" oninput="App.handleCalendarSearch(this.value)">
+                <span data-icon="Search" data-icon-size="14" style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--color-text-muted);"></span>
+              </div>
+            </div>
+
+            <div style="display: flex; gap: 12px; margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--color-border); flex-wrap: wrap; align-items: center;">
+              <span style="font-size: 11.5px; font-weight: 600; color: var(--color-text-muted); display: flex; align-items: center; gap: 5px;">
+                <span data-icon="Filter" data-icon-size="13"></span> Filter Lanjutan:
+              </span>
+
+              <!-- Lembaga Filter -->
+              <select id="calFilterInstitusi" class="form-control form-control-sm" style="width: auto; min-width: 190px;" onchange="App.setCalendarFilter('institusi', this.value)">
+                <option value="all">Semua Lembaga Penyelenggara</option>
+                <option value="bpsdmd">BPSDMD Provinsi Lampung</option>
+                <option value="bappenas">Pusbindiklatren Bappenas RI</option>
+                <option value="lan">Lembaga Administrasi Negara (LAN)</option>
+                <option value="internal">Internal Bappeda Lampung</option>
+              </select>
+
+              <!-- Moda Filter -->
+              <select id="calFilterModa" class="form-control form-control-sm" style="width: auto; min-width: 170px;" onchange="App.setCalendarFilter('moda', this.value)">
+                <option value="all">Semua Moda Pelatihan</option>
+                <option value="klasikal">Klasikal (Tatap Muka)</option>
+                <option value="blended">Blended Learning</option>
+                <option value="nonklasikal">Non-Klasikal / E-Learning</option>
+              </select>
+
+              <!-- Reset Button -->
+              <button class="btn btn-outline btn-sm" onclick="App.resetCalendarFilters()" style="margin-left: auto;">
+                <span data-icon="RotateCcw" data-icon-size="13"></span> Reset
+              </button>
+            </div>
+          </div>
+
+          <!-- Training Grid Container -->
+          <div id="calTrainingGrid" class="training-grid"></div>
         </section>
 
         <!-- ====================================================================
@@ -4234,6 +4369,32 @@
     </div>
   </div>
 
+  <!-- MODAL DETAIL & SILABUS DIKLAT (TAHAP 3) -->
+  <div class="modal-overlay" id="trainingDetailModal" style="display: none;">
+    <div class="modal-card" style="max-width: 660px; width: 94%;">
+      <div class="modal-header">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <div style="width: 38px; height: 38px; border-radius: 9px; background: rgba(37, 99, 235, 0.12); color: #2563eb; display: grid; place-items: center;">
+            <span data-icon="GraduationCap" data-icon-size="22"></span>
+          </div>
+          <div>
+            <h3 class="modal-title" id="trainingDetailModalTitle">Rincian &amp; Silabus Diklat</h3>
+            <p class="modal-subtitle">Kurikulum resmi &amp; kompetensi pengembangan aparatur sipil negara</p>
+          </div>
+        </div>
+        <button class="btn-icon" onclick="App.closeModal('trainingDetailModal')" title="Tutup Modal">
+          <span data-icon="X" data-icon-size="18"></span>
+        </button>
+      </div>
+
+      <div class="modal-body" id="trainingDetailModalBody" style="padding: 20px 24px;"></div>
+
+      <div class="modal-footer" id="trainingDetailModalFooter" style="display: flex; justify-content: flex-end; gap: 10px;">
+        <button class="btn btn-outline" onclick="App.closeModal('trainingDetailModal')">Tutup</button>
+      </div>
+    </div>
+  </div>
+
   <!-- TOAST CONTAINER -->
   <div class="toast-container" id="toastContainer"></div>
 
@@ -4245,10 +4406,10 @@
   <script src="assets/tte-service.js?v=20261023_v45"></script>
   <script src="js/icons.js?v=20261014_v16"></script>
   <script src="js/charts.js?v=20261008_fix"></script>
-  <script src="js/bappeda_data.js?v=20261020_v11"></script>
-  <script src="js/store.js?v=20261023_v47"></script>
-  <script src="js/export.js?v=20261023_v47"></script>
-  <script src="js/app.js?v=20261023_v47"></script>
+  <script src="js/bappeda_data.js?v=20261023_v48"></script>
+  <script src="js/store.js?v=20261023_v48"></script>
+  <script src="js/export.js?v=20261023_v48"></script>
+  <script src="js/app.js?v=20261023_v48"></script>
 </body>
 
 </html>

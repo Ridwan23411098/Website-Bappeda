@@ -4123,3 +4123,297 @@ button[onclick*="quickLogin"]:hover {
   margin-bottom: 6px;
   display: inline-block;
 }
+
+/* =========================================================================
+   TAHAP 3: KALENDER TERPADU DIKLAT & PELATIHAN ASN (BPSDMD & BAPPENAS)
+   ========================================================================= */
+
+.quarter-tabs-wrapper {
+  display: flex;
+  gap: 6px;
+  background: var(--color-surface-subtle);
+  padding: 4px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.quarter-tabs-wrapper::-webkit-scrollbar {
+  display: none;
+}
+
+.quarter-tab {
+  border: none;
+  background: transparent;
+  color: var(--color-text-secondary);
+  font-size: 12px;
+  font-weight: 600;
+  padding: 6px 14px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 180ms ease;
+}
+
+.quarter-tab:hover {
+  color: var(--color-text-primary);
+  background: rgba(0, 0, 0, 0.04);
+}
+
+[data-theme="dark"] .quarter-tab:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.quarter-tab.active {
+  background: var(--color-surface);
+  color: var(--color-primary);
+  font-weight: 750;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.calendar-user-status-card {
+  padding: 14px 18px;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  transition: all 200ms ease;
+}
+
+.calendar-user-status-card.status-met {
+  background: rgba(22, 163, 74, 0.08);
+  border: 1.5px solid rgba(22, 163, 74, 0.35);
+}
+
+.calendar-user-status-card.status-warning {
+  background: rgba(217, 119, 6, 0.08);
+  border: 1.5px solid rgba(217, 119, 6, 0.35);
+}
+
+.calendar-user-status-card.status-info {
+  background: rgba(37, 99, 235, 0.06);
+  border: 1.5px solid rgba(37, 99, 235, 0.25);
+}
+
+.training-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 20px;
+}
+
+@media (max-width: 640px) {
+  .training-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.training-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  transition: transform 200ms ease, box-shadow 200ms ease, border-color 200ms ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.training-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 24px -6px rgba(0, 0, 0, 0.1);
+  border-color: rgba(37, 99, 235, 0.35);
+}
+
+.training-card.is-enrolled {
+  border-color: rgba(22, 163, 74, 0.4);
+  background: linear-gradient(180deg, rgba(22, 163, 74, 0.02) 0%, var(--color-surface) 100%);
+}
+
+.training-card.just-enrolled {
+  animation: pulseCardHighlight 1.2s ease-out;
+}
+
+@keyframes pulseCardHighlight {
+  0% { transform: scale(0.98); box-shadow: 0 0 0 4px rgba(22, 163, 74, 0.4); }
+  50% { transform: scale(1.02); box-shadow: 0 0 0 8px rgba(22, 163, 74, 0.15); }
+  100% { transform: scale(1); box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04); }
+}
+
+.training-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.badge-quarter {
+  background: #1e293b;
+  color: #f8fafc;
+  font-weight: 750;
+  font-size: 10px;
+  padding: 3px 8px;
+  border-radius: 4px;
+  letter-spacing: 0.3px;
+}
+
+[data-theme="dark"] .badge-quarter {
+  background: #334155;
+  color: #f1f5f9;
+}
+
+.inst-badge {
+  font-size: 10.5px;
+  font-weight: 700;
+  padding: 2.5px 8px;
+  border-radius: 4px;
+}
+
+.inst-badge-bpsdmd {
+  background: rgba(217, 119, 6, 0.12);
+  color: #b45309;
+  border: 1px solid rgba(217, 119, 6, 0.3);
+}
+
+.inst-badge-bappenas {
+  background: rgba(37, 99, 235, 0.12);
+  color: #1d4ed8;
+  border: 1px solid rgba(37, 99, 235, 0.3);
+}
+
+.inst-badge-lan {
+  background: rgba(147, 51, 234, 0.12);
+  color: #7e22ce;
+  border: 1px solid rgba(147, 51, 234, 0.3);
+}
+
+.inst-badge-internal {
+  background: rgba(13, 148, 136, 0.12);
+  color: #0f766e;
+  border: 1px solid rgba(13, 148, 136, 0.3);
+}
+
+.training-card-title {
+  font-size: 15px;
+  font-weight: 750;
+  color: var(--color-text-primary);
+  margin: 0 0 6px 0;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.training-card-code {
+  font-size: 11px;
+  color: var(--color-text-muted);
+  font-family: monospace;
+  margin-bottom: 14px;
+}
+
+.training-card-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  background: var(--color-surface-subtle);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: 10px 8px;
+  margin-bottom: 8px;
+  text-align: center;
+}
+
+.tc-metric {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.tc-metric-label {
+  font-size: 9.5px;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  font-weight: 600;
+  letter-spacing: 0.3px;
+}
+
+.tc-metric-val {
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--color-text-primary);
+}
+
+.tc-metric-val.highlight {
+  color: #ea580c;
+  font-weight: 800;
+}
+
+.tc-quota-bar-wrap {
+  width: 100%;
+  height: 5px;
+  background: var(--color-border);
+  border-radius: 99px;
+  overflow: hidden;
+  margin-bottom: 14px;
+}
+
+.tc-quota-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #3b82f6 0%, #10b981 100%);
+  border-radius: 99px;
+  transition: width 300ms ease;
+}
+
+.training-card-details {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  margin-bottom: 18px;
+  flex: 1;
+}
+
+.tc-detail-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  line-height: 1.4;
+}
+
+.tc-detail-icon {
+  font-size: 14px;
+  flex-shrink: 0;
+  line-height: 1.2;
+}
+
+.training-card-footer {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: space-between;
+  border-top: 1px solid var(--color-border);
+  padding-top: 14px;
+  margin-top: auto;
+}
+
+.training-card-footer button {
+  flex: 1;
+}
+
+.btn-enrolled {
+  background: rgba(22, 163, 74, 0.12) !important;
+  color: #166534 !important;
+  border: 1px solid rgba(22, 163, 74, 0.35) !important;
+  font-weight: 700 !important;
+  cursor: default !important;
+}
+
+[data-theme="dark"] .btn-enrolled {
+  background: rgba(34, 197, 94, 0.2) !important;
+  color: #86efac !important;
+}

@@ -782,6 +782,13 @@ const Store = {
       this.updateNotificationUnreadCount();
       this.updateUserStats();
 
+      // Inisialisasi Katalog Kalender Diklat Terpadu 2026
+      if (!this.state.kalenderDiklat || !Array.isArray(this.state.kalenderDiklat) || this.state.kalenderDiklat.length === 0) {
+        this.state.kalenderDiklat = (typeof BAPPEDA_DATA !== 'undefined' && BAPPEDA_DATA.kalenderDiklat) 
+          ? JSON.parse(JSON.stringify(BAPPEDA_DATA.kalenderDiklat)) 
+          : [];
+      }
+
       this.save();
     } catch (err) {
       console.error('Peringatan di Store.init():', err);
@@ -2367,6 +2374,153 @@ const Store = {
   updateNotificationUnreadCount() {
     if (!this.state.notifications) this.state.notifications = [];
     this.state.unreadCount = this.state.notifications.filter(n => !n.dibaca).length;
+  },
+
+  // =========================================================================
+  // TAHAP 3: KALENDER TERPADU DIKLAT & PELATIHAN ASN (BPSDMD & BAPPENAS)
+  // =========================================================================
+  getKalenderDiklat(filter = {}) {
+    const list = (this.state.kalenderDiklat && this.state.kalenderDiklat.length > 0)
+      ? this.state.kalenderDiklat
+      : (typeof BAPPEDA_DATA !== 'undefined' && BAPPEDA_DATA.kalenderDiklat ? BAPPEDA_DATA.kalenderDiklat : []);
+
+    return list.filter(item => {
+      if (filter.triwulan && filter.triwulan !== 'all' && item.triwulan !== filter.triwulan) {
+        return false;
+      }
+      if (filter.institusi && filter.institusi !== 'all' && item.institusiKategori !== filter.institusi) {
+        return false;
+      }
+      if (filter.moda && filter.moda !== 'all' && item.moda !== filter.moda) {
+        return false;
+      }
+      if (filter.kategoriKompetensi && filter.kategoriKompetensi !== 'all' && item.kategoriKompetensi !== filter.kategoriKompetensi) {
+        return false;
+      }
+      if (filter.search) {
+        const q = filter.search.toLowerCase().trim();
+        const str = `${item.judul} ${item.institusi} ${item.kode} ${item.kategoriKompetensi} ${item.sasaranPeserta} ${(item.silabus || []).join(' ')}`.toLowerCase();
+        if (!str.includes(q)) return false;
+      }
+      return true;
+    });
+  },
+
+  getTrainingById(id) {
+    const list = (this.state.kalenderDiklat && this.state.kalenderDiklat.length > 0)
+      ? this.state.kalenderDiklat
+      : (typeof BAPPEDA_DATA !== 'undefined' && BAPPEDA_DATA.kalenderDiklat ? BAPPEDA_DATA.kalenderDiklat : []);
+    return list.find(t => t.id === id || t.kode === id) || null;
+  },
+
+  isTrainingEnrolled(trainingId) {
+    if (!this.state.idpState || !Array.isArray(this.state.idpState.programs)) return false;
+    const t = this.getTrainingById(trainingId);
+    if (!t) return false;
+    return this.state.idpState.programs.some(p => 
+      p.idKalender === t.id ||
+      (p.topik && p.topik.trim().toLowerCase() === t.judul.trim().toLowerCase())
+    );
+  },
+
+  enrollProgramToIdp(trainingId) {
+    const training = this.getTrainingById(trainingId);
+    if (!training) {
+      return { success: false, message: 'Program pelatihan tidak ditemukan di katalog.' };
+    }
+
+    if (!this.state.idpState) {
+      this.state.idpState = { status: 'Draft', progress: 0, programs: [] };
+    }
+    if (!Array.isArray(this.state.idpState.programs)) {
+      this.state.idpState.programs = [];
+    }
+
+    // Cek duplikasi
+    if (this.isTrainingEnrolled(training.id)) {
+      return { success: false, message: `Program "${training.judul}" sudah terdaftar di Formulir IDP Anda.` };
+    }
+
+    const activeYr = this.getActiveYear() || 2026;
+    const newProg = {
+      id: Date.now() + Math.floor(Math.random() * 1000),
+      idKalender: training.id,
+      kompetensi: training.kategoriKompetensi || 'Teknis',
+      metode: training.metode || 'Diklat Teknis',
+      topik: training.judul,
+      jenisDiklat: `${training.institusi} (${training.triwulan} ${activeYr})`,
+      jp: Number(training.jp) || 4,
+      penyelenggara: training.institusi,
+      periode: training.periodeTeks || `TA ${activeYr}`,
+      periodeMulai: training.tanggalMulai,
+      periodeSelesai: training.tanggalSelesai,
+      estimasi: Number(training.estimasiBiaya) || 0,
+      status: 'Direncanakan',
+      details: {
+        idKalender: training.id,
+        kode: training.kode,
+        sasaranPeserta: training.sasaranPeserta,
+        persyaratan: training.persyaratan,
+        silabus: (training.silabus || []).join('; '),
+        biayaKeterangan: training.biaya,
+        tempat: training.tempat,
+        kontakPIC: training.kontakPIC,
+        linkPendaftaran: training.linkPendaftaran
+      }
+    };
+
+    this.state.idpState.programs.push(newProg);
+
+    // Sinkronkan idpByYear
+    if (!this.state.idpByYear) this.state.idpByYear = {};
+    this.state.idpByYear[String(activeYr)] = JSON.parse(JSON.stringify(this.state.idpState));
+
+    this.save();
+
+    // Persist ke user IDP
+    try {
+      const curNip = this.state.user?.nip || this.state.currentSession?.nip;
+      if (curNip && typeof this.saveUserIdp === 'function') {
+        this.saveUserIdp(curNip);
+      }
+    } catch (e) {
+      console.warn('saveUserIdp error:', e);
+    }
+
+    return { success: true, program: newProg, training };
+  },
+
+  getKalenderStats() {
+    const list = (this.state.kalenderDiklat && this.state.kalenderDiklat.length > 0)
+      ? this.state.kalenderDiklat
+      : (typeof BAPPEDA_DATA !== 'undefined' && BAPPEDA_DATA.kalenderDiklat ? BAPPEDA_DATA.kalenderDiklat : []);
+
+    const totalPrograms = list.length;
+    const totalJp = list.reduce((acc, c) => acc + (Number(c.jp) || 0), 0);
+    const bpsdmdCount = list.filter(c => c.institusiKategori === 'bpsdmd').length;
+    const bappenasCount = list.filter(c => c.institusiKategori === 'bappenas').length;
+    const lanCount = list.filter(c => c.institusiKategori === 'lan').length;
+    const internalCount = list.filter(c => c.institusiKategori === 'internal').length;
+
+    let myEnrolledCount = 0;
+    let myEnrolledJp = 0;
+    list.forEach(t => {
+      if (this.isTrainingEnrolled(t.id)) {
+        myEnrolledCount++;
+        myEnrolledJp += (Number(t.jp) || 0);
+      }
+    });
+
+    return {
+      totalPrograms,
+      totalJp,
+      bpsdmdCount,
+      bappenasCount,
+      lanCount,
+      internalCount,
+      myEnrolledCount,
+      myEnrolledJp
+    };
   },
 
   resetDemoData() {
