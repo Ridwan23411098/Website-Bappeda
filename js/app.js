@@ -3529,6 +3529,265 @@ const App = {
     this.renderAdminEmployees();
   },
 
+  _parsedImportEmployees: [],
+
+  openImportEmployeeModal() {
+    this._parsedImportEmployees = [];
+    const fileInput = document.getElementById('importEmployeeFileInput');
+    if (fileInput) fileInput.value = '';
+    const auditBox = document.getElementById('importAuditResultBox');
+    if (auditBox) auditBox.style.display = 'none';
+    const btnSync = document.getElementById('btnExecuteEmployeeSync');
+    if (btnSync) btnSync.disabled = true;
+    const title = document.getElementById('dropZoneTitle');
+    if (title) title.textContent = 'Pilih atau Tarik Berkas Excel DUK di Sini';
+    const desc = document.getElementById('dropZoneDesc');
+    if (desc) desc.textContent = 'Mendukung format .XLSX, .XLS, .CSV (Maksimal 10 MB)';
+
+    this.openModal('importEmployeeModal');
+  },
+
+  handleEmployeeFileSelect(event) {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const title = document.getElementById('dropZoneTitle');
+    if (title) title.innerHTML = `Berkas Terpilih: <b>${file.name}</b> (${(file.size / 1024).toFixed(1)} KB)`;
+    const desc = document.getElementById('dropZoneDesc');
+    if (desc) desc.textContent = 'Sedang memproses dan memvalidasi struktur data...';
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const data = new Uint8Array(e.target.result);
+        if (typeof XLSX === 'undefined') {
+          App.toast('Pustaka SheetJS belum dimuat. Silakan muat ulang halaman.', 'danger');
+          return;
+        }
+
+        const workbook = XLSX.read(data, { type: 'array' });
+        const firstSheetName = workbook.SheetNames[0];
+        const worksheet = workbook.Sheets[firstSheetName];
+        const rawRows = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: '' });
+
+        if (!rawRows || rawRows.length < 2) {
+          App.toast('Berkas Excel kosong atau tidak memiliki baris data.', 'warning');
+          return;
+        }
+
+        // Cari baris header yang memuat 'nip' atau 'nama'
+        let headerRowIdx = -1;
+        for (let r = 0; r < Math.min(10, rawRows.length); r++) {
+          const rowStr = rawRows[r].map(c => String(c).toLowerCase().trim()).join(' ');
+          if (rowStr.includes('nip') || rowStr.includes('nama')) {
+            headerRowIdx = r;
+            break;
+          }
+        }
+
+        if (headerRowIdx === -1) headerRowIdx = 0;
+        const headers = rawRows[headerRowIdx].map(c => String(c).toLowerCase().trim());
+
+        const nipIdx = headers.findIndex(h => h.includes('nip'));
+        const nameIdx = headers.findIndex(h => h.includes('nama'));
+        const pangkatIdx = headers.findIndex(h => h.includes('pangkat') || h.includes('gol'));
+        const jabatanIdx = headers.findIndex(h => h.includes('jabatan'));
+        const jenisIdx = headers.findIndex(h => h.includes('jenis'));
+        const unitIdx = headers.findIndex(h => h.includes('unit') || h.includes('bidang') || h.includes('satker'));
+        const pendIdx = headers.findIndex(h => h.includes('pendidikan') || h.includes('pend'));
+        const waIdx = headers.findIndex(h => h.includes('wa') || h.includes('whatsapp') || h.includes('telepon') || h.includes('hp'));
+
+        const parsed = [];
+        const existingEmps = Store.state.employees || [];
+        const existingNipSet = new Set(existingEmps.map(e => String(e.nip || '').replace(/\D/g, '')));
+
+        let validNipCount = 0;
+        let newEmpCount = 0;
+
+        for (let r = headerRowIdx + 1; r < rawRows.length; r++) {
+          const row = rawRows[r];
+          if (!row || row.length === 0) continue;
+
+          const rawNip = String(row[nipIdx] ?? '').trim();
+          const cleanNip = rawNip.replace(/\D/g, '');
+          const name = String(row[nameIdx] ?? '').trim();
+
+          if (!name && !cleanNip) continue;
+
+          const isValidNip = cleanNip.length >= 8;
+          if (isValidNip) validNipCount++;
+
+          const isExisting = existingNipSet.has(cleanNip);
+          if (!isExisting && name) newEmpCount++;
+
+          let rawWa = waIdx >= 0 ? String(row[waIdx] ?? '').replace(/\D/g, '') : '';
+          if (rawWa && !rawWa.startsWith('0') && !rawWa.startsWith('62')) {
+            rawWa = '0' + rawWa;
+          }
+
+          parsed.push({
+            nip: cleanNip || rawNip,
+            name: name || 'Pegawai Bappeda',
+            pangkat: pangkatIdx >= 0 ? String(row[pangkatIdx] ?? '').trim() : 'Penata Muda (III/a)',
+            jabatan: jabatanIdx >= 0 ? String(row[jabatanIdx] ?? '').trim() : 'Pelaksana',
+            jenis: jenisIdx >= 0 ? String(row[jenisIdx] ?? '').trim() : 'Struktural / Fungsional',
+            unit: unitIdx >= 0 ? String(row[unitIdx] ?? '').trim() : 'Bappeda Provinsi Lampung',
+            pendidikan: pendIdx >= 0 ? String(row[pendIdx] ?? '').trim() : 'S-1',
+            whatsapp: rawWa,
+            isValidNip,
+            isExisting
+          });
+        }
+
+        if (parsed.length === 0) {
+          App.toast('Tidak ada baris data valid yang dapat dibaca.', 'warning');
+          return;
+        }
+
+        this._parsedImportEmployees = parsed;
+
+        // Tampilkan audit dan preview
+        const auditBox = document.getElementById('importAuditResultBox');
+        if (auditBox) auditBox.style.display = 'block';
+
+        const statTotal = document.getElementById('importStatTotal');
+        if (statTotal) statTotal.textContent = parsed.length;
+
+        const statNip = document.getElementById('importStatValidNip');
+        if (statNip) statNip.textContent = validNipCount;
+
+        const statNew = document.getElementById('importStatNewEmp');
+        if (statNew) statNew.textContent = newEmpCount;
+
+        const previewBody = document.getElementById('importPreviewTableBody');
+        if (previewBody) {
+          const previewRows = parsed.slice(0, 5);
+          previewBody.innerHTML = previewRows.map((p, idx) => `
+            <tr>
+              <td style="text-align: center;">${idx + 1}</td>
+              <td style="font-family: monospace;"><b>${p.nip}</b></td>
+              <td><b>${p.name}</b></td>
+              <td>${p.pangkat}</td>
+              <td>${p.jabatan}</td>
+              <td><span class="badge badge-neutral">${p.unit}</span></td>
+            </tr>
+          `).join('');
+        }
+
+        const btnSync = document.getElementById('btnExecuteEmployeeSync');
+        if (btnSync) {
+          btnSync.disabled = false;
+          btnSync.innerHTML = `<span data-icon="CheckCheck" data-icon-size="16"></span> Mulai Sinkronisasi (${parsed.length} ASN)`;
+          if (typeof lucide !== 'undefined') lucide.createIcons();
+        }
+
+        if (desc) desc.textContent = `Berhasil membaca ${parsed.length} baris data ASN. Siap disinkronkan.`;
+      } catch (err) {
+        console.error('Error membaca berkas Excel DUK:', err);
+        App.toast('Gagal memproses berkas Excel: ' + (err.message || 'Format tidak valid'), 'danger');
+      }
+    };
+
+    reader.readAsArrayBuffer(file);
+  },
+
+  executeEmployeeSync() {
+    const parsed = this._parsedImportEmployees || [];
+    if (parsed.length === 0) {
+      App.toast('Tidak ada data yang siap disinkronkan.', 'warning');
+      return;
+    }
+
+    const modeEl = document.querySelector('input[name="importSyncMode"]:checked');
+    const syncMode = modeEl ? modeEl.value : 'update_all';
+
+    const currentEmps = [...(Store.state.employees || [])];
+    const empMap = new Map();
+    let maxId = 0;
+
+    currentEmps.forEach(e => {
+      const clean = String(e.nip || '').replace(/\D/g, '');
+      if (clean) empMap.set(clean, e);
+      if (typeof e.id === 'number' && e.id > maxId) maxId = e.id;
+    });
+
+    let updatedCount = 0;
+    let addedCount = 0;
+
+    parsed.forEach(item => {
+      const cleanNip = String(item.nip || '').replace(/\D/g, '');
+      if (!cleanNip) return;
+
+      if (empMap.has(cleanNip)) {
+        // Update data profil pegawai yang sudah ada
+        const existing = empMap.get(cleanNip);
+        if (item.name) existing.name = item.name;
+        if (item.pangkat) existing.pangkat = item.pangkat;
+        if (item.jabatan) existing.jabatan = item.jabatan;
+        if (item.unit) existing.unit = item.unit;
+        if (item.jenis) existing.jenis = item.jenis;
+        if (item.pendidikan) existing.pendidikan = item.pendidikan;
+        if (item.whatsapp) existing.whatsapp = item.whatsapp;
+        updatedCount++;
+      } else if (syncMode === 'update_all') {
+        // Tambahkan pegawai baru
+        maxId++;
+        const words = item.name.trim().split(/\s+/);
+        const initials = (words[0]?.[0] || 'A') + (words[1]?.[0] || 'S');
+
+        const newEmp = {
+          id: maxId,
+          nip: item.nip,
+          name: item.name,
+          pangkat: item.pangkat,
+          jabatan: item.jabatan,
+          jenis: item.jenis || 'Struktural',
+          unit: item.unit || 'Bappeda Provinsi Lampung',
+          pendidikan: item.pendidikan || 'S-1',
+          whatsapp: item.whatsapp || '',
+          nineBox: 7,
+          statusIdp: 'Belum Mengisi',
+          jp: 0,
+          progress: '0 JP (0%)',
+          avatarInitial: initials.toUpperCase()
+        };
+
+        currentEmps.push(newEmp);
+        empMap.set(cleanNip, newEmp);
+        addedCount++;
+      }
+    });
+
+    // Simpan ke Store dan localStorage
+    Store.syncEmployees(currentEmps);
+
+    // Sinkronkan ke Supabase jika terhubung
+    if (typeof supabaseClient !== 'undefined' && supabaseClient) {
+      try {
+        const payloadUpsert = currentEmps.map(e => ({
+          nip: String(e.nip || '').replace(/\D/g, ''),
+          nama: e.name,
+          pangkat: e.pangkat,
+          jabatan: e.jabatan,
+          unit_kerja: e.unit,
+          jenis_jabatan: e.jenis || 'Struktural'
+        }));
+        supabaseClient.from('pegawai').upsert(payloadUpsert, { onConflict: 'nip' })
+          .then(({ error }) => {
+            if (error) console.warn("Supabase upsert warning:", error);
+            else console.log("Supabase pegawai upserted successfully");
+          });
+      } catch (errDb) {
+        console.warn("Supabase sync err:", errDb);
+      }
+    }
+
+    this.closeModal('importEmployeeModal');
+    this.renderAdminEmployees();
+
+    App.toast(`Sinkronisasi DUK Berhasil! ${updatedCount} data pegawai diperbarui, ${addedCount} pegawai baru ditambahkan.`, 'success');
+  },
+
   renderAdminRealization() {
     this.renderEmployeeRealization();
   },
@@ -5102,6 +5361,10 @@ const App = {
     });
   }
 };
+
+if (typeof window !== 'undefined') {
+  window.App = App;
+}
 
 // Initialize application on DOM ready
 document.addEventListener('DOMContentLoaded', () => {

@@ -598,7 +598,17 @@ const Store = {
         this.state.masterData.jenjang = BAPPEDA_DATA.masterJenjang;
         this.state.masterData.metode = BAPPEDA_DATA.masterMetode;
         this.state.masterData.rumpun = BAPPEDA_DATA.masterRumpun;
-        this.state.employees = BAPPEDA_DATA.employees;
+        // Prioritas muat master data pegawai: hasil sinkronisasi custom / DUK terbaru
+        const savedEmps = localStorage.getItem('sip_bappeda_employees_custom');
+        if (savedEmps) {
+          try {
+            this.state.employees = JSON.parse(savedEmps);
+          } catch (e) {
+            this.state.employees = BAPPEDA_DATA.employees;
+          }
+        } else {
+          this.state.employees = BAPPEDA_DATA.employees;
+        }
         this.state.monitoringUnits = BAPPEDA_DATA.monitoringUnits;
 
         // PERTAHANKAN SEMUA REALISASI YANG SUDAH TERSIMPAN DI STATE (jangan pernah buang data lokal!)
@@ -892,6 +902,20 @@ const Store = {
       }
     } catch (e) {
       console.warn("Gagal simpan user IDP:", e);
+    }
+  },
+
+  /**
+   * Menyimpan dan menyinkronkan daftar master pegawai hasil import DUK / SIASN
+   * @param {Array} updatedList
+   */
+  syncEmployees(updatedList) {
+    if (!Array.isArray(updatedList)) return;
+    this.state.employees = updatedList;
+    try {
+      localStorage.setItem('sip_bappeda_employees_custom', JSON.stringify(updatedList));
+    } catch (e) {
+      console.warn("Storage quota saat simpan custom employees:", e);
     }
   },
 

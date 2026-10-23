@@ -109,6 +109,136 @@ const ExportService = {
   },
 
   /**
+   * Unduh Berkas Template Excel Resmi Standar DUK Bappeda / SIASN BKN
+   */
+  downloadDukTemplate() {
+    const headers = [
+      'NIP', 
+      'Nama Lengkap & Gelar', 
+      'Pangkat / Golongan', 
+      'Jabatan Kedinasan', 
+      'Jenis Jabatan', 
+      'Unit Kerja / Bidang', 
+      'Pendidikan Terakhir', 
+      'Nomor WhatsApp'
+    ];
+
+    const sampleRows = [
+      [
+        '197507312000031002',
+        'Dr. ANANG RISGIYANTO, S.K.M., M.Kes.',
+        'Pembina Utama Madya (IV/d)',
+        'Kepala Badan Perencanaan Pembangunan Daerah',
+        'Pimpinan',
+        'Pimpinan Bappeda',
+        'S-3',
+        '081272001002'
+      ],
+      [
+        '197407072002121008',
+        'ANDI ARAFAT, S.T., M.E.',
+        'Pembina Tk. I (IV/b)',
+        'Sekretaris Bappeda Provinsi Lampung',
+        'Struktural',
+        'Sekretariat',
+        'S-2',
+        '081369002008'
+      ],
+      [
+        '196910261992032002',
+        'CIK MARYA, S.E., M.M.',
+        'Pembina (IV/a)',
+        'Kasubbag Umum & Kepegawaian',
+        'Struktural',
+        'Sekretariat',
+        'S-2',
+        '081279003002'
+      ],
+      [
+        '197305141998031007',
+        'MEYDIANDRA EKA PUTRA, S.P., M.I.P.',
+        'Pembina Tk. I (IV/b)',
+        'Kepala Bidang Perencanaan Makro, Pengendalian dan Evaluasi',
+        'Struktural',
+        'Bidang PMPE (Rendalev)',
+        'S-2',
+        '081273004007'
+      ]
+    ];
+
+    this.downloadExcel('Template_DUK_Bappeda_Lampung', 'Template DUK', headers, sampleRows);
+    App.toast('Template format DUK Pegawai berhasil diunduh. Silakan isi dan unggah kembali.', 'success');
+  },
+
+  /**
+   * Ekspor Rekapitulasi Eksekutif Kepatuhan 20 JP & IDP Pegawai (Format BKD / BPSDMD)
+   */
+  exportBkdRecap() {
+    const emps = Store.state.employees || [];
+    const activeYear = Store.getActiveYear();
+    const headers = [
+      'No',
+      'NIP',
+      'Nama Lengkap Pegawai',
+      'Pangkat / Gol. Ruang',
+      'Jabatan Kedinasan',
+      'Unit Kerja / Bidang',
+      'Posisi Nine-Box',
+      'Target Cita-Cita Karier',
+      'Akumulasi Bangkom (JP)',
+      'Status 20 JP (UU No. 20/2023)',
+      'Status Pengajuan IDP',
+      'Nomor Kontak WhatsApp'
+    ];
+
+    let countMet = 0;
+    let countNotMet = 0;
+    let totalAllJp = 0;
+
+    const rows = emps.map((e, idx) => {
+      const yearData = typeof App !== 'undefined' && App.getEmployeeYearData ? App.getEmployeeYearData(e) : { jp: e.jp || 0 };
+      const jp = yearData.jp || 0;
+      totalAllJp += jp;
+      const isMet = jp >= 20;
+      if (isMet) countMet++; else countNotMet++;
+
+      return [
+        idx + 1,
+        `'${String(e.nip || '').replace(/\D/g, '')}`,
+        e.name || '-',
+        e.pangkat || '-',
+        e.jabatan || '-',
+        e.unit || 'Bappeda Provinsi Lampung',
+        `Kotak ${e.nineBox || '8'}`,
+        e.targetJenjang || 'JFT Madya — Level 4',
+        jp,
+        isMet ? 'MEMENUHI (>= 20 JP)' : `BELUM MEMENUHI (Kurang ${20 - jp} JP)`,
+        e.statusIdp || 'Final / Disetujui',
+        e.whatsapp ? `'${e.whatsapp}` : '-'
+      ];
+    });
+
+    // Baris rekapitulasi agregasi di akhir
+    rows.push([
+      '',
+      '',
+      'TOTAL REKAPITULASI BAPPEDA LAMPUNG',
+      '',
+      '',
+      '',
+      '',
+      '',
+      totalAllJp,
+      `Memenuhi: ${countMet} ASN | Belum: ${countNotMet} ASN`,
+      `Kepatuhan: ${Math.round((countMet / (emps.length || 1)) * 100)}%`,
+      ''
+    ]);
+
+    this.downloadExcel(`Rekapitulasi_Kepatuhan_IDP_Bappeda_Lampung_TA_${activeYear}`, `Rekapitulasi BKD TA ${activeYear}`, headers, rows);
+    App.toast(`Rekapitulasi Kepatuhan IDP & Bangkom TA ${activeYear} berhasil diunduh.`, 'success');
+  },
+
+  /**
    * Export IDP Realization Monitoring to CSV
    */
   exportMonitoring() {

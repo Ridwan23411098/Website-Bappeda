@@ -80,3 +80,13 @@ function renderAllIcons() {
     el.innerHTML = getIcon(iconName, size, cls);
   });
 }
+
+if (typeof window !== 'undefined') {
+  window.LUCIDE_ICONS = LUCIDE_ICONS;
+  window.getIcon = getIcon;
+  window.renderAllIcons = renderAllIcons;
+}
+if (typeof global !== 'undefined') {
+  global.getIcon = getIcon;
+  global.renderAllIcons = renderAllIcons;
+}
