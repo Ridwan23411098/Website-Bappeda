@@ -4,9 +4,7 @@
   "cleanUrls": true,
   "trailingSlash": false,
   "rewrites": [
-    { "source": "/tte-verif", "destination": "/verif.html" },
-    { "source": "/verif", "destination": "/verif.html" },
-    { "source": "/verif.html", "destination": "/verif.html" }
+    { "source": "/tte-verif", "destination": "/verif" }
   ],
   "headers": [
     {
