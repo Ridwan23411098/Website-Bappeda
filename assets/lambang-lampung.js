@@ -87,3 +87,8 @@ const LambangLampung = {
     `;
   }
 };
+
+if (typeof window !== 'undefined') {
+  window.LambangLampung = LambangLampung;
+}
+

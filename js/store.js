@@ -163,7 +163,7 @@ const Store = {
       rumpunTarget: ['86 — BAPPENAS', '70 — Aparatur Negara / Kepegawaian', '22 — Statistik']
     },
 
-    // Competencies Matrix
+    // Competencies Matrix (Sistem Diagnostik Kesenjangan Kompetensi ASN Bappeda)
     competencies: {
       currentAvg: 2.1,
       targetAvg: 3.0,
@@ -180,22 +180,190 @@ const Store = {
         { label: 'Pengambilan Keputusan', current: 2, target: 3, max: 4 }
       ],
       teknis: [
-        { name: 'Analisis Data Perencanaan Pembangunan', current: 2, target: 3, gap: 1, priority: 'Tinggi', status: 'Perlu Pengembangan' },
-        { name: 'Penyusunan Dokumen Perencanaan (RPJMD/RKPD)', current: 2, target: 3, gap: 1, priority: 'Sedang', status: 'Perlu Pengembangan' },
-        { name: 'Pengolahan Data Spasial & Statistik Daerah', current: 3, target: 3, gap: 0, priority: 'Rendah', status: 'Terpenuhi' }
+        {
+          name: 'Analisis Data Perencanaan Pembangunan',
+          current: 2,
+          target: 3,
+          gap: 1,
+          priority: 'Tinggi',
+          status: 'Perlu Pengembangan',
+          deskripsi: 'Kemampuan menganalisis data makro ekonomi, proyeksi IPM, kemiskinan, dan evaluasi capaian RKPD/RPJMD Provinsi Lampung.',
+          solusi: 'Pelatihan Analisis Data Perencanaan dengan Python & PowerBI',
+          metode: 'Diklat Teknis',
+          jenisDiklat: 'Diklat Teknis Perencanaan',
+          penyelenggara: 'Pusbindiklatren Bappenas / BPSDMD',
+          jp: 20,
+          estimasi: 1500000
+        },
+        {
+          name: 'Penyusunan Dokumen Perencanaan (RPJMD/RKPD)',
+          current: 2,
+          target: 3,
+          gap: 1,
+          priority: 'Sedang',
+          status: 'Perlu Pengembangan',
+          deskripsi: 'Penyelarasan target indikator kinerja utama daerah dengan target RPJPN nasional dan SPM.',
+          solusi: 'Bimtek Penyusunan Dokumen Evaluasi dan Pelaporan Kinerja Perencanaan',
+          metode: 'Bimtek',
+          jenisDiklat: 'Bimtek Kedinasan',
+          penyelenggara: 'Internal Bappeda',
+          jp: 10,
+          estimasi: 0
+        },
+        {
+          name: 'Pengolahan Data Spasial & Statistik Daerah',
+          current: 3,
+          target: 3,
+          gap: 0,
+          priority: 'Rendah',
+          status: 'Terpenuhi',
+          deskripsi: 'Penguasaan GIS / WebGIS dan pengolahan statistik sektoral untuk perencanaan tata ruang.',
+          solusi: 'Pemeliharaan kompetensi via webinar berkala',
+          metode: 'Seminar/Webinar',
+          jenisDiklat: 'Non-Klasikal',
+          penyelenggara: 'Badan Informasi Geospasial (BIG)',
+          jp: 4,
+          estimasi: 0
+        }
       ],
       manajerial: [
-        { name: 'Integritas', current: 2, target: 3, gap: 1, priority: 'Sedang', status: 'Perlu Pengembangan' },
-        { name: 'Kerjasama', current: 2, target: 3, gap: 1, priority: 'Sedang', status: 'Perlu Pengembangan' },
-        { name: 'Komunikasi', current: 2, target: 3, gap: 1, priority: 'Sedang', status: 'Perlu Pengembangan' },
-        { name: 'Orientasi pada Hasil', current: 2, target: 3, gap: 1, priority: 'Sedang', status: 'Perlu Pengembangan' },
-        { name: 'Pelayanan Publik', current: 2, target: 3, gap: 1, priority: 'Tinggi', status: 'Perlu Pengembangan' },
-        { name: 'Pengembangan Diri & Orang Lain', current: 1, target: 3, gap: 2, priority: 'Sangat Tinggi', status: 'Prioritas Tinggi' },
-        { name: 'Mengelola Perubahan', current: 1, target: 3, gap: 2, priority: 'Sangat Tinggi', status: 'Prioritas Tinggi' },
-        { name: 'Pengambilan Keputusan', current: 2, target: 3, gap: 1, priority: 'Sedang', status: 'Perlu Pengembangan' }
+        {
+          name: 'Integritas',
+          current: 2,
+          target: 3,
+          gap: 1,
+          priority: 'Sedang',
+          status: 'Perlu Pengembangan',
+          deskripsi: 'Menjunjung etika birokrasi, kejujuran pelaporan anggaran perencanaan, dan keteladanan.',
+          solusi: 'Workshop Penegakan Integritas & Anti-Korupsi',
+          metode: 'Workshop',
+          jenisDiklat: 'Non-Klasikal',
+          penyelenggara: 'Inspektorat / KPK',
+          jp: 4,
+          estimasi: 0
+        },
+        {
+          name: 'Kerjasama',
+          current: 2,
+          target: 3,
+          gap: 1,
+          priority: 'Sedang',
+          status: 'Perlu Pengembangan',
+          deskripsi: 'Membangun sinergi perencanaan antar bidang di Bappeda dan OPD teknis di lingkungan Pemprov Lampung.',
+          solusi: 'Mentoring Manajemen Waktu & Efektivitas Tim Kerja',
+          metode: 'Mentoring',
+          jenisDiklat: 'Internal Bappeda',
+          penyelenggara: 'Internal Bappeda',
+          jp: 4,
+          estimasi: 0
+        },
+        {
+          name: 'Komunikasi',
+          current: 2,
+          target: 3,
+          gap: 1,
+          priority: 'Sedang',
+          status: 'Perlu Pengembangan',
+          deskripsi: 'Kemampuan komunikasi asertif, presentasi data perencanaan ke pimpinan & DPRD.',
+          solusi: 'Pelatihan Public Speaking & Executive Briefing',
+          metode: 'Pelatihan Teknis',
+          jenisDiklat: 'Non-Klasikal',
+          penyelenggara: 'BPSDMD Provinsi Lampung',
+          jp: 8,
+          estimasi: 500000
+        },
+        {
+          name: 'Orientasi pada Hasil',
+          current: 2,
+          target: 3,
+          gap: 1,
+          priority: 'Sedang',
+          status: 'Perlu Pengembangan',
+          deskripsi: 'Menjaga ketepatan waktu penyelesaian dokumen perencanaan RKPD dan pelaporan kinerja.',
+          solusi: 'Coaching Kinerja & Manajemen Beban Kerja Prioritas',
+          metode: 'Coaching',
+          jenisDiklat: 'Internal Bappeda',
+          penyelenggara: 'Atasan Langsung / Bappeda',
+          jp: 4,
+          estimasi: 0
+        },
+        {
+          name: 'Pelayanan Publik',
+          current: 2,
+          target: 3,
+          gap: 1,
+          priority: 'Tinggi',
+          status: 'Perlu Pengembangan',
+          deskripsi: 'Memberikan asistensi perencanaan dan fasilitasi konsultasi publik secara profesional dan cepat.',
+          solusi: 'Coaching Service Excellence dalam Perencanaan Pembangunan',
+          metode: 'Coaching',
+          jenisDiklat: 'Coaching Kedinasan',
+          penyelenggara: 'Internal Bappeda',
+          jp: 2,
+          estimasi: 0
+        },
+        {
+          name: 'Pengembangan Diri & Orang Lain',
+          current: 1,
+          target: 3,
+          gap: 2,
+          priority: 'Sangat Tinggi',
+          status: 'Prioritas Tinggi',
+          deskripsi: 'Kekurangan Kritis: Pegawai belum aktif membimbing bawahan dan belum mandiri mengupgrade kompetensi perencanaan.',
+          solusi: 'Mentoring Kepemimpinan & Program Peer Coaching Staf Junior',
+          metode: 'Mentoring',
+          jenisDiklat: 'Program Pembinaan SDM',
+          penyelenggara: 'Internal Bappeda',
+          jp: 6,
+          estimasi: 0
+        },
+        {
+          name: 'Mengelola Perubahan',
+          current: 1,
+          target: 3,
+          gap: 2,
+          priority: 'Sangat Tinggi',
+          status: 'Prioritas Tinggi',
+          deskripsi: 'Kekurangan Kritis: Masih lambat menyesuaikan dengan digitalisasi SIPD/SIP-KOMPETENSI dan regulasi perencanaan baru.',
+          solusi: 'Workshop Strategic Change Management & Inovasi Perencanaan Daerah',
+          metode: 'Workshop',
+          jenisDiklat: 'Workshop Teknis',
+          penyelenggara: 'BPSDMD Provinsi Lampung',
+          jp: 8,
+          estimasi: 750000
+        },
+        {
+          name: 'Pengambilan Keputusan',
+          current: 2,
+          target: 3,
+          gap: 1,
+          priority: 'Sedang',
+          status: 'Perlu Pengembangan',
+          deskripsi: 'Kecakapan merumuskan alternatif solusi masalah pembangunan daerah berbasis bukti (evidence-based).',
+          solusi: 'Workshop Strategic Decision Making Kebijakan Publik',
+          metode: 'Workshop',
+          jenisDiklat: 'Workshop Eksternal',
+          penyelenggara: 'Pusbindiklatren Bappenas',
+          jp: 8,
+          estimasi: 750000
+        }
       ],
       sosialKultural: [
-        { name: 'Perekat Bangsa', current: 2, target: 3, gap: 1, priority: 'Sedang', status: 'Perlu Pengembangan' }
+        {
+          name: 'Perekat Bangsa',
+          current: 2,
+          target: 3,
+          gap: 1,
+          priority: 'Sedang',
+          status: 'Perlu Pengembangan',
+          deskripsi: 'Menjaga persatuan, toleransi, keharmonisan lingkungan kerja, dan non-diskriminatif.',
+          solusi: 'Sosialisasi & Aktualisasi Nilai BerAKHLAK ASN Bappeda',
+          metode: 'Sosialisasi',
+          jenisDiklat: 'Non-Klasikal',
+          penyelenggara: 'Biro Organisasi / BKD Provinsi Lampung',
+          jp: 4,
+          estimasi: 0
+        }
       ]
     },
 
@@ -539,6 +707,27 @@ const Store = {
       // SINKRONKAN STATUS IDP BERDASARKAN REALISASI SECARA AMAN (Bebas TypeError)
       this.syncIdpStatusWithRealizations();
 
+      // SINKRONKAN DATA KOMPETENSI (Pastikan seluruh atribut diagnostik & solusi IDP tersedia)
+      if (this.state.competencies) {
+        const defComp = this.defaultState.competencies;
+        ['teknis', 'manajerial', 'sosialKultural'].forEach(cat => {
+          if (Array.isArray(this.state.competencies[cat]) && Array.isArray(defComp[cat])) {
+            this.state.competencies[cat].forEach(item => {
+              const defItem = defComp[cat].find(d => d.name === item.name);
+              if (defItem) {
+                if (!item.solusi) item.solusi = defItem.solusi;
+                if (!item.metode) item.metode = defItem.metode;
+                if (!item.deskripsi) item.deskripsi = defItem.deskripsi;
+                if (!item.jp) item.jp = defItem.jp;
+                if (!item.jenisDiklat) item.jenisDiklat = defItem.jenisDiklat;
+                if (!item.penyelenggara) item.penyelenggara = defItem.penyelenggara;
+                if (item.estimasi === undefined) item.estimasi = defItem.estimasi;
+              }
+            });
+          }
+        });
+      }
+
       // Check active session: Utamakan sessionStorage.
       // localStorage hanya digunakan jika user secara eksplisit mencentang 'Ingat sesi'
       let activeSess = null;
@@ -690,6 +879,19 @@ const Store = {
       } catch (err2) {
         console.error('Critical: Failed to save state to localStorage even after sanitizing:', err2);
       }
+    }
+  },
+
+  saveUserIdp(nip) {
+    if (!nip) return;
+    try {
+      const cleanNip = String(nip).replace(/\s+/g, '');
+      const yr = this.getActiveYear ? this.getActiveYear() : 2026;
+      if (this.state.idpState) {
+        localStorage.setItem(`sip_idp_${cleanNip}_${yr}`, JSON.stringify(this.state.idpState));
+      }
+    } catch (e) {
+      console.warn("Gagal simpan user IDP:", e);
     }
   },
 
@@ -1164,6 +1366,168 @@ const Store = {
     const progressPct = totalProgram > 0 ? Math.round((completed / totalProgram) * 100) : 0;
     
     return { totalProgram, totalJp, totalCost, completed, progressPct };
+  },
+
+  /**
+   * Mengambil rangkuman diagnostik kekurangan kompetensi (Self-Gap Diagnostic)
+   */
+  getCompetencyGaps() {
+    const comp = this.state.competencies || {};
+    const all = [
+      ...(comp.teknis || []).map(x => ({ ...x, kategori: 'Kompetensi Teknis' })),
+      ...(comp.manajerial || []).map(x => ({ ...x, kategori: 'Kompetensi Manajerial' })),
+      ...(comp.sosialKultural || []).map(x => ({ ...x, kategori: 'Sosial Kultural' }))
+    ];
+    const gaps = all.filter(item => item.gap > 0);
+    const fulfilled = all.filter(item => item.gap === 0);
+    const critical = gaps.filter(item => item.gap >= 2);
+    const moderate = gaps.filter(item => item.gap === 1);
+
+    return {
+      all,
+      gaps,
+      fulfilled,
+      critical,
+      moderate,
+      totalCount: all.length,
+      gapCount: gaps.length,
+      fulfilledCount: fulfilled.length,
+      percentageFulfilled: all.length > 0 ? Math.round((fulfilled.length / all.length) * 100) : 100
+    };
+  },
+
+  /**
+   * Menghitung Skor Kesiapan Cita-Cita Karier & Suksesi Jabatan (Career Readiness Score)
+   * Berdasarkan UU No. 20/2023 & PermenPAN-RB No. 3/2020 Manajemen Talenta
+   */
+  calculateCareerReadiness(targetJenjang) {
+    const user = this.state.user || {};
+    const comp = this.state.competencies || {};
+    const summary = this.getIdpSummary();
+    const targetStr = targetJenjang || this.state.careerPlan?.jenjangTarget || 'JFT Madya — Level 4';
+
+    // Ekstrak Target Level dari string jenjang target
+    const targetMatch = targetStr.match(/Level\s*(\d)/i);
+    const targetLevel = targetMatch ? parseInt(targetMatch[1]) : 3;
+
+    // 1. Evaluasi Level Kompetensi Saat Ini vs Target
+    const currentAvg = comp.currentAvg || 2.1;
+    const compRatio = Math.min(100, Math.round((currentAvg / targetLevel) * 100));
+
+    // 2. Evaluasi Pangkat / Golongan
+    const pangkat = user.pangkat || 'Pembina Tk. I / IV/b';
+    let pangkatScore = 70;
+    let pangkatReq = 'Minimal Pembina / IV/a';
+    let pangkatStatus = 'Terpenuhi';
+
+    if (targetLevel === 5) {
+      pangkatReq = 'Minimal Pembina Utama Madya / IV/d';
+      pangkatScore = (pangkat.includes('IV/d') || pangkat.includes('IV/e')) ? 100 : (pangkat.includes('IV/c') ? 75 : 60);
+      pangkatStatus = pangkatScore >= 100 ? 'Terpenuhi' : 'Perlu Kenaikan Pangkat Reguler';
+    } else if (targetLevel === 4) {
+      pangkatReq = 'Minimal Pembina / IV/a';
+      pangkatScore = pangkat.includes('IV/') ? 100 : (pangkat.includes('III/d') ? 80 : 60);
+      pangkatStatus = pangkatScore >= 100 ? 'Terpenuhi' : 'Perlu Kenaikan Pangkat Reguler';
+    } else if (targetLevel === 3) {
+      pangkatReq = 'Minimal Penata / III/c';
+      pangkatScore = (pangkat.includes('III/c') || pangkat.includes('III/d') || pangkat.includes('IV/')) ? 100 : 70;
+      pangkatStatus = pangkatScore >= 100 ? 'Terpenuhi' : 'Perlu Kenaikan Pangkat Reguler';
+    } else {
+      pangkatReq = 'Minimal Penata Muda / III/a';
+      pangkatScore = 100;
+      pangkatStatus = 'Terpenuhi';
+    }
+
+    // 3. Evaluasi Jam Pelajaran (JP Bangkom) - Standar UU No. 20/2023 minimal 20 JP
+    const totalJp = summary.totalJp || 0;
+    const jpScore = Math.min(100, Math.round((totalJp / 20) * 100));
+    const jpStatus = totalJp >= 20 ? 'Memenuhi Standar 20 JP' : `Kurang ${Math.max(0, 20 - totalJp)} JP (Realisasi: ${totalJp} JP)`;
+
+    // 4. Evaluasi Sertifikasi / Uji Kompetensi (Ukom)
+    const hasCert = (this.state.realizations || []).some(r => {
+      const txt = (r.nama || r.topik || '').toLowerCase();
+      return txt.includes('kompetensi') || txt.includes('bappenas') || txt.includes('sertifikasi');
+    });
+    let certScore = hasCert ? 90 : 50;
+    let certReq = targetStr.includes('JFT') ? 'Lulus Uji Kompetensi (Ukom) Pusbindiklatren Bappenas' : 'Lulus Seleksi Asesmen Manajerial LAN RI';
+    let certStatus = hasCert ? 'Telah Memiliki Sertifikasi' : 'Belum Memiliki (Wajib Mengikuti Ukom)';
+
+    // 5. Evaluasi Kinerja (SKP & Nine-Box Grid)
+    const nineBox = user.nineBox || 8;
+    const skpScore = nineBox >= 7 ? 95 : (nineBox >= 4 ? 80 : 60);
+    const skpStatus = nineBox >= 7 ? 'Sangat Baik (Kuadran 8 - Talent Pool Prioritas)' : 'Baik (Sesuai Target Kinerja)';
+
+    // Overall Weighted Readiness Score:
+    // Kompetensi: 35%, Pangkat: 25%, Bangkom JP: 20%, Sertifikasi: 20%
+    const overallScore = Math.round((compRatio * 0.35) + (pangkatScore * 0.25) + (jpScore * 0.20) + (certScore * 0.20));
+
+    let kategori = '';
+    let kategoriClass = '';
+    let badgeClass = '';
+    let proyeksiWaktu = '';
+    if (overallScore >= 85) {
+      kategori = 'KATEGORI I: SIAP PROMOSI (READY NOW)';
+      kategoriClass = 'text-success';
+      badgeClass = 'badge-success';
+      proyeksiWaktu = 'Periode TA 2026/2027 (Prioritas Promosi Langsung)';
+    } else if (overallScore >= 65) {
+      kategori = 'KATEGORI II: SIAP DENGAN PENGEMBANGAN (READY WITH DEVELOPMENT)';
+      kategoriClass = 'text-warning';
+      badgeClass = 'badge-warning';
+      proyeksiWaktu = '1 — 2 Tahun (Setelah Menutup Gap Kompetensi & Ukom)';
+    } else {
+      kategori = 'KATEGORI III: MEMERLUKAN PEMBINAAN INTENSIF (DEVELOPMENT NEEDED)';
+      kategoriClass = 'text-danger';
+      badgeClass = 'badge-danger';
+      proyeksiWaktu = '2 — 3 Tahun (Memerlukan Pemenuhan Angka Kredit & Diklat)';
+    }
+
+    return {
+      targetJenjang: targetStr,
+      targetLevel,
+      overallScore,
+      kategori,
+      kategoriClass,
+      badgeClass,
+      proyeksiWaktu,
+      checklist: [
+        {
+          param: 'Pangkat & Golongan Ruang',
+          detail: `Pangkat Anda: <b>${pangkat || '-'}</b> (Syarat Jabatan: ${pangkatReq})`,
+          score: pangkatScore,
+          status: pangkatStatus,
+          isPassed: pangkatScore >= 100
+        },
+        {
+          param: 'Standar Level Kompetensi',
+          detail: `Level Rata-rata Anda: <b>${currentAvg}</b> | Standar Jabatan Target: <b>Level ${targetLevel}.0</b>`,
+          score: compRatio,
+          status: compRatio >= 100 ? 'Memenuhi Standar' : `Gap -${(targetLevel - currentAvg).toFixed(1)} Level`,
+          isPassed: compRatio >= 100
+        },
+        {
+          param: 'Hak Belajar Bangkom (Min. 20 JP)',
+          detail: `Total Rencana & Realisasi: <b>${totalJp} JP</b> dari standar minimal 20 JP/tahun (UU No. 20/2023)`,
+          score: jpScore,
+          status: jpStatus,
+          isPassed: totalJp >= 20
+        },
+        {
+          param: 'Uji Kompetensi / Sertifikasi Penjenjangan',
+          detail: `Persyaratan: ${certReq}`,
+          score: certScore,
+          status: certStatus,
+          isPassed: hasCert
+        },
+        {
+          param: 'Evaluasi Kinerja & Nine-Box Matrix',
+          detail: `Kuadran Nine-Box: <b>Kotak ${nineBox} (High Performer)</b> • Predikat SKP: <b>Sangat Baik</b>`,
+          score: skpScore,
+          status: skpStatus,
+          isPassed: true
+        }
+      ]
+    };
   },
 
   getExecutiveSummary() {

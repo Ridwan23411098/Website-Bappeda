@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Verifikasi Dokumen Elektronik (TTE) — Bappeda Provinsi Lampung</title>
+  <link rel="icon" type="image/png" href="Gambar/logo-idp.png">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: #f1f5f9;
+      color: #1e293b;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px 16px;
+    }
+    .verif-card {
+      background: #ffffff;
+      width: 100%;
+      max-width: 600px;
+      border-radius: 18px;
+      box-shadow: 0 20px 40px -10px rgba(11, 37, 69, 0.15);
+      border: 1px solid #e2e8f0;
+      overflow: hidden;
+      margin: auto;
+    }
+    .verif-header {
+      background: linear-gradient(135deg, #0b2545 0%, #134074 100%);
+      color: white;
+      padding: 28px 24px 22px;
+      text-align: center;
+      position: relative;
+    }
+    .verif-header img {
+      width: 58px;
+      height: 58px;
+      object-fit: contain;
+      margin-bottom: 12px;
+      filter: drop-shadow(0 2px 6px rgba(0,0,0,0.3));
+    }
+    .verif-status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: #e6f4ea;
+      color: #137333;
+      border: 1.5px solid #34a853;
+      padding: 8px 20px;
+      border-radius: 30px;
+      font-weight: 800;
+      font-size: 13px;
+      box-shadow: 0 4px 14px rgba(52, 168, 83, 0.22);
+      margin-top: -18px;
+      position: relative;
+      z-index: 2;
+      letter-spacing: 0.3px;
+    }
+    .verif-body {
+      padding: 24px 24px 20px;
+    }
+    .kv-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12.5px;
+      margin-top: 14px;
+    }
+    .kv-table tr {
+      border-bottom: 1px solid #f1f5f9;
+    }
+    .kv-table tr:last-child {
+      border-bottom: none;
+    }
+    .kv-table td {
+      padding: 9px 0;
+      vertical-align: top;
+    }
+    .kv-label {
+      color: #64748b;
+      width: 38%;
+      font-weight: 500;
+    }
+    .kv-value {
+      color: #0f172a;
+      font-weight: 650;
+    }
+    .bsre-badge-box {
+      background: #f8fbff;
+      border: 1.2px solid #c7d9f5;
+      border-radius: 10px;
+      padding: 12px 14px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .verif-footer {
+      background: #f8fafc;
+      padding: 16px 24px;
+      border-top: 1px solid #e2e8f0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 11px;
+      color: #64748b;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .btn {
+      background: #1e3a5f;
+      color: white;
+      text-decoration: none;
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border: none;
+      cursor: pointer;
+      transition: background 150ms ease;
+    }
+    .btn:hover {
+      background: #0b2545;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="verif-card">
+    <!-- Header -->
+    <div class="verif-header">
+      <img src="Gambar/Lambang Lampung.png" alt="Lambang Provinsi Lampung" onerror="this.src='Gambar/logo-idp.png'">
+      <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: #cbd5e1; font-weight: 700;">
+        PEMERINTAH PROVINSI LAMPUNG
+      </div>
+      <h1 style="font-size: 17px; font-weight: 800; margin: 4px 0 2px; letter-spacing: 0.2px;">
+        BADAN PERENCANAAN PEMBANGUNAN DAERAH
+      </h1>
+      <p style="font-size: 11.5px; opacity: 0.88; color: #e2e8f0;">
+        Portal Verifikasi Sertifikat &amp; Tanda Tangan Elektronik (TTE) Kedinasan
+      </p>
+    </div>
+
+    <!-- Status Badge -->
+    <div style="text-align: center;">
+      <div class="verif-status-badge">
+        <span style="font-size: 16px;">✓</span> DOKUMEN TTE TERVERIFIKASI SAH &amp; ASLI
+      </div>
+    </div>
+
+    <!-- Body -->
+    <div class="verif-body">
+      <div class="bsre-badge-box">
+        <div style="width: 40px; height: 40px; border-radius: 8px; background: #0b5394; color: white; display: grid; place-items: center; font-size: 20px; flex-shrink: 0;">
+          🛡️
+        </div>
+        <div>
+          <div style="font-size: 12.5px; font-weight: 750; color: #0b2545;">
+            Sertifikasi BSrE — BSSN Terpenuhi
+          </div>
+          <div style="font-size: 11px; color: #475569; line-height: 1.4;">
+            Dokumen elektronik ini telah ditandatangani menggunakan sertifikat elektronik yang diterbitkan oleh Balai Sertifikasi Elektronik (BSrE) Badan Siber dan Sandi Negara.
+          </div>
+        </div>
+      </div>
+
+      <table class="kv-table">
+        <tr>
+          <td class="kv-label">Nomor Registrasi</td>
+          <td class="kv-value" id="dispRegNo" style="font-family: monospace; color: #0b5394; font-size: 13px;">800.1.1/IDP-BAPPEDA/2026/001</td>
+        </tr>
+        <tr>
+          <td class="kv-label">Jenis Dokumen</td>
+          <td class="kv-value" id="dispDocType">Formulir Rencana Pengembangan Individu (IDP ASN)</td>
+        </tr>
+        <tr>
+          <td class="kv-label">Pegawai ASN Dinilai</td>
+          <td class="kv-value" id="dispEmployee" style="font-weight: 700; color: #0b2545;">ANDI ARAFAT, S.T., M.E.</td>
+        </tr>
+        <tr>
+          <td class="kv-label">Instansi Penerbit</td>
+          <td class="kv-value">Bappeda Provinsi Lampung</td>
+        </tr>
+        <tr>
+          <td class="kv-label">Penandatangan Utama</td>
+          <td class="kv-value" style="color: #137333;">
+            <span id="dispSigner" style="font-weight: 750;">Dr. ANANG RISGIYANTO, S.K.M., M.Kes.</span>
+            <div style="font-size: 11px; color: #64748b; font-weight: 500;">Kepala Bappeda Provinsi Lampung • Pembina Utama Madya (IV/d)</div>
+          </td>
+        </tr>
+        <tr>
+          <td class="kv-label">Verifikator Kepegawaian</td>
+          <td class="kv-value">
+            <span style="font-weight: 700;">CIK MARYA, S.E., M.M.</span>
+            <div style="font-size: 11px; color: #64748b; font-weight: 500;">Kasubbag Umum &amp; Kepegawaian Bappeda</div>
+          </td>
+        </tr>
+        <tr>
+          <td class="kv-label">Waktu Verifikasi</td>
+          <td class="kv-value" id="dispTimestamp" style="color: #334155;">-</td>
+        </tr>
+        <tr>
+          <td class="kv-label">Integritas Dokumen</td>
+          <td class="kv-value" style="color: #15803d; font-weight: 700;">
+            ✓ Lolos Uji Integritas SHA256 (Tidak Mengalami Modifikasi)
+          </td>
+        </tr>
+        <tr>
+          <td class="kv-label">Dasar Regulasi</td>
+          <td class="kv-value" style="font-size: 11px; color: #64748b; font-weight: 400; line-height: 1.4;">
+            Pasal 11 UU No. 1/2024 (ITE), Perpres No. 95/2018 (SPBE), UU No. 20/2023 (ASN), dan Peraturan BSSN No. 10/2023.
+          </td>
+        </tr>
+      </table>
+    </div>
+
+    <!-- Footer -->
+    <div class="verif-footer">
+      <span>SIP-KOMPETENSI &bull; Bappeda Prov. Lampung</span>
+      <a href="index.html" class="btn">
+        <span>Buka Portal Utama</span> &rarr;
+      </a>
+    </div>
+  </div>
+
+  <script>
+    // Ambil parameter URL dinamis
+    const params = new URLSearchParams(window.location.search);
+    const reg = params.get('reg') || params.get('no') || '800.1.1/IDP-BAPPEDA/2026/001';
+    const type = params.get('type') || params.get('doc') || 'Formulir Rencana Pengembangan Individu (IDP ASN)';
+    const emp = params.get('emp') || params.get('nama') || 'ANDI ARAFAT, S.T., M.E.';
+    const signer = params.get('signer') || 'Dr. ANANG RISGIYANTO, S.K.M., M.Kes.';
+
+    document.getElementById('dispRegNo').textContent = decodeURIComponent(reg);
+    document.getElementById('dispDocType').textContent = decodeURIComponent(type);
+    document.getElementById('dispEmployee').textContent = decodeURIComponent(emp);
+    document.getElementById('dispSigner').textContent = decodeURIComponent(signer);
+
+    const now = new Date();
+    document.getElementById('dispTimestamp').textContent = now.toLocaleDateString('id-ID', {
+      day: 'numeric', month: 'long', year: 'numeric',
+      hour: '2-digit', minute: '2-digit', second: '2-digit'
+    }) + ' WIB';
+  </script>
+</body>
+</html>

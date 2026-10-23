@@ -3975,3 +3975,151 @@ button[onclick*="quickLogin"]:hover {
     page-break-after: always;
   }
 }
+
+/* ==========================================================================
+   DIAGNOSTIK KEKURANGAN KOMPETENSI & SIMULASI CITA-CITA KARIER (TALENT MERIT)
+   ========================================================================== */
+.gap-diagnostic-hero {
+  background: linear-gradient(135deg, rgba(30, 58, 95, 0.05) 0%, rgba(245, 158, 11, 0.08) 100%);
+  border: 1px solid rgba(245, 158, 11, 0.25);
+  border-radius: var(--radius-lg);
+  padding: 20px 24px;
+  margin-bottom: 24px;
+  position: relative;
+}
+
+.gap-diagnostic-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.gap-badge-stat {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.gap-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 16px;
+  margin-top: 14px;
+}
+
+.gap-detail-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: all 200ms ease;
+}
+
+.gap-detail-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.07);
+}
+
+.gap-detail-card.critical {
+  border-left: 4px solid var(--color-danger);
+}
+
+.gap-detail-card.moderate {
+  border-left: 4px solid var(--color-warning);
+}
+
+.gap-level-meter {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 12px 0;
+  padding: 8px 12px;
+  background: var(--color-surface-subtle);
+  border-radius: 6px;
+}
+
+.career-simulator-hero {
+  background: linear-gradient(135deg, rgba(30, 58, 95, 0.04) 0%, rgba(37, 99, 235, 0.06) 100%);
+  border: 1px solid rgba(37, 99, 235, 0.2);
+  border-radius: var(--radius-lg);
+  padding: 22px 24px;
+  margin-bottom: 24px;
+}
+
+.readiness-score-box {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 18px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+
+.readiness-score-number {
+  font-size: 38px;
+  font-weight: 850;
+  line-height: 1;
+  color: var(--color-primary);
+}
+
+.readiness-checklist-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 14px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  margin-bottom: 10px;
+}
+
+.readiness-step-flow {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  margin-top: 16px;
+}
+
+@media (max-width: 768px) {
+  .readiness-step-flow {
+    grid-template-columns: 1fr;
+  }
+  .readiness-score-box {
+    flex-direction: column;
+    text-align: center;
+  }
+}
+
+.readiness-step-box {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  padding: 14px;
+  position: relative;
+}
+
+.readiness-step-box.active {
+  border-color: var(--color-accent);
+  background: rgba(47, 128, 237, 0.04);
+}
+
+.readiness-step-box .step-badge {
+  font-size: 10.5px;
+  font-weight: 750;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+  display: inline-block;
+}

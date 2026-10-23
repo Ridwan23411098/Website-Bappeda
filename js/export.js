@@ -138,27 +138,42 @@ const ExportService = {
   _customPrintData: null,
 
   /**
-   * Menampilkan dialog pilih orientasi, lalu cetak dokumen resmi IDP
+   * Menampilkan dialog pilih orientasi, lalu cetak dokumen resmi IDP atau Rapor Diagnostik
    */
   showPrintDialog(customData = null) {
     ExportService._customPrintData = customData;
     const isExecutive = customData === 'executive';
+    const isDiagnostic = customData === 'diagnostic';
 
     // Hapus dialog lama jika ada
     const oldDialog = document.getElementById('printOrientDialog');
     if (oldDialog) oldDialog.remove();
+
+    let titleText = 'Cetak / Unduh Dokumen IDP (.PDF)';
+    let descText = 'Pilih orientasi halaman sebelum mencetak atau menyimpan dokumen IDP resmi:';
+    let actionFn = 'ExportService.printOfficialIdp()';
+
+    if (isDiagnostic) {
+      titleText = 'Cetak Rapor Diagnostik Kompetensi & Rencana Karier (.PDF)';
+      descText = 'Pilih orientasi halaman untuk mencetak Rapor Diagnostik Kesenjangan & Peta Cita-Cita Karier:';
+      actionFn = 'ExportService.printCareerDiagnosticReport()';
+    } else if (isExecutive) {
+      titleText = 'Cetak Laporan Eksekutif Bappeda (.PDF)';
+      descText = 'Pilih orientasi halaman untuk Laporan Rekapitulasi Eksekutif Kepala Badan:';
+      actionFn = 'ExportService.printExecutiveSummary()';
+    }
 
     const dialog = document.createElement('div');
     dialog.id = 'printOrientDialog';
     dialog.className = 'print-dialog-overlay';
     dialog.innerHTML = `
       <div class="print-dialog-box">
-        <h3>🖨️ ${isExecutive ? 'Cetak Laporan Eksekutif Bappeda (.PDF)' : 'Cetak / Unduh Dokumen IDP (.PDF)'}</h3>
-        <p>${isExecutive ? 'Pilih orientasi halaman untuk Laporan Rekapitulasi Eksekutif Kepala Badan:' : 'Pilih orientasi halaman sebelum mencetak atau menyimpan dokumen IDP resmi:'}</p>
+        <h3>🖨️ ${titleText}</h3>
+        <p>${descText}</p>
         <div class="print-orientation-grid">
           <button class="print-orient-btn ${ExportService._printOrientation === 'portrait' ? 'selected' : ''}" id="btnPortrait" onclick="ExportService.selectOrientation('portrait')">
             <div class="print-orient-icon portrait-icon"></div>
-            Potret (Standar A4)
+            Potret (Standar Resmi A4)
           </button>
           <button class="print-orient-btn ${ExportService._printOrientation === 'landscape' ? 'selected' : ''}" id="btnLandscape" onclick="ExportService.selectOrientation('landscape')">
             <div class="print-orient-icon landscape-icon"></div>
@@ -170,7 +185,7 @@ const ExportService = {
         </div>
         <div class="print-dialog-actions" style="display: flex; justify-content: flex-end; gap: 10px;">
           <button class="btn btn-outline" onclick="ExportService.closePrintDialog()">Batal</button>
-          <button class="btn btn-primary" onclick="${isExecutive ? 'ExportService.printExecutiveSummary()' : 'ExportService.printOfficialIdp()'}">
+          <button class="btn btn-primary" onclick="${actionFn}">
             🖨️ Buka Jendela Cetak / PDF
           </button>
         </div>
@@ -181,6 +196,10 @@ const ExportService = {
 
   showExecutivePrintDialog() {
     this.showPrintDialog('executive');
+  },
+
+  showCareerDiagnosticPrintDialog(customData = null) {
+    this.showPrintDialog('diagnostic');
   },
 
   selectOrientation(orient) {
@@ -465,15 +484,26 @@ const ExportService = {
           </div>
 
           <!-- Pejabat 3: Kepala Badan -->
-          <div>
-            <div>Bandar Lampung, ${tanggalSurat}</div>
-            <div style="font-weight: 700; margin-top: 1px;">Kepala Bappeda Provinsi Lampung</div>
-            <div style="height: 44px; display: flex; align-items: center; justify-content: center; font-size: 9px; color: #777;">
-              <i>(Tanda Tangan Elektronik)</i>
+          ${(typeof TTEService !== 'undefined') ? TTEService.getTteSignatureBox({
+            signerRole: 'Kepala Bappeda',
+            signerName: 'Dr. ANANG RISGIYANTO, S.K.M., M.Kes.',
+            signerPangkat: 'Pembina Utama Madya (IV/d)',
+            signerNip: '19750731 200003 1 002',
+            docRegNo: docRegNo,
+            docType: 'Formulir Rencana Pengembangan Individu (IDP ASN)',
+            employeeName: u.name,
+            dateText: tanggalSurat
+          }) : `
+            <div>
+              <div>Bandar Lampung, \${tanggalSurat}</div>
+              <div style="font-weight: 700; margin-top: 1px;">Kepala Bappeda Provinsi Lampung</div>
+              <div style="height: 44px; display: flex; align-items: center; justify-content: center; font-size: 9px; color: #777;">
+                <i>(Tanda Tangan Elektronik)</i>
+              </div>
+              <div style="font-weight: 750; text-decoration: underline;">Dr. ANANG RISGIYANTO, S.K.M., M.Kes.</div>
+              <div style="font-size: 9.5px; margin-top: 1px;">Pembina Utama Madya (IV/d)<br>NIP. 19750731 200003 1 002</div>
             </div>
-            <div style="font-weight: 750; text-decoration: underline;">Dr. ANANG RISGIYANTO, S.K.M., M.Kes.</div>
-            <div style="font-size: 9.5px; margin-top: 1px;">Pembina Utama Madya (IV/d)<br>NIP. 19750731 200003 1 002</div>
-          </div>
+          `}
         </div>
 
         <!-- FOOTER KEAMANAN & INTEGRITAS DOKUMEN -->
@@ -510,6 +540,327 @@ const ExportService = {
     document.body.insertBefore(printContainer, document.body.firstChild);
 
     // Trigger Browser Print / Simpan PDF
+    setTimeout(() => {
+      window.print();
+    }, 150);
+  },
+
+  /**
+   * Cetak Dokumen Resmi: Rapor Diagnostik Kesenjangan Kompetensi & Peta Kesiapan Cita-Cita Karier ASN
+   * Ber-KOP Resmi Lambang Lampung & Ditandatangani Kepala Bappeda Provinsi Lampung
+   */
+  /**
+   * Mengembalikan HTML Resmi Rapor Diagnostik Kesenjangan Kompetensi & Peta Karier
+   */
+  getDiagnosticReportHtml() {
+    const u = Store.state.user || {
+      name: 'ANDI ARAFAT S.T., M.E.',
+      nip: '197407072002121008',
+      pangkat: 'Pembina Tk. I / IV/b',
+      jabatan: 'Sekretaris Bappeda Provinsi Lampung',
+      unitKerja: 'Sekretariat',
+      pendidikan: 'EKONOMI PEMBANGUNAN & PERENCANAAN (2007)',
+      masaKerja: '23 Tahun 9 Bulan',
+      nineBox: 8
+    };
+
+    const cp = Store.state.careerPlan || {
+      jenjangTarget: 'JFT Madya — Level 4',
+      rencana: 'Mengembangkan kompetensi evaluasi perencanaan pembangunan daerah...',
+      rumpunTarget: ['86 — BAPPENAS', '70 — Aparatur Negara / Kepegawaian', '22 — Statistik']
+    };
+
+    const targetJenjang = cp.jenjangTarget || 'JFT Madya — Level 4';
+    const readiness = (typeof Store.calculateCareerReadiness === 'function') 
+      ? Store.calculateCareerReadiness(targetJenjang) 
+      : {
+          overallScore: 74,
+          targetLevel: 4,
+          kategori: 'KATEGORI II: SIAP DENGAN PENGEMBANGAN (READY WITH DEVELOPMENT)',
+          proyeksiWaktu: '1 — 2 Tahun',
+          checklist: []
+        };
+
+    const gapData = (typeof Store.getCompetencyGaps === 'function') 
+      ? Store.getCompetencyGaps() 
+      : { all: [], gaps: [], fulfilled: [], totalCount: 12, gapCount: 3, percentageFulfilled: 75 };
+
+    const programs = Store.state.idpState?.programs || [];
+    const totalJp = programs.reduce((acc, p) => acc + (parseInt(p.jp) || 0), 0);
+
+    const kopHtml = (typeof LambangLampung !== 'undefined' && typeof LambangLampung.getKopSuratHtml === 'function')
+      ? LambangLampung.getKopSuratHtml()
+      : (window.LambangLampung?.getKopSuratHtml ? window.LambangLampung.getKopSuratHtml() : '');
+
+    const now = new Date();
+    const months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+    const tanggalSurat = `${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}`;
+
+    const cleanNip = String(u.nip || '').replace(/[^0-9]/g, '');
+    const nipFormatted = cleanNip.length === 18 
+      ? `${cleanNip.slice(0,8)} ${cleanNip.slice(8,14)} ${cleanNip.slice(14,15)} ${cleanNip.slice(15,18)}`
+      : (u.nip || '-');
+    const docRegNo = `800.1.2/DIAG-KARIER/${now.getFullYear()}/${cleanNip ? cleanNip.slice(-4) : '0001'}`;
+
+    // Bangun baris tabel kompetensi dengan status gap & rekomendasi solusi IDP
+    let compRowsHtml = '';
+    (gapData.all || []).forEach((item, idx) => {
+      const isGap = item.gap > 0;
+      const gapBadge = isGap 
+        ? `<span style="display:inline-block; padding: 2px 6px; background: ${item.gap >= 2 ? '#fce8e6' : '#fef7e0'}; color: ${item.gap >= 2 ? '#c5221f' : '#b06000'}; font-weight: 700; border-radius: 3px; font-size: 9.5px;">Gap -${item.gap} Level</span>`
+        : `<span style="display:inline-block; padding: 2px 6px; background: #e6f4ea; color: #137333; font-weight: 700; border-radius: 3px; font-size: 9.5px;">Memenuhi</span>`;
+
+      compRowsHtml += `
+        <tr style="${isGap ? 'background: #fffdf5;' : ''}">
+          <td style="text-align: center;">${idx + 1}</td>
+          <td><b>${item.name}</b><div style="font-size: 9px; color: #666;">${item.kategori || '-'}</div></td>
+          <td style="text-align: center;">Level ${item.current}</td>
+          <td style="text-align: center;">Level ${item.target}</td>
+          <td style="text-align: center;">${gapBadge}</td>
+          <td>${item.solusi ? `<b>${item.solusi}</b> (${item.metode || 'Diklat'}, ${item.jp || 4} JP)` : 'Pemeliharaan Kompetensi Berkala'}</td>
+        </tr>
+      `;
+    });
+
+    // Bangun baris checklist kesiapan suksesi karier
+    let checklistRowsHtml = '';
+    (readiness.checklist || []).forEach((chk, idx) => {
+      const statusBadge = chk.isPassed
+        ? `<span style="display:inline-block; padding: 2px 6px; background: #e6f4ea; color: #137333; font-weight: 700; border-radius: 3px; font-size: 9.5px;">&#10004; ${chk.status}</span>`
+        : `<span style="display:inline-block; padding: 2px 6px; background: #fef7e0; color: #b06000; font-weight: 700; border-radius: 3px; font-size: 9.5px;">&#9888; ${chk.status}</span>`;
+
+      checklistRowsHtml += `
+        <tr>
+          <td style="text-align: center;">${idx + 1}</td>
+          <td><b>${chk.param}</b></td>
+          <td>${chk.detail}</td>
+          <td style="text-align: center;"><b>${chk.score}%</b></td>
+          <td style="text-align: center;">${statusBadge}</td>
+        </tr>
+      `;
+    });
+
+    return `
+      <div class="official-print-paper" style="background: #fff; color: #000; font-family: 'Inter', Arial, sans-serif;">
+        ${kopHtml}
+
+        <!-- REGISTRASI & METADATA DOKUMEN KEDINASAN -->
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin: 10px 0 16px; border-bottom: 1.5px solid #000; padding-bottom: 8px; font-size: 10.5px; color: #000;">
+          <div>
+            <div><b>Nomor Dokumen:</b> ${docRegNo}</div>
+            <div><b>Sifat:</b> Rahasia Kedinasan / Portofolio Kepegawaian</div>
+            <div><b>Dasar Hukum:</b> UU No. 20/2023 Pasal 49 &bull; PermenPAN-RB No. 3/2020 &bull; Peraturan LAN No. 10/2018</div>
+          </div>
+          <div style="text-align: right;">
+            <div><b>Tahun Anggaran:</b> ${Store.getActiveYear()}</div>
+            <div><b>Kategori Dokumen:</b> <span style="font-weight: 700; color: #0b5394;">RAPOR DIAGNOSTIK RESMI</span></div>
+            <div><b>Indeks Kesiapan Karier:</b> <b style="color: #137333; font-size: 12px;">${readiness.overallScore}%</b></div>
+          </div>
+        </div>
+
+        <!-- JUDUL UTAMA DOKUMEN RESMI -->
+        <div style="text-align: center; margin: 10px 0 16px;">
+          <h2 style="font-size: 12.5px; font-weight: 800; text-transform: uppercase; margin: 0; color: #000; letter-spacing: 0.02em; line-height: 1.35;">
+            RAPOR DIAGNOSTIK KESENJANGAN KOMPETENSI<br>&amp; PETA KESIAPAN CITA-CITA KARIER PEGAWAI NEGERI SIPIL
+          </h2>
+          <div style="font-size: 10px; font-weight: 650; color: #222; margin-top: 3px;">
+            BADAN PERENCANAAN PEMBANGUNAN DAERAH PROVINSI LAMPUNG
+          </div>
+        </div>
+
+        <!-- BAGIAN I: IDENTITAS PEGAWAI & KUADRAN TALENTA -->
+        <div class="print-section-title">I. IDENTITAS PEGAWAI ASN &amp; MATRIKS TALENTA (NINE-BOX GRID)</div>
+        <table class="print-table-kv">
+          <tr>
+            <td style="width: 24%;">Nama Lengkap &amp; Gelar</td>
+            <td style="width: 2%;">:</td>
+            <td style="width: 34%;"><b>${u.name}</b></td>
+            <td style="width: 18%;">Masa Kerja Golongan</td>
+            <td style="width: 2%;">:</td>
+            <td>${u.masaKerja || '-'}</td>
+          </tr>
+          <tr>
+            <td>NIP (18 Digit)</td>
+            <td>:</td>
+            <td><b>${nipFormatted}</b></td>
+            <td>Pangkat / Gol. Ruang</td>
+            <td>:</td>
+            <td>${u.pangkat || '-'}</td>
+          </tr>
+          <tr>
+            <td>Jabatan Saat Ini</td>
+            <td>:</td>
+            <td><b>${u.jabatan}</b></td>
+            <td>Pendidikan Terakhir</td>
+            <td>:</td>
+            <td>${u.pendidikan || '-'}</td>
+          </tr>
+          <tr>
+            <td>Unit Kerja Penugasan</td>
+            <td>:</td>
+            <td>${u.unitKerja} — Bappeda Provinsi Lampung</td>
+            <td>Posisi Nine-Box Grid</td>
+            <td>:</td>
+            <td><b style="color: #0b5394;">Kotak ${u.nineBox || 8} (High Performer — Siap Akselerasi)</b></td>
+          </tr>
+        </table>
+
+        <!-- BAGIAN II: DIAGNOSTIK KESENJANGAN KOMPETENSI -->
+        <div class="print-section-title" style="margin-top: 14px; display: flex; justify-content: space-between; align-items: center;">
+          <span>II. HASIL DIAGNOSTIK KESENJANGAN KOMPETENSI (COMPETENCY GAP DIAGNOSTIC)</span>
+          <span style="font-size: 9.5px; font-weight: normal;">Standar Pengujian: 12 Indikator Standar Kompetensi Bappeda</span>
+        </div>
+        <div style="margin-bottom: 8px; font-size: 10px; background: #f8fafc; border: 1px solid #e2e8f0; padding: 6px 10px; border-radius: 4px;">
+          <b>Ringkasan Diagnostik:</b> Dari <b>${gapData.totalCount}</b> kompetensi yang diuji, terdapat <b>${gapData.gapCount} kompetensi</b> yang belum memenuhi standar level jabatan saat ini (Tingkat Pemenuhan: <b>${gapData.percentageFulfilled}%</b>). Pegawai diwajibkan menutup kesenjangan melalui program pengembangan (IDP) di bawah ini.
+        </div>
+        <table class="print-table-data">
+          <thead>
+            <tr>
+              <th style="width: 28px; text-align: center;">No</th>
+              <th style="width: 28%;">Nama Indikator Kompetensi</th>
+              <th style="width: 11%; text-align: center;">Level Saat Ini</th>
+              <th style="width: 11%; text-align: center;">Standar Jabatan</th>
+              <th style="width: 13%; text-align: center;">Kesenjangan (Gap)</th>
+              <th>Rekomendasi Program Pengembangan IDP Penutup Gap</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${compRowsHtml}
+          </tbody>
+        </table>
+
+        <!-- BAGIAN III: ANALISIS CITA-CITA JABATAN & INDEKS KESIAPAN SUKSESI -->
+        <div class="print-section-title" style="margin-top: 14px;">III. PROYEKSI CITA-CITA JABATAN &amp; INDEKS KESIAPAN SUKSESI (CAREER READINESS)</div>
+        <table class="print-table-kv" style="margin-bottom: 8px;">
+          <tr>
+            <td style="width: 24%;">Cita-Cita Jabatan Target</td>
+            <td style="width: 2%;">:</td>
+            <td style="width: 34%;"><b style="color: #0b5394; font-size: 11px;">${targetJenjang}</b></td>
+            <td style="width: 18%;">Skor Indeks Kesiapan</td>
+            <td style="width: 2%;">:</td>
+            <td><b style="color: #137333; font-size: 12px;">${readiness.overallScore}%</b> (${readiness.kategori})</td>
+          </tr>
+          <tr>
+            <td>Proyeksi Waktu Suksesi</td>
+            <td style="width: 2%;">:</td>
+            <td><b>${readiness.proyeksiWaktu}</b></td>
+            <td>Status Hak Belajar Bangkom</td>
+            <td style="width: 2%;">:</td>
+            <td>${totalJp >= 20 ? '&#10004; Memenuhi 20 JP' : `Kurang ${Math.max(0, 20 - totalJp)} JP`} (Realisasi: ${totalJp} JP)</td>
+          </tr>
+          <tr>
+            <td>Arah &amp; Harapan Pegawai</td>
+            <td style="width: 2%;">:</td>
+            <td colspan="4"><i>"${cp.rencana || '-'}"</i></td>
+          </tr>
+        </table>
+
+        <div style="font-size: 10px; font-weight: 700; margin: 6px 0 4px; color: #333;">Checklist Parameter Kelayakan Menuju Cita-Cita:</div>
+        <table class="print-table-data">
+          <thead>
+            <tr>
+              <th style="width: 28px; text-align: center;">No</th>
+              <th style="width: 28%;">Parameter Penilaian Kesiapan</th>
+              <th>Kondisi Saat Ini vs Syarat Jabatan Target</th>
+              <th style="width: 12%; text-align: center;">Skor Bobot</th>
+              <th style="width: 20%; text-align: center;">Status Kelayakan</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${checklistRowsHtml}
+          </tbody>
+        </table>
+
+        <!-- BAGIAN IV: LEMBAR PENGESAHAN RESMI (TRIPARTIT BAPPEDA LAMPUNG) -->
+        <div style="margin-top: 22px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; text-align: center; font-size: 10px; color: #000; page-break-inside: avoid;">
+          <!-- Pejabat 1: Pegawai yang Dinilai -->
+          <div>
+            <div style="font-weight: 600;">Pegawai ASN yang Dinilai,</div>
+            <div style="height: 48px; display: flex; align-items: center; justify-content: center; font-size: 9px; color: #777;">
+              <i>(Tanda Tangan Elektronik)</i>
+            </div>
+            <div style="font-weight: 750; text-decoration: underline;">${u.name}</div>
+            <div style="font-size: 9px; margin-top: 1px;">NIP. ${nipFormatted}</div>
+          </div>
+
+          <!-- Pejabat 2: Verifikator SDM (Kasubbag Kepegawaian) -->
+          <div>
+            <div style="font-weight: 600;">Kasubbag Umum &amp; Kepegawaian,</div>
+            <div style="height: 48px; display: flex; align-items: center; justify-content: center; font-size: 9px; color: #777;">
+              <i>(Tanda Tangan Elektronik)</i>
+            </div>
+            <div style="font-weight: 750; text-decoration: underline;">CIK MARYA, S.E., M.M.</div>
+            <div style="font-size: 9px; margin-top: 1px;">Pembina (IV/a)<br>NIP. 19691026 199203 2 002</div>
+          </div>
+
+          <!-- Pejabat 3: Kepala Badan -->
+          ${(typeof TTEService !== 'undefined') ? TTEService.getTteSignatureBox({
+            signerRole: 'Kepala Bappeda',
+            signerName: 'Dr. ANANG RISGIYANTO, S.K.M., M.Kes.',
+            signerPangkat: 'Pembina Utama Madya (IV/d)',
+            signerNip: '19750731 200003 1 002',
+            docRegNo: docRegNo,
+            docType: 'Rapor Diagnostik Kesenjangan & Peta Karier ASN',
+            employeeName: u.name,
+            dateText: tanggalSurat
+          }) : `
+            <div>
+              <div>Bandar Lampung, \${tanggalSurat}</div>
+              <div style="font-weight: 700; margin-top: 1px;">Kepala Bappeda Provinsi Lampung</div>
+              <div style="height: 40px; display: flex; align-items: center; justify-content: center; font-size: 9px; color: #777;">
+                <i>(Tanda Tangan Elektronik)</i>
+              </div>
+              <div style="font-weight: 750; text-decoration: underline;">Dr. ANANG RISGIYANTO, S.K.M., M.Kes.</div>
+              <div style="font-size: 9px; margin-top: 1px;">Pembina Utama Madya (IV/d)<br>NIP. 19750731 200003 1 002</div>
+            </div>
+          `}
+        </div>
+
+        <!-- FOOTER KEAMANAN & INTEGRITAS DOKUMEN -->
+        <div style="margin-top: 20px; padding-top: 8px; border-top: 1px dashed #777; display: flex; justify-content: space-between; align-items: center; font-size: 8.5px; color: #555;">
+          <div>
+            <b>SIP-KOMPETENSI &bull; BAPPEDA PROVINSI LAMPUNG</b> &bull; Rapor diagnostik kesenjangan kompetensi &amp; kesiapan karier ASN resmi.
+          </div>
+          <div>
+            Kode Otentikasi: <b>DIAG-${Store.getActiveYear()}-${cleanNip ? cleanNip.slice(-6) : 'VERIF'}-SAH</b>
+          </div>
+        </div>
+      </div>
+    `;
+  },
+
+  /**
+   * Cetak Dokumen Resmi: Rapor Diagnostik Kesenjangan Kompetensi & Peta Kesiapan Cita-Cita Karier ASN
+   * Ber-KOP Resmi Lambang Lampung & Ditandatangani Kepala Bappeda Provinsi Lampung
+   */
+  printCareerDiagnosticReport() {
+    let printContainer = document.getElementById('officialPrintContainer');
+    if (!printContainer) {
+      printContainer = document.createElement('div');
+      printContainer.id = 'officialPrintContainer';
+      document.body.appendChild(printContainer);
+    }
+    printContainer.style.display = 'none';
+
+    printContainer.innerHTML = this.getDiagnosticReportHtml();
+    this.closePrintDialog();
+
+    const orient = ExportService._printOrientation || 'portrait';
+    let styleEl = document.getElementById('dynamicPrintStyle');
+    if (!styleEl) {
+      styleEl = document.createElement('style');
+      styleEl.id = 'dynamicPrintStyle';
+      document.head.appendChild(styleEl);
+    }
+
+    if (orient === 'landscape') {
+       styleEl.textContent = `@media print { @page { size: landscape; margin: 8mm 10mm 10mm 10mm; } }`;
+    } else {
+       styleEl.textContent = `@media print { @page { size: portrait; margin: 8mm 10mm 10mm 10mm; } }`;
+    }
+
+    document.body.insertBefore(printContainer, document.body.firstChild);
+
     setTimeout(() => {
       window.print();
     }, 150);
@@ -660,31 +1011,29 @@ const ExportService = {
 
         <!-- TANDA TANGAN KEPALA BADAN -->
         <div style="display: flex; justify-content: flex-end; margin-top: 8px;">
-          <div style="width: 300px; text-align: center; font-size: 10px; line-height: 1.4;">
-            <div>Bandar Lampung, ${tanggalSurat}</div>
-            <div style="font-weight: 700; margin-top: 3px; text-transform: uppercase;">
-              KEPALA BADAN PERENCANAAN PEMBANGUNAN DAERAH<br>PROVINSI LAMPUNG
-            </div>
-            
-            <!-- Stempel Digital & QR Verification -->
-            <div style="margin: 10px auto; display: flex; align-items: center; justify-content: center; gap: 8px;">
-              <div style="width: 48px; height: 48px; border: 1.2px dashed #0b5394; border-radius: 5px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 7.5px; color: #0b5394; line-height: 1.1; font-weight: 700; text-align: center; padding: 2px;">
-                <span>SEAL</span>
-                <span style="font-size: 10px;">★</span>
-                <span>BAPPEDA</span>
+          <div style="width: 320px;">
+            ${(typeof TTEService !== 'undefined') ? TTEService.getTteSignatureBox({
+              signerRole: 'Kepala Bappeda',
+              signerName: 'Dr. ANANG RISGIYANTO, S.K.M., M.Kes.',
+              signerPangkat: 'Pembina Utama Madya (IV/d)',
+              signerNip: '19750731 200003 1 002',
+              docRegNo: `REKAP-IDP-BAPPEDA-${now.getFullYear()}-FINAL`,
+              docType: 'Laporan Eksekutif Pengendalian IDP Bappeda',
+              employeeName: 'Seluruh 99 ASN Bappeda Provinsi Lampung',
+              dateText: tanggalSurat
+            }) : `
+              <div style="text-align: center; font-size: 10px; line-height: 1.4;">
+                <div>Bandar Lampung, \${tanggalSurat}</div>
+                <div style="font-weight: 700; margin-top: 3px; text-transform: uppercase;">
+                  KEPALA BADAN PERENCANAAN PEMBANGUNAN DAERAH<br>PROVINSI LAMPUNG
+                </div>
+                <div style="font-weight: 750; text-decoration: underline; font-size: 11px; margin-top: 40px;">
+                  Dr. ANANG RISGIYANTO, S.K.M., M.Kes.
+                </div>
+                <div style="font-size: 9.5px;">Pembina Utama Madya / IV.d</div>
+                <div style="font-size: 9.5px;">NIP. 19750731 200003 1 002</div>
               </div>
-              <div style="font-size: 9px; color: #333; text-align: left; line-height: 1.25;">
-                <div style="font-weight: 700; color: #0b5394;">TERTANDATANGANI SECARA ELEKTRONIK</div>
-                <div>Sistem Informasi IDP Bappeda</div>
-                <div>ID: VERIF-EXECUTIVE-${now.getFullYear()}-001</div>
-              </div>
-            </div>
-
-            <div style="font-weight: 750; text-decoration: underline; font-size: 11px; margin-top: 3px;">
-              Dr. ANANG RISGIYANTO, S.K.M., M.Kes.
-            </div>
-            <div style="font-size: 9.5px;">Pembina Utama Madya / IV.d</div>
-            <div style="font-size: 9.5px;">NIP. 19750731 200003 1 002</div>
+            `}
           </div>
         </div>
 
@@ -898,6 +1247,10 @@ const ExportService = {
     }, 150);
   }
 };
+
+if (typeof window !== 'undefined') {
+  window.ExportService = ExportService;
+}
 
 // ===========================================================================
 // BACKUP & RESTORE SERVICE (TAHAP 6: DATA SAFETY & RECOVERY)

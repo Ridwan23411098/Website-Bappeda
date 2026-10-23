@@ -73,8 +73,9 @@ const App = {
     this.renderOfficialLogos();
     this.initYearSystem();
 
-    // Register Service Worker for PWA & Background Alerts
-    if ('serviceWorker' in navigator) {
+    // Register Service Worker for PWA & Background Alerts (hanya di production)
+    const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    if ('serviceWorker' in navigator && !isLocalhost) {
       navigator.serviceWorker.register('sw.js').then(reg => {
         reg.update();
         console.log('SIP Service Worker active:', reg.scope);
@@ -1058,6 +1059,7 @@ const App = {
     this.setCareerJenjangValue(cp.jenjangTarget);
     this.updateCareerRoadmapTarget(cp.jenjangTarget);
     this.renderCareerJenjangTable(cp.jenjangTarget);
+    this.renderCareerReadinessSimulator(cp.jenjangTarget);
 
     const txtArea = document.getElementById('careerRencanaText');
     if (txtArea) {
@@ -1102,6 +1104,7 @@ const App = {
     Store.state.careerPlan.jenjangTarget = val;
     this.updateCareerRoadmapTarget(val);
     this.renderCareerJenjangTable(val);
+    this.renderCareerReadinessSimulator(val);
     Store.save();
   },
 
@@ -1109,6 +1112,182 @@ const App = {
     this.setCareerJenjangValue(val);
     this.onCareerJenjangTargetChange(val);
     App.toast(`Target jenjang dipilih: ${val}`, 'success');
+  },
+
+  renderCareerReadinessSimulator(targetJenjang) {
+    const simContainer = document.getElementById('careerSimulatorContainer');
+    if (!simContainer) return;
+
+    const val = targetJenjang || Store.state.careerPlan?.jenjangTarget || 'JFT Madya — Level 4';
+    const res = Store.calculateCareerReadiness ? Store.calculateCareerReadiness(val) : {
+      targetJenjang: val,
+      targetLevel: 4,
+      overallScore: 72,
+      kategori: 'KATEGORI II: SIAP DENGAN PENGEMBANGAN (READY WITH DEVELOPMENT)',
+      kategoriClass: 'text-warning',
+      badgeClass: 'badge-warning',
+      proyeksiWaktu: '1 — 2 Tahun',
+      checklist: []
+    };
+
+    const checklistHtml = (res.checklist || []).map(chk => {
+      const icon = chk.isPassed ? getIcon('CircleCheck', 18) : getIcon('AlertTriangle', 18);
+      const iconColor = chk.isPassed ? '#16a34a' : '#d97706';
+      const badgeCls = chk.isPassed ? 'badge-success' : 'badge-warning';
+
+      return `
+        <div class="readiness-checklist-item">
+          <div style="color: ${iconColor}; flex-shrink: 0; margin-top: 2px;">${icon}</div>
+          <div style="flex: 1;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px; flex-wrap: wrap; gap: 6px;">
+              <div style="font-weight: 750; font-size: 13px; color: var(--color-text-primary);">${chk.param}</div>
+              <span class="badge ${badgeCls}" style="font-size: 10.5px;">${chk.status}</span>
+            </div>
+            <div style="font-size: 11.5px; color: var(--color-text-secondary); line-height: 1.4;">${chk.detail}</div>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    simContainer.innerHTML = `
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 12px;">
+        <div>
+          <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 2px;">
+            <span style="font-size: 18px;">🎯</span>
+            <h3 style="font-size: 15.5px; font-weight: 750; color: var(--color-text-primary); margin: 0;">Simulasi Kesiapan Jabatan Target ASN (Cita-Cita)</h3>
+            <span class="badge badge-primary" style="font-size: 10.5px;">Merit System</span>
+          </div>
+          <p style="font-size: 12px; color: var(--color-text-secondary); margin: 0;">
+            Standar kompetensi &amp; kelayakan untuk target cita-cita: <b style="color: var(--color-primary); font-size: 13px;">${res.targetJenjang}</b>
+          </p>
+        </div>
+        <div>
+          <button class="btn btn-primary btn-sm" onclick="App.syncCareerToIdp()" style="font-size: 12px; font-weight: 700; display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px; box-shadow: 0 2px 8px rgba(31, 111, 174, 0.25);" title="Tambahkan program persiapan kenaikan ke jenjang ini ke Formulir IDP">
+            <span data-icon="PlusCircle" data-icon-size="15"></span> + Masukkan Cita-Cita ke IDP
+          </button>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-12" style="gap: 18px; margin-bottom: 16px;">
+        <!-- Skor Kesiapan Box -->
+        <div class="col-span-4" style="display: flex; flex-direction: column;">
+          <div class="readiness-score-box" style="flex: 1; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 20px 14px;">
+            <div style="font-size: 12px; font-weight: 750; text-transform: uppercase; letter-spacing: 0.5px; color: var(--color-text-muted); margin-bottom: 8px;">
+              Indeks Kesiapan Suksesi
+            </div>
+            <div class="readiness-score-number" style="font-size: 48px; margin-bottom: 4px;">
+              ${res.overallScore}%
+            </div>
+            <div class="progress-track" style="width: 80%; height: 8px; margin-bottom: 12px;">
+              <div class="progress-fill ${res.overallScore >= 85 ? 'success' : (res.overallScore >= 65 ? 'warning' : 'danger')}" style="width: ${res.overallScore}%;"></div>
+            </div>
+            <span class="badge ${res.badgeClass}" style="font-size: 10.5px; padding: 6px 10px; font-weight: 750; margin-bottom: 10px; white-space: normal; line-height: 1.35; text-align: center; display: inline-block; max-width: 100%;">
+              ${res.kategori}
+            </span>
+            <div style="font-size: 11.5px; color: var(--color-text-secondary); line-height: 1.45;">
+              Estimasi Waktu Siap Promosi:<br><b style="color: var(--color-primary);">${res.proyeksiWaktu}</b>
+            </div>
+          </div>
+        </div>
+
+        <!-- Checklist Parameter -->
+        <div class="col-span-8">
+          <div style="font-size: 12.5px; font-weight: 750; color: var(--color-text-primary); margin-bottom: 10px;">
+            Evaluasi 5 Parameter Kelayakan Menuju Jabatan Target:
+          </div>
+          ${checklistHtml}
+        </div>
+      </div>
+
+      <!-- Roadmap 3 Langkah Aksi Menuju Jabatan Target -->
+      <div style="margin-top: 14px; border-top: 1px solid var(--color-border); padding-top: 14px;">
+        <div style="font-size: 12.5px; font-weight: 750; color: var(--color-text-primary); margin-bottom: 10px;">
+          Peta Jalan Aksi Pengembangan Karier (Action Roadmap):
+        </div>
+        <div class="readiness-step-flow">
+          <div class="readiness-step-box active">
+            <span class="step-badge badge badge-blue">Tahap 1 &bull; Tahun 2026</span>
+            <h5 style="font-size: 13px; font-weight: 750; margin-bottom: 4px; color: var(--color-primary);">Tutup Kesenjangan Kompetensi</h5>
+            <p style="font-size: 11.5px; color: var(--color-text-secondary); margin: 0; line-height: 1.4;">
+              Selesaikan program IDP tahun ini (24 JP) khususnya Analisis Data, Manajemen Inovasi, dan Mentoring Kepemimpinan.
+            </p>
+          </div>
+          <div class="readiness-step-box">
+            <span class="step-badge badge badge-neutral">Tahap 2 &bull; Tahun 2027</span>
+            <h5 style="font-size: 13px; font-weight: 750; margin-bottom: 4px; color: var(--color-text-primary);">Ukom &amp; Sertifikasi Bappenas</h5>
+            <p style="font-size: 11.5px; color: var(--color-text-secondary); margin: 0; line-height: 1.4;">
+              Didaftarkan oleh Bappeda untuk mengikuti Uji Kompetensi Kenaikan Jenjang di Pusbindiklatren Bappenas / Asesmen BKD.
+            </p>
+          </div>
+          <div class="readiness-step-box">
+            <span class="step-badge badge badge-neutral">Tahap 3 &bull; Tahun 2028</span>
+            <h5 style="font-size: 13px; font-weight: 750; margin-bottom: 4px; color: var(--color-text-primary);">Penetapan SK Promosi Jabatan</h5>
+            <p style="font-size: 11.5px; color: var(--color-text-secondary); margin: 0; line-height: 1.4;">
+              Pengusulan penetapan ke Tim Penilai Kinerja / Pejabat Pembina Kepegawaian (Gubernur) berbasis Talent Pool Merit.
+            </p>
+          </div>
+        </div>
+
+        <div style="margin-top: 14px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+          <div style="font-size: 12px; color: var(--color-text-muted);">
+            💡 Rencana persiapan jenjang karier ini dapat disinkronkan ke dokumen IDP Anda.
+          </div>
+          <button class="btn btn-outline-primary btn-sm" onclick="App.syncCareerToIdp()" style="font-size: 11.5px; font-weight: 650; display: inline-flex; align-items: center; gap: 6px;">
+            <span data-icon="PlusCircle" data-icon-size="14"></span> Masukkan Rencana ke IDP
+          </button>
+        </div>
+      </div>
+    `;
+
+    if (typeof renderAllIcons === 'function') renderAllIcons();
+  },
+
+  syncCareerToIdp() {
+    const cp = Store.state.careerPlan;
+    const target = cp.jenjangTarget || 'JFT Madya — Level 4';
+    const activeYr = Store.getActiveYear();
+
+    const topik = `Persiapan Uji Kompetensi (Ukom) & Sertifikasi ${target}`;
+    const exists = Store.state.idpState.programs.some(p => p.topik === topik);
+    if (exists) {
+      App.toast(`Program persiapan kenaikan ke ${target} sudah ada di Formulir IDP Anda.`, 'info');
+      App.navigate('eidp');
+      return;
+    }
+
+    Store.state.idpState.programs.push({
+      id: Date.now(),
+      kompetensi: 'Perencanaan Strategis Penjenjangan',
+      metode: 'Diklat Teknis',
+      topik: topik,
+      jenisDiklat: 'Diklat Fungsional Penjenjangan',
+      jp: 24,
+      penyelenggara: 'Pusbindiklatren Bappenas',
+      periode: `TA ${activeYr}`,
+      periodeMulai: `${activeYr}-06-01`,
+      periodeSelesai: `${activeYr}-09-30`,
+      estimasi: 2500000,
+      status: 'Direncanakan',
+      details: {
+        tujuan: `Pemenuhan syarat Ukom dan sertifikasi kompetensi menuju jenjang ${target}.`
+      }
+    });
+
+    Store.save();
+    try {
+      if (Store.state.user?.nip && typeof Store.saveUserIdp === 'function') {
+        Store.saveUserIdp(Store.state.user.nip);
+      }
+    } catch (e) {
+      console.warn('saveUserIdp notice:', e);
+    }
+
+    App.toast(`Program persiapan penjenjangan karier (${target}) berhasil ditambahkan ke Formulir IDP Anda!`, 'success');
+    App.navigate('eidp');
+  },
+
+  printCareerPlanReport() {
+    this.openDiagnosticReportModal();
   },
 
   updateCareerRoadmapTarget(val) {
@@ -1229,42 +1408,367 @@ const App = {
     }
   },
 
+  switchKompTab(tab) {
+    const tabs = ['gaps', 'teknis', 'manajerial', 'sosial', 'all'];
+    tabs.forEach(t => {
+      const btn = document.getElementById(`tabBtn${t.charAt(0).toUpperCase() + t.slice(1)}`);
+      const pane = document.getElementById(`tabPane${t.charAt(0).toUpperCase() + t.slice(1)}`);
+      if (btn) btn.classList.toggle('active', t === tab);
+      if (pane) pane.style.display = (t === tab) ? 'block' : 'none';
+    });
+  },
+
+  printCompetencyDiagnosticReport() {
+    this.openDiagnosticReportModal();
+  },
+
+  openDiagnosticReportModal() {
+    try {
+      const paper = document.getElementById('diagnosticReportPaperContent');
+      if (paper && typeof ExportService !== 'undefined' && typeof ExportService.getDiagnosticReportHtml === 'function') {
+        paper.innerHTML = ExportService.getDiagnosticReportHtml();
+      }
+      this.openModal('diagnosticReportModal');
+      if (typeof renderAllIcons === 'function') renderAllIcons();
+    } catch (err) {
+      console.error('Error opening diagnostic report modal:', err);
+      if (typeof ExportService !== 'undefined' && typeof ExportService.printCareerDiagnosticReport === 'function') {
+        ExportService.printCareerDiagnosticReport();
+      }
+    }
+  },
+
+  addGapSolutionToIdp(kompetensi, metode, topik, penyelenggara, jp, estimasi) {
+    const activeYr = Store.getActiveYear();
+    if (!Store.state.idpState) {
+      Store.state.idpState = { status: 'Draft', programs: [] };
+    }
+    if (!Array.isArray(Store.state.idpState.programs)) {
+      Store.state.idpState.programs = [];
+    }
+
+    const existing = Store.state.idpState.programs.find(p => p.kompetensi === kompetensi && p.topik === topik);
+    if (existing) {
+      App.toast(`Program "${topik}" sudah terdaftar di Formulir IDP Anda.`, 'warning');
+      App.navigate('eidp');
+      return;
+    }
+
+    const newProg = {
+      id: Date.now(),
+      kompetensi: kompetensi,
+      metode: metode || 'Diklat Teknis',
+      topik: topik,
+      jenisDiklat: metode === 'Diklat Teknis' ? 'Diklat Teknis Perencanaan' : (metode === 'Mentoring' ? 'Pembinaan Internal' : 'Workshop Kedinasan'),
+      jp: parseInt(jp) || 4,
+      penyelenggara: penyelenggara || 'Internal Bappeda',
+      periode: `TA ${activeYr}`,
+      periodeMulai: `${activeYr}-03-01`,
+      periodeSelesai: `${activeYr}-10-31`,
+      estimasi: parseFloat(estimasi) || 0,
+      status: 'Direncanakan',
+      details: {
+        tujuan: `Menutup kesenjangan kompetensi ${kompetensi} agar memenuhi standar jabatan target.`
+      }
+    };
+
+    Store.state.idpState.programs.push(newProg);
+    Store.save();
+    try {
+      if (Store.state.user?.nip && typeof Store.saveUserIdp === 'function') {
+        Store.saveUserIdp(Store.state.user.nip);
+      }
+    } catch (e) {
+      console.warn('saveUserIdp notice:', e);
+    }
+
+    App.toast(`Berhasil ditambahkan ke IDP! Program "${topik}" (${jp} JP) siap diajukan ke atasan.`, 'success');
+    this.renderCompetencies();
+    App.navigate('eidp');
+  },
+
+  addAllGapsToIdp() {
+    const compGaps = Store.getCompetencyGaps ? Store.getCompetencyGaps() : { gaps: [] };
+    const gaps = compGaps.gaps || [];
+    let addedCount = 0;
+    const activeYr = Store.getActiveYear();
+
+    if (!Store.state.idpState) {
+      Store.state.idpState = { status: 'Draft', programs: [] };
+    }
+    if (!Array.isArray(Store.state.idpState.programs)) {
+      Store.state.idpState.programs = [];
+    }
+
+    gaps.forEach(item => {
+      if (!item.solusi) return;
+      const exists = Store.state.idpState.programs.some(p => p.kompetensi === item.name || p.topik === item.solusi);
+      if (!exists) {
+        Store.state.idpState.programs.push({
+          id: Date.now() + Math.floor(Math.random() * 1000),
+          kompetensi: item.name,
+          metode: item.metode || 'Diklat Teknis',
+          topik: item.solusi,
+          jenisDiklat: item.jenisDiklat || 'Diklat Teknis',
+          jp: item.jp || 4,
+          penyelenggara: item.penyelenggara || 'Internal Bappeda',
+          periode: `TA ${activeYr}`,
+          periodeMulai: `${activeYr}-03-01`,
+          periodeSelesai: `${activeYr}-10-31`,
+          estimasi: item.estimasi || 0,
+          status: 'Direncanakan',
+          details: {
+            tujuan: `Menutup kesenjangan kompetensi ${item.name} (-${item.gap} level).`
+          }
+        });
+        addedCount++;
+      }
+    });
+
+    Store.save();
+    try {
+      if (Store.state.user?.nip && typeof Store.saveUserIdp === 'function') {
+        Store.saveUserIdp(Store.state.user.nip);
+      }
+    } catch (e) {
+      console.warn('saveUserIdp notice:', e);
+    }
+
+    if (addedCount > 0) {
+      App.toast(`${addedCount} Program pengembangan untuk seluruh kekurangan Anda berhasil dimasukkan ke Formulir IDP!`, 'success');
+    } else {
+      App.toast('Seluruh rekomendasi program penutup kekurangan sudah terdaftar di Formulir IDP Anda.', 'info');
+    }
+    App.navigate('eidp');
+  },
+
   renderCompetencies() {
     const c = Store.state.competencies;
+    const gapsInfo = Store.getCompetencyGaps ? Store.getCompetencyGaps() : {
+      all: [], gaps: [], fulfilled: [], critical: [], moderate: [], totalCount: 12, gapCount: 3, percentageFulfilled: 75
+    };
+
+    // Update Stat Cards
+    const curAvgEl = document.getElementById('compCurrentAvgVal');
+    const tgtAvgEl = document.getElementById('compTargetAvgVal');
+    const gapValEl = document.getElementById('compGapVal');
+    const gapBadgeEl = document.getElementById('compGapDescBadge');
+    if (curAvgEl) curAvgEl.textContent = (c.currentAvg || 2.1).toFixed(1);
+    if (tgtAvgEl) tgtAvgEl.textContent = (c.targetAvg || 3.0).toFixed(1);
+    if (gapValEl) gapValEl.textContent = (c.gap || 0.9).toFixed(1);
+    if (gapBadgeEl) gapBadgeEl.textContent = gapsInfo.gapCount > 0 ? `${gapsInfo.gapCount} Kompetensi Memiliki Gap` : 'Semua Terpenuhi';
+
+    const tabGapCount = document.getElementById('tabGapCount');
+    if (tabGapCount) tabGapCount.textContent = gapsInfo.gapCount;
+
+    // Render Radar Chart
     Charts.renderRadar('competencyRadarChart', c.radarData);
 
-    document.getElementById('kompTeknisTableBody').innerHTML = c.teknis.map(item => `
-      <tr>
-        <td class="font-semibold">${item.name}</td>
-        <td><span class="badge badge-neutral">${item.current}</span></td>
-        <td><span class="badge badge-blue">${item.target}</span></td>
-        <td>${item.gap > 0 ? `<span class="badge badge-warning">${item.gap} level</span>` : `<span class="badge badge-success">Terpenuhi</span>`}</td>
-        <td><span class="badge ${item.priority === 'Tinggi' ? 'badge-danger' : 'badge-neutral'}">${item.priority}</span></td>
-        <td><span class="badge ${item.status === 'Terpenuhi' ? 'badge-success' : 'badge-warning'}">${item.status}</span></td>
-      </tr>
-    `).join('');
+    // 1. Render Hero Diagnostik Kekurangan Diri
+    const diagHero = document.getElementById('selfGapDiagnosticSection');
+    if (diagHero) {
+      if (gapsInfo.gapCount === 0) {
+        diagHero.innerHTML = `
+          <div class="gap-diagnostic-hero" style="border-color: rgba(34, 197, 94, 0.3); background: rgba(34, 197, 94, 0.05); margin-bottom: 24px;">
+            <div style="display: flex; align-items: center; gap: 12px;">
+              <div style="color: var(--color-success);">${getIcon('CircleCheck', 28)}</div>
+              <div>
+                <h3 style="font-size: 15px; font-weight: 750; color: var(--color-text-primary); margin-bottom: 2px;">Seluruh Kompetensi Anda Telah Memenuhi Standar Jabatan</h3>
+                <p style="font-size: 12px; color: var(--color-text-secondary); margin: 0;">Tidak ditemukan kesenjangan kompetensi. Anda siap untuk akselerasi karier menuju jenjang berikutnya.</p>
+              </div>
+            </div>
+          </div>
+        `;
+      } else {
+        const gapCardsHtml = gapsInfo.gaps.map(item => {
+          const isCritical = item.gap >= 2;
+          const borderClass = isCritical ? 'critical' : 'moderate';
+          const badgeClass = isCritical ? 'badge-danger' : 'badge-warning';
+          const badgeText = isCritical ? `🔴 Kurang ${item.gap} Level (Kritis)` : `🟡 Kurang ${item.gap} Level (Sedang)`;
 
-    document.getElementById('kompManajerialTableBody').innerHTML = c.manajerial.map(item => `
-      <tr>
-        <td class="font-semibold">${item.name}</td>
-        <td><span class="badge badge-neutral">${item.current}</span></td>
-        <td><span class="badge badge-blue">${item.target}</span></td>
-        <td>${item.gap > 0 ? `<span class="badge ${item.gap >= 2 ? 'badge-danger' : 'badge-warning'}">${item.gap} level</span>` : `<span class="badge badge-success">Terpenuhi</span>`}</td>
-        <td><span class="badge ${item.priority === 'Sangat Tinggi' ? 'badge-danger' : 'badge-neutral'}">${item.priority}</span></td>
-        <td><span class="badge ${item.status === 'Prioritas Tinggi' ? 'badge-danger' : 'badge-warning'}">${item.status}</span></td>
-      </tr>
-    `).join('');
+          return `
+            <div class="gap-detail-card ${borderClass}">
+              <div>
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px; gap: 8px;">
+                  <span class="badge ${badgeClass}" style="font-size: 10.5px; font-weight: 700;">${badgeText}</span>
+                  <span style="font-size: 11px; font-weight: 600; color: var(--color-text-muted);">${item.kategori || 'Kompetensi'}</span>
+                </div>
+                <h4 style="font-size: 14.5px; font-weight: 750; color: var(--color-text-primary); margin-bottom: 6px;">${item.name}</h4>
+                <p style="font-size: 11.5px; color: var(--color-text-secondary); line-height: 1.45; margin-bottom: 10px;">
+                  ${item.deskripsi || 'Perlu peningkatan kapasitas terstruktur untuk mencapai standar level jabatan.'}
+                </p>
 
-    document.getElementById('kompSosialTableBody').innerHTML = c.sosialKultural.map(item => `
-      <tr>
-        <td class="font-semibold">${item.name}</td>
-        <td><span class="badge badge-neutral">${item.current}</span></td>
-        <td><span class="badge badge-blue">${item.target}</span></td>
-        <td><span class="badge badge-warning">${item.gap} level</span></td>
-        <td><span class="badge badge-neutral">${item.priority}</span></td>
-        <td><span class="badge badge-warning">${item.status}</span></td>
-      </tr>
-    `).join('');
+                <div class="gap-level-meter">
+                  <div style="flex: 1; font-size: 11.5px;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 3px;">
+                      <span style="color: var(--color-text-muted);">Level Anda: <b style="color: var(--color-text-primary);">${item.current}</b></span>
+                      <span style="color: var(--color-text-muted);">Standar: <b style="color: var(--color-primary);">${item.target}</b></span>
+                    </div>
+                    <div class="progress-track" style="height: 6px;">
+                      <div class="progress-fill ${isCritical ? 'danger' : 'warning'}" style="width: ${Math.round((item.current / item.target) * 100)}%;"></div>
+                    </div>
+                  </div>
+                </div>
+
+                <div style="background: rgba(47, 128, 237, 0.05); border: 1px dashed rgba(47, 128, 237, 0.3); border-radius: 6px; padding: 8px 10px; margin-bottom: 12px; font-size: 11.5px;">
+                  <div style="color: var(--color-primary); font-weight: 700; margin-bottom: 2px;">💡 Rekomendasi Solusi IDP:</div>
+                  <div style="color: var(--color-text-primary); font-weight: 600;">${item.solusi || '-'}</div>
+                  <div style="font-size: 10.5px; color: var(--color-text-muted); margin-top: 2px;">Metode: <b>${item.metode || 'Diklat'}</b> &bull; Bobot: <b>${item.jp || 4} JP</b> &bull; ${item.penyelenggara || 'Internal Bappeda'}</div>
+                </div>
+              </div>
+
+              <div style="display: flex; justify-content: flex-end; margin-top: 8px;">
+                <button class="btn btn-primary btn-sm" style="width: 100%; justify-content: center; font-size: 11.5px; font-weight: 600;" onclick="App.addGapSolutionToIdp('${item.name}', '${item.metode || 'Diklat Teknis'}', '${(item.solusi || '').replace(/'/g, "\\'")}', '${item.penyelenggara || 'Internal Bappeda'}', ${item.jp || 4}, ${item.estimasi || 0})">
+                  <span data-icon="Plus" data-icon-size="13"></span> Masukkan Solusi ke IDP
+                </button>
+              </div>
+            </div>
+          `;
+        }).join('');
+
+        diagHero.innerHTML = `
+          <div class="gap-diagnostic-hero" style="margin-bottom: 24px;">
+            <div class="gap-diagnostic-header" style="display: flex; justify-content: space-between; align-items: center;">
+              <div>
+                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+                  <span style="font-size: 18px;">⚠️</span>
+                  <h3 style="font-size: 15.5px; font-weight: 800; color: var(--color-text-primary); margin: 0;">Diagnostik Kesenjangan Kompetensi Jabatan</h3>
+                  <span class="badge badge-warning" style="font-weight: 750;">${gapsInfo.gapCount} Indikator Belum Memenuhi</span>
+                </div>
+                <p style="font-size: 12px; color: var(--color-text-secondary); margin: 0; line-height: 1.5;">
+                  Rincian kesenjangan kompetensi terhadap standar jabatan. Pilih rekomendasi program pelatihan pada kartu terkait untuk ditambahkan ke formulir IDP.
+                </p>
+              </div>
+            </div>
+
+            <div class="gap-cards-grid">
+              ${gapCardsHtml}
+            </div>
+          </div>
+        `;
+      }
+    }
+
+    // 2. Render Prioritas Pengembangan Cards
+    const priorityCardsEl = document.getElementById('competencyPriorityCards');
+    if (priorityCardsEl) {
+      if (gapsInfo.gaps.length === 0) {
+        priorityCardsEl.innerHTML = `<div style="padding: 16px; text-align: center; color: var(--color-text-muted); font-size: 12px;">Seluruh kompetensi terpenuhi.</div>`;
+      } else {
+        priorityCardsEl.innerHTML = gapsInfo.gaps.slice(0, 3).map((item, idx) => {
+          const isCritical = item.gap >= 2;
+          const bgCol = isCritical ? 'var(--color-danger-light)' : 'var(--color-warning-light)';
+          const brdCol = isCritical ? 'var(--color-danger)' : 'var(--color-warning)';
+          const textCol = isCritical ? 'var(--color-danger)' : 'var(--color-warning)';
+          const badgeClass = isCritical ? 'badge-danger' : 'badge-warning';
+
+          return `
+            <div style="padding: 12px 14px; background: ${bgCol}; border-left: 4px solid ${brdCol}; border-radius: var(--radius-sm);">
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <b style="color: ${textCol}; font-size: 12.5px;">${idx + 1}. ${item.name}</b>
+                <span class="badge ${badgeClass}" style="font-size: 10px;">Gap ${item.gap} Level</span>
+              </div>
+              <p style="font-size: 11px; color: var(--color-text-secondary); margin-top: 4px; line-height: 1.4;">
+                Solusi: <b>${item.solusi || '-'}</b> (${item.metode || 'Diklat'}, ${item.jp || 4} JP).
+              </p>
+            </div>
+          `;
+        }).join('');
+      }
+    }
+
+    // 3. Render Tab Tables
+    const makeRow = (item, isAll = false) => {
+      const hasGap = item.gap > 0;
+      const isCritical = item.gap >= 2;
+      const gapBadge = hasGap 
+        ? `<span class="badge ${isCritical ? 'badge-danger' : 'badge-warning'}">-${item.gap} Level</span>`
+        : `<span class="badge badge-success">Terpenuhi</span>`;
+
+      return `
+        <tr style="${hasGap ? 'background: rgba(245, 158, 11, 0.04);' : ''}">
+          <td class="font-semibold">${item.name}</td>
+          ${isAll ? `<td><span class="badge badge-neutral" style="font-size: 11px;">${item.kategori || '-'}</span></td>` : ''}
+          <td style="text-align: center;"><span class="badge badge-neutral">${item.current}</span></td>
+          <td style="text-align: center;"><span class="badge badge-blue">${item.target}</span></td>
+          <td style="text-align: center;">${gapBadge}</td>
+          <td>
+            ${item.solusi ? `
+              <div style="font-size: 12px; font-weight: 600; color: var(--color-text-primary);">${item.solusi}</div>
+              <div style="font-size: 10.5px; color: var(--color-text-muted);">${item.metode || 'Diklat'} &bull; <b>${item.jp || 4} JP</b> &bull; ${item.penyelenggara || 'Internal Bappeda'}</div>
+            ` : '<span style="color: var(--color-text-muted); font-size: 11.5px;">Kompetensi telah memenuhi standar</span>'}
+          </td>
+          <td style="text-align: center;">
+            ${hasGap ? `
+              <button class="btn btn-outline btn-sm" style="font-size: 11px; padding: 4px 8px;" onclick="App.addGapSolutionToIdp('${item.name}', '${item.metode || 'Diklat Teknis'}', '${(item.solusi || '').replace(/'/g, "\\'")}', '${item.penyelenggara || 'Internal Bappeda'}', ${item.jp || 4}, ${item.estimasi || 0})">
+                + IDP
+              </button>
+            ` : '<span class="badge badge-success" style="font-size: 10px;">✓ Terpenuhi</span>'}
+          </td>
+        </tr>
+      `;
+    };
+
+    // Render Tab Gaps (Hanya Kekurangan Saya)
+    const gapsTbody = document.getElementById('kompGapsTableBody');
+    if (gapsTbody) {
+      if (gapsInfo.gaps.length === 0) {
+        gapsTbody.innerHTML = `<tr><td colspan="7" style="text-align: center; padding: 24px; color: var(--color-text-muted);">Tidak ada kekurangan kompetensi terdeteksi. Seluruh standar terpenuhi.</td></tr>`;
+      } else {
+        gapsTbody.innerHTML = gapsInfo.gaps.map(item => {
+          const isCritical = item.gap >= 2;
+          return `
+            <tr style="background: rgba(245, 158, 11, 0.04);">
+              <td class="font-semibold">
+                <div style="color: var(--color-text-primary); font-size: 13px;">${item.name}</div>
+                <div style="font-size: 11px; color: var(--color-text-muted);">${item.kategori || '-'}</div>
+              </td>
+              <td style="font-size: 11.5px; color: var(--color-text-secondary); line-height: 1.4;">
+                ${item.deskripsi || '-'}
+              </td>
+              <td style="text-align: center;"><span class="badge badge-neutral">${item.current}</span></td>
+              <td style="text-align: center;"><span class="badge badge-blue">${item.target}</span></td>
+              <td style="text-align: center;"><span class="badge ${isCritical ? 'badge-danger' : 'badge-warning'}">-${item.gap} Level</span></td>
+              <td>
+                <div style="font-size: 12px; font-weight: 600; color: var(--color-text-primary);">${item.solusi || '-'}</div>
+                <div style="font-size: 10.5px; color: var(--color-text-muted);">${item.metode || 'Diklat'} &bull; <b>${item.jp || 4} JP</b> &bull; ${item.penyelenggara || 'Internal Bappeda'}</div>
+              </td>
+              <td style="text-align: center;">
+                <button class="btn btn-primary btn-sm" style="font-size: 11px; padding: 5px 10px;" onclick="App.addGapSolutionToIdp('${item.name}', '${item.metode || 'Diklat Teknis'}', '${(item.solusi || '').replace(/'/g, "\\'")}', '${item.penyelenggara || 'Internal Bappeda'}', ${item.jp || 4}, ${item.estimasi || 0})">
+                  + Masukkan IDP
+                </button>
+              </td>
+            </tr>
+          `;
+        }).join('');
+      }
+    }
+
+    // Render Tab Teknis
+    const teknisTbody = document.getElementById('kompTeknisTableBody');
+    if (teknisTbody) {
+      teknisTbody.innerHTML = (c.teknis || []).map(item => makeRow(item)).join('');
+    }
+
+    // Render Tab Manajerial
+    const manajerialTbody = document.getElementById('kompManajerialTableBody');
+    if (manajerialTbody) {
+      manajerialTbody.innerHTML = (c.manajerial || []).map(item => makeRow(item)).join('');
+    }
+
+    // Render Tab Sosial
+    const sosialTbody = document.getElementById('kompSosialTableBody');
+    if (sosialTbody) {
+      sosialTbody.innerHTML = (c.sosialKultural || []).map(item => makeRow(item)).join('');
+    }
+
+    // Render Tab All
+    const allTbody = document.getElementById('kompAllTableBody');
+    if (allTbody) {
+      allTbody.innerHTML = gapsInfo.all.map(item => makeRow(item, true)).join('');
+    }
+
+    if (typeof renderAllIcons === 'function') renderAllIcons();
   },
 
   renderIdpSaya() {
@@ -1276,6 +1780,52 @@ const App = {
     document.getElementById('idpSummaryCount').textContent = summary.totalProgram;
     document.getElementById('idpSummaryJp').textContent = `${summary.totalJp} JP`;
     document.getElementById('idpSummaryCost').textContent = `Rp${summary.totalCost.toLocaleString('id-ID')}`;
+
+    // Render Banner Kepatuhan 20 JP (UU No. 20/2023)
+    const compBannerEl = document.getElementById('idpComplianceBanner');
+    if (compBannerEl) {
+      const isMet = summary.totalJp >= 20;
+      if (isMet) {
+        compBannerEl.innerHTML = `
+          <div style="background: rgba(22, 163, 74, 0.08); border: 1.5px solid rgba(22, 163, 74, 0.35); border-radius: 8px; padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <span style="font-size: 22px;">🛡️</span>
+              <div>
+                <div style="font-size: 13px; font-weight: 750; color: #166534;">
+                  Standar Hak Belajar ASN Terpenuhi (UU No. 20/2023 Pasal 49)
+                </div>
+                <div style="font-size: 11.5px; color: #15803d;">
+                  Total rencana pengembangan: <b>${summary.totalJp} JP</b> (Melampaui syarat minimal 20 JP per tahun). Dokumen sah dan siap diajukan.
+                </div>
+              </div>
+            </div>
+            <span class="badge badge-success" style="font-weight: 700; padding: 6px 12px; font-size: 11px;">
+              ✓ 100% Kepatuhan Regulasi
+            </span>
+          </div>
+        `;
+      } else {
+        const kurang = 20 - summary.totalJp;
+        compBannerEl.innerHTML = `
+          <div style="background: rgba(217, 119, 6, 0.08); border: 1.5px solid rgba(217, 119, 6, 0.35); border-radius: 8px; padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <span style="font-size: 22px;">⚠️</span>
+              <div>
+                <div style="font-size: 13px; font-weight: 750; color: #9a3412;">
+                  Belum Memenuhi Syarat Minimal 20 JP (UU No. 20/2023 Pasal 49)
+                </div>
+                <div style="font-size: 11.5px; color: #b45309;">
+                  Total saat ini: <b>${summary.totalJp} JP</b> (Masih kurang <b>${kurang} JP</b> lagi untuk memenuhi standar hak belajar tahunan ASN).
+                </div>
+              </div>
+            </div>
+            <button class="btn btn-warning btn-sm" onclick="App.openAddProgramModal()" style="font-size: 11.5px; font-weight: 700;">
+              + Tambah ${kurang} JP Pelatihan
+            </button>
+          </div>
+        `;
+      }
+    }
 
     const tbody = document.getElementById('idpProgramTableBody');
     if (idpState.programs.length === 0) {
@@ -1531,6 +2081,27 @@ const App = {
     if (targetSummaryEl && cp) {
       targetSummaryEl.textContent = `Target: ${cp.jenjangTarget} • ${cp.rumpunTarget ? cp.rumpunTarget.length : 0} Rumpun Terpilih`;
     }
+
+    // Render Review Compliance Banner
+    const revBannerEl = document.getElementById('reviewComplianceBanner');
+    if (revBannerEl) {
+      const isMet = summary.totalJp >= 20;
+      if (isMet) {
+        revBannerEl.innerHTML = `
+          <div style="background: rgba(22, 163, 74, 0.08); border: 1px solid rgba(22, 163, 74, 0.3); border-radius: 6px; padding: 10px 14px; font-size: 12px; color: #166534; display: flex; align-items: center; justify-content: space-between;">
+            <div><b>✓ Standar 20 JP Terpenuhi:</b> Total <b>${summary.totalJp} JP</b> (Sesuai UU No. 20/2023).</div>
+            <span class="badge badge-success" style="font-size: 10.5px;">Sah</span>
+          </div>
+        `;
+      } else {
+        revBannerEl.innerHTML = `
+          <div style="background: rgba(217, 119, 6, 0.08); border: 1px solid rgba(217, 119, 6, 0.3); border-radius: 6px; padding: 10px 14px; font-size: 12px; color: #9a3412; display: flex; align-items: center; justify-content: space-between;">
+            <div><b>⚠️ Perhatian Regulasi:</b> Total baru <b>${summary.totalJp} JP</b> (Kurang ${20 - summary.totalJp} JP dari target minimal 20 JP).</div>
+            <span class="badge badge-warning" style="font-size: 10.5px;">Kurang ${20 - summary.totalJp} JP</span>
+          </div>
+        `;
+      }
+    }
   },
 
   openSubmitIdpModal() {
@@ -1539,6 +2110,79 @@ const App = {
       App.toast('Harap centang pernyataan persetujuan terlebih dahulu', 'warning');
       return;
     }
+
+    const summary = Store.getIdpSummary();
+    const totalJp = summary.totalJp || 0;
+    const modalBody = document.getElementById('submitIdpConfirmModalBody');
+
+    if (modalBody) {
+      if (totalJp < 20) {
+        modalBody.innerHTML = `
+          <div style="width: 56px; height: 56px; border-radius: 50%; background: #fef3c7; color: #b45309; display: grid; place-items: center; margin: 0 auto 16px;">
+            <span data-icon="AlertTriangle" data-icon-size="28"></span>
+          </div>
+          <h3 style="font-size: 17px; font-weight: 750; margin-bottom: 8px; color: #92400e;">
+            Peringatan: Hak Belajar Belum 20 JP
+          </h3>
+          <p style="font-size: 12.5px; color: var(--color-text-secondary); line-height: 1.5; margin-bottom: 14px;">
+            Berdasarkan <b>UU No. 20 Tahun 2023 Pasal 49</b>, setiap pegawai ASN berhak dan wajib mendapatkan pengembangan kompetensi minimal <b>20 Jam Pelajaran (JP)</b> per tahun.
+          </p>
+          <div style="background: #fffbeb; border: 1px solid #fde68a; border-radius: 6px; padding: 10px 14px; margin-bottom: 20px; font-size: 12px; text-align: left;">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+              <span>Total JP Anda Saat Ini:</span>
+              <b style="color: #b45309;">${totalJp} JP</b>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+              <span>Standar Minimal Regulasi:</span>
+              <b>20 JP / Tahun</b>
+            </div>
+            <div style="display: flex; justify-content: space-between; color: #dc2626; font-weight: 700; border-top: 1px dashed #fcd34d; padding-top: 4px; margin-top: 4px;">
+              <span>Kekurangan:</span>
+              <span>Kurang ${20 - totalJp} JP</span>
+            </div>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 8px;">
+            <button class="btn btn-primary" onclick="App.closeModal('submitIdpConfirmModal'); App.navigate('eidp'); App.openAddProgramModal();">
+              <span data-icon="Plus" data-icon-size="15"></span> + Tambah Program Pelatihan (Disarankan)
+            </button>
+            <button class="btn btn-outline" style="color: #b45309; border-color: #d97706;" onclick="App.submitIdpConfirmed(true)">
+              Tetap Ajukan dengan Catatan Dispensasi
+            </button>
+            <button class="btn btn-outline" onclick="App.closeModal('submitIdpConfirmModal')">
+              Batal
+            </button>
+          </div>
+        `;
+      } else {
+        modalBody.innerHTML = `
+          <div style="width: 56px; height: 56px; border-radius: 50%; background: var(--color-success-light); color: var(--color-success); display: grid; place-items: center; margin: 0 auto 16px;">
+            <span data-icon="CircleCheck" data-icon-size="28"></span>
+          </div>
+          <h3 style="font-size: 17.5px; font-weight: 750; margin-bottom: 8px; color: #166534;">
+            Ajukan IDP untuk Verifikasi?
+          </h3>
+          <p style="font-size: 12.5px; color: var(--color-text-secondary); line-height: 1.5; margin-bottom: 14px;">
+            Dokumen IDP Anda telah <b>memenuhi standar regulasi UU No. 20/2023</b> dengan total <b>${totalJp} JP</b> (≥ 20 JP) dan siap diverifikasi oleh Pengelola SDM Bappeda.
+          </p>
+          <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 6px; padding: 10px 14px; margin-bottom: 20px; font-size: 12px; text-align: left;">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+              <span>Total Jam Pelajaran:</span>
+              <b style="color: #16a34a;">${totalJp} JP (Terpenuhi)</b>
+            </div>
+            <div style="display: flex; justify-content: space-between;">
+              <span>Status Kepatuhan:</span>
+              <span class="badge badge-success" style="font-size: 10px;">Lolos Kepatuhan 100%</span>
+            </div>
+          </div>
+          <div style="display: flex; gap: 10px;">
+            <button class="btn btn-outline" style="flex: 1;" onclick="App.closeModal('submitIdpConfirmModal')">Batal</button>
+            <button class="btn btn-success" style="flex: 1;" onclick="App.submitIdpConfirmed()">Ya, Ajukan IDP</button>
+          </div>
+        `;
+      }
+      if (typeof renderAllIcons === 'function') renderAllIcons();
+    }
+
     this.openModal('submitIdpConfirmModal');
   },
 
