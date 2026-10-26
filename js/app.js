@@ -46,6 +46,7 @@ const NAV_CONFIG = {
           { id: 'ecoaching', icon: 'BookOpen', label: 'Buku Log Pembinaan' },
           { id: 'epascapelatihan', icon: 'Award', label: 'Evaluasi Dampak Bangkom' },
           { id: 'apelaksanaan', icon: 'CircleCheck', label: 'Pelaksanaan SDM' },
+          { id: 'abackup', icon: 'DatabaseBackup', label: 'Cadangan & Pemulihan' },
           { id: 'amaster', icon: 'Settings2', label: 'Master Data' }
         ]
       }
@@ -67,7 +68,8 @@ const NAV_CONFIG = {
           { id: 'plaporan', icon: 'FileBarChart', label: 'Laporan' },
           { id: 'ekalender', icon: 'Calendar', label: 'Kalender Diklat' },
           { id: 'ecoaching', icon: 'BookOpen', label: 'Log Pembinaan ASN' },
-          { id: 'epascapelatihan', icon: 'Award', label: 'Dampak Pasca-Diklat' }
+          { id: 'epascapelatihan', icon: 'Award', label: 'Dampak Pasca-Diklat' },
+          { id: 'abackup', icon: 'DatabaseBackup', label: 'Keamanan Data & Audit' }
         ]
       }
     ]
@@ -405,8 +407,8 @@ const App = {
     const userRole = Store.state.currentSession?.role || Store.state.user?.role || 'pegawai';
     const roleAllowedPages = {
       pegawai: ['edash', 'eprofil', 'ekarier', 'ekompetensi', 'eidp', 'ekalender', 'ecoaching', 'epascapelatihan', 'ereview', 'epelaksanaan'],
-      admin: ['adash', 'averif', 'apegawai', 'ekalender', 'ecoaching', 'epascapelatihan', 'apelaksanaan', 'amaster', 'eprofil'],
-      pimpinan: ['pdash', 'pmonitoring', 'plaporan', 'ekalender', 'ecoaching', 'epascapelatihan', 'eprofil']
+      admin: ['adash', 'averif', 'apegawai', 'ekalender', 'ecoaching', 'epascapelatihan', 'apelaksanaan', 'abackup', 'amaster', 'eprofil'],
+      pimpinan: ['pdash', 'pmonitoring', 'plaporan', 'ekalender', 'ecoaching', 'epascapelatihan', 'abackup', 'eprofil']
     };
 
     const allowed = roleAllowedPages[userRole] || roleAllowedPages['pegawai'];
@@ -448,6 +450,7 @@ const App = {
       averif: 'Verifikasi IDP Pegawai',
       apegawai: 'Data Pegawai Bappeda',
       apelaksanaan: 'Pelaksanaan SDM Seluruh Unit',
+      abackup: 'Pusat Cadangan & Pemulihan Data Cloud SPBE',
       amaster: 'Master Data Referensi',
       pdash: 'Dashboard Pimpinan',
       pmonitoring: 'Monitoring Pengembangan',
@@ -517,6 +520,9 @@ const App = {
         break;
       case 'amaster':
         this.renderMasterData();
+        break;
+      case 'abackup':
+        this.renderBackupPage();
         break;
       case 'pdash':
         this.renderExecutiveDashboard();
@@ -5463,8 +5469,13 @@ const App = {
   },
 
   openMasterBackupTab() {
-    this.navigate('amaster');
-    this.switchMasterTab('backup');
+    this.navigate('abackup');
+  },
+
+  renderBackupPage() {
+    if (typeof BackupService !== 'undefined') {
+      BackupService.renderBackupPage();
+    }
   },
 
   confirmDeleteMasterItem(type, id) {

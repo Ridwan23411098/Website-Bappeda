@@ -6,6 +6,8 @@
 const STORAGE_KEY = 'sip_kompetensi_bappeda_db_v4';
 const SESSION_KEY = 'sip_kompetensi_active_session';
 const USER_REALIZATIONS_KEY = 'sip_user_realizations_v2';
+if (typeof window !== 'undefined') window.USER_REALIZATIONS_KEY = USER_REALIZATIONS_KEY;
+if (typeof global !== 'undefined') global.USER_REALIZATIONS_KEY = USER_REALIZATIONS_KEY;
 
 // IndexedDB Helper untuk penyimpanan bukti/sertifikat dan backup data realisasi tanpa batas 5MB localStorage
 const IDBHelper = {

@@ -2844,6 +2844,42 @@
           </div>
         </section>
 
+        <!-- 12b. PENGAMANAN & PENCADANGAN CLOUD SPBE (TAHAP 6: abackup) -->
+        <section id="page-abackup" class="page-view">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 14px;">
+            <div>
+              <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px; flex-wrap: wrap;">
+                <span class="badge" style="background: rgba(30, 41, 59, 0.08); color: var(--color-text-main); font-weight: 600; font-size: 11px;">
+                  <span data-icon="ShieldCheck" data-icon-size="12"></span> Perpres No. 95/2018 (SPBE)
+                </span>
+                <span class="badge" style="background: rgba(37, 99, 235, 0.1); color: #2563eb; font-weight: 600; font-size: 11px;">
+                  <span data-icon="Lock" data-icon-size="12"></span> Standar Keamanan BSSN
+                </span>
+                <span class="badge" style="background: rgba(16, 185, 129, 0.12); color: #059669; font-weight: 600; font-size: 11px;">
+                  <span data-icon="CircleCheck" data-icon-size="12"></span> Integritas Kriptografis SHA-256
+                </span>
+              </div>
+              <h1 class="page-title">Pusat Cadangan &amp; Pemulihan Data Cloud SPBE</h1>
+              <p class="page-subtitle" style="margin-bottom: 0;">Pengamanan basis data terenkripsi, pencadangan snapshot cloud otomatis, pemulihan bencana (Disaster Recovery), dan rekam jejak audit kedinasan Bappeda.</p>
+            </div>
+
+            <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+              <button class="btn btn-outline btn-sm" onclick="BackupService.exportFullAuditSheet()">
+                <span data-icon="FileSpreadsheet" data-icon-size="15"></span> Ekspor Rekap Excel
+              </button>
+              <button class="btn btn-outline btn-sm" onclick="BackupService.createFullBackup()">
+                <span data-icon="Download" data-icon-size="15"></span> Unduh Cadangan (.JSON)
+              </button>
+              <button class="btn btn-primary btn-sm" onclick="BackupService.promptCreateSnapshot()">
+                <span data-icon="UploadCloud" data-icon-size="15"></span> Buat Cloud Snapshot
+              </button>
+            </div>
+          </div>
+
+          <!-- Dynamic Container rendered by BackupService.renderBackupPage() -->
+          <div id="backupPageContent"></div>
+        </section>
+
         <!-- ====================================================================
              ROLE 3: PIMPINAN PAGES (READ ONLY)
              ==================================================================== -->
@@ -5113,10 +5149,10 @@
   <script src="assets/tte-service.js?v=20261023_v45"></script>
   <script src="js/icons.js?v=20261014_v16"></script>
   <script src="js/charts.js?v=20261008_fix"></script>
-  <script src="js/bappeda_data.js?v=20261026_v52"></script>
-  <script src="js/store.js?v=20261026_v52"></script>
-  <script src="js/export.js?v=20261026_v52"></script>
-  <script src="js/app.js?v=20261026_v52"></script>
+  <script src="js/bappeda_data.js?v=20261026_v53"></script>
+  <script src="js/store.js?v=20261026_v53"></script>
+  <script src="js/export.js?v=20261026_v53"></script>
+  <script src="js/app.js?v=20261026_v53"></script>
 </body>
 
 </html>
