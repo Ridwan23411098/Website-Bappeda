@@ -44,7 +44,7 @@
     rel="stylesheet">
 
   <!-- Core Stylesheet -->
-  <link rel="stylesheet" href="css/app.css?v=20261026_v51">
+  <link rel="stylesheet" href="css/app.css?v=20261026_v52">
 
   <!-- Critical Inlined CSS (Ensures 100% Instant & Flawless Mobile / PWA Rendering) -->
   <style>
@@ -2140,6 +2140,167 @@
               </thead>
               <tbody id="coachingTableBody">
                 <!-- Populated dynamically by App.renderCoachingTable() -->
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- 7c. EVALUASI DAMPAK PASCA-PELATIHAN (TAHAP 5 - KIRKPATRICK LEVEL 3) -->
+        <section id="page-epascapelatihan" class="page-view">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 14px;">
+            <div>
+              <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px; flex-wrap: wrap;">
+                <span class="badge" style="background: rgba(30, 41, 59, 0.08); color: var(--color-text-main); font-weight: 600; font-size: 11px;">
+                  <span data-icon="Scale" data-icon-size="12"></span> Perka LAN RI No. 10/2018
+                </span>
+                <span class="badge" style="background: rgba(37, 99, 235, 0.1); color: #2563eb; font-weight: 600; font-size: 11px;">
+                  <span data-icon="Target" data-icon-size="12"></span> Evaluasi Level 3 Kirkpatrick
+                </span>
+                <span class="badge" style="background: rgba(16, 185, 129, 0.12); color: #059669; font-weight: 600; font-size: 11px;">
+                  <span data-icon="ShieldCheck" data-icon-size="12"></span> Verifikasi Portofolio BSrE
+                </span>
+              </div>
+              <h1 class="page-title">Evaluasi Dampak Pasca-Pelatihan (Level 3)</h1>
+              <p class="page-subtitle" style="margin-bottom: 0;">Pengukuran penerapan kompetensi pasca-diklat (3–6 bulan) dan validasi produk inovasi kerja ASN Bappeda Provinsi Lampung.</p>
+            </div>
+
+            <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+              <button class="btn btn-outline btn-sm" onclick="App.exportPascaPelatihanExcel()">
+                <span data-icon="FileSpreadsheet" data-icon-size="15"></span> Ekspor Rekap Excel
+              </button>
+              <button class="btn btn-primary btn-sm" onclick="App.openAddPascaPelatihanModal()">
+                <span data-icon="Plus" data-icon-size="15"></span> Input Lembar Evaluasi Dampak
+              </button>
+            </div>
+          </div>
+
+          <!-- 4 KPI Stat Cards -->
+          <div class="stat-grid" style="grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); margin-bottom: 24px;">
+            <div class="stat-card" style="border-top: 3px solid #2563eb;">
+              <div class="stat-card-inner">
+                <div class="stat-card-info">
+                  <div class="stat-card-label">Total ASN Dievaluasi</div>
+                  <div class="stat-card-value text-blue" id="evalMetricTotal">0 Pegawai</div>
+                  <div class="stat-card-desc">Evaluasi 3–6 bulan pasca-diklat</div>
+                </div>
+                <div class="stat-card-icon" style="color: #2563eb;"><span data-icon="Award" data-icon-size="20"></span></div>
+              </div>
+            </div>
+
+            <div class="stat-card" style="border-top: 3px solid #10b981;">
+              <div class="stat-card-inner">
+                <div class="stat-card-info">
+                  <div class="stat-card-label">Sangat Berdampak (High)</div>
+                  <div class="stat-card-value text-green" id="evalMetricHighImpact">0 Pegawai</div>
+                  <div class="stat-card-desc">Skor efektivitas ≥ 85 (Predikat A)</div>
+                </div>
+                <div class="stat-card-icon" style="color: #10b981;"><span data-icon="TrendingUp" data-icon-size="20"></span></div>
+              </div>
+            </div>
+
+            <div class="stat-card" style="border-top: 3px solid #8b5cf6;">
+              <div class="stat-card-inner">
+                <div class="stat-card-info">
+                  <div class="stat-card-label">Rata-Rata Indeks Dampak</div>
+                  <div class="stat-card-value" style="color: #8b5cf6;" id="evalMetricAvgScore">0 / 100</div>
+                  <div class="stat-card-desc">Skor gabungan 5 dimensi Level 3</div>
+                </div>
+                <div class="stat-card-icon" style="color: #8b5cf6;"><span data-icon="Target" data-icon-size="20"></span></div>
+              </div>
+            </div>
+
+            <div class="stat-card" style="border-top: 3px solid #f59e0b;">
+              <div class="stat-card-inner">
+                <div class="stat-card-info">
+                  <div class="stat-card-label">Portofolio Output Dihasilkan</div>
+                  <div class="stat-card-value" style="color: #f59e0b;" id="evalMetricOutputs">0 Dokumen</div>
+                  <div class="stat-card-desc">Inovasi, Policy Brief, &amp; Produk Kerja</div>
+                </div>
+                <div class="stat-card-icon" style="color: #f59e0b;"><span data-icon="FileCheck" data-icon-size="20"></span></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 5 Dimensions Summary Banner -->
+          <div class="card" style="margin-bottom: 24px; padding: 18px 22px; background: linear-gradient(135deg, rgba(248, 250, 252, 0.9) 0%, rgba(241, 245, 249, 0.8) 100%); border: 1px solid rgba(226, 232, 240, 0.8);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 10px;">
+              <div>
+                <h4 style="margin: 0; font-size: 14px; font-weight: 700; color: var(--color-text-main); display: flex; align-items: center; gap: 8px;">
+                  <span data-icon="ChartNoAxesCombined" data-icon-size="16" style="color: #2563eb;"></span>
+                  Indeks Capaian 5 Dimensi Evaluasi Pasca-Diklat Bappeda (Pedoman LAN RI)
+                </h4>
+                <p style="margin: 4px 0 0 0; font-size: 12px; color: var(--color-text-muted);">
+                  Tolak ukur keberhasilan transfer pembelajaran ke dalam peningkatan produktivitas unit kerja
+                </p>
+              </div>
+              <span class="badge" style="background: rgba(37, 99, 235, 0.1); color: #2563eb; font-weight: 600; font-size: 11px;">
+                Kirkpatrick Behavior Matrix
+              </span>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px;" id="evalDimensionScoresGrid">
+              <!-- Rendered dynamically by App.renderPascaPelatihanPage() -->
+            </div>
+          </div>
+
+          <!-- Filters & Search Bar -->
+          <div class="card" style="padding: 16px 20px; margin-bottom: 20px;">
+            <div style="display: flex; gap: 14px; align-items: center; justify-content: space-between; flex-wrap: wrap;">
+              <div style="display: flex; gap: 12px; align-items: center; flex: 1; min-width: 280px; max-width: 440px;">
+                <div class="input-with-icon" style="width: 100%; position: relative;">
+                  <input type="text" id="evalSearchInput" class="form-control form-control-sm" placeholder="Cari Pegawai, NIP, Pelatihan, atau Output..." oninput="App.onPascaPelatihanSearch(this.value)">
+                </div>
+              </div>
+
+              <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                <div>
+                  <select id="evalFilterImpact" class="form-control form-control-sm" onchange="App.onPascaPelatihanFilterChanged()" style="min-width: 175px;">
+                    <option value="all">Semua Kategori Dampak</option>
+                    <option value="Sangat Berdampak (High Impact)">Sangat Berdampak (High Impact)</option>
+                    <option value="Berdampak (Baik)">Berdampak (Baik)</option>
+                    <option value="Cukup Berdampak">Cukup Berdampak</option>
+                  </select>
+                </div>
+
+                <div>
+                  <select id="evalFilterUnit" class="form-control form-control-sm" onchange="App.onPascaPelatihanFilterChanged()" style="min-width: 160px;">
+                    <option value="all">Semua Unit Kerja</option>
+                    <option value="Sekretariat">Sekretariat</option>
+                    <option value="PMPE">Bidang PMPE</option>
+                    <option value="Infrastruktur">Infrastruktur &amp; Wilayah</option>
+                    <option value="Perekonomian">Bidang Perekonomian</option>
+                    <option value="Pemerintahan">Bidang Pemerintahan</option>
+                  </select>
+                </div>
+
+                <div>
+                  <select id="evalFilterStatus" class="form-control form-control-sm" onchange="App.onPascaPelatihanFilterChanged()" style="min-width: 155px;">
+                    <option value="all">Semua Status Verifikasi</option>
+                    <option value="Terverifikasi Penilai">Terverifikasi Penilai</option>
+                    <option value="Menunggu Verifikasi">Menunggu Verifikasi</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Table Container with Horizontal Scroll & No Right Clipping -->
+          <div class="table-responsive card" style="padding: 0; overflow-x: auto; -webkit-overflow-scrolling: touch; border-radius: 10px;">
+            <table class="data-table" style="min-width: 1250px; width: 100%; margin-bottom: 0;">
+              <thead>
+                <tr>
+                  <th style="width: 110px;">No &amp; ID</th>
+                  <th style="width: 220px;">Pegawai ASN &amp; Unit</th>
+                  <th style="width: 240px;">Program Pelatihan</th>
+                  <th style="width: 150px;">Jeda Pasca-Diklat</th>
+                  <th style="width: 230px;">Action Learning Output</th>
+                  <th style="width: 160px;">Skor &amp; Dampak</th>
+                  <th style="width: 160px;">Status &amp; Penilai</th>
+                  <th style="width: 220px; text-align: center; padding-right: 24px;">Aksi</th>
+                </tr>
+              </thead>
+              <tbody id="pascaPelatihanTableBody">
+                <!-- Populated dynamically by App.renderPascaPelatihanTable() -->
               </tbody>
             </table>
           </div>
@@ -4701,6 +4862,246 @@
     </div>
   </div>
 
+  <!-- MODAL 1: FORMULIR INPUT/EDIT EVALUASI PASCA-PELATIHAN (TAHAP 5 - KIRKPATRICK LEVEL 3) -->
+  <div class="modal-overlay" id="pascaPelatihanModal" style="display: none;">
+    <div class="modal-card" style="max-width: 800px; width: 95%;">
+      <div class="modal-header">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <div style="width: 38px; height: 38px; border-radius: 9px; background: rgba(37, 99, 235, 0.12); color: #2563eb; display: grid; place-items: center;">
+            <span data-icon="Award" data-icon-size="22"></span>
+          </div>
+          <div>
+            <h3 class="modal-title" id="pascaPelatihanModalTitle">Lembar Evaluasi Dampak Pasca-Pelatihan</h3>
+            <p class="modal-subtitle">Pengukuran penerapan kompetensi pasca-diklat (Level 3 Kirkpatrick) sesuai Perka LAN RI</p>
+          </div>
+        </div>
+        <button class="btn-icon" onclick="App.closeModal('pascaPelatihanModal')" title="Tutup Modal">
+          <span data-icon="X" data-icon-size="18"></span>
+        </button>
+      </div>
+
+      <form id="pascaPelatihanForm" onsubmit="App.savePascaPelatihan(event)">
+        <input type="hidden" id="pascaPelatihanEditId" value="">
+        <div class="modal-body" style="padding: 20px 24px; max-height: 74vh; overflow-y: auto;">
+          
+          <!-- Baris 1: Pegawai & Evaluator/Atasan -->
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
+            <div class="form-group" style="margin-bottom: 0;">
+              <label class="form-label" for="evalPegawaiSelect">Pegawai ASN Peserta Diklat <span class="text-danger">*</span></label>
+              <select id="evalPegawaiSelect" class="form-control" required onchange="App.onEvalPegawaiChanged(this.value)">
+                <!-- Diisi otomatis dari DUK ASN Bappeda -->
+              </select>
+            </div>
+            <div class="form-group" style="margin-bottom: 0;">
+              <label class="form-label" for="evalAtasanSelect">Pejabat Penilai Kinerja / Atasan Langsung <span class="text-danger">*</span></label>
+              <select id="evalAtasanSelect" class="form-control" required>
+                <!-- Diisi dari Pimpinan / Atasan Bappeda -->
+              </select>
+            </div>
+          </div>
+
+          <!-- Baris 2: Pelatihan yang Dievaluasi -->
+          <div style="display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 14px; margin-bottom: 16px;">
+            <div class="form-group" style="margin-bottom: 0;">
+              <label class="form-label" for="evalDiklatNama">Program Pelatihan / Diklat yang Diikuti <span class="text-danger">*</span></label>
+              <input type="text" id="evalDiklatNama" class="form-control" placeholder="Contoh: Pelatihan Analisis Kebijakan Berbasis Bukti (EBPM)" required>
+            </div>
+            <div class="form-group" style="margin-bottom: 0;">
+              <label class="form-label" for="evalDiklatPenyelenggara">Penyelenggara</label>
+              <input type="text" id="evalDiklatPenyelenggara" class="form-control" placeholder="BPSDMD / Bappenas" value="BPSDMD Provinsi Lampung">
+            </div>
+            <div class="form-group" style="margin-bottom: 0;">
+              <label class="form-label" for="evalDiklatJp">Durasi (JP)</label>
+              <input type="number" id="evalDiklatJp" class="form-control" placeholder="20" min="1" max="500" value="20">
+            </div>
+          </div>
+
+          <!-- Baris 3: Tanggal & Jeda Pasca-Diklat -->
+          <div style="display: grid; grid-template-columns: 1.2fr 1.2fr 1.2fr; gap: 14px; margin-bottom: 20px;">
+            <div class="form-group" style="margin-bottom: 0;">
+              <label class="form-label" for="evalPeriodeDiklat">Waktu Pelaksanaan Diklat</label>
+              <input type="text" id="evalPeriodeDiklat" class="form-control" placeholder="Contoh: 10 Jan – 15 Jan 2026">
+            </div>
+            <div class="form-group" style="margin-bottom: 0;">
+              <label class="form-label" for="evalTanggal">Tanggal Evaluasi Pasca-Diklat <span class="text-danger">*</span></label>
+              <input type="date" id="evalTanggal" class="form-control" required onchange="App.onEvalTanggalChanged()">
+            </div>
+            <div class="form-group" style="margin-bottom: 0;">
+              <label class="form-label" for="evalRentangPasca">Jeda Pasca-Pelatihan</label>
+              <input type="text" id="evalRentangPasca" class="form-control" placeholder="Contoh: 3.5 Bulan Pasca Diklat" value="3 Bulan Pasca Pelatihan">
+            </div>
+          </div>
+
+          <!-- Section Rubrik Penilaian 5 Dimensi Kirkpatrick Level 3 -->
+          <div style="background: var(--color-bg-alt, #f8fafc); border: 1px solid var(--color-border); border-radius: 10px; padding: 16px 20px; margin-bottom: 20px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 10px;">
+              <div>
+                <h4 style="margin: 0; font-size: 13px; font-weight: 700; color: var(--color-text-main); display: flex; align-items: center; gap: 6px;">
+                  <span data-icon="Target" data-icon-size="15" style="color: #2563eb;"></span>
+                  Rubrik Penilaian 5 Dimensi Penerapan di Tempat Kerja (Skala 0–100)
+                </h4>
+                <small class="text-muted">Atasan langsung memberikan penilaian objektif terhadap performa kerja pegawai pasca pelatihan</small>
+              </div>
+              <div id="evalLiveScoreCard" style="display: flex; align-items: center; gap: 8px; background: #ffffff; border: 1px solid #cbd5e1; padding: 5px 12px; border-radius: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+                <span style="font-size: 12px; font-weight: 600; color: var(--color-text-muted);">Skor Rata-Rata:</span>
+                <span id="evalLiveAvgScore" style="font-size: 15px; font-weight: 800; color: #2563eb;">85.0</span>
+                <span id="evalLiveBadge" class="badge" style="background: rgba(16, 185, 129, 0.15); color: #059669; font-weight: 700; font-size: 11px;">
+                  Sangat Berdampak
+                </span>
+              </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 12px;">
+              <!-- D1 -->
+              <div class="form-group" style="margin-bottom: 0;">
+                <label class="form-label" style="font-size: 11px; margin-bottom: 4px;" for="evalSkorD1">
+                  <strong>D1. Penerapan Materi</strong> (0–100)
+                </label>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <input type="range" id="evalRangeD1" min="40" max="100" value="85" style="flex: 1;" oninput="App.onEvalScoreInput('D1', this.value)">
+                  <input type="number" id="evalSkorD1" min="0" max="100" value="85" class="form-control form-control-sm" style="width: 60px; text-align: center; font-weight: 700;" oninput="App.onEvalScoreNumber('D1', this.value)">
+                </div>
+                <small class="text-muted" style="font-size: 10px; display: block; margin-top: 2px;">Penggunaan ilmu diklat pada tugas pokok</small>
+              </div>
+
+              <!-- D2 -->
+              <div class="form-group" style="margin-bottom: 0;">
+                <label class="form-label" style="font-size: 11px; margin-bottom: 4px;" for="evalSkorD2">
+                  <strong>D2. Mutu Output/Dokumen</strong> (0–100)
+                </label>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <input type="range" id="evalRangeD2" min="40" max="100" value="85" style="flex: 1;" oninput="App.onEvalScoreInput('D2', this.value)">
+                  <input type="number" id="evalSkorD2" min="0" max="100" value="85" class="form-control form-control-sm" style="width: 60px; text-align: center; font-weight: 700;" oninput="App.onEvalScoreNumber('D2', this.value)">
+                </div>
+                <small class="text-muted" style="font-size: 10px; display: block; margin-top: 2px;">Ketajaman analisis &amp; minim revisi</small>
+              </div>
+
+              <!-- D3 -->
+              <div class="form-group" style="margin-bottom: 0;">
+                <label class="form-label" style="font-size: 11px; margin-bottom: 4px;" for="evalSkorD3">
+                  <strong>D3. Efisiensi &amp; Kecepatan</strong> (0–100)
+                </label>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <input type="range" id="evalRangeD3" min="40" max="100" value="85" style="flex: 1;" oninput="App.onEvalScoreInput('D3', this.value)">
+                  <input type="number" id="evalSkorD3" min="0" max="100" value="85" class="form-control form-control-sm" style="width: 60px; text-align: center; font-weight: 700;" oninput="App.onEvalScoreNumber('D3', this.value)">
+                </div>
+                <small class="text-muted" style="font-size: 10px; display: block; margin-top: 2px;">Kecepatan penyelesaian tupoksi</small>
+              </div>
+
+              <!-- D4 -->
+              <div class="form-group" style="margin-bottom: 0;">
+                <label class="form-label" style="font-size: 11px; margin-bottom: 4px;" for="evalSkorD4">
+                  <strong>D4. Inovasi &amp; Solusi</strong> (0–100)
+                </label>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <input type="range" id="evalRangeD4" min="40" max="100" value="85" style="flex: 1;" oninput="App.onEvalScoreInput('D4', this.value)">
+                  <input type="number" id="evalSkorD4" min="0" max="100" value="85" class="form-control form-control-sm" style="width: 60px; text-align: center; font-weight: 700;" oninput="App.onEvalScoreNumber('D4', this.value)">
+                </div>
+                <small class="text-muted" style="font-size: 10px; display: block; margin-top: 2px;">Gagasan baru &amp; pemecahan masalah</small>
+              </div>
+
+              <!-- D5 -->
+              <div class="form-group" style="margin-bottom: 0;">
+                <label class="form-label" style="font-size: 11px; margin-bottom: 4px;" for="evalSkorD5">
+                  <strong>D5. Transfer Knowledge</strong> (0–100)
+                </label>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <input type="range" id="evalRangeD5" min="40" max="100" value="85" style="flex: 1;" oninput="App.onEvalScoreInput('D5', this.value)">
+                  <input type="number" id="evalSkorD5" min="0" max="100" value="85" class="form-control form-control-sm" style="width: 60px; text-align: center; font-weight: 700;" oninput="App.onEvalScoreNumber('D5', this.value)">
+                </div>
+                <small class="text-muted" style="font-size: 10px; display: block; margin-top: 2px;">Berbagi ilmu dengan rekan unit kerja</small>
+              </div>
+            </div>
+          </div>
+
+          <!-- Baris 4: Portofolio Output Nyata (Action Learning Output) -->
+          <div class="form-group" style="margin-bottom: 16px;">
+            <label class="form-label" for="evalProdukKerja">
+              <span data-icon="FileCheck" data-icon-size="14" style="color: #2563eb;"></span>
+              Produk Nyata / Action Learning Output yang Dihasilkan <span class="text-danger">*</span>
+            </label>
+            <input type="text" id="evalProdukKerja" class="form-control" placeholder="Contoh: Policy Brief Strategi Penanggulangan Kemiskinan / SOP Digital SIP-KOMPETENSI / Peta WebGIS RTRW" required>
+            <small class="text-muted" style="display: block; margin-top: 4px; font-size: 11px;">Nama dokumen, regulasi, pedoman, instrumen, atau sistem yang berhasil dibuat berkat pelatihan ini.</small>
+          </div>
+
+          <!-- Baris 5: Manfaat Konkret bagi Unit Kerja -->
+          <div class="form-group" style="margin-bottom: 16px;">
+            <label class="form-label" for="evalManfaat">Manfaat Konkret bagi Kinerja Unit Kerja / Bappeda <span class="text-danger">*</span></label>
+            <textarea id="evalManfaat" class="form-control" rows="2" placeholder="Uraikan dampak positif nyata terhadap kinerja bidang atau percepatan proses perencanaan daerah..." required></textarea>
+          </div>
+
+          <!-- Baris 6: Tautan File & Rekomendasi Lanjutan -->
+          <div style="display: grid; grid-template-columns: 1.2fr 1.8fr; gap: 16px; margin-bottom: 16px;">
+            <div class="form-group" style="margin-bottom: 0;">
+              <label class="form-label" for="evalTautanDokumen">File Dokumen Bukti Dukung</label>
+              <input type="text" id="evalTautanDokumen" class="form-control" placeholder="dokumen_output_kerja.pdf" value="dokumen_output_kerja.pdf">
+            </div>
+            <div class="form-group" style="margin-bottom: 0;">
+              <label class="form-label" for="evalRekomendasi">Rekomendasi Pengembangan Lanjutan</label>
+              <input type="text" id="evalRekomendasi" class="form-control" placeholder="Contoh: Disiapkan mengikuti sertifikasi keahlian tingkat lanjut">
+            </div>
+          </div>
+
+          <!-- Baris 7: Testimoni / Ulasan Atasan & Status -->
+          <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 16px; margin-bottom: 0;">
+            <div class="form-group" style="margin-bottom: 0;">
+              <label class="form-label" for="evalTestimoni">Ulasan Kualitatif Pejabat Penilai Kinerja (Atasan Langsung) <span class="text-danger">*</span></label>
+              <textarea id="evalTestimoni" class="form-control" rows="2" placeholder="Catatan evaluasi atasan terhadap perubahan perilaku kerja dan komitmen pegawai..." required></textarea>
+            </div>
+            <div class="form-group" style="margin-bottom: 0;">
+              <label class="form-label" for="evalStatus">Status Verifikasi</label>
+              <select id="evalStatus" class="form-control">
+                <option value="Terverifikasi Penilai">Terverifikasi Penilai (TTE Sah)</option>
+                <option value="Menunggu Verifikasi">Menunggu Verifikasi</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer" style="display: flex; justify-content: flex-end; gap: 10px; padding: 14px 24px; border-top: 1px solid var(--color-border);">
+          <button type="button" class="btn btn-outline" onclick="App.closeModal('pascaPelatihanModal')">Batal</button>
+          <button type="submit" class="btn btn-primary">
+            <span data-icon="Save" data-icon-size="15"></span> Simpan Lembar Evaluasi
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL 2: PRATINJAU DOKUMEN RESMI LEMBAR EVALUASI DAMPAK PASCA-PELATIHAN (BSrE TTE) -->
+  <div class="modal-overlay" id="pascaPelatihanDetailModal" style="display: none;">
+    <div class="modal-card" style="max-width: 820px; width: 95%;">
+      <div class="modal-header">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <div style="width: 38px; height: 38px; border-radius: 9px; background: rgba(16, 185, 129, 0.12); color: #059669; display: grid; place-items: center;">
+            <span data-icon="Award" data-icon-size="22"></span>
+          </div>
+          <div>
+            <h3 class="modal-title" id="pascaPelatihanDetailTitle">Lembar Evaluasi Dampak Pasca-Pelatihan</h3>
+            <p class="modal-subtitle">Format evaluasi resmi Kirkpatrick Level 3 terverifikasi Balai Sertifikasi Elektronik (BSrE)</p>
+          </div>
+        </div>
+        <button class="btn-icon" onclick="App.closeModal('pascaPelatihanDetailModal')" title="Tutup Modal">
+          <span data-icon="X" data-icon-size="18"></span>
+        </button>
+      </div>
+
+      <div class="modal-body" id="pascaPelatihanDetailBody" style="padding: 20px 24px; max-height: 74vh; overflow-y: auto;">
+        <!-- Konten Berita Acara Lembar Evaluasi dirender secara dinamis oleh App.renderPascaPelatihanDetail() -->
+      </div>
+
+      <div class="modal-footer" id="pascaPelatihanDetailFooter" style="display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 14px 24px; border-top: 1px solid var(--color-border); flex-wrap: wrap;">
+        <div id="pascaPelatihanDetailLeftActions">
+          <!-- Tombol Cetak / TTE Lembar Evaluasi -->
+        </div>
+        <div style="display: flex; gap: 10px;">
+          <button type="button" class="btn btn-outline" onclick="App.closeModal('pascaPelatihanDetailModal')">Tutup</button>
+          <div id="pascaPelatihanDetailRightActions"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- TOAST CONTAINER -->
   <div class="toast-container" id="toastContainer"></div>
 
@@ -4712,10 +5113,10 @@
   <script src="assets/tte-service.js?v=20261023_v45"></script>
   <script src="js/icons.js?v=20261014_v16"></script>
   <script src="js/charts.js?v=20261008_fix"></script>
-  <script src="js/bappeda_data.js?v=20261026_v51"></script>
-  <script src="js/store.js?v=20261026_v51"></script>
-  <script src="js/export.js?v=20261026_v51"></script>
-  <script src="js/app.js?v=20261026_v51"></script>
+  <script src="js/bappeda_data.js?v=20261026_v52"></script>
+  <script src="js/store.js?v=20261026_v52"></script>
+  <script src="js/export.js?v=20261026_v52"></script>
+  <script src="js/app.js?v=20261026_v52"></script>
 </body>
 
 </html>

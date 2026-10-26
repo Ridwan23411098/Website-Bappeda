@@ -4488,3 +4488,43 @@ button[onclick*="quickLogin"]:hover {
 .data-table td:first-child {
   padding-left: 20px !important;
 }
+
+/* ==========================================================================
+   TAHAP 5: EVALUASI DAMPAK PASCA-PELATIHAN (KIRKPATRICK LEVEL 3) STYLES
+   ========================================================================== */
+.badge-impact-high {
+  background: rgba(16, 185, 129, 0.12);
+  color: #059669;
+  border: 1px solid rgba(16, 185, 129, 0.25);
+  font-weight: 700;
+}
+
+.badge-impact-med {
+  background: rgba(37, 99, 235, 0.12);
+  color: #2563eb;
+  border: 1px solid rgba(37, 99, 235, 0.25);
+  font-weight: 700;
+}
+
+.badge-impact-low {
+  background: rgba(239, 68, 68, 0.12);
+  color: #dc2626;
+  border: 1px solid rgba(239, 68, 68, 0.25);
+  font-weight: 700;
+}
+
+/* Custom Range Slider for 5 Dimensions Rubric */
+input[type="range"] {
+  accent-color: #2563eb;
+  height: 6px;
+  cursor: pointer;
+}
+
+#evalDimensionScoresGrid > div {
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+#evalDimensionScoresGrid > div:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+}

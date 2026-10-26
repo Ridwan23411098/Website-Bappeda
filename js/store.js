@@ -796,6 +796,13 @@ const Store = {
           : [];
       }
 
+      // Inisialisasi Evaluasi Dampak Pasca-Pelatihan Level 3 (Tahap 5)
+      if (!this.state.postTrainingEvaluations || !Array.isArray(this.state.postTrainingEvaluations) || this.state.postTrainingEvaluations.length === 0) {
+        this.state.postTrainingEvaluations = (typeof BAPPEDA_DATA !== 'undefined' && BAPPEDA_DATA.postTrainingEvaluations) 
+          ? JSON.parse(JSON.stringify(BAPPEDA_DATA.postTrainingEvaluations)) 
+          : [];
+      }
+
       this.save();
     } catch (err) {
       console.error('Peringatan di Store.init():', err);
@@ -2718,6 +2725,309 @@ const Store = {
     };
   },
 
+  // ==========================================
+  // TAHAP 5: EVALUASI DAMPAK PASCA-PELATIHAN (KIRKPATRICK LEVEL 3 & ACTION LEARNING)
+  // Sesuai Perka LAN RI No. 10/2018, PermenPAN-RB No. 38/2017 & UU No. 20/2023
+  // ==========================================
+  getPostTrainingEvals(filters = {}) {
+    if (!this.state.postTrainingEvaluations || !Array.isArray(this.state.postTrainingEvaluations)) {
+      this.state.postTrainingEvaluations = (typeof BAPPEDA_DATA !== 'undefined' && BAPPEDA_DATA.postTrainingEvaluations)
+        ? JSON.parse(JSON.stringify(BAPPEDA_DATA.postTrainingEvaluations))
+        : [];
+    }
+
+    let evals = [...this.state.postTrainingEvaluations];
+
+    // Filter Pegawai NIP
+    if (filters.pegawaiNip) {
+      evals = evals.filter(e => String(e.pegawaiNip).replace(/\s+/g, '') === String(filters.pegawaiNip).replace(/\s+/g, ''));
+    }
+
+    // Filter Evaluator NIP
+    if (filters.evaluatorNip) {
+      evals = evals.filter(e => String(e.evaluatorNip).replace(/\s+/g, '') === String(filters.evaluatorNip).replace(/\s+/g, ''));
+    }
+
+    // Filter Kategori Dampak
+    if (filters.kategoriDampak && filters.kategoriDampak !== 'all') {
+      evals = evals.filter(e => e.kategoriDampak === filters.kategoriDampak);
+    }
+
+    // Filter Status
+    if (filters.status && filters.status !== 'all') {
+      evals = evals.filter(e => e.status === filters.status);
+    }
+
+    // Filter Unit Kerja
+    if (filters.unit && filters.unit !== 'all') {
+      evals = evals.filter(e => e.pegawaiUnit && e.pegawaiUnit.toLowerCase().includes(filters.unit.toLowerCase()));
+    }
+
+    // Filter Tahun
+    if (filters.tahun && filters.tahun !== 'all') {
+      evals = evals.filter(e => String(e.tahun) === String(filters.tahun));
+    }
+
+    // Filter Search
+    if (filters.search && filters.search.trim()) {
+      const q = filters.search.toLowerCase().trim();
+      evals = evals.filter(e =>
+        (e.pegawaiNama && e.pegawaiNama.toLowerCase().includes(q)) ||
+        (e.pegawaiNip && e.pegawaiNip.toLowerCase().includes(q)) ||
+        (e.diklatNama && e.diklatNama.toLowerCase().includes(q)) ||
+        (e.produkKerja && e.produkKerja.toLowerCase().includes(q)) ||
+        (e.evaluatorNama && e.evaluatorNama.toLowerCase().includes(q)) ||
+        (e.id && e.id.toLowerCase().includes(q))
+      );
+    }
+
+    return evals;
+  },
+
+  getPostTrainingEvalById(id) {
+    if (!this.state.postTrainingEvaluations) return null;
+    return this.state.postTrainingEvaluations.find(e => e.id === id) || null;
+  },
+
+  calculateEvalRubrics(d1, d2, d3, d4, d5) {
+    const v1 = Math.max(0, Math.min(100, Number(d1) || 0));
+    const v2 = Math.max(0, Math.min(100, Number(d2) || 0));
+    const v3 = Math.max(0, Math.min(100, Number(d3) || 0));
+    const v4 = Math.max(0, Math.min(100, Number(d4) || 0));
+    const v5 = Math.max(0, Math.min(100, Number(d5) || 0));
+    const avg = parseFloat(((v1 + v2 + v3 + v4 + v5) / 5).toFixed(1));
+
+    let kategoriDampak = 'Berdampak (Baik)';
+    let predikat = 'B (Baik)';
+
+    if (avg >= 85) {
+      kategoriDampak = 'Sangat Berdampak (High Impact)';
+      predikat = 'A (Sangat Baik)';
+    } else if (avg >= 70) {
+      kategoriDampak = 'Berdampak (Baik)';
+      predikat = 'B (Baik)';
+    } else if (avg >= 60) {
+      kategoriDampak = 'Cukup Berdampak';
+      predikat = 'C (Cukup)';
+    } else {
+      kategoriDampak = 'Kurang Berdampak / Perlu Bimbingan';
+      predikat = 'D (Kurang)';
+    }
+
+    return {
+      skorD1: v1,
+      skorD2: v2,
+      skorD3: v3,
+      skorD4: v4,
+      skorD5: v5,
+      skorRataRata: avg,
+      kategoriDampak,
+      predikat
+    };
+  },
+
+  addPostTrainingEval(data) {
+    if (!this.state.postTrainingEvaluations) this.state.postTrainingEvaluations = [];
+
+    const count = this.state.postTrainingEvaluations.length + 1;
+    const year = data.tahun || (this.state.activeYear || 2026);
+    const newId = `EPP-${year}-${String(count).padStart(3, '0')}`;
+
+    const rubrics = this.calculateEvalRubrics(
+      data.skorD1,
+      data.skorD2,
+      data.skorD3,
+      data.skorD4,
+      data.skorD5
+    );
+
+    const isVerified = data.status === 'Terverifikasi Penilai';
+    const now = new Date();
+    const dateCode = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}`;
+    const randCode = Math.floor(1000 + Math.random() * 9000);
+
+    const newEval = {
+      id: newId,
+      tahun: year,
+      pegawaiNama: data.pegawaiNama || '',
+      pegawaiNip: data.pegawaiNip || '',
+      pegawaiJabatan: data.pegawaiJabatan || '',
+      pegawaiUnit: data.pegawaiUnit || '',
+      diklatNama: data.diklatNama || '',
+      diklatPenyelenggara: data.diklatPenyelenggara || 'BPSDMD Provinsi Lampung',
+      diklatJp: Number(data.diklatJp) || 20,
+      diklatPeriode: data.diklatPeriode || 'Tahun 2026',
+      tanggalEvaluasi: data.tanggalEvaluasi || now.toISOString().split('T')[0],
+      rentangPascaBulan: data.rentangPascaBulan || '3 Bulan Pasca Pelatihan',
+      evaluatorNama: data.evaluatorNama || '',
+      evaluatorNip: data.evaluatorNip || '',
+      evaluatorJabatan: data.evaluatorJabatan || '',
+      skorD1: rubrics.skorD1,
+      skorD2: rubrics.skorD2,
+      skorD3: rubrics.skorD3,
+      skorD4: rubrics.skorD4,
+      skorD5: rubrics.skorD5,
+      skorRataRata: rubrics.skorRataRata,
+      kategoriDampak: rubrics.kategoriDampak,
+      predikat: rubrics.predikat,
+      produkKerja: data.produkKerja || '',
+      tautanDokumen: data.tautanDokumen || 'dokumen_output_kerja.pdf',
+      manfaatUnitKerja: data.manfaatUnitKerja || '',
+      testimoniAtasan: data.testimoniAtasan || '',
+      rekomendasiPengembangan: data.rekomendasiPengembangan || '',
+      status: data.status || 'Terverifikasi Penilai',
+      tglTTE: isVerified ? `${now.toISOString().split('T')[0]} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')} WIB` : null,
+      kodeVerifikasi: isVerified ? `BSRE-EPP-${dateCode}-${randCode}` : null,
+      dibuatPada: now.toISOString()
+    };
+
+    this.state.postTrainingEvaluations.unshift(newEval);
+    this.save();
+
+    if (typeof this.sendNotification === 'function') {
+      this.sendNotification({
+        penerima: newEval.pegawaiNip,
+        judul: 'Evaluasi Dampak Pasca-Diklat Selesai',
+        pesan: `Evaluasi pasca-diklat "${newEval.diklatNama}" telah diterbitkan dengan skor ${newEval.skorRataRata} (${newEval.kategoriDampak}).`,
+        tipe: 'success'
+      }).catch?.(() => {});
+    }
+
+    return newEval;
+  },
+
+  updatePostTrainingEval(id, updatedFields) {
+    if (!this.state.postTrainingEvaluations) return null;
+    const idx = this.state.postTrainingEvaluations.findIndex(e => e.id === id);
+    if (idx === -1) return null;
+
+    const existing = this.state.postTrainingEvaluations[idx];
+    const merged = { ...existing, ...updatedFields };
+
+    // Recompute rubrics if scores are modified
+    if (
+      updatedFields.skorD1 !== undefined ||
+      updatedFields.skorD2 !== undefined ||
+      updatedFields.skorD3 !== undefined ||
+      updatedFields.skorD4 !== undefined ||
+      updatedFields.skorD5 !== undefined
+    ) {
+      const rubrics = this.calculateEvalRubrics(
+        merged.skorD1,
+        merged.skorD2,
+        merged.skorD3,
+        merged.skorD4,
+        merged.skorD5
+      );
+      merged.skorD1 = rubrics.skorD1;
+      merged.skorD2 = rubrics.skorD2;
+      merged.skorD3 = rubrics.skorD3;
+      merged.skorD4 = rubrics.skorD4;
+      merged.skorD5 = rubrics.skorD5;
+      merged.skorRataRata = rubrics.skorRataRata;
+      merged.kategoriDampak = rubrics.kategoriDampak;
+      merged.predikat = rubrics.predikat;
+    }
+
+    merged.diperbaruiPada = new Date().toISOString();
+    this.state.postTrainingEvaluations[idx] = merged;
+    this.save();
+    return merged;
+  },
+
+  verifyPostTrainingEval(id, supervisorNotes = '') {
+    if (!this.state.postTrainingEvaluations) return null;
+    const item = this.state.postTrainingEvaluations.find(e => e.id === id);
+    if (!item) return null;
+
+    const now = new Date();
+    const dateCode = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}`;
+    const randCode = Math.floor(1000 + Math.random() * 9000);
+
+    item.status = 'Terverifikasi Penilai';
+    item.tglTTE = `${now.toISOString().split('T')[0]} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')} WIB`;
+    item.kodeVerifikasi = `BSRE-EPP-${dateCode}-${randCode}`;
+    if (supervisorNotes) {
+      item.testimoniAtasan = supervisorNotes;
+    }
+    item.diperbaruiPada = now.toISOString();
+
+    this.save();
+
+    if (typeof this.sendNotification === 'function') {
+      this.sendNotification({
+        penerima: item.pegawaiNip,
+        judul: 'Evaluasi Dampak Pasca-Diklat Terverifikasi',
+        pesan: `Lembar evaluasi pasca-diklat "${item.diklatNama}" telah diverifikasi resmi dengan TTE BSrE oleh ${item.evaluatorNama}.`,
+        tipe: 'success'
+      }).catch?.(() => {});
+    }
+
+    return item;
+  },
+
+  deletePostTrainingEval(id) {
+    if (!this.state.postTrainingEvaluations) return false;
+    const initialLen = this.state.postTrainingEvaluations.length;
+    this.state.postTrainingEvaluations = this.state.postTrainingEvaluations.filter(e => e.id !== id);
+    if (this.state.postTrainingEvaluations.length !== initialLen) {
+      this.save();
+      return true;
+    }
+    return false;
+  },
+
+  getPostTrainingStats(year = 2026) {
+    const list = this.getPostTrainingEvals({ tahun: year });
+    const total = list.length;
+
+    let totalScore = 0;
+    let sumD1 = 0, sumD2 = 0, sumD3 = 0, sumD4 = 0, sumD5 = 0;
+    let highImpact = 0;
+    let mediumImpact = 0;
+    let lowImpact = 0;
+    let actionOutputs = 0;
+
+    list.forEach(e => {
+      const score = Number(e.skorRataRata) || 0;
+      totalScore += score;
+      sumD1 += (Number(e.skorD1) || 0);
+      sumD2 += (Number(e.skorD2) || 0);
+      sumD3 += (Number(e.skorD3) || 0);
+      sumD4 += (Number(e.skorD4) || 0);
+      sumD5 += (Number(e.skorD5) || 0);
+
+      if (score >= 85) highImpact++;
+      else if (score >= 70) mediumImpact++;
+      else lowImpact++;
+
+      if (e.produkKerja && e.produkKerja.trim()) actionOutputs++;
+    });
+
+    const avgScore = total > 0 ? parseFloat((totalScore / total).toFixed(1)) : 0;
+    const d1Avg = total > 0 ? parseFloat((sumD1 / total).toFixed(1)) : 0;
+    const d2Avg = total > 0 ? parseFloat((sumD2 / total).toFixed(1)) : 0;
+    const d3Avg = total > 0 ? parseFloat((sumD3 / total).toFixed(1)) : 0;
+    const d4Avg = total > 0 ? parseFloat((sumD4 / total).toFixed(1)) : 0;
+    const d5Avg = total > 0 ? parseFloat((sumD5 / total).toFixed(1)) : 0;
+
+    return {
+      totalEvaluated: total,
+      highImpactCount: highImpact,
+      mediumImpactCount: mediumImpact,
+      lowImpactCount: lowImpact,
+      avgScore,
+      totalActionOutputs: actionOutputs,
+      dimensionAverages: {
+        d1: d1Avg,
+        d2: d2Avg,
+        d3: d3Avg,
+        d4: d4Avg,
+        d5: d5Avg
+      }
+    };
+  },
+
   resetDemoData() {
     try {
       localStorage.removeItem(STORAGE_KEY);
@@ -2736,6 +3046,7 @@ const Store = {
       fresh.realizations = JSON.parse(JSON.stringify(BAPPEDA_DATA.realizations || []));
       fresh.kalenderDiklat = JSON.parse(JSON.stringify(BAPPEDA_DATA.kalenderDiklat || []));
       fresh.coachingLogs = JSON.parse(JSON.stringify(BAPPEDA_DATA.coachingLogs || []));
+      fresh.postTrainingEvaluations = JSON.parse(JSON.stringify(BAPPEDA_DATA.postTrainingEvaluations || []));
     }
     fresh.activeYear = 2026;
     this.state = fresh;

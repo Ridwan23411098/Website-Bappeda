@@ -22,6 +22,7 @@ const NAV_CONFIG = {
           { id: 'eidp', icon: 'ClipboardCheck', label: 'IDP Saya' },
           { id: 'ekalender', icon: 'Calendar', label: 'Kalender Diklat' },
           { id: 'ecoaching', icon: 'BookOpen', label: 'Buku Log Pembinaan' },
+          { id: 'epascapelatihan', icon: 'Award', label: 'Evaluasi Pasca-Diklat' },
           { id: 'epelaksanaan', icon: 'CircleCheck', label: 'Pelaksanaan SDM' }
         ]
       }
@@ -43,6 +44,7 @@ const NAV_CONFIG = {
           { id: 'apegawai', icon: 'Users', label: 'Data Pegawai' },
           { id: 'ekalender', icon: 'Calendar', label: 'Kalender Diklat' },
           { id: 'ecoaching', icon: 'BookOpen', label: 'Buku Log Pembinaan' },
+          { id: 'epascapelatihan', icon: 'Award', label: 'Evaluasi Dampak Bangkom' },
           { id: 'apelaksanaan', icon: 'CircleCheck', label: 'Pelaksanaan SDM' },
           { id: 'amaster', icon: 'Settings2', label: 'Master Data' }
         ]
@@ -64,7 +66,8 @@ const NAV_CONFIG = {
           { id: 'pmonitoring', icon: 'ChartNoAxesCombined', label: 'Monitoring' },
           { id: 'plaporan', icon: 'FileBarChart', label: 'Laporan' },
           { id: 'ekalender', icon: 'Calendar', label: 'Kalender Diklat' },
-          { id: 'ecoaching', icon: 'BookOpen', label: 'Log Pembinaan ASN' }
+          { id: 'ecoaching', icon: 'BookOpen', label: 'Log Pembinaan ASN' },
+          { id: 'epascapelatihan', icon: 'Award', label: 'Dampak Pasca-Diklat' }
         ]
       }
     ]
@@ -401,9 +404,9 @@ const App = {
     // Role-Based Guard: Proteksi Akses Halaman berdasarkan Peran ASN
     const userRole = Store.state.currentSession?.role || Store.state.user?.role || 'pegawai';
     const roleAllowedPages = {
-      pegawai: ['edash', 'eprofil', 'ekarier', 'ekompetensi', 'eidp', 'ekalender', 'ecoaching', 'ereview', 'epelaksanaan'],
-      admin: ['adash', 'averif', 'apegawai', 'ekalender', 'ecoaching', 'apelaksanaan', 'amaster', 'eprofil'],
-      pimpinan: ['pdash', 'pmonitoring', 'plaporan', 'ekalender', 'ecoaching', 'eprofil']
+      pegawai: ['edash', 'eprofil', 'ekarier', 'ekompetensi', 'eidp', 'ekalender', 'ecoaching', 'epascapelatihan', 'ereview', 'epelaksanaan'],
+      admin: ['adash', 'averif', 'apegawai', 'ekalender', 'ecoaching', 'epascapelatihan', 'apelaksanaan', 'amaster', 'eprofil'],
+      pimpinan: ['pdash', 'pmonitoring', 'plaporan', 'ekalender', 'ecoaching', 'epascapelatihan', 'eprofil']
     };
 
     const allowed = roleAllowedPages[userRole] || roleAllowedPages['pegawai'];
@@ -438,6 +441,7 @@ const App = {
       eidp: 'Formulir IDP Saya',
       ekalender: 'Kalender Diklat Terpadu 2026',
       ecoaching: 'Buku Log Dialog Kinerja, Coaching & Mentoring ASN',
+      epascapelatihan: 'Evaluasi Dampak Pasca-Pelatihan (Kirkpatrick Level 3 & Portofolio Output)',
       ereview: 'Review & Pengajuan IDP',
       epelaksanaan: 'Pelaksanaan Pengembangan SDM',
       adash: 'Dashboard Pengelola SDM',
@@ -489,6 +493,9 @@ const App = {
         break;
       case 'ecoaching':
         this.renderCoachingLogPage();
+        break;
+      case 'epascapelatihan':
+        this.renderPascaPelatihanPage();
         break;
       case 'ereview':
         this.renderReviewPage();
@@ -2854,6 +2861,660 @@ const App = {
   exportCoachingRecapExcel() {
     if (typeof ExportService !== 'undefined' && ExportService.exportCoachingRecapExcel) {
       ExportService.exportCoachingRecapExcel();
+    } else {
+      App.toast('Modul ekspor Excel belum siap.', 'error');
+    }
+  },
+
+  // =========================================================================
+  // TAHAP 5: EVALUASI DAMPAK PASCA-PELATIHAN (KIRKPATRICK LEVEL 3 CONTROLLER)
+  // Sesuai Perka LAN RI No. 10/2018 & PermenPAN-RB No. 38/2017
+  // =========================================================================
+  pascaPelatihanFilter: {
+    kategoriDampak: 'all',
+    unit: 'all',
+    status: 'all',
+    search: ''
+  },
+
+  renderPascaPelatihanPage() {
+    const stats = Store.getPostTrainingStats ? Store.getPostTrainingStats() : {
+      totalEvaluated: 0,
+      highImpactCount: 0,
+      mediumImpactCount: 0,
+      lowImpactCount: 0,
+      avgScore: 0,
+      totalActionOutputs: 0,
+      dimensionAverages: { d1: 0, d2: 0, d3: 0, d4: 0, d5: 0 }
+    };
+
+    // 1. Render Metrics
+    const totalEl = document.getElementById('evalMetricTotal');
+    if (totalEl) totalEl.textContent = `${stats.totalEvaluated} Pegawai`;
+
+    const highEl = document.getElementById('evalMetricHighImpact');
+    if (highEl) {
+      const pct = stats.totalEvaluated > 0 ? Math.round((stats.highImpactCount / stats.totalEvaluated) * 100) : 0;
+      highEl.textContent = `${stats.highImpactCount} (${pct}%)`;
+    }
+
+    const avgEl = document.getElementById('evalMetricAvgScore');
+    if (avgEl) avgEl.textContent = `${stats.avgScore} / 100`;
+
+    const outEl = document.getElementById('evalMetricOutputs');
+    if (outEl) outEl.textContent = `${stats.totalActionOutputs} Dokumen`;
+
+    // 2. Render 5 Dimensions Banner Scores
+    const dimContainer = document.getElementById('evalDimensionScoresGrid');
+    if (dimContainer) {
+      const dims = [
+        { key: 'd1', label: 'D1. Penerapan Materi Diklat', val: stats.dimensionAverages.d1, icon: 'Award', desc: 'Penggunaan ilmu di tupoksi' },
+        { key: 'd2', label: 'D2. Mutu Output Dokumen', val: stats.dimensionAverages.d2, icon: 'FileText', desc: 'Akurasi & ketajaman analisis' },
+        { key: 'd3', label: 'D3. Kecepatan & Efisiensi', val: stats.dimensionAverages.d3, icon: 'Clock3', desc: 'Percepatan penyelesaian kerja' },
+        { key: 'd4', label: 'D4. Inovasi & Pemecahan Masalah', val: stats.dimensionAverages.d4, icon: 'Sparkles', desc: 'Gagasan & inisiatif baru' },
+        { key: 'd5', label: 'D5. Transfer Pengetahuan', val: stats.dimensionAverages.d5, icon: 'Users', desc: 'Diseminasi ke rekan tim' }
+      ];
+
+      dimContainer.innerHTML = dims.map(d => {
+        let barColor = '#2563eb';
+        if (d.val >= 85) barColor = '#10b981';
+        else if (d.val < 75) barColor = '#f59e0b';
+
+        return `
+          <div style="background: #ffffff; border: 1px solid rgba(226, 232, 240, 0.9); border-radius: 8px; padding: 10px 14px; box-shadow: 0 1px 2px rgba(0,0,0,0.03);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+              <span style="font-size: 11px; font-weight: 700; color: var(--color-text-main);">${d.label}</span>
+              <span style="font-size: 13px; font-weight: 800; color: ${barColor};">${d.val}</span>
+            </div>
+            <div style="height: 5px; width: 100%; background: #e2e8f0; border-radius: 4px; overflow: hidden; margin-bottom: 4px;">
+              <div style="height: 100%; width: ${Math.min(100, Math.max(0, d.val))}%; background: ${barColor}; border-radius: 4px;"></div>
+            </div>
+            <div style="font-size: 10px; color: var(--color-text-muted);">${d.desc}</div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // 3. Render Table
+    this.renderPascaPelatihanTable();
+  },
+
+  onPascaPelatihanSearch(val) {
+    this.pascaPelatihanFilter.search = val;
+    this.renderPascaPelatihanTable();
+  },
+
+  onPascaPelatihanFilterChanged() {
+    const impact = document.getElementById('evalFilterImpact')?.value || 'all';
+    const unit = document.getElementById('evalFilterUnit')?.value || 'all';
+    const status = document.getElementById('evalFilterStatus')?.value || 'all';
+
+    this.pascaPelatihanFilter.kategoriDampak = impact;
+    this.pascaPelatihanFilter.unit = unit;
+    this.pascaPelatihanFilter.status = status;
+
+    this.renderPascaPelatihanTable();
+  },
+
+  renderPascaPelatihanTable() {
+    const tbody = document.getElementById('pascaPelatihanTableBody');
+    if (!tbody) return;
+
+    const evals = Store.getPostTrainingEvals ? Store.getPostTrainingEvals(this.pascaPelatihanFilter) : [];
+
+    if (!evals || evals.length === 0) {
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="8" style="text-align: center; padding: 40px 16px; color: var(--color-text-muted);">
+            <div style="display: flex; flex-direction: column; align-items: center; gap: 8px;">
+              <span data-icon="Award" data-icon-size="32" style="opacity: 0.4;"></span>
+              <div style="font-size: 14px; font-weight: 600;">Tidak ada lembar evaluasi dampak pasca-pelatihan yang sesuai.</div>
+              <div style="font-size: 12px;">Gunakan tombol "Input Lembar Evaluasi Dampak" untuk mencatat hasil evaluasi baru.</div>
+            </div>
+          </td>
+        </tr>
+      `;
+      renderAllIcons();
+      return;
+    }
+
+    const currentNip = Store.state.currentSession?.nip || Store.state.user?.nip || '';
+    const currentUserRole = Store.state.currentSession?.role || Store.state.user?.role || 'pegawai';
+
+    tbody.innerHTML = evals.map((item, index) => {
+      // Score Category Badge
+      let badgeStyle = 'background: rgba(16, 185, 129, 0.12); color: #059669; border: 1px solid rgba(16, 185, 129, 0.25);';
+      let impactIcon = 'TrendingUp';
+      if (item.skorRataRata < 70) {
+        badgeStyle = 'background: rgba(239, 68, 68, 0.12); color: #dc2626; border: 1px solid rgba(239, 68, 68, 0.25);';
+        impactIcon = 'AlertCircle';
+      } else if (item.skorRataRata < 85) {
+        badgeStyle = 'background: rgba(37, 99, 235, 0.12); color: #2563eb; border: 1px solid rgba(37, 99, 235, 0.25);';
+        impactIcon = 'CheckCircle';
+      }
+
+      // Status Badge
+      const isVerified = item.status === 'Terverifikasi Penilai';
+      const statusBadge = isVerified
+        ? `<span class="badge" style="background: rgba(16, 185, 129, 0.12); color: #059669; font-weight: 600; font-size: 11px;">
+             <span data-icon="ShieldCheck" data-icon-size="12"></span> Terverifikasi TTE
+           </span>`
+        : `<span class="badge" style="background: rgba(245, 158, 11, 0.12); color: #d97706; font-weight: 600; font-size: 11px;">
+             <span data-icon="Clock3" data-icon-size="12"></span> Menunggu Verifikasi
+           </span>`;
+
+      // Rights check for verify / edit / delete
+      const canVerify = !isVerified && (
+        currentUserRole === 'admin' ||
+        currentUserRole === 'pimpinan' ||
+        String(currentNip).replace(/\s+/g, '') === String(item.evaluatorNip).replace(/\s+/g, '')
+      );
+
+      const canManage = (
+        currentUserRole === 'admin' ||
+        currentUserRole === 'pimpinan' ||
+        String(currentNip).replace(/\s+/g, '') === String(item.evaluatorNip).replace(/\s+/g, '')
+      );
+
+      return `
+        <tr>
+          <td>
+            <div style="font-weight: 700; font-size: 13px; color: #1e3a8a;">${item.id}</div>
+            <div style="font-size: 11px; color: var(--color-text-muted); font-weight: 500;">No. ${index + 1} • Th ${item.tahun}</div>
+          </td>
+          <td>
+            <div style="font-weight: 700; font-size: 13px; color: var(--color-text-main);">${item.pegawaiNama}</div>
+            <div style="font-size: 11px; color: var(--color-text-muted);">${item.pegawaiJabatan}</div>
+            <div style="font-size: 10.5px; color: #2563eb; font-weight: 600; margin-top: 2px;">${item.pegawaiUnit}</div>
+          </td>
+          <td>
+            <div style="font-weight: 600; font-size: 12.5px; color: var(--color-text-main); line-height: 1.35;">${item.diklatNama}</div>
+            <div style="font-size: 11px; color: var(--color-text-muted); margin-top: 2px;">
+              ${item.diklatPenyelenggara || 'BPSDMD'} • <strong>${item.diklatJp || 20} JP</strong>
+            </div>
+          </td>
+          <td>
+            <div style="font-size: 12px; font-weight: 700; color: #047857;">${item.rentangPascaBulan || '3 Bulan'}</div>
+            <div style="font-size: 11px; color: var(--color-text-muted); margin-top: 2px;">Evaluasi: ${item.tanggalEvaluasi}</div>
+          </td>
+          <td>
+            <div style="font-size: 12px; font-weight: 600; color: #1e3a8a; line-height: 1.3;">
+              <span data-icon="FileCheck" data-icon-size="13" style="color: #2563eb;"></span>
+              ${item.produkKerja || '-'}
+            </div>
+            <div style="font-size: 10.5px; color: var(--color-text-muted); margin-top: 3px; max-width: 260px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${item.manfaatUnitKerja || ''}">
+              ${item.manfaatUnitKerja || '-'}
+            </div>
+          </td>
+          <td>
+            <div style="display: flex; align-items: baseline; gap: 4px; margin-bottom: 4px;">
+              <span style="font-size: 16px; font-weight: 800; color: var(--color-text-main);">${item.skorRataRata}</span>
+              <span style="font-size: 11px; color: var(--color-text-muted);">/ 100</span>
+            </div>
+            <span class="badge" style="${badgeStyle} font-size: 10px; font-weight: 700; white-space: nowrap; padding: 2px 7px;">
+              <span data-icon="${impactIcon}" data-icon-size="11"></span> ${item.kategoriDampak}
+            </span>
+          </td>
+          <td>
+            <div style="margin-bottom: 4px;">${statusBadge}</div>
+            <div style="font-size: 10.5px; color: var(--color-text-muted);">Penilai: ${item.evaluatorNama.split(' ')[0]}</div>
+          </td>
+          <td style="text-align: center; padding-right: 24px;">
+            <div style="display: flex; gap: 6px; align-items: center; justify-content: center; white-space: nowrap;">
+              <button class="btn btn-outline btn-xs" onclick="App.openDetailPascaPelatihanModal('${item.id}')" title="Buka Dokumen Lembar Evaluasi Resmi" style="padding: 4px 8px; font-size: 11px;">
+                <span data-icon="Eye" data-icon-size="13"></span> Rincian
+              </button>
+
+              <button class="btn btn-outline btn-xs" onclick="App.printPascaPelatihanDocument('${item.id}')" title="Cetak Format Resmi A4 / PDF" style="padding: 4px 8px; font-size: 11px;">
+                <span data-icon="Printer" data-icon-size="13"></span> Cetak
+              </button>
+
+              ${canVerify ? `
+                <button class="btn btn-success btn-xs" onclick="App.verifyPascaPelatihan('${item.id}')" title="Verifikasi Hasil Evaluasi & Sahkan TTE" style="padding: 4px 8px; font-size: 11px;">
+                  <span data-icon="Check" data-icon-size="13"></span> Sahkan
+                </button>
+              ` : ''}
+
+              ${canManage ? `
+                <button class="btn btn-outline btn-xs" onclick="App.openEditPascaPelatihanModal('${item.id}')" title="Edit Nilai & Rubrik" style="padding: 4px 8px; font-size: 11px;">
+                  <span data-icon="Edit3" data-icon-size="13"></span>
+                </button>
+                <button class="btn btn-outline btn-xs text-danger" onclick="App.deletePascaPelatihan('${item.id}')" title="Hapus Evaluasi" style="padding: 4px 8px; font-size: 11px;">
+                  <span data-icon="Trash2" data-icon-size="13"></span>
+                </button>
+              ` : ''}
+            </div>
+          </td>
+        </tr>
+      `;
+    }).join('');
+
+    renderAllIcons();
+  },
+
+  onEvalScoreInput(dim, val) {
+    const numInput = document.getElementById(`evalSkor${dim}`);
+    if (numInput) numInput.value = val;
+    this.updatePascaPelatihanLiveScore();
+  },
+
+  onEvalScoreNumber(dim, val) {
+    const rangeInput = document.getElementById(`evalRange${dim}`);
+    if (rangeInput) rangeInput.value = val;
+    this.updatePascaPelatihanLiveScore();
+  },
+
+  updatePascaPelatihanLiveScore() {
+    const d1 = Number(document.getElementById('evalSkorD1')?.value) || 0;
+    const d2 = Number(document.getElementById('evalSkorD2')?.value) || 0;
+    const d3 = Number(document.getElementById('evalSkorD3')?.value) || 0;
+    const d4 = Number(document.getElementById('evalSkorD4')?.value) || 0;
+    const d5 = Number(document.getElementById('evalSkorD5')?.value) || 0;
+
+    const rubrics = Store.calculateEvalRubrics(d1, d2, d3, d4, d5);
+
+    const scoreEl = document.getElementById('evalLiveAvgScore');
+    if (scoreEl) scoreEl.textContent = rubrics.skorRataRata.toFixed(1);
+
+    const badgeEl = document.getElementById('evalLiveBadge');
+    if (badgeEl) {
+      badgeEl.textContent = `${rubrics.predikat} — ${rubrics.kategoriDampak}`;
+      if (rubrics.skorRataRata >= 85) {
+        badgeEl.style.background = 'rgba(16, 185, 129, 0.15)';
+        badgeEl.style.color = '#059669';
+      } else if (rubrics.skorRataRata >= 70) {
+        badgeEl.style.background = 'rgba(37, 99, 235, 0.15)';
+        badgeEl.style.color = '#2563eb';
+      } else {
+        badgeEl.style.background = 'rgba(239, 68, 68, 0.15)';
+        badgeEl.style.color = '#dc2626';
+      }
+    }
+  },
+
+  onEvalTanggalChanged() {
+    const tgl = document.getElementById('evalTanggal')?.value;
+    if (tgl) {
+      const rentangEl = document.getElementById('evalRentangPasca');
+      if (rentangEl && !rentangEl.value) {
+        rentangEl.value = '3 Bulan Pasca Pelatihan';
+      }
+    }
+  },
+
+  onEvalPegawaiChanged(nip) {
+    const employees = Store.state.employees || (typeof BAPPEDA_DATA !== 'undefined' ? BAPPEDA_DATA.employees : []);
+    const cleanNip = String(nip).replace(/\s+/g, '');
+    const emp = employees.find(e => String(e.nip).replace(/\s+/g, '') === cleanNip);
+    if (!emp) return;
+
+    // Suggest suitable diklat based on realisations
+    const realizations = (Store.state.realizations || []).filter(r => String(r.nip).replace(/\s+/g, '') === cleanNip);
+    const diklatInput = document.getElementById('evalDiklatNama');
+    if (diklatInput && realizations.length > 0 && !diklatInput.value) {
+      diklatInput.value = realizations[0].nama || realizations[0].topik || 'Pelatihan Teknis Bappeda';
+      const jpInput = document.getElementById('evalDiklatJp');
+      if (jpInput && realizations[0].jp) jpInput.value = realizations[0].jp;
+      const tglInput = document.getElementById('evalPeriodeDiklat');
+      if (tglInput && realizations[0].tanggal) tglInput.value = realizations[0].tanggal;
+    }
+  },
+
+  populateEvalSelects() {
+    const pegSelect = document.getElementById('evalPegawaiSelect');
+    const ataSelect = document.getElementById('evalAtasanSelect');
+    if (!pegSelect || !ataSelect) return;
+
+    const employees = Store.state.employees || (typeof BAPPEDA_DATA !== 'undefined' ? BAPPEDA_DATA.employees : []);
+
+    pegSelect.innerHTML = employees.map(e => `
+      <option value="${e.nip}">${e.name || e.nama} — ${e.jabatan || 'Aparatur Perencana'} (${e.unit || 'Bappeda'})</option>
+    `).join('');
+
+    // Supervisors: Leaders, Kabid, Kasubbag
+    const supervisors = employees.filter(e => {
+      const j = (e.jabatan || '').toLowerCase();
+      return j.includes('kepala') || j.includes('kabid') || j.includes('kasubbag') || j.includes('sekretaris') || j.includes('pembina') || j.includes('madya');
+    });
+
+    const supList = supervisors.length > 0 ? supervisors : employees.slice(0, 10);
+    ataSelect.innerHTML = supList.map(s => `
+      <option value="${s.nip}">${s.name || s.nama} — ${s.jabatan} (${s.unit})</option>
+    `).join('');
+  },
+
+  openAddPascaPelatihanModal() {
+    this.populateEvalSelects();
+    document.getElementById('pascaPelatihanEditId').value = '';
+    document.getElementById('pascaPelatihanModalTitle').textContent = 'Lembar Evaluasi Dampak Pasca-Pelatihan';
+
+    // Defaults
+    const now = new Date();
+    document.getElementById('evalTanggal').value = now.toISOString().split('T')[0];
+    document.getElementById('evalDiklatNama').value = '';
+    document.getElementById('evalDiklatPenyelenggara').value = 'BPSDMD Provinsi Lampung';
+    document.getElementById('evalDiklatJp').value = 20;
+    document.getElementById('evalPeriodeDiklat').value = 'Januari – Februari 2026';
+    document.getElementById('evalRentangPasca').value = '3.5 Bulan Pasca Pelatihan';
+
+    ['D1', 'D2', 'D3', 'D4', 'D5'].forEach(d => {
+      const r = document.getElementById(`evalRange${d}`);
+      const n = document.getElementById(`evalSkor${d}`);
+      if (r) r.value = 85;
+      if (n) n.value = 85;
+    });
+
+    document.getElementById('evalProdukKerja').value = '';
+    document.getElementById('evalManfaat').value = '';
+    document.getElementById('evalTautanDokumen').value = 'dokumen_output_kerja.pdf';
+    document.getElementById('evalRekomendasi').value = 'Direkomendasikan mengikuti pelatihan pendalaman kompetensi tingkat lanjut.';
+    document.getElementById('evalTestimoni').value = 'Pegawai menunjukkan perubahan kinerja yang signifikan dan mampu menerapkan hasil pembelajaran di tempat tugas.';
+    document.getElementById('evalStatus').value = 'Terverifikasi Penilai';
+
+    this.updatePascaPelatihanLiveScore();
+    this.openModal('pascaPelatihanModal');
+  },
+
+  openEditPascaPelatihanModal(evalId) {
+    const item = Store.getPostTrainingEvalById(evalId);
+    if (!item) {
+      App.toast('Data evaluasi tidak ditemukan.', 'error');
+      return;
+    }
+
+    this.populateEvalSelects();
+    document.getElementById('pascaPelatihanEditId').value = item.id;
+    document.getElementById('pascaPelatihanModalTitle').textContent = `Ubah Lembar Evaluasi (${item.id})`;
+
+    const pegSelect = document.getElementById('evalPegawaiSelect');
+    if (pegSelect) pegSelect.value = item.pegawaiNip;
+
+    const ataSelect = document.getElementById('evalAtasanSelect');
+    if (ataSelect) ataSelect.value = item.evaluatorNip;
+
+    document.getElementById('evalDiklatNama').value = item.diklatNama;
+    document.getElementById('evalDiklatPenyelenggara').value = item.diklatPenyelenggara || 'BPSDMD Provinsi Lampung';
+    document.getElementById('evalDiklatJp').value = item.diklatJp || 20;
+    document.getElementById('evalPeriodeDiklat').value = item.diklatPeriode || '-';
+    document.getElementById('evalTanggal').value = item.tanggalEvaluasi;
+    document.getElementById('evalRentangPasca').value = item.rentangPascaBulan || '3 Bulan Pasca Pelatihan';
+
+    const scores = { D1: item.skorD1, D2: item.skorD2, D3: item.skorD3, D4: item.skorD4, D5: item.skorD5 };
+    ['D1', 'D2', 'D3', 'D4', 'D5'].forEach(d => {
+      const val = scores[d] || 80;
+      const r = document.getElementById(`evalRange${d}`);
+      const n = document.getElementById(`evalSkor${d}`);
+      if (r) r.value = val;
+      if (n) n.value = val;
+    });
+
+    document.getElementById('evalProdukKerja').value = item.produkKerja || '';
+    document.getElementById('evalManfaat').value = item.manfaatUnitKerja || '';
+    document.getElementById('evalTautanDokumen').value = item.tautanDokumen || 'dokumen_output_kerja.pdf';
+    document.getElementById('evalRekomendasi').value = item.rekomendasiPengembangan || '';
+    document.getElementById('evalTestimoni').value = item.testimoniAtasan || '';
+    document.getElementById('evalStatus').value = item.status;
+
+    this.updatePascaPelatihanLiveScore();
+    this.openModal('pascaPelatihanModal');
+  },
+
+  savePascaPelatihan(event) {
+    if (event) event.preventDefault();
+
+    const editId = document.getElementById('pascaPelatihanEditId')?.value;
+    const employees = Store.state.employees || (typeof BAPPEDA_DATA !== 'undefined' ? BAPPEDA_DATA.employees : []);
+
+    const pegNip = document.getElementById('evalPegawaiSelect')?.value;
+    const cleanPegNip = String(pegNip).replace(/\s+/g, '');
+    const emp = employees.find(e => String(e.nip).replace(/\s+/g, '') === cleanPegNip);
+
+    const ataNip = document.getElementById('evalAtasanSelect')?.value;
+    const cleanAtaNip = String(ataNip).replace(/\s+/g, '');
+    const sup = employees.find(e => String(e.nip).replace(/\s+/g, '') === cleanAtaNip);
+
+    const data = {
+      pegawaiNip: pegNip,
+      pegawaiNama: emp ? (emp.name || emp.nama) : 'Pegawai ASN Bappeda',
+      pegawaiJabatan: emp ? (emp.jabatan || 'Aparatur') : 'Aparatur Perencana',
+      pegawaiUnit: emp ? (emp.unit || 'Bappeda Provinsi Lampung') : 'Bappeda Provinsi Lampung',
+      evaluatorNip: ataNip,
+      evaluatorNama: sup ? (sup.name || sup.nama) : 'Atasan Langsung',
+      evaluatorJabatan: sup ? (sup.jabatan || 'Pejabat Penilai Kinerja') : 'Pejabat Penilai Kinerja',
+      diklatNama: document.getElementById('evalDiklatNama')?.value.trim(),
+      diklatPenyelenggara: document.getElementById('evalDiklatPenyelenggara')?.value.trim() || 'BPSDMD Provinsi Lampung',
+      diklatJp: Number(document.getElementById('evalDiklatJp')?.value) || 20,
+      diklatPeriode: document.getElementById('evalPeriodeDiklat')?.value.trim() || 'Tahun 2026',
+      tanggalEvaluasi: document.getElementById('evalTanggal')?.value || new Date().toISOString().split('T')[0],
+      rentangPascaBulan: document.getElementById('evalRentangPasca')?.value.trim() || '3 Bulan Pasca Pelatihan',
+      skorD1: Number(document.getElementById('evalSkorD1')?.value) || 85,
+      skorD2: Number(document.getElementById('evalSkorD2')?.value) || 85,
+      skorD3: Number(document.getElementById('evalSkorD3')?.value) || 85,
+      skorD4: Number(document.getElementById('evalSkorD4')?.value) || 85,
+      skorD5: Number(document.getElementById('evalSkorD5')?.value) || 85,
+      produkKerja: document.getElementById('evalProdukKerja')?.value.trim(),
+      manfaatUnitKerja: document.getElementById('evalManfaat')?.value.trim(),
+      tautanDokumen: document.getElementById('evalTautanDokumen')?.value.trim() || 'dokumen_output_kerja.pdf',
+      rekomendasiPengembangan: document.getElementById('evalRekomendasi')?.value.trim(),
+      testimoniAtasan: document.getElementById('evalTestimoni')?.value.trim(),
+      status: document.getElementById('evalStatus')?.value || 'Terverifikasi Penilai'
+    };
+
+    if (editId) {
+      Store.updatePostTrainingEval(editId, data);
+      App.toast(`Lembar Evaluasi ${editId} berhasil diperbarui.`, 'success');
+    } else {
+      const added = Store.addPostTrainingEval(data);
+      App.toast(`Lembar Evaluasi Pasca-Diklat (${added.id}) berhasil diterbitkan dengan skor ${added.skorRataRata}.`, 'success');
+    }
+
+    this.closeModal('pascaPelatihanModal');
+    this.renderPascaPelatihanPage();
+  },
+
+  openDetailPascaPelatihanModal(evalId) {
+    const item = Store.getPostTrainingEvalById(evalId);
+    if (!item) {
+      App.toast('Data evaluasi tidak ditemukan.', 'error');
+      return;
+    }
+
+    const modalBody = document.getElementById('pascaPelatihanDetailBody');
+    const leftActions = document.getElementById('pascaPelatihanDetailLeftActions');
+    const rightActions = document.getElementById('pascaPelatihanDetailRightActions');
+    if (!modalBody) return;
+
+    const qrData = encodeURIComponent(`LEMBAR_EVALUASI_PASCA_DIKLAT_${item.id}_PEGAWAI_${item.pegawaiNip}_PENILAI_${item.evaluatorNip}_SKOR_${item.skorRataRata}_STATUS_${item.status}`);
+    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=110x110&data=${qrData}`;
+
+    modalBody.innerHTML = `
+      <div style="background: var(--color-bg-alt, #f8fafc); border: 1px solid var(--color-border); border-radius: 8px; padding: 14px 18px; margin-bottom: 18px;">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 10px;">
+          <div>
+            <div style="font-size: 11px; font-weight: 700; color: #2563eb; text-transform: uppercase; letter-spacing: 0.5px;">
+              Dokumen Resmi Evaluasi Level 3 Kirkpatrick (Perka LAN RI No. 10/2018)
+            </div>
+            <div style="font-size: 16px; font-weight: 800; color: var(--color-text-main); margin-top: 2px;">
+              Nomor: BA-EPP / ${item.tahun} / ${item.id}
+            </div>
+            <div style="font-size: 12px; color: var(--color-text-muted); margin-top: 2px;">
+              Tanggal Evaluasi: <strong>${item.tanggalEvaluasi}</strong> • Jeda Pasca-Pelatihan: <strong>${item.rentangPascaBulan || '3 Bulan'}</strong>
+            </div>
+          </div>
+          <span class="badge" style="background: rgba(16, 185, 129, 0.15); color: #059669; font-weight: 700; font-size: 12px; padding: 6px 12px;">
+            <span data-icon="ShieldCheck" data-icon-size="14"></span> ${item.status}
+          </span>
+        </div>
+      </div>
+
+      <!-- Grid 2 Kolom: Identitas Peserta & Penilai -->
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 18px;">
+        <div class="card" style="padding: 14px 16px; margin-bottom: 0;">
+          <div style="font-size: 11px; font-weight: 750; color: #64748b; margin-bottom: 8px; text-transform: uppercase;">
+            Peserta Diklat ASN
+          </div>
+          <div style="font-weight: 800; font-size: 14px; color: var(--color-text-main);">${item.pegawaiNama}</div>
+          <div style="font-size: 12px; color: var(--color-text-muted); margin-top: 2px;">NIP. ${item.pegawaiNip}</div>
+          <div style="font-size: 12px; color: #2563eb; font-weight: 600; margin-top: 2px;">${item.pegawaiJabatan}</div>
+          <div style="font-size: 11px; color: var(--color-text-muted); margin-top: 2px;">Unit: ${item.pegawaiUnit}</div>
+        </div>
+
+        <div class="card" style="padding: 14px 16px; margin-bottom: 0;">
+          <div style="font-size: 11px; font-weight: 750; color: #64748b; margin-bottom: 8px; text-transform: uppercase;">
+            Pejabat Penilai Kinerja (Atasan Langsung)
+          </div>
+          <div style="font-weight: 800; font-size: 14px; color: var(--color-text-main);">${item.evaluatorNama}</div>
+          <div style="font-size: 12px; color: var(--color-text-muted); margin-top: 2px;">NIP. ${item.evaluatorNip}</div>
+          <div style="font-size: 12px; color: #059669; font-weight: 600; margin-top: 2px;">${item.evaluatorJabatan}</div>
+          <div style="font-size: 11px; color: var(--color-text-muted); margin-top: 2px;">Peran: Evaluator Pasca-Diklat</div>
+        </div>
+      </div>
+
+      <!-- Profil Pelatihan yang Dievaluasi -->
+      <div class="card" style="padding: 14px 16px; margin-bottom: 18px; border-left: 4px solid #2563eb;">
+        <div style="font-size: 11px; font-weight: 750; color: #64748b; margin-bottom: 4px; text-transform: uppercase;">
+          Program Pelatihan yang Dievaluasi
+        </div>
+        <div style="font-size: 15px; font-weight: 800; color: #1e3a8a;">${item.diklatNama}</div>
+        <div style="font-size: 12px; color: var(--color-text-muted); margin-top: 3px;">
+          Penyelenggara: <strong>${item.diklatPenyelenggara || 'BPSDMD'}</strong> • Durasi: <strong>${item.diklatJp || 20} JP</strong> • Waktu Diklat: <strong>${item.diklatPeriode || '-'}</strong>
+        </div>
+      </div>
+
+      <!-- Skor 5 Dimensi & Predikat -->
+      <div style="margin-bottom: 18px;">
+        <div style="font-size: 12.5px; font-weight: 700; color: var(--color-text-main); margin-bottom: 10px;">
+          Penilaian Capaian 5 Dimensi Evaluasi Pasca-Diklat:
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; margin-bottom: 12px;">
+          <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px; text-align: center;">
+            <div style="font-size: 10.5px; color: var(--color-text-muted); font-weight: 600;">D1. Penerapan</div>
+            <div style="font-size: 18px; font-weight: 800; color: #2563eb; margin-top: 2px;">${item.skorD1}</div>
+          </div>
+          <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px; text-align: center;">
+            <div style="font-size: 10.5px; color: var(--color-text-muted); font-weight: 600;">D2. Mutu Output</div>
+            <div style="font-size: 18px; font-weight: 800; color: #2563eb; margin-top: 2px;">${item.skorD2}</div>
+          </div>
+          <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px; text-align: center;">
+            <div style="font-size: 10.5px; color: var(--color-text-muted); font-weight: 600;">D3. Efisiensi</div>
+            <div style="font-size: 18px; font-weight: 800; color: #2563eb; margin-top: 2px;">${item.skorD3}</div>
+          </div>
+          <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px; text-align: center;">
+            <div style="font-size: 10.5px; color: var(--color-text-muted); font-weight: 600;">D4. Inovasi</div>
+            <div style="font-size: 18px; font-weight: 800; color: #2563eb; margin-top: 2px;">${item.skorD4}</div>
+          </div>
+          <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px; text-align: center;">
+            <div style="font-size: 10.5px; color: var(--color-text-muted); font-weight: 600;">D5. Transfer</div>
+            <div style="font-size: 18px; font-weight: 800; color: #2563eb; margin-top: 2px;">${item.skorD5}</div>
+          </div>
+        </div>
+
+        <div style="background: linear-gradient(135deg, rgba(37, 99, 235, 0.08) 0%, rgba(16, 185, 129, 0.08) 100%); border: 1px solid rgba(37, 99, 235, 0.2); border-radius: 8px; padding: 12px 18px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+          <div>
+            <div style="font-size: 11px; font-weight: 600; color: var(--color-text-muted);">Indeks Efektivitas Dampak:</div>
+            <div style="font-size: 22px; font-weight: 900; color: #1e3a8a;">
+              ${item.skorRataRata} <span style="font-size: 13px; font-weight: 600; color: #64748b;">/ 100</span>
+            </div>
+          </div>
+          <div style="text-align: right;">
+            <div style="font-size: 11px; font-weight: 600; color: var(--color-text-muted);">Predikat Dampak:</div>
+            <div style="font-size: 15px; font-weight: 800; color: #059669;">
+              ${item.predikat} — ${item.kategoriDampak}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Learning Output & Bukti Nyata -->
+      <div style="background: #ffffff; border: 1px solid var(--color-border); border-radius: 8px; padding: 14px 18px; margin-bottom: 18px;">
+        <div style="font-size: 12px; font-weight: 750; color: #2563eb; text-transform: uppercase; margin-bottom: 6px; display: flex; align-items: center; gap: 6px;">
+          <span data-icon="FileCheck" data-icon-size="14"></span> Portofolio Output Nyata (Action Learning Impact)
+        </div>
+        <div style="font-weight: 800; font-size: 14px; color: var(--color-text-main); margin-bottom: 4px;">
+          ${item.produkKerja || '-'}
+        </div>
+        <div style="font-size: 12.5px; color: var(--color-text-muted); line-height: 1.45; margin-bottom: 10px;">
+          ${item.manfaatUnitKerja || '-'}
+        </div>
+        <div style="display: flex; align-items: center; gap: 6px; font-size: 11.5px; color: #475569; background: #f8fafc; padding: 6px 10px; border-radius: 6px; border: 1px dashed #cbd5e1;">
+          <span data-icon="FileText" data-icon-size="13"></span>
+          <span>Lampiran Dokumen: <strong>${item.tautanDokumen || 'dokumen_output_kerja.pdf'}</strong></span>
+        </div>
+      </div>
+
+      <!-- Ulasan & Rekomendasi Atasan -->
+      <div style="background: #ffffff; border: 1px solid var(--color-border); border-radius: 8px; padding: 14px 18px; margin-bottom: 18px;">
+        <div style="font-size: 12px; font-weight: 750; color: #059669; text-transform: uppercase; margin-bottom: 6px;">
+          Ulasan &amp; Rekomendasi Pejabat Penilai Kinerja
+        </div>
+        <div style="font-size: 13px; font-style: italic; color: var(--color-text-main); margin-bottom: 8px; line-height: 1.4;">
+          "${item.testimoniAtasan || 'Pegawai menunjukkan komitmen tinggi pasca pelatihan.'}"
+        </div>
+        <div style="font-size: 12px; color: var(--color-text-muted);">
+          Rekomendasi Lanjutan: <strong>${item.rekomendasiPengembangan || 'Diberikan penugasan mandiri strategis.'}</strong>
+        </div>
+      </div>
+
+      <!-- Blok Verifikasi Digital BSrE -->
+      <div style="display: flex; align-items: center; justify-content: space-between; background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.25); border-radius: 8px; padding: 12px 18px;">
+        <div style="display: flex; align-items: center; gap: 14px;">
+          <img src="${qrUrl}" alt="QR TTE" style="width: 58px; height: 58px; border: 1px solid #10b981; border-radius: 4px; padding: 2px; background: #ffffff;">
+          <div>
+            <div style="font-size: 12px; font-weight: 800; color: #047857;">Tanda Tangan Elektronik Sah BSrE BSSN</div>
+            <div style="font-size: 11px; color: var(--color-text-muted); margin-top: 2px;">
+              Kode Verifikasi: <strong>${item.kodeVerifikasi || 'TERVERIFIKASI-DIGITAL'}</strong>
+            </div>
+            <div style="font-size: 10.5px; color: #64748b; margin-top: 2px;">
+              Disahkan oleh: ${item.evaluatorNama} (${item.tglTTE || item.tanggalEvaluasi})
+            </div>
+          </div>
+        </div>
+        <span class="badge" style="background: #10b981; color: #ffffff; font-weight: 700; font-size: 11px;">
+          Valid SPBE
+        </span>
+      </div>
+    `;
+
+    leftActions.innerHTML = `
+      <button class="btn btn-primary btn-sm" onclick="App.printPascaPelatihanDocument('${item.id}')">
+        <span data-icon="Printer" data-icon-size="14"></span> Cetak Format Resmi (A4)
+      </button>
+    `;
+
+    renderAllIcons();
+    this.openModal('pascaPelatihanDetailModal');
+  },
+
+  deletePascaPelatihan(evalId) {
+    if (!confirm(`Apakah Anda yakin ingin menghapus arsip lembar evaluasi dampak ${evalId}?`)) return;
+    const ok = Store.deletePostTrainingEval(evalId);
+    if (ok) {
+      App.toast(`Lembar evaluasi dampak ${evalId} berhasil dihapus.`, 'info');
+      this.renderPascaPelatihanPage();
+    }
+  },
+
+  verifyPascaPelatihan(evalId) {
+    const note = prompt('Masukkan catatan/ulasan pengesahan penilai (opsional):', 'Telah dievaluasi dan disetujui sesuai standar evaluasi pasca-diklat.');
+    if (note === null) return;
+    const item = Store.verifyPostTrainingEval(evalId, note);
+    if (item) {
+      App.toast(`Lembar evaluasi ${evalId} berhasil diverifikasi resmi dengan TTE BSrE.`, 'success');
+      this.renderPascaPelatihanPage();
+    }
+  },
+
+  printPascaPelatihanDocument(evalId) {
+    if (typeof ExportService !== 'undefined' && ExportService.printLembarEvaluasiDampak) {
+      ExportService.printLembarEvaluasiDampak(evalId);
+    } else {
+      App.toast('Modul pencetakan dokumen belum siap.', 'error');
+    }
+  },
+
+  exportPascaPelatihanExcel() {
+    if (typeof ExportService !== 'undefined' && ExportService.exportPascaPelatihanExcel) {
+      ExportService.exportPascaPelatihanExcel();
     } else {
       App.toast('Modul ekspor Excel belum siap.', 'error');
     }

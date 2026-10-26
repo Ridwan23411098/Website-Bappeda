@@ -1650,6 +1650,352 @@ const ExportService = {
     setTimeout(() => {
       window.print();
     }, 150);
+  },
+
+  /**
+   * =========================================================================
+   * TAHAP 5: EKSPOR REKAPITULASI EVALUASI DAMPAK PASCA-PELATIHAN (EXCEL)
+   * Standar Pelaporan Lembaga Administrasi Negara (LAN RI) & BKD Lampung
+   * =========================================================================
+   */
+  exportPascaPelatihanExcel() {
+    const evals = (typeof Store !== 'undefined' && Store.getPostTrainingEvals) ? Store.getPostTrainingEvals() : [];
+    if (!evals || evals.length === 0) {
+      if (typeof App !== 'undefined' && App.toast) {
+        App.toast('Tidak ada data evaluasi pasca-pelatihan untuk diekspor.', 'warning');
+      }
+      return;
+    }
+
+    const headers = [
+      'No',
+      'ID Evaluasi',
+      'Tahun',
+      'Nama Pegawai ASN',
+      'NIP Pegawai',
+      'Jabatan Pegawai',
+      'Unit Kerja',
+      'Program Pelatihan / Diklat',
+      'Penyelenggara',
+      'Durasi (JP)',
+      'Periode Diklat',
+      'Tanggal Evaluasi',
+      'Jeda Pasca Diklat',
+      'D1 - Penerapan Materi (0-100)',
+      'D2 - Mutu Dokumen / Output (0-100)',
+      'D3 - Efisiensi & Kecepatan (0-100)',
+      'D4 - Inovasi & Gagasan (0-100)',
+      'D5 - Transfer Knowledge (0-100)',
+      'Skor Rata-Rata',
+      'Kategori Dampak',
+      'Predikat',
+      'Produk Kerja / Action Learning Output',
+      'Manfaat Konkret bagi Bappeda',
+      'Pejabat Penilai Kinerja (Atasan)',
+      'NIP Penilai',
+      'Ulasan Kualitatif Atasan',
+      'Rekomendasi Lanjutan',
+      'Status Verifikasi',
+      'Tgl TTE BSrE',
+      'Kode Verifikasi BSrE'
+    ];
+
+    const rows = evals.map((e, idx) => [
+      idx + 1,
+      e.id,
+      e.tahun,
+      e.pegawaiNama,
+      `'${e.pegawaiNip}`,
+      e.pegawaiJabatan,
+      e.pegawaiUnit,
+      e.diklatNama,
+      e.diklatPenyelenggara || 'BPSDMD Provinsi Lampung',
+      e.diklatJp || 20,
+      e.diklatPeriode || '-',
+      e.tanggalEvaluasi,
+      e.rentangPascaBulan || '3 Bulan',
+      e.skorD1,
+      e.skorD2,
+      e.skorD3,
+      e.skorD4,
+      e.skorD5,
+      e.skorRataRata,
+      e.kategoriDampak,
+      e.predikat,
+      e.produkKerja || '-',
+      e.manfaatUnitKerja || '-',
+      e.evaluatorNama,
+      `'${e.evaluatorNip}`,
+      e.testimoniAtasan || '-',
+      e.rekomendasiPengembangan || '-',
+      e.status,
+      e.tglTTE || '-',
+      e.kodeVerifikasi || '-'
+    ]);
+
+    const activeYear = (typeof Store !== 'undefined' && Store.getActiveYear) ? Store.getActiveYear() : 2026;
+    const filename = `Rekap_Evaluasi_Dampak_Pasca_Diklat_Bappeda_${activeYear}`;
+    this.downloadExcel(filename, 'Evaluasi Level 3 LAN RI', headers, rows);
+
+    if (typeof App !== 'undefined' && App.toast) {
+      App.toast('Rekapitulasi Evaluasi Pasca-Diklat berhasil diekspor ke format Excel!', 'success');
+    }
+  },
+
+  /**
+   * =========================================================================
+   * TAHAP 5: CETAK LEMBAR EVALUASI DAMPAK PASCA-PELATIHAN RESMI (PRINT/PDF)
+   * Format Standar LAN RI & Pemprov Lampung Terverifikasi BSrE BSSN
+   * =========================================================================
+   */
+  printLembarEvaluasiDampak(evalId) {
+    const item = (typeof Store !== 'undefined' && Store.getPostTrainingEvalById) ? Store.getPostTrainingEvalById(evalId) : null;
+    if (!item) {
+      if (typeof App !== 'undefined' && App.toast) {
+        App.toast('Data lembar evaluasi dampak tidak ditemukan.', 'error');
+      }
+      return;
+    }
+
+    const oldPrint = document.getElementById('officialPrintSection');
+    if (oldPrint) {
+      if (typeof oldPrint.remove === 'function') oldPrint.remove();
+      else if (oldPrint.parentNode) oldPrint.parentNode.removeChild(oldPrint);
+    }
+
+    const lambang = (typeof window !== 'undefined' && window.LAMBANG_LAMPUNG_SVG)
+      ? window.LAMBANG_LAMPUNG_SVG
+      : '<div style="font-size:28px;">🏛️</div>';
+
+    const qrData = encodeURIComponent(`LEMBAR_EVALUASI_PASCA_DIKLAT_${item.id}_PEGAWAI_${item.pegawaiNip}_PENILAI_${item.evaluatorNip}_SKOR_${item.skorRataRata}_STATUS_${item.status}_KODE_${item.kodeVerifikasi || 'DRAFT'}`);
+    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=110x110&data=${qrData}`;
+
+    const printContainer = document.createElement('div');
+    printContainer.id = 'officialPrintSection';
+    printContainer.className = 'print-only-container';
+
+    printContainer.innerHTML = `
+      <div style="font-family: 'Times New Roman', Times, serif; color: #000; padding: 12px 18px; line-height: 1.35; font-size: 11pt;">
+        <!-- KOP SURAT PEMERINTAH PROVINSI LAMPUNG -->
+        <div style="display: flex; align-items: center; border-bottom: 3px double #000; padding-bottom: 8px; margin-bottom: 16px;">
+          <div style="width: 72px; height: 72px; margin-right: 14px; display: flex; align-items: center; justify-content: center;">
+            ${lambang}
+          </div>
+          <div style="flex: 1; text-align: center;">
+            <div style="font-size: 13pt; font-weight: 700; letter-spacing: 0.5px;">PEMERINTAH PROVINSI LAMPUNG</div>
+            <div style="font-size: 15pt; font-weight: 800; letter-spacing: 0.5px;">BADAN PERENCANAAN PEMBANGUNAN DAERAH</div>
+            <div style="font-size: 9pt; font-family: Arial, sans-serif; margin-top: 2px;">
+              Jalan Wolter Monginsidi Nomor 224, Teluk Betung, Bandar Lampung Kode Pos 35215<br>
+              Telepon: (0721) 486255 • Pos-el: bappeda@lampungprov.go.id • Laman: bappeda.lampungprov.go.id
+            </div>
+          </div>
+        </div>
+
+        <!-- JUDUL DOKUMEN -->
+        <div style="text-align: center; margin-bottom: 16px;">
+          <div style="font-size: 12.5pt; font-weight: 700; text-decoration: underline; text-transform: uppercase;">
+            LEMBAR EVALUASI DAMPAK PASCA-PELATIHAN (LEVEL 3 KIRKPATRICK)
+          </div>
+          <div style="font-size: 10.5pt; font-weight: 600; margin-top: 2px;">
+            Nomor: BA-EPP / ${item.tahun} / ${item.id}
+          </div>
+          <div style="font-size: 9.5pt; font-style: italic; color: #333; margin-top: 2px;">
+            Berdasarkan Peraturan Kepala LAN RI Nomor 10 Tahun 2018 &amp; PermenPAN-RB Nomor 38 Tahun 2017
+          </div>
+        </div>
+
+        <!-- I. IDENTITAS PEGAWAI & PEJABAT PENILAI -->
+        <div style="font-weight: bold; font-size: 10.5pt; margin-bottom: 6px; background: #f1f5f9; padding: 4px 8px; border-left: 4px solid #1e3a8a;">
+          I. IDENTITAS PESERTA DIKLAT &amp; PEJABAT PENILAI KINERJA
+        </div>
+        <table style="width: 100%; border-collapse: collapse; margin-bottom: 14px; font-size: 10pt;">
+          <tr>
+            <td style="width: 22%; font-weight: 600; padding: 3px 0;">Nama Pegawai ASN</td>
+            <td style="width: 2%;">:</td>
+            <td style="width: 40%; font-weight: bold;">${item.pegawaiNama}</td>
+            <td style="width: 16%; font-weight: 600; padding: 3px 0;">Pejabat Penilai</td>
+            <td style="width: 2%;">:</td>
+            <td style="width: 18%; font-weight: bold;">${item.evaluatorNama}</td>
+          </tr>
+          <tr>
+            <td style="font-weight: 600; padding: 3px 0;">NIP Pegawai</td>
+            <td>:</td>
+            <td>${item.pegawaiNip}</td>
+            <td style="font-weight: 600; padding: 3px 0;">NIP Penilai</td>
+            <td>:</td>
+            <td>${item.evaluatorNip}</td>
+          </tr>
+          <tr>
+            <td style="font-weight: 600; padding: 3px 0;">Jabatan / Unit Kerja</td>
+            <td>:</td>
+            <td>${item.pegawaiJabatan} — ${item.pegawaiUnit}</td>
+            <td style="font-weight: 600; padding: 3px 0;">Jabatan Penilai</td>
+            <td>:</td>
+            <td>${item.evaluatorJabatan}</td>
+          </tr>
+        </table>
+
+        <!-- II. INFORMASI PELATIHAN YANG DIEVALUASI -->
+        <div style="font-weight: bold; font-size: 10.5pt; margin-bottom: 6px; background: #f1f5f9; padding: 4px 8px; border-left: 4px solid #1e3a8a;">
+          II. DATA PELATIHAN YANG DIEVALUASI
+        </div>
+        <table style="width: 100%; border-collapse: collapse; margin-bottom: 14px; font-size: 10pt;">
+          <tr>
+            <td style="width: 24%; font-weight: 600; padding: 3px 0;">Nama Program Diklat</td>
+            <td style="width: 2%;">:</td>
+            <td style="width: 74%; font-weight: bold; color: #1e3a8a;">${item.diklatNama}</td>
+          </tr>
+          <tr>
+            <td style="font-weight: 600; padding: 3px 0;">Lembaga Penyelenggara</td>
+            <td>:</td>
+            <td>${item.diklatPenyelenggara || 'BPSDMD Provinsi Lampung'} (${item.diklatJp || 20} JP)</td>
+          </tr>
+          <tr>
+            <td style="font-weight: 600; padding: 3px 0;">Waktu Pelaksanaan Diklat</td>
+            <td>:</td>
+            <td>${item.diklatPeriode || 'Tahun Anggaran 2026'}</td>
+          </tr>
+          <tr>
+            <td style="font-weight: 600; padding: 3px 0;">Waktu &amp; Jeda Evaluasi</td>
+            <td>:</td>
+            <td>Tanggal ${item.tanggalEvaluasi} <span style="font-weight: bold; color: #047857;">(${item.rentangPascaBulan || '3 Bulan Pasca Pelatihan'})</span></td>
+          </tr>
+        </table>
+
+        <!-- III. RUBRIK HASIL EVALUASI 5 DIMENSI -->
+        <div style="font-weight: bold; font-size: 10.5pt; margin-bottom: 6px; background: #f1f5f9; padding: 4px 8px; border-left: 4px solid #1e3a8a;">
+          III. PENILAIAN 5 DIMENSI DAMPAK PASCA-PELATIHAN (KIRKPATRICK LEVEL 3)
+        </div>
+        <table style="width: 100%; border-collapse: collapse; margin-bottom: 14px; font-size: 9.5pt; border: 1px solid #000;" border="1">
+          <thead>
+            <tr style="background: #e2e8f0; text-align: center;">
+              <th style="padding: 5px; width: 35px;">No</th>
+              <th style="padding: 5px; width: 220px;">Dimensi Pengukuran (LAN RI)</th>
+              <th style="padding: 5px;">Deskripsi Capaian / Perubahan Perilaku Kerja</th>
+              <th style="padding: 5px; width: 85px;">Skor (0-100)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="text-align: center; padding: 4px;">1</td>
+              <td style="padding: 4px; font-weight: 600;">D1. Penerapan Pengetahuan &amp; Keahlian</td>
+              <td style="padding: 4px;">Penerapan materi metodologi dan substansi diklat dalam tugas rutin perencanaan.</td>
+              <td style="text-align: center; font-weight: bold; padding: 4px;">${item.skorD1}</td>
+            </tr>
+            <tr>
+              <td style="text-align: center; padding: 4px;">2</td>
+              <td style="padding: 4px; font-weight: 600;">D2. Peningkatan Mutu Output Kerja</td>
+              <td style="padding: 4px;">Kualitas dokumen perencanaan lebih tajam, analitis, dan minim kesalahan revisi.</td>
+              <td style="text-align: center; font-weight: bold; padding: 4px;">${item.skorD2}</td>
+            </tr>
+            <tr>
+              <td style="text-align: center; padding: 4px;">3</td>
+              <td style="padding: 4px; font-weight: 600;">D3. Efisiensi Waktu &amp; Kecepatan</td>
+              <td style="padding: 4px;">Penyelesaian penyusunan laporan atau telaah staf diselesaikan lebih cepat dan tepat waktu.</td>
+              <td style="text-align: center; font-weight: bold; padding: 4px;">${item.skorD3}</td>
+            </tr>
+            <tr>
+              <td style="text-align: center; padding: 4px;">4</td>
+              <td style="padding: 4px; font-weight: 600;">D4. Inovasi &amp; Pemecahan Masalah</td>
+              <td style="padding: 4px;">Menghasilkan inisiatif baru atau pemecahan hambatan kerja berbasis sistem/metode baru.</td>
+              <td style="text-align: center; font-weight: bold; padding: 4px;">${item.skorD4}</td>
+            </tr>
+            <tr>
+              <td style="text-align: center; padding: 4px;">5</td>
+              <td style="padding: 4px; font-weight: 600;">D5. Diseminasi &amp; Transfer Knowledge</td>
+              <td style="padding: 4px;">Membagikan materi dan membimbing rekan kerja dalam unit kerja (knowledge sharing).</td>
+              <td style="text-align: center; font-weight: bold; padding: 4px;">${item.skorD5}</td>
+            </tr>
+            <tr style="background: #f8fafc; font-weight: bold;">
+              <td colspan="3" style="text-align: right; padding: 5px;">SKOR RATA-RATA DAMPAK (INDEKS EFEKTIVITAS):</td>
+              <td style="text-align: center; padding: 5px; font-size: 11pt; color: #1e3a8a;">${item.skorRataRata}</td>
+            </tr>
+            <tr style="background: #f1f5f9; font-weight: bold;">
+              <td colspan="3" style="text-align: right; padding: 5px;">KATEGORI PREDIKAT KELAYAKAN:</td>
+              <td style="text-align: center; padding: 5px; color: #047857;">${item.predikat} — ${item.kategoriDampak}</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <!-- IV. BUKTI PORTOFOLIO / ACTION LEARNING OUTPUT -->
+        <div style="font-weight: bold; font-size: 10.5pt; margin-bottom: 6px; background: #f1f5f9; padding: 4px 8px; border-left: 4px solid #1e3a8a;">
+          IV. BUKTI OUTPUT / PORTOFOLIO KERJA NYATA
+        </div>
+        <table style="width: 100%; border-collapse: collapse; margin-bottom: 12px; font-size: 10pt;">
+          <tr>
+            <td style="width: 25%; font-weight: 600; vertical-align: top; padding: 3px 0;">Produk Nyata yang Dihasilkan</td>
+            <td style="width: 2%; vertical-align: top;">:</td>
+            <td style="font-weight: bold; color: #1e3a8a;">${item.produkKerja || '-'}</td>
+          </tr>
+          <tr>
+            <td style="font-weight: 600; vertical-align: top; padding: 3px 0;">Dampak Nyata bagi Unit Kerja</td>
+            <td style="vertical-align: top;">:</td>
+            <td style="text-align: justify;">${item.manfaatUnitKerja || '-'}</td>
+          </tr>
+          <tr>
+            <td style="font-weight: 600; vertical-align: top; padding: 3px 0;">Arsip Bukti Dokumen</td>
+            <td style="vertical-align: top;">:</td>
+            <td style="font-style: italic;">${item.tautanDokumen || 'dokumen_output_kerja.pdf'}</td>
+          </tr>
+        </table>
+
+        <!-- V. KESIMPULAN & REKOMENDASI PENILAI -->
+        <div style="font-weight: bold; font-size: 10.5pt; margin-bottom: 6px; background: #f1f5f9; padding: 4px 8px; border-left: 4px solid #1e3a8a;">
+          V. ULASAN &amp; REKOMENDASI PEJABAT PENILAI KINERJA
+        </div>
+        <div style="border: 1px solid #cbd5e1; padding: 8px 12px; font-size: 9.5pt; margin-bottom: 14px; background: #fafafa;">
+          <div style="margin-bottom: 4px;">
+            <strong>Testimoni / Catatan Atasan:</strong> <em>"${item.testimoniAtasan || 'Pegawai menunjukkan komitmen tinggi dan mampu mengimplementasikan kompetensi secara optimal.'}"</em>
+          </div>
+          <div>
+            <strong>Rekomendasi Bangkom Lanjutan:</strong> ${item.rekomendasiPengembangan || 'Diberikan penugasan strategis dan didorong mengikuti jenjang pelatihan lanjutan.'}
+          </div>
+        </div>
+
+        <!-- PENGESAHAN TANDA TANGAN (BSrE TTE QR CODE) -->
+        <div style="display: flex; justify-content: space-between; margin-top: 10px; font-size: 10pt;">
+          <div style="width: 45%; text-align: center;">
+            <div>Pegawai yang Dievaluasi,</div>
+            <div style="height: 55px; display: flex; align-items: center; justify-content: center;">
+              <span style="font-size: 9pt; color: #475569; font-style: italic;">[Telah Diverifikasi Bersama]</span>
+            </div>
+            <div style="font-weight: bold; text-decoration: underline;">${item.pegawaiNama}</div>
+            <div>NIP. ${item.pegawaiNip}</div>
+          </div>
+
+          <div style="width: 48%; text-align: center;">
+            <div>Bandar Lampung, ${item.tanggalEvaluasi}</div>
+            <div style="font-weight: bold;">Pejabat Penilai Kinerja (Atasan),</div>
+            <div style="margin: 6px auto; display: flex; flex-direction: column; align-items: center;">
+              <img src="${qrUrl}" alt="TTE BSrE" style="width: 65px; height: 65px; border: 1px solid #cbd5e1; padding: 2px;">
+              <div style="font-size: 7.5pt; font-family: Arial, sans-serif; color: #047857; font-weight: bold; margin-top: 2px;">
+                ✓ TTE Sah BSrE: ${item.kodeVerifikasi || 'TERVERIFIKASI'}
+              </div>
+            </div>
+            <div style="font-weight: bold; text-decoration: underline;">${item.evaluatorNama}</div>
+            <div>NIP. ${item.evaluatorNip}</div>
+          </div>
+        </div>
+
+        <div style="margin-top: 16px; border-top: 1px dashed #94a3b8; padding-top: 4px; font-size: 7.5pt; color: #64748b; font-family: Arial, sans-serif; display: flex; justify-content: space-between;">
+          <span>Sistem Informasi Pengembangan Kompetensi (SIP-KOMPETENSI) Bappeda Provinsi Lampung — Kirkpatrick Level 3</span>
+          <span>Dicetak: ${new Date().toLocaleString('id-ID')}</span>
+        </div>
+      </div>
+    `;
+
+    let styleEl = document.getElementById('dynamicPrintStyle');
+    if (!styleEl) {
+      styleEl = document.createElement('style');
+      styleEl.id = 'dynamicPrintStyle';
+      document.head.appendChild(styleEl);
+    }
+    styleEl.textContent = `@media print { @page { size: portrait; margin: 10mm 12mm 12mm 12mm; } }`;
+
+    document.body.insertBefore(printContainer, document.body.firstChild);
+    setTimeout(() => {
+      window.print();
+    }, 150);
   }
 };
 
