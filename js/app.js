@@ -2416,71 +2416,93 @@ const App = {
     logs.forEach(log => {
       let statusBadge = '';
       if (log.status === 'Disetujui Pembina') {
-        statusBadge = `<span class="badge" style="background: rgba(16, 185, 129, 0.12); color: #059669; font-weight: 650; font-size: 11px;"><span data-icon="CircleCheck" data-icon-size="12"></span> Disetujui</span>`;
+        statusBadge = `<span class="badge" style="background: rgba(16, 185, 129, 0.12); color: #059669; font-weight: 700; font-size: 11px; padding: 4px 9px;"><span data-icon="CircleCheck" data-icon-size="12"></span> Disetujui</span>`;
       } else if (log.status === 'Menunggu Persetujuan') {
-        statusBadge = `<span class="badge" style="background: rgba(245, 158, 11, 0.12); color: #d97706; font-weight: 650; font-size: 11px;"><span data-icon="Clock" data-icon-size="12"></span> Menunggu</span>`;
+        statusBadge = `<span class="badge" style="background: rgba(245, 158, 11, 0.12); color: #d97706; font-weight: 700; font-size: 11px; padding: 4px 9px;"><span data-icon="Clock" data-icon-size="12"></span> Menunggu</span>`;
       } else {
-        statusBadge = `<span class="badge" style="background: rgba(37, 99, 235, 0.12); color: #2563eb; font-weight: 650; font-size: 11px;"><span data-icon="Calendar" data-icon-size="12"></span> Terjadwal</span>`;
+        statusBadge = `<span class="badge" style="background: rgba(37, 99, 235, 0.12); color: #2563eb; font-weight: 700; font-size: 11px; padding: 4px 9px;"><span data-icon="Calendar" data-icon-size="12"></span> Terjadwal</span>`;
       }
 
       const logMentorNip = String(log.mentorNip || '').replace(/\s+/g, '');
       const canApprove = (userRole === 'admin' || userRole === 'pimpinan' || userNip === logMentorNip) && log.status !== 'Disetujui Pembina';
       const canEdit = userRole === 'admin' || userRole === 'pimpinan' || userNip === logMentorNip || String(log.pegawaiNip).replace(/\s+/g, '') === userNip;
 
+      const hasDiklat = log.rekomendasiDiklatJudul && log.rekomendasiDiklatJudul !== '-';
+
       html += `
         <tr>
-          <td>
-            <div style="font-weight: 700; font-size: 12.5px; color: var(--color-primary);">${log.id}</div>
-            <div style="font-size: 11px; color: var(--color-text-muted); margin-top: 2px;">${log.tanggal}</div>
-            <span class="badge badge-quarter" style="font-size: 10px; margin-top: 4px;">${log.triwulan} ${log.tahun}</span>
-          </td>
-          <td>
-            <div style="font-weight: 700; font-size: 13px; color: var(--color-text-primary);">${log.pegawaiNama}</div>
-            <div style="font-size: 11px; color: var(--color-text-muted);">NIP. ${log.pegawaiNip}</div>
-            <div style="font-size: 11.5px; color: var(--color-text-secondary); margin-top: 2px;">${log.pegawaiJabatan}</div>
-          </td>
-          <td>
-            <div style="font-weight: 650; font-size: 12.5px; color: var(--color-text-primary);">${log.mentorNama}</div>
-            <div style="font-size: 11px; color: var(--color-text-muted);">NIP. ${log.mentorNip}</div>
-            <div style="font-size: 11.5px; color: var(--color-text-secondary); margin-top: 2px;">${log.mentorJabatan}</div>
-          </td>
-          <td>
-            <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 3px;">
-              <span class="badge badge-blue" style="font-size: 10.5px; font-weight: 650;">${log.tipe}</span>
+          <td style="padding-left: 20px; vertical-align: middle;">
+            <div style="font-weight: 800; font-size: 13px; color: var(--color-primary); font-family: monospace; letter-spacing: 0.3px;">${log.id}</div>
+            <div style="font-size: 11px; color: var(--color-text-secondary); margin-top: 3px; display: flex; align-items: center; gap: 4px;">
+              <span data-icon="Calendar" data-icon-size="12" style="color: var(--color-text-muted);"></span> ${log.tanggal}
             </div>
-            <div style="font-weight: 600; font-size: 12px; color: var(--color-text-primary);">${log.fokusKompetensi}</div>
-            <div style="font-size: 11px; color: var(--color-text-muted); line-height: 1.35; margin-top: 2px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;" title="${log.kendalaTantangan}">
+            <span class="badge badge-quarter" style="font-size: 10px; margin-top: 5px; display: inline-block;">${log.triwulan} TA ${log.tahun}</span>
+          </td>
+          <td style="vertical-align: middle;">
+            <div style="font-weight: 750; font-size: 13px; color: var(--color-text-primary); line-height: 1.35;">${log.pegawaiNama}</div>
+            <div style="font-size: 11px; color: var(--color-text-muted); margin-top: 2px;">
+              NIP. <span style="font-family: monospace; font-weight: 600;">${log.pegawaiNip}</span>
+            </div>
+            <div style="font-size: 11.5px; color: var(--color-text-secondary); margin-top: 3px; line-height: 1.35;">${log.pegawaiJabatan}</div>
+          </td>
+          <td style="vertical-align: middle;">
+            <div style="font-weight: 700; font-size: 13px; color: var(--color-text-primary); line-height: 1.35;">${log.mentorNama}</div>
+            <div style="font-size: 11px; color: var(--color-text-muted); margin-top: 2px;">
+              NIP. <span style="font-family: monospace; font-weight: 600;">${log.mentorNip}</span>
+            </div>
+            <div style="font-size: 11.5px; color: var(--color-text-secondary); margin-top: 3px; line-height: 1.35;">${log.mentorJabatan}</div>
+          </td>
+          <td style="vertical-align: middle;">
+            <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 4px;">
+              <span class="badge badge-blue" style="font-size: 10.5px; font-weight: 700; padding: 2px 7px;">${log.tipe}</span>
+            </div>
+            <div style="font-weight: 700; font-size: 12.5px; color: var(--color-text-primary); line-height: 1.35;">${log.fokusKompetensi}</div>
+            <div style="font-size: 11px; color: var(--color-text-muted); line-height: 1.35; margin-top: 3px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;" title="${log.kendalaTantangan}">
               ${log.kendalaTantangan}
             </div>
           </td>
-          <td>
-            <div style="font-size: 12px; font-weight: 600; color: #1e40af;">
-              ${log.rekomendasiDiklatJudul && log.rekomendasiDiklatJudul !== '-' ? `🎓 ${log.rekomendasiDiklatJudul}` : '⚡ Tindak Lanjut Mandiri'}
-            </div>
-            <div style="font-size: 11px; color: var(--color-text-muted); margin-top: 3px;">
-              Target: <b>${log.targetWaktu || '1 Bulan'}</b>
+          <td style="vertical-align: middle;">
+            ${hasDiklat ? `
+              <div style="font-size: 12px; font-weight: 700; color: #1e40af; line-height: 1.35; display: flex; align-items: flex-start; gap: 5px;">
+                <span data-icon="GraduationCap" data-icon-size="14" style="color: #2563eb; flex-shrink: 0; margin-top: 2px;"></span>
+                <span>${log.rekomendasiDiklatJudul}</span>
+              </div>
+            ` : `
+              <div style="font-size: 12px; font-weight: 650; color: #475569; display: flex; align-items: center; gap: 5px;">
+                <span data-icon="Sparkles" data-icon-size="13" style="color: #f59e0b;"></span>
+                <span>Bimbingan Klinis / Mandiri</span>
+              </div>
+            `}
+            <div style="font-size: 11px; color: var(--color-text-secondary); margin-top: 4px;">
+              Target: <span style="font-weight: 700; color: var(--color-text-primary);">${log.targetWaktu || '1 Bulan'}</span>
             </div>
           </td>
-          <td style="text-align: center;">
-            ${statusBadge}
-            ${log.disetujuiPada ? `<div style="font-size: 9.5px; color: var(--color-text-muted); margin-top: 4px;">${log.disetujuiPada}</div>` : ''}
+          <td style="text-align: center; vertical-align: middle;">
+            <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px;">
+              ${statusBadge}
+              ${log.disetujuiPada ? `
+                <div style="font-size: 10px; color: var(--color-text-muted); font-family: monospace; white-space: nowrap; margin-top: 2px;">
+                  ${log.disetujuiPada}
+                </div>
+              ` : ''}
+            </div>
           </td>
-          <td style="text-align: right;">
-            <div style="display: flex; gap: 6px; justify-content: flex-end; align-items: center; flex-wrap: wrap;">
-              <button class="btn btn-xs btn-outline" onclick="App.openCoachingDetailModal('${log.id}')" title="Buka Berita Acara / Rincian">
+          <td style="text-align: center; vertical-align: middle; padding-right: 24px;">
+            <div style="display: inline-flex; align-items: center; justify-content: center; gap: 6px; white-space: nowrap;">
+              <button class="btn btn-xs btn-outline" onclick="App.openCoachingDetailModal('${log.id}')" title="Buka Berita Acara & Rincian" style="display: inline-flex; align-items: center; gap: 4px; padding: 5px 9px; font-weight: 600;">
                 <span data-icon="FileText" data-icon-size="13"></span> Rincian
               </button>
               ${canApprove ? `
-                <button class="btn btn-xs btn-success" onclick="App.approveCoachingSession('${log.id}')" title="Setujui Hasil Pembinaan (TTE BSrE)">
+                <button class="btn btn-xs btn-success" onclick="App.approveCoachingSession('${log.id}')" title="Setujui Hasil Pembinaan (TTE BSrE)" style="display: inline-flex; align-items: center; gap: 4px; padding: 5px 9px; font-weight: 600;">
                   <span data-icon="Check" data-icon-size="13"></span> Setujui
                 </button>
               ` : ''}
               ${canEdit ? `
-                <button class="btn btn-xs btn-outline" onclick="App.openAddCoachingModal('${log.id}')" title="Edit Data Sesi">
-                  <span data-icon="Pencil" data-icon-size="12"></span>
+                <button class="btn btn-xs btn-outline" onclick="App.openAddCoachingModal('${log.id}')" title="Edit Sesi Pembinaan" style="padding: 5px 8px;">
+                  <span data-icon="Edit3" data-icon-size="13"></span>
                 </button>
-                <button class="btn btn-xs btn-outline-danger" onclick="App.deleteCoachingSession('${log.id}')" title="Hapus Sesi">
-                  <span data-icon="Trash2" data-icon-size="12"></span>
+                <button class="btn btn-xs btn-outline-danger" onclick="App.deleteCoachingSession('${log.id}')" title="Hapus Sesi" style="padding: 5px 8px;">
+                  <span data-icon="Trash2" data-icon-size="13"></span>
                 </button>
               ` : ''}
             </div>

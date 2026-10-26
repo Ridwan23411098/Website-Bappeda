@@ -4454,3 +4454,37 @@ button[onclick*="quickLogin"]:hover {
 #coachingTableBody tr:hover {
   background-color: var(--color-surface-hover, rgba(241, 245, 249, 0.6));
 }
+
+/* Table scrollbar & edge padding enhancements */
+.table-responsive {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-border) transparent;
+}
+
+.table-responsive::-webkit-scrollbar {
+  height: 7px;
+}
+
+.table-responsive::-webkit-scrollbar-track {
+  background: var(--color-surface-subtle);
+  border-radius: 4px;
+}
+
+.table-responsive::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 4px;
+}
+
+.table-responsive::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+.data-table th:last-child,
+.data-table td:last-child {
+  padding-right: 24px !important;
+}
+
+.data-table th:first-child,
+.data-table td:first-child {
+  padding-left: 20px !important;
+}
