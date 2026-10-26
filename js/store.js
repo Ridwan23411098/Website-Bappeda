@@ -789,6 +789,13 @@ const Store = {
           : [];
       }
 
+      // Inisialisasi Buku Log Dialog Kinerja & Coaching/Mentoring (Tahap 4)
+      if (!this.state.coachingLogs || !Array.isArray(this.state.coachingLogs) || this.state.coachingLogs.length === 0) {
+        this.state.coachingLogs = (typeof BAPPEDA_DATA !== 'undefined' && BAPPEDA_DATA.coachingLogs) 
+          ? JSON.parse(JSON.stringify(BAPPEDA_DATA.coachingLogs)) 
+          : [];
+      }
+
       this.save();
     } catch (err) {
       console.error('Peringatan di Store.init():', err);
@@ -2523,6 +2530,194 @@ const Store = {
     };
   },
 
+  // ==========================================
+  // TAHAP 4: BUKU LOG DIALOG KINERJA, COACHING & MENTORING (PERMENPAN-RB NO. 6/2022)
+  // ==========================================
+  getCoachingLogs(filters = {}) {
+    if (!this.state.coachingLogs || !Array.isArray(this.state.coachingLogs)) {
+      this.state.coachingLogs = (typeof BAPPEDA_DATA !== 'undefined' && BAPPEDA_DATA.coachingLogs)
+        ? JSON.parse(JSON.stringify(BAPPEDA_DATA.coachingLogs))
+        : [];
+    }
+
+    let logs = [...this.state.coachingLogs];
+
+    // Filter Pegawai NIP
+    if (filters.pegawaiNip) {
+      logs = logs.filter(l => String(l.pegawaiNip).replace(/\s+/g, '') === String(filters.pegawaiNip).replace(/\s+/g, ''));
+    }
+
+    // Filter Mentor NIP
+    if (filters.mentorNip) {
+      logs = logs.filter(l => String(l.mentorNip).replace(/\s+/g, '') === String(filters.mentorNip).replace(/\s+/g, ''));
+    }
+
+    // Filter Triwulan
+    if (filters.triwulan && filters.triwulan !== 'all') {
+      logs = logs.filter(l => l.triwulan === filters.triwulan);
+    }
+
+    // Filter Tipe Pembinaan
+    if (filters.tipe && filters.tipe !== 'all') {
+      logs = logs.filter(l => l.tipe === filters.tipe);
+    }
+
+    // Filter Status
+    if (filters.status && filters.status !== 'all') {
+      logs = logs.filter(l => l.status === filters.status);
+    }
+
+    // Filter Search
+    if (filters.search && filters.search.trim()) {
+      const q = filters.search.toLowerCase().trim();
+      logs = logs.filter(l => 
+        (l.pegawaiNama && l.pegawaiNama.toLowerCase().includes(q)) ||
+        (l.pegawaiNip && l.pegawaiNip.toLowerCase().includes(q)) ||
+        (l.mentorNama && l.mentorNama.toLowerCase().includes(q)) ||
+        (l.fokusKompetensi && l.fokusKompetensi.toLowerCase().includes(q)) ||
+        (l.kendalaTantangan && l.kendalaTantangan.toLowerCase().includes(q)) ||
+        (l.rekomendasiTindakan && l.rekomendasiTindakan.toLowerCase().includes(q)) ||
+        (l.id && l.id.toLowerCase().includes(q))
+      );
+    }
+
+    return logs;
+  },
+
+  getCoachingLogById(id) {
+    if (!this.state.coachingLogs) return null;
+    return this.state.coachingLogs.find(l => l.id === id) || null;
+  },
+
+  addCoachingLog(data) {
+    if (!this.state.coachingLogs) this.state.coachingLogs = [];
+    
+    const count = this.state.coachingLogs.length + 1;
+    const year = data.tahun || (this.state.activeYear || 2026);
+    const newId = `CM-${year}-${String(count).padStart(3, '0')}`;
+
+    const newLog = {
+      id: newId,
+      tahun: year,
+      triwulan: data.triwulan || 'Q1',
+      tanggal: data.tanggal || new Date().toISOString().split('T')[0],
+      pegawaiNama: data.pegawaiNama || '',
+      pegawaiNip: data.pegawaiNip || '',
+      pegawaiJabatan: data.pegawaiJabatan || '',
+      pegawaiUnit: data.pegawaiUnit || '',
+      mentorNama: data.mentorNama || '',
+      mentorNip: data.mentorNip || '',
+      mentorJabatan: data.mentorJabatan || '',
+      tipe: data.tipe || 'Coaching',
+      fokusKompetensi: data.fokusKompetensi || '',
+      kendalaTantangan: data.kendalaTantangan || '',
+      hasilDiskusi: data.hasilDiskusi || '',
+      rekomendasiTindakan: data.rekomendasiTindakan || '',
+      rekomendasiDiklatJudul: data.rekomendasiDiklatJudul || '-',
+      targetWaktu: data.targetWaktu || '1 Bulan',
+      status: data.status || 'Menunggu Persetujuan',
+      catatanMentor: data.catatanMentor || '',
+      disetujuiPada: data.status === 'Disetujui Pembina' ? new Date().toLocaleString('id-ID') : null,
+      dibuatPada: new Date().toISOString()
+    };
+
+    this.state.coachingLogs.unshift(newLog);
+    this.save();
+
+    if (typeof this.sendNotification === 'function') {
+      this.sendNotification({
+        penerima: newLog.pegawaiNip,
+        judul: 'Sesi Pembinaan Dicatat',
+        pesan: `Sesi ${newLog.tipe} untuk ${newLog.pegawaiNama} (${newLog.triwulan} ${newLog.tahun}) berhasil didaftarkan.`,
+        tipe: 'info'
+      }).catch?.(() => {});
+    }
+
+    return newLog;
+  },
+
+  updateCoachingLog(id, updatedFields) {
+    if (!this.state.coachingLogs) return null;
+    const idx = this.state.coachingLogs.findIndex(l => l.id === id);
+    if (idx === -1) return null;
+
+    this.state.coachingLogs[idx] = {
+      ...this.state.coachingLogs[idx],
+      ...updatedFields,
+      diperbaruiPada: new Date().toISOString()
+    };
+
+    this.save();
+    return this.state.coachingLogs[idx];
+  },
+
+  approveCoachingLog(id, supervisorNotes = '') {
+    if (!this.state.coachingLogs) return null;
+    const item = this.state.coachingLogs.find(l => l.id === id);
+    if (!item) return null;
+
+    item.status = 'Disetujui Pembina';
+    if (supervisorNotes) item.catatanMentor = supervisorNotes;
+    const now = new Date();
+    const formatted = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')} WIB`;
+    item.disetujuiPada = formatted;
+
+    this.save();
+
+    if (typeof this.sendNotification === 'function') {
+      this.sendNotification({
+        penerima: item.pegawaiNip,
+        judul: 'Pembinaan Disetujui',
+        pesan: `Hasil sesi ${item.tipe} (${item.id}) telah disetujui resmi oleh ${item.mentorNama}.`,
+        tipe: 'success'
+      }).catch?.(() => {});
+    }
+
+    return item;
+  },
+
+  deleteCoachingLog(id) {
+    if (!this.state.coachingLogs) return false;
+    const prevLen = this.state.coachingLogs.length;
+    this.state.coachingLogs = this.state.coachingLogs.filter(l => l.id !== id);
+    if (this.state.coachingLogs.length < prevLen) {
+      this.save();
+      return true;
+    }
+    return false;
+  },
+
+  getCoachingStats() {
+    const logs = this.state.coachingLogs || [];
+    const total = logs.length;
+    const disetujui = logs.filter(l => l.status === 'Disetujui Pembina').length;
+    const menunggu = logs.filter(l => l.status === 'Menunggu Persetujuan').length;
+    const terjadwal = logs.filter(l => l.status === 'Terjadwal').length;
+
+    const byTipe = {
+      coaching: logs.filter(l => l.tipe === 'Coaching').length,
+      mentoring: logs.filter(l => l.tipe === 'Mentoring').length,
+      dialogKinerja: logs.filter(l => l.tipe === 'Dialog Kinerja').length,
+      konseling: logs.filter(l => l.tipe === 'Konseling Karir').length
+    };
+
+    const byTriwulan = {
+      Q1: logs.filter(l => l.triwulan === 'Q1').length,
+      Q2: logs.filter(l => l.triwulan === 'Q2').length,
+      Q3: logs.filter(l => l.triwulan === 'Q3').length,
+      Q4: logs.filter(l => l.triwulan === 'Q4').length
+    };
+
+    return {
+      total,
+      disetujui,
+      menunggu,
+      terjadwal,
+      byTipe,
+      byTriwulan
+    };
+  },
+
   resetDemoData() {
     try {
       localStorage.removeItem(STORAGE_KEY);
@@ -2539,6 +2734,8 @@ const Store = {
       fresh.monitoringUnits = BAPPEDA_DATA.monitoringUnits;
       fresh.verifications = JSON.parse(JSON.stringify(BAPPEDA_DATA.verifications || []));
       fresh.realizations = JSON.parse(JSON.stringify(BAPPEDA_DATA.realizations || []));
+      fresh.kalenderDiklat = JSON.parse(JSON.stringify(BAPPEDA_DATA.kalenderDiklat || []));
+      fresh.coachingLogs = JSON.parse(JSON.stringify(BAPPEDA_DATA.coachingLogs || []));
     }
     fresh.activeYear = 2026;
     this.state = fresh;

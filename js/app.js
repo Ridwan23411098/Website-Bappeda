@@ -21,6 +21,7 @@ const NAV_CONFIG = {
           { id: 'ekompetensi', icon: 'Target', label: 'Kompetensi' },
           { id: 'eidp', icon: 'ClipboardCheck', label: 'IDP Saya' },
           { id: 'ekalender', icon: 'Calendar', label: 'Kalender Diklat' },
+          { id: 'ecoaching', icon: 'BookOpen', label: 'Buku Log Pembinaan' },
           { id: 'epelaksanaan', icon: 'CircleCheck', label: 'Pelaksanaan SDM' }
         ]
       }
@@ -41,6 +42,7 @@ const NAV_CONFIG = {
           { id: 'averif', icon: 'ShieldCheck', label: 'Verifikasi IDP' },
           { id: 'apegawai', icon: 'Users', label: 'Data Pegawai' },
           { id: 'ekalender', icon: 'Calendar', label: 'Kalender Diklat' },
+          { id: 'ecoaching', icon: 'BookOpen', label: 'Buku Log Pembinaan' },
           { id: 'apelaksanaan', icon: 'CircleCheck', label: 'Pelaksanaan SDM' },
           { id: 'amaster', icon: 'Settings2', label: 'Master Data' }
         ]
@@ -61,7 +63,8 @@ const NAV_CONFIG = {
         items: [
           { id: 'pmonitoring', icon: 'ChartNoAxesCombined', label: 'Monitoring' },
           { id: 'plaporan', icon: 'FileBarChart', label: 'Laporan' },
-          { id: 'ekalender', icon: 'Calendar', label: 'Kalender Diklat' }
+          { id: 'ekalender', icon: 'Calendar', label: 'Kalender Diklat' },
+          { id: 'ecoaching', icon: 'BookOpen', label: 'Log Pembinaan ASN' }
         ]
       }
     ]
@@ -398,9 +401,9 @@ const App = {
     // Role-Based Guard: Proteksi Akses Halaman berdasarkan Peran ASN
     const userRole = Store.state.currentSession?.role || Store.state.user?.role || 'pegawai';
     const roleAllowedPages = {
-      pegawai: ['edash', 'eprofil', 'ekarier', 'ekompetensi', 'eidp', 'ekalender', 'ereview', 'epelaksanaan'],
-      admin: ['adash', 'averif', 'apegawai', 'ekalender', 'apelaksanaan', 'amaster', 'eprofil'],
-      pimpinan: ['pdash', 'pmonitoring', 'plaporan', 'ekalender', 'eprofil']
+      pegawai: ['edash', 'eprofil', 'ekarier', 'ekompetensi', 'eidp', 'ekalender', 'ecoaching', 'ereview', 'epelaksanaan'],
+      admin: ['adash', 'averif', 'apegawai', 'ekalender', 'ecoaching', 'apelaksanaan', 'amaster', 'eprofil'],
+      pimpinan: ['pdash', 'pmonitoring', 'plaporan', 'ekalender', 'ecoaching', 'eprofil']
     };
 
     const allowed = roleAllowedPages[userRole] || roleAllowedPages['pegawai'];
@@ -434,6 +437,7 @@ const App = {
       ekompetensi: 'Pemetaan Kompetensi',
       eidp: 'Formulir IDP Saya',
       ekalender: 'Kalender Diklat Terpadu 2026',
+      ecoaching: 'Buku Log Dialog Kinerja, Coaching & Mentoring ASN',
       ereview: 'Review & Pengajuan IDP',
       epelaksanaan: 'Pelaksanaan Pengembangan SDM',
       adash: 'Dashboard Pengelola SDM',
@@ -482,6 +486,9 @@ const App = {
         break;
       case 'ekalender':
         this.renderTrainingCalendar();
+        break;
+      case 'ecoaching':
+        this.renderCoachingLogPage();
         break;
       case 'ereview':
         this.renderReviewPage();
@@ -2293,6 +2300,541 @@ const App = {
     }
 
     this.openModal('trainingDetailModal');
+  },
+
+  // =========================================================================
+  // TAHAP 4: BUKU LOG DIALOG KINERJA, COACHING & MENTORING (PERMENPAN-RB NO. 6/2022)
+  // =========================================================================
+  coachingFilter: {
+    triwulan: 'all',
+    tipe: 'all',
+    status: 'all',
+    search: ''
+  },
+
+  renderCoachingLogPage() {
+    const stats = Store.getCoachingStats ? Store.getCoachingStats() : { total: 0, disetujui: 0, menunggu: 0, terjadwal: 0 };
+    const allLogs = Store.getCoachingLogs ? Store.getCoachingLogs() : [];
+
+    // 1. Render Metrics
+    const totalEl = document.getElementById('coachingMetricTotal');
+    if (totalEl) totalEl.textContent = `${stats.total} Sesi`;
+
+    const appEl = document.getElementById('coachingMetricApproved');
+    if (appEl) appEl.textContent = `${stats.disetujui} Sesi`;
+
+    const pendEl = document.getElementById('coachingMetricPending');
+    if (pendEl) pendEl.textContent = `${stats.menunggu} Sesi`;
+
+    const linkedEl = document.getElementById('coachingMetricDiklatLinked');
+    if (linkedEl) {
+      const withDiklat = allLogs.filter(l => l.rekomendasiDiklatJudul && l.rekomendasiDiklatJudul !== '-').length;
+      const pct = stats.total > 0 ? Math.round((withDiklat / stats.total) * 100) : 100;
+      linkedEl.textContent = `${pct}%`;
+    }
+
+    // 2. Sync Tab States
+    const quarterTabs = document.querySelectorAll('.coach-tab-quarter');
+    quarterTabs.forEach(tab => {
+      const q = tab.getAttribute('data-quarter');
+      tab.classList.toggle('active', q === this.coachingFilter.triwulan);
+    });
+
+    const tipeSelect = document.getElementById('coachingFilterTipe');
+    if (tipeSelect && tipeSelect.value !== this.coachingFilter.tipe) {
+      tipeSelect.value = this.coachingFilter.tipe;
+    }
+
+    const statusSelect = document.getElementById('coachingFilterStatus');
+    if (statusSelect && statusSelect.value !== this.coachingFilter.status) {
+      statusSelect.value = this.coachingFilter.status;
+    }
+
+    const searchInput = document.getElementById('coachingSearchInput');
+    if (searchInput && searchInput.value !== this.coachingFilter.search) {
+      searchInput.value = this.coachingFilter.search;
+    }
+
+    // 3. Render Table
+    this.renderCoachingTable();
+  },
+
+  setCoachingFilter(key, val) {
+    this.coachingFilter[key] = val;
+    this.renderCoachingLogPage();
+  },
+
+  resetCoachingFilters() {
+    this.coachingFilter = {
+      triwulan: 'all',
+      tipe: 'all',
+      status: 'all',
+      search: ''
+    };
+    const sInput = document.getElementById('coachingSearchInput');
+    if (sInput) sInput.value = '';
+    this.renderCoachingLogPage();
+  },
+
+  handleCoachingSearch(val) {
+    this.coachingFilter.search = val;
+    this.renderCoachingTable();
+  },
+
+  renderCoachingTable() {
+    const tbody = document.getElementById('coachingTableBody');
+    if (!tbody) return;
+
+    const user = Store.state.currentSession || Store.state.user || {};
+    const userRole = user.role || 'pegawai';
+    const userNip = String(user.nip || '').replace(/\s+/g, '');
+
+    const logs = Store.getCoachingLogs(this.coachingFilter);
+
+    if (logs.length === 0) {
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="7" style="text-align: center; padding: 48px 16px; color: var(--color-text-muted);">
+            <div style="font-size: 32px; margin-bottom: 8px;">📋</div>
+            <div style="font-weight: 700; font-size: 14.5px; color: var(--color-text-primary); margin-bottom: 4px;">
+              Belum Ada Rekaman Sesi Pembinaan
+            </div>
+            <div style="font-size: 12.5px; margin-bottom: 16px;">
+              Tidak ada sesi pembinaan yang cocok dengan filter aktif. Klik tombol di bawah untuk mencatat sesi baru.
+            </div>
+            <button class="btn btn-sm btn-primary" onclick="App.openAddCoachingModal()">
+              <span data-icon="Plus" data-icon-size="14"></span> Catat Sesi Pembinaan Baru
+            </button>
+          </td>
+        </tr>
+      `;
+      if (typeof renderAllIcons === 'function') renderAllIcons();
+      return;
+    }
+
+    let html = '';
+    logs.forEach(log => {
+      let statusBadge = '';
+      if (log.status === 'Disetujui Pembina') {
+        statusBadge = `<span class="badge" style="background: rgba(16, 185, 129, 0.12); color: #059669; font-weight: 650; font-size: 11px;"><span data-icon="CircleCheck" data-icon-size="12"></span> Disetujui</span>`;
+      } else if (log.status === 'Menunggu Persetujuan') {
+        statusBadge = `<span class="badge" style="background: rgba(245, 158, 11, 0.12); color: #d97706; font-weight: 650; font-size: 11px;"><span data-icon="Clock" data-icon-size="12"></span> Menunggu</span>`;
+      } else {
+        statusBadge = `<span class="badge" style="background: rgba(37, 99, 235, 0.12); color: #2563eb; font-weight: 650; font-size: 11px;"><span data-icon="Calendar" data-icon-size="12"></span> Terjadwal</span>`;
+      }
+
+      const logMentorNip = String(log.mentorNip || '').replace(/\s+/g, '');
+      const canApprove = (userRole === 'admin' || userRole === 'pimpinan' || userNip === logMentorNip) && log.status !== 'Disetujui Pembina';
+      const canEdit = userRole === 'admin' || userRole === 'pimpinan' || userNip === logMentorNip || String(log.pegawaiNip).replace(/\s+/g, '') === userNip;
+
+      html += `
+        <tr>
+          <td>
+            <div style="font-weight: 700; font-size: 12.5px; color: var(--color-primary);">${log.id}</div>
+            <div style="font-size: 11px; color: var(--color-text-muted); margin-top: 2px;">${log.tanggal}</div>
+            <span class="badge badge-quarter" style="font-size: 10px; margin-top: 4px;">${log.triwulan} ${log.tahun}</span>
+          </td>
+          <td>
+            <div style="font-weight: 700; font-size: 13px; color: var(--color-text-primary);">${log.pegawaiNama}</div>
+            <div style="font-size: 11px; color: var(--color-text-muted);">NIP. ${log.pegawaiNip}</div>
+            <div style="font-size: 11.5px; color: var(--color-text-secondary); margin-top: 2px;">${log.pegawaiJabatan}</div>
+          </td>
+          <td>
+            <div style="font-weight: 650; font-size: 12.5px; color: var(--color-text-primary);">${log.mentorNama}</div>
+            <div style="font-size: 11px; color: var(--color-text-muted);">NIP. ${log.mentorNip}</div>
+            <div style="font-size: 11.5px; color: var(--color-text-secondary); margin-top: 2px;">${log.mentorJabatan}</div>
+          </td>
+          <td>
+            <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 3px;">
+              <span class="badge badge-blue" style="font-size: 10.5px; font-weight: 650;">${log.tipe}</span>
+            </div>
+            <div style="font-weight: 600; font-size: 12px; color: var(--color-text-primary);">${log.fokusKompetensi}</div>
+            <div style="font-size: 11px; color: var(--color-text-muted); line-height: 1.35; margin-top: 2px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;" title="${log.kendalaTantangan}">
+              ${log.kendalaTantangan}
+            </div>
+          </td>
+          <td>
+            <div style="font-size: 12px; font-weight: 600; color: #1e40af;">
+              ${log.rekomendasiDiklatJudul && log.rekomendasiDiklatJudul !== '-' ? `🎓 ${log.rekomendasiDiklatJudul}` : '⚡ Tindak Lanjut Mandiri'}
+            </div>
+            <div style="font-size: 11px; color: var(--color-text-muted); margin-top: 3px;">
+              Target: <b>${log.targetWaktu || '1 Bulan'}</b>
+            </div>
+          </td>
+          <td style="text-align: center;">
+            ${statusBadge}
+            ${log.disetujuiPada ? `<div style="font-size: 9.5px; color: var(--color-text-muted); margin-top: 4px;">${log.disetujuiPada}</div>` : ''}
+          </td>
+          <td style="text-align: right;">
+            <div style="display: flex; gap: 6px; justify-content: flex-end; align-items: center; flex-wrap: wrap;">
+              <button class="btn btn-xs btn-outline" onclick="App.openCoachingDetailModal('${log.id}')" title="Buka Berita Acara / Rincian">
+                <span data-icon="FileText" data-icon-size="13"></span> Rincian
+              </button>
+              ${canApprove ? `
+                <button class="btn btn-xs btn-success" onclick="App.approveCoachingSession('${log.id}')" title="Setujui Hasil Pembinaan (TTE BSrE)">
+                  <span data-icon="Check" data-icon-size="13"></span> Setujui
+                </button>
+              ` : ''}
+              ${canEdit ? `
+                <button class="btn btn-xs btn-outline" onclick="App.openAddCoachingModal('${log.id}')" title="Edit Data Sesi">
+                  <span data-icon="Pencil" data-icon-size="12"></span>
+                </button>
+                <button class="btn btn-xs btn-outline-danger" onclick="App.deleteCoachingSession('${log.id}')" title="Hapus Sesi">
+                  <span data-icon="Trash2" data-icon-size="12"></span>
+                </button>
+              ` : ''}
+            </div>
+          </td>
+        </tr>
+      `;
+    });
+
+    tbody.innerHTML = html;
+    if (typeof renderAllIcons === 'function') renderAllIcons();
+  },
+
+  openAddCoachingModal(editId = null) {
+    const employees = (Store.state && Store.state.employees) ? Store.state.employees : [];
+    const kalender = (Store.state && Store.state.kalenderDiklat) ? Store.state.kalenderDiklat : [];
+    const currentSession = Store.state.currentSession || Store.state.user || {};
+
+    // 1. Populate Pegawai ASN Select
+    const pegSelect = document.getElementById('coachingPegawaiSelect');
+    if (pegSelect) {
+      pegSelect.innerHTML = employees.map(e => `
+        <option value="${e.nip}" data-nama="${e.name}" data-jabatan="${e.jabatan}" data-unit="${e.unitKerja || ''}">
+          ${e.name} (${e.nip}) — ${e.jabatan}
+        </option>
+      `).join('');
+    }
+
+    // 2. Populate Atasan / Mentor Select
+    const mentorSelect = document.getElementById('coachingMentorSelect');
+    if (mentorSelect) {
+      // Prioritaskan Pejabat Struktural & Eselon II / III
+      const supervisors = [
+        { nip: '197507312000031002', name: 'Dr. ANANG RISGIYANTO S.K.M., M.Kes.', jabatan: 'Kepala Badan Perencanaan Pembangunan Daerah' },
+        { nip: '197407072002121008', name: 'ANDI ARAFAT S.T., M.E.', jabatan: 'Sekretaris Bappeda Provinsi Lampung' },
+        { nip: '197305141998031007', name: 'MEYDIANDRA EKA PUTRA S.P,MIP', jabatan: 'KEPALA BIDANG PERENCANAAN MAKRO, PENGENDALIAN DAN EVALUASI PEMBANGUNAN' },
+        { nip: '197410092006042005', name: 'Ir. IDA SUSANTI S S.T., M.T', jabatan: 'KEPALA BIDANG PERENCANAAN INFRASTRUKTUR DAN KEWILAYAYAHAN' },
+        { nip: '197010241998031003', name: 'Dr. EKO CAHYONO S.P., M.Si', jabatan: 'KEPALA BIDANG PERENCANAAN PEREKONOMIAN' },
+        { nip: '196910261992032002', name: 'CIK MARYA S.E.,M.M.', jabatan: 'Kepala Sub Bagian Umum & Kepegawaian' }
+      ];
+
+      const otherEmps = employees.filter(e => !supervisors.some(s => s.nip === e.nip));
+      const allMentors = [...supervisors, ...otherEmps];
+
+      mentorSelect.innerHTML = allMentors.map(m => `
+        <option value="${m.nip}" data-nama="${m.name}" data-jabatan="${m.jabatan}">
+          ${m.name} — ${m.jabatan}
+        </option>
+      `).join('');
+    }
+
+    // 3. Populate Rekomendasi Diklat Select
+    const diklatSelect = document.getElementById('coachingRekomendasiDiklat');
+    if (diklatSelect) {
+      let diklatOptions = `
+        <option value="-">— Tidak Merekomendasikan Diklat Formal (Bimbingan Mandiri) —</option>
+      `;
+      kalender.forEach(k => {
+        diklatOptions += `
+          <option value="${k.judul} (${k.jp} JP)">
+            [${k.institusiKategori.toUpperCase()}] ${k.judul} (${k.jp} JP - ${k.triwulan})
+          </option>
+        `;
+      });
+      diklatSelect.innerHTML = diklatOptions;
+    }
+
+    const editInput = document.getElementById('coachingEditId');
+    const modalTitle = document.getElementById('coachingModalTitle');
+
+    if (editId) {
+      const log = Store.getCoachingLogById(editId);
+      if (!log) {
+        App.toast('Data sesi tidak ditemukan.', 'error');
+        return;
+      }
+      if (editInput) editInput.value = log.id;
+      if (modalTitle) modalTitle.textContent = `Edit Sesi Pembinaan (${log.id})`;
+
+      if (pegSelect) pegSelect.value = log.pegawaiNip;
+      if (mentorSelect) mentorSelect.value = log.mentorNip;
+      document.getElementById('coachingTanggal').value = log.tanggal;
+      document.getElementById('coachingTriwulan').value = log.triwulan;
+      document.getElementById('coachingTipe').value = log.tipe;
+      document.getElementById('coachingFokusKompetensi').value = log.fokusKompetensi;
+      document.getElementById('coachingTargetWaktu').value = log.targetWaktu || '1 Bulan';
+      document.getElementById('coachingKendala').value = log.kendalaTantangan;
+      document.getElementById('coachingHasilDiskusi').value = log.hasilDiskusi;
+      document.getElementById('coachingRekomendasiTindakan').value = log.rekomendasiTindakan;
+      if (diklatSelect) diklatSelect.value = log.rekomendasiDiklatJudul || '-';
+      document.getElementById('coachingStatus').value = log.status;
+      document.getElementById('coachingCatatanMentor').value = log.catatanMentor || '';
+    } else {
+      if (editInput) editInput.value = '';
+      if (modalTitle) modalTitle.textContent = 'Formulir Sesi Dialog Kinerja & Coaching';
+
+      const today = new Date().toISOString().split('T')[0];
+      document.getElementById('coachingTanggal').value = today;
+      document.getElementById('coachingTriwulan').value = 'Q1';
+      document.getElementById('coachingTipe').value = 'Coaching';
+      document.getElementById('coachingFokusKompetensi').value = '';
+      document.getElementById('coachingTargetWaktu').value = '1 Bulan';
+      document.getElementById('coachingKendala').value = '';
+      document.getElementById('coachingHasilDiskusi').value = '';
+      document.getElementById('coachingRekomendasiTindakan').value = '';
+      if (diklatSelect) diklatSelect.selectedIndex = 0;
+      document.getElementById('coachingStatus').value = 'Menunggu Persetujuan';
+      document.getElementById('coachingCatatanMentor').value = '';
+
+      // Default pegawai coachee jika login sebagai pegawai
+      if (currentSession && currentSession.role === 'pegawai' && pegSelect) {
+        pegSelect.value = currentSession.nip;
+      }
+      // Default mentor atasan jika login sebagai pimpinan/admin
+      if (currentSession && (currentSession.role === 'pimpinan' || currentSession.role === 'admin') && mentorSelect) {
+        mentorSelect.value = currentSession.nip;
+      }
+    }
+
+    this.openModal('coachingSessionModal');
+  },
+
+  onCoachingPegawaiChanged(nip) {
+    // Helper jika ingin menyesuaikan atasan dari unit kerja pegawai
+  },
+
+  saveCoachingSession(e) {
+    if (e && e.preventDefault) e.preventDefault();
+
+    const editId = document.getElementById('coachingEditId').value;
+    const pegSelect = document.getElementById('coachingPegawaiSelect');
+    const mentorSelect = document.getElementById('coachingMentorSelect');
+
+    const selectedPegOption = pegSelect.options[pegSelect.selectedIndex];
+    const selectedMentorOption = mentorSelect.options[mentorSelect.selectedIndex];
+
+    const data = {
+      pegawaiNip: pegSelect.value,
+      pegawaiNama: selectedPegOption ? selectedPegOption.getAttribute('data-nama') : '',
+      pegawaiJabatan: selectedPegOption ? selectedPegOption.getAttribute('data-jabatan') : '',
+      pegawaiUnit: selectedPegOption ? selectedPegOption.getAttribute('data-unit') : '',
+      mentorNip: mentorSelect.value,
+      mentorNama: selectedMentorOption ? selectedMentorOption.getAttribute('data-nama') : '',
+      mentorJabatan: selectedMentorOption ? selectedMentorOption.getAttribute('data-jabatan') : '',
+      tanggal: document.getElementById('coachingTanggal').value,
+      triwulan: document.getElementById('coachingTriwulan').value,
+      tipe: document.getElementById('coachingTipe').value,
+      fokusKompetensi: document.getElementById('coachingFokusKompetensi').value.trim(),
+      targetWaktu: document.getElementById('coachingTargetWaktu').value.trim() || '1 Bulan',
+      kendalaTantangan: document.getElementById('coachingKendala').value.trim(),
+      hasilDiskusi: document.getElementById('coachingHasilDiskusi').value.trim(),
+      rekomendasiTindakan: document.getElementById('coachingRekomendasiTindakan').value.trim(),
+      rekomendasiDiklatJudul: document.getElementById('coachingRekomendasiDiklat').value,
+      status: document.getElementById('coachingStatus').value,
+      catatanMentor: document.getElementById('coachingCatatanMentor').value.trim()
+    };
+
+    if (!data.pegawaiNip || !data.mentorNip || !data.fokusKompetensi || !data.kendalaTantangan) {
+      App.toast('Mohon lengkapi seluruh kolom bertanda bintang (*).', 'warning');
+      return;
+    }
+
+    if (editId) {
+      Store.updateCoachingLog(editId, data);
+      App.toast(`Sesi pembinaan ${editId} berhasil diperbarui.`, 'success');
+    } else {
+      const created = Store.addCoachingLog(data);
+      App.toast(`Sesi ${created.tipe} (${created.id}) berhasil didaftarkan.`, 'success');
+    }
+
+    this.closeModal('coachingSessionModal');
+    this.renderCoachingLogPage();
+  },
+
+  openCoachingDetailModal(id) {
+    const log = Store.getCoachingLogById(id);
+    if (!log) {
+      App.toast('Data sesi pembinaan tidak ditemukan.', 'error');
+      return;
+    }
+
+    const titleEl = document.getElementById('coachingDetailTitle');
+    if (titleEl) titleEl.textContent = `Berita Acara Dialog Kinerja — ${log.id}`;
+
+    const bodyEl = document.getElementById('coachingDetailBody');
+    const leftActionsEl = document.getElementById('coachingDetailLeftActions');
+    const rightActionsEl = document.getElementById('coachingDetailRightActions');
+
+    const qrData = encodeURIComponent(`BERITA_ACARA_PEMBINAAN_${log.id}_PEGAWAI_${log.pegawaiNip}_MENTOR_${log.mentorNip}_STATUS_${log.status}`);
+    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=90x90&data=${qrData}`;
+
+    let statusBadge = '';
+    if (log.status === 'Disetujui Pembina') {
+      statusBadge = `<span class="badge" style="background: rgba(16, 185, 129, 0.15); color: #047857; font-weight: 700; font-size: 11.5px;">✓ Disetujui Pembina (Sah)</span>`;
+    } else if (log.status === 'Menunggu Persetujuan') {
+      statusBadge = `<span class="badge" style="background: rgba(245, 158, 11, 0.15); color: #b45309; font-weight: 700; font-size: 11.5px;">⏳ Menunggu Persetujuan Atasan</span>`;
+    } else {
+      statusBadge = `<span class="badge" style="background: rgba(37, 99, 235, 0.15); color: #1d4ed8; font-weight: 700; font-size: 11.5px;">📅 Terjadwal</span>`;
+    }
+
+    if (bodyEl) {
+      bodyEl.innerHTML = `
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--color-border); padding-bottom: 12px; margin-bottom: 16px; flex-wrap: wrap; gap: 8px;">
+          <div>
+            <div style="font-size: 11px; color: var(--color-text-muted); text-transform: uppercase; letter-spacing: 0.5px;">Nomor Dokumen Resmi:</div>
+            <div style="font-weight: 800; font-size: 15px; color: var(--color-primary);">BA-DK/${log.tahun}/${log.triwulan}/${log.id}</div>
+          </div>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span class="badge badge-quarter" style="font-size: 11px;">${log.triwulan} TA ${log.tahun}</span>
+            <span class="badge badge-blue" style="font-size: 11px;">${log.tipe}</span>
+            ${statusBadge}
+          </div>
+        </div>
+
+        <!-- Coachee & Coach Identity Cards -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 18px;">
+          <div style="background: var(--color-surface-subtle); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 14px;">
+            <div style="font-size: 11px; font-weight: 700; color: var(--color-text-muted); text-transform: uppercase; margin-bottom: 6px;">
+              👤 Pegawai yang Dibina (Coachee)
+            </div>
+            <div style="font-weight: 750; font-size: 13.5px; color: var(--color-text-primary);">${log.pegawaiNama}</div>
+            <div style="font-size: 11.5px; color: var(--color-text-muted);">NIP. ${log.pegawaiNip}</div>
+            <div style="font-size: 12px; color: var(--color-text-secondary); margin-top: 4px;">${log.pegawaiJabatan}</div>
+            <div style="font-size: 11.5px; color: var(--color-text-muted); margin-top: 2px;">Unit: ${log.pegawaiUnit || 'Bappeda'}</div>
+          </div>
+
+          <div style="background: var(--color-surface-subtle); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 14px;">
+            <div style="font-size: 11px; font-weight: 700; color: var(--color-text-muted); text-transform: uppercase; margin-bottom: 6px;">
+              👔 Atasan Langsung / Coach
+            </div>
+            <div style="font-weight: 750; font-size: 13.5px; color: var(--color-text-primary);">${log.mentorNama}</div>
+            <div style="font-size: 11.5px; color: var(--color-text-muted);">NIP. ${log.mentorNip}</div>
+            <div style="font-size: 12px; color: var(--color-text-secondary); margin-top: 4px;">${log.mentorJabatan}</div>
+            <div style="font-size: 11.5px; color: #047857; font-weight: 600; margin-top: 2px;">Penilai Kinerja Sesuai SKP 2026</div>
+          </div>
+        </div>
+
+        <!-- Evaluation Details Table -->
+        <div style="background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); overflow: hidden; margin-bottom: 18px;">
+          <div style="padding: 10px 14px; background: rgba(30, 41, 59, 0.04); border-bottom: 1px solid var(--color-border); font-size: 12px; font-weight: 750; color: var(--color-text-primary);">
+            📋 POKOK KESEPAKATAN EVALUASI & PEMBINAAN KINERJA
+          </div>
+          <div style="padding: 14px; font-size: 12.5px; line-height: 1.55;">
+            <div style="margin-bottom: 12px;">
+              <span style="font-weight: 700; color: var(--color-text-primary);">Fokus Kompetensi / Sasaran Kinerja:</span>
+              <div style="color: var(--color-text-secondary); margin-top: 2px;">${log.fokusKompetensi}</div>
+            </div>
+            <div style="margin-bottom: 12px;">
+              <span style="font-weight: 700; color: var(--color-text-primary);">Identifikasi Masalah & Analisis Kendala:</span>
+              <div style="color: var(--color-text-secondary); margin-top: 2px;">${log.kendalaTantangan}</div>
+            </div>
+            <div style="margin-bottom: 12px;">
+              <span style="font-weight: 700; color: var(--color-text-primary);">Hasil Diskusi & Solusi Alternatif:</span>
+              <div style="color: var(--color-text-secondary); margin-top: 2px;">${log.hasilDiskusi}</div>
+            </div>
+            <div style="margin-bottom: 12px; background: rgba(16, 185, 129, 0.06); padding: 10px 12px; border-radius: var(--radius-sm); border-left: 3px solid #10b981;">
+              <span style="font-weight: 750; color: #065f46;">Komitmen Rencana Aksi (Action Plan):</span>
+              <div style="color: #047857; margin-top: 2px; font-weight: 600;">${log.rekomendasiTindakan}</div>
+              <div style="font-size: 11px; color: #047857; margin-top: 3px;">Target Waktu Penyelesaian: <b>${log.targetWaktu || '1 Bulan'}</b></div>
+            </div>
+            <div>
+              <span style="font-weight: 700; color: var(--color-text-primary);">Rekomendasi Program Pelatihan Terpadu (Katalog Diklat 2026):</span>
+              <div style="color: #1e40af; font-weight: 650; margin-top: 2px;">${log.rekomendasiDiklatJudul || 'Tidak merekomendasikan pelatihan formal'}</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Verification & Signature Block -->
+        <div style="display: flex; justify-content: space-between; align-items: center; background: var(--color-surface-subtle); border: 1px dashed var(--color-border); border-radius: var(--radius-md); padding: 12px 16px; flex-wrap: wrap; gap: 12px;">
+          <div>
+            <div style="font-size: 11px; color: var(--color-text-muted);">Status Pengesahan Berita Acara:</div>
+            <div style="font-weight: 700; font-size: 12.5px; color: var(--color-text-primary); margin-top: 2px;">
+              ${log.status === 'Disetujui Pembina' ? `Telah Disahkan oleh ${log.mentorNama}` : 'Menunggu Pengesahan Atasan Langsung'}
+            </div>
+            <div style="font-size: 11px; color: var(--color-text-muted); margin-top: 2px;">
+              Waktu: ${log.disetujuiPada || 'Belum diverifikasi'}
+            </div>
+            ${log.catatanMentor ? `<div style="font-size: 11.5px; font-style: italic; color: var(--color-text-secondary); margin-top: 4px;">"Catatan: ${log.catatanMentor}"</div>` : ''}
+          </div>
+
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <div style="text-align: right; font-size: 10.5px; color: var(--color-text-muted);">
+              <div style="font-weight: 700; color: #047857;">TTE SPBE BSrE</div>
+              <div>Terverifikasi Sistem</div>
+            </div>
+            <img src="${qrUrl}" alt="QR BSrE" style="width: 55px; height: 55px; border-radius: 4px; border: 1px solid var(--color-border); background: #fff; padding: 2px;">
+          </div>
+        </div>
+      `;
+    }
+
+    if (leftActionsEl) {
+      leftActionsEl.innerHTML = `
+        <button class="btn btn-primary" onclick="App.printCoachingDocument('${log.id}')">
+          <span data-icon="Printer" data-icon-size="15"></span> Cetak Berita Acara (Print / PDF)
+        </button>
+      `;
+    }
+
+    const user = Store.state.currentSession || Store.state.user || {};
+    const userRole = user.role || 'pegawai';
+    const userNip = String(user.nip || '').replace(/\s+/g, '');
+    const logMentorNip = String(log.mentorNip || '').replace(/\s+/g, '');
+    const canApprove = (userRole === 'admin' || userRole === 'pimpinan' || userNip === logMentorNip) && log.status !== 'Disetujui Pembina';
+
+    if (rightActionsEl) {
+      rightActionsEl.innerHTML = canApprove ? `
+        <button class="btn btn-success" onclick="App.approveCoachingSession('${log.id}'); App.openCoachingDetailModal('${log.id}');">
+          <span data-icon="Check" data-icon-size="15"></span> Sahkan & Setujui Berita Acara
+        </button>
+      ` : '';
+    }
+
+    if (typeof renderAllIcons === 'function') renderAllIcons();
+    this.openModal('coachingDetailModal');
+  },
+
+  approveCoachingSession(id) {
+    const supervisorNotes = prompt('Masukkan catatan rekomendasi arahan bagi pegawai (opsional):', 'Disetujui untuk dilaksanakan dan ditindaklanjuti sesuai komitmen aksi.');
+    if (supervisorNotes === null) return;
+
+    const updated = Store.approveCoachingLog(id, supervisorNotes);
+    if (updated) {
+      App.toast(`Berita Acara ${id} berhasil disahkan & disetujui.`, 'success');
+      this.renderCoachingLogPage();
+      const detailModal = document.getElementById('coachingDetailModal');
+      if (detailModal && detailModal.classList.contains('active')) {
+        this.openCoachingDetailModal(id);
+      }
+    }
+  },
+
+  deleteCoachingSession(id) {
+    if (!confirm(`Apakah Anda yakin ingin menghapus arsip sesi pembinaan ${id}?`)) return;
+    const ok = Store.deleteCoachingLog(id);
+    if (ok) {
+      App.toast(`Sesi pembinaan ${id} berhasil dihapus.`, 'info');
+      this.renderCoachingLogPage();
+    }
+  },
+
+  printCoachingDocument(sessionId) {
+    if (typeof ExportService !== 'undefined' && ExportService.printCoachingDocument) {
+      ExportService.printCoachingDocument(sessionId);
+    } else {
+      App.toast('Modul pencetakan dokumen belum siap.', 'error');
+    }
+  },
+
+  exportCoachingRecapExcel() {
+    if (typeof ExportService !== 'undefined' && ExportService.exportCoachingRecapExcel) {
+      ExportService.exportCoachingRecapExcel();
+    } else {
+      App.toast('Modul ekspor Excel belum siap.', 'error');
+    }
   },
 
   openAddProgramModal() {
@@ -5734,6 +6276,7 @@ const App = {
 
 if (typeof window !== 'undefined') {
   window.App = App;
+  window.NAV_CONFIG = NAV_CONFIG;
 }
 
 // Initialize application on DOM ready

@@ -2004,6 +2004,149 @@
           <div id="calTrainingGrid" class="training-grid"></div>
         </section>
 
+        <!-- 7b. BUKU LOG DIALOG KINERJA, COACHING & MENTORING (TAHAP 4 - PERMENPAN-RB NO. 6/2022) -->
+        <section id="page-ecoaching" class="page-view">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 14px;">
+            <div>
+              <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
+                <span class="badge" style="background: rgba(30, 41, 59, 0.08); color: var(--color-text-main); font-weight: 600; font-size: 11px;">
+                  <span data-icon="Scale" data-icon-size="12"></span> PermenPAN-RB No. 6/2022
+                </span>
+                <span class="badge" style="background: rgba(16, 185, 129, 0.12); color: #059669; font-weight: 600; font-size: 11px;">
+                  <span data-icon="ShieldCheck" data-icon-size="12"></span> Berita Acara BSrE
+                </span>
+              </div>
+              <h1 class="page-title">Buku Log Pembinaan &amp; Dialog Kinerja ASN</h1>
+              <p class="page-subtitle" style="margin-bottom: 0;">Dokumentasi berkala sesi coaching, mentoring, dan dialog kinerja berkala antara atasan langsung dan aparatur.</p>
+            </div>
+
+            <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+              <button class="btn btn-outline btn-sm" onclick="App.exportCoachingRecapExcel()">
+                <span data-icon="FileSpreadsheet" data-icon-size="15"></span> Ekspor Rekap Excel
+              </button>
+              <button class="btn btn-primary btn-sm" onclick="App.openAddCoachingModal()">
+                <span data-icon="Plus" data-icon-size="15"></span> Catat Sesi Pembinaan
+              </button>
+            </div>
+          </div>
+
+          <!-- 4 Coaching Metric Cards -->
+          <div class="stat-grid" style="grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); margin-bottom: 24px;">
+            <div class="stat-card" style="border-top: 3px solid #2563eb;">
+              <div class="stat-card-inner">
+                <div class="stat-card-info">
+                  <div class="stat-card-label">Total Sesi Pembinaan</div>
+                  <div class="stat-card-value text-blue" id="coachingMetricTotal">0 Sesi</div>
+                  <div class="stat-card-desc">Tercatat sepanjang tahun 2026</div>
+                </div>
+                <div class="stat-card-icon" style="color: #2563eb;"><span data-icon="BookOpen" data-icon-size="20"></span></div>
+              </div>
+            </div>
+
+            <div class="stat-card" style="border-top: 3px solid #10b981;">
+              <div class="stat-card-inner">
+                <div class="stat-card-info">
+                  <div class="stat-card-label">Disetujui Pembina</div>
+                  <div class="stat-card-value text-green" id="coachingMetricApproved">0 Sesi</div>
+                  <div class="stat-card-desc">Berita Acara sah &amp; terverifikasi</div>
+                </div>
+                <div class="stat-card-icon" style="color: #10b981;"><span data-icon="CircleCheck" data-icon-size="20"></span></div>
+              </div>
+            </div>
+
+            <div class="stat-card" style="border-top: 3px solid #f59e0b;">
+              <div class="stat-card-inner">
+                <div class="stat-card-info">
+                  <div class="stat-card-label">Menunggu Review</div>
+                  <div class="stat-card-value text-amber" id="coachingMetricPending">0 Sesi</div>
+                  <div class="stat-card-desc">Perlu persetujuan atasan langsung</div>
+                </div>
+                <div class="stat-card-icon" style="color: #f59e0b;"><span data-icon="Clock" data-icon-size="20"></span></div>
+              </div>
+            </div>
+
+            <div class="stat-card" style="border-top: 3px solid #8b5cf6;">
+              <div class="stat-card-inner">
+                <div class="stat-card-info">
+                  <div class="stat-card-label">Terkoneksi Kalender Diklat</div>
+                  <div class="stat-card-value" style="color: #8b5cf6;" id="coachingMetricDiklatLinked">100%</div>
+                  <div class="stat-card-desc">Rekomendasi bangkom presisi</div>
+                </div>
+                <div class="stat-card-icon" style="color: #8b5cf6;"><span data-icon="GraduationCap" data-icon-size="20"></span></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Filter & Search Toolbar Card -->
+          <div class="card" style="margin-bottom: 24px; padding: 16px 20px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap;">
+              <!-- Triwulan Tabs -->
+              <div class="quarter-tabs-wrapper">
+                <button class="quarter-tab coach-tab-quarter active" data-quarter="all" onclick="App.setCoachingFilter('triwulan', 'all')">Semua Triwulan</button>
+                <button class="quarter-tab coach-tab-quarter" data-quarter="Q1" onclick="App.setCoachingFilter('triwulan', 'Q1')">Q1 (Jan–Mar)</button>
+                <button class="quarter-tab coach-tab-quarter" data-quarter="Q2" onclick="App.setCoachingFilter('triwulan', 'Q2')">Q2 (Apr–Jun)</button>
+                <button class="quarter-tab coach-tab-quarter" data-quarter="Q3" onclick="App.setCoachingFilter('triwulan', 'Q3')">Q3 (Jul–Sep)</button>
+                <button class="quarter-tab coach-tab-quarter" data-quarter="Q4" onclick="App.setCoachingFilter('triwulan', 'Q4')">Q4 (Okt–Des)</button>
+              </div>
+
+              <!-- Quick Search -->
+              <div style="position: relative; min-width: 240px; flex: 1; max-width: 360px;">
+                <input type="text" id="coachingSearchInput" class="form-control form-control-sm" placeholder="Cari pegawai, atasan, topik..." style="padding-left: 32px;" oninput="App.handleCoachingSearch(this.value)">
+                <span data-icon="Search" data-icon-size="14" style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--color-text-muted);"></span>
+              </div>
+            </div>
+
+            <div style="display: flex; gap: 12px; margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--color-border); flex-wrap: wrap; align-items: center;">
+              <span style="font-size: 11.5px; font-weight: 600; color: var(--color-text-muted); display: flex; align-items: center; gap: 5px;">
+                <span data-icon="Filter" data-icon-size="13"></span> Filter:
+              </span>
+
+              <!-- Tipe Pembinaan Filter -->
+              <select id="coachingFilterTipe" class="form-control form-control-sm" style="width: auto; min-width: 170px;" onchange="App.setCoachingFilter('tipe', this.value)">
+                <option value="all">Semua Jenis Pembinaan</option>
+                <option value="Coaching">Coaching Kinerja</option>
+                <option value="Mentoring">Mentoring Teknis</option>
+                <option value="Dialog Kinerja">Dialog Sasaran SKP</option>
+                <option value="Konseling Karir">Konseling Karir</option>
+              </select>
+
+              <!-- Status Filter -->
+              <select id="coachingFilterStatus" class="form-control form-control-sm" style="width: auto; min-width: 170px;" onchange="App.setCoachingFilter('status', this.value)">
+                <option value="all">Semua Status</option>
+                <option value="Disetujui Pembina">Disetujui Pembina</option>
+                <option value="Menunggu Persetujuan">Menunggu Persetujuan</option>
+                <option value="Terjadwal">Terjadwal</option>
+              </select>
+
+              <button class="btn btn-outline btn-sm" onclick="App.resetCoachingFilters()" style="margin-left: auto;">
+                <span data-icon="RotateCcw" data-icon-size="13"></span> Reset
+              </button>
+            </div>
+          </div>
+
+          <!-- Coaching Sessions Table Card -->
+          <div class="card" style="padding: 0; overflow: hidden;">
+            <div class="table-responsive">
+              <table class="table" style="margin-bottom: 0;">
+                <thead>
+                  <tr>
+                    <th style="width: 110px;">ID &amp; Jadwal</th>
+                    <th>Pegawai ASN (Coachee)</th>
+                    <th>Atasan Langsung (Coach / Mentor)</th>
+                    <th>Jenis &amp; Fokus Kompetensi</th>
+                    <th>Rekomendasi Diklat / Aksi</th>
+                    <th style="width: 130px; text-align: center;">Status</th>
+                    <th style="width: 140px; text-align: right;">Aksi</th>
+                  </tr>
+                </thead>
+                <tbody id="coachingTableBody">
+                  <!-- Populated dynamically by App.renderCoachingTable() -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
         <!-- ====================================================================
              ROLE 2: ADMIN / PENGELOLA SDM PAGES
              ==================================================================== -->
@@ -4395,6 +4538,171 @@
     </div>
   </div>
 
+  <!-- MODAL FORM SESI DIALOG KINERJA / COACHING (TAHAP 4) -->
+  <div class="modal-overlay" id="coachingSessionModal" style="display: none;">
+    <div class="modal-card" style="max-width: 740px; width: 94%;">
+      <div class="modal-header">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <div style="width: 38px; height: 38px; border-radius: 9px; background: rgba(37, 99, 235, 0.12); color: #2563eb; display: grid; place-items: center;">
+            <span data-icon="BookOpen" data-icon-size="22"></span>
+          </div>
+          <div>
+            <h3 class="modal-title" id="coachingModalTitle">Formulir Sesi Dialog Kinerja &amp; Coaching</h3>
+            <p class="modal-subtitle">Pencatatan pembinaan berkala atasan sesuai PermenPAN-RB No. 6 Tahun 2022</p>
+          </div>
+        </div>
+        <button class="btn-icon" onclick="App.closeModal('coachingSessionModal')" title="Tutup Modal">
+          <span data-icon="X" data-icon-size="18"></span>
+        </button>
+      </div>
+
+      <form id="coachingForm" onsubmit="App.saveCoachingSession(event)">
+        <input type="hidden" id="coachingEditId" value="">
+        <div class="modal-body" style="padding: 20px 24px; max-height: 72vh; overflow-y: auto;">
+          <!-- Baris 1: Pegawai & Atasan -->
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
+            <div class="form-group" style="margin-bottom: 0;">
+              <label class="form-label" for="coachingPegawaiSelect">Pegawai ASN (Coachee) <span class="text-danger">*</span></label>
+              <select id="coachingPegawaiSelect" class="form-control" required onchange="App.onCoachingPegawaiChanged(this.value)">
+                <!-- Diisi dari DUK Bappeda -->
+              </select>
+            </div>
+            <div class="form-group" style="margin-bottom: 0;">
+              <label class="form-label" for="coachingMentorSelect">Atasan Langsung / Coach / Mentor <span class="text-danger">*</span></label>
+              <select id="coachingMentorSelect" class="form-control" required>
+                <!-- Diisi dari Pimpinan / Atasan Bappeda -->
+              </select>
+            </div>
+          </div>
+
+          <!-- Baris 2: Tanggal, Triwulan, Jenis Pembinaan -->
+          <div style="display: grid; grid-template-columns: 1.2fr 1fr 1.3fr; gap: 16px; margin-bottom: 16px;">
+            <div class="form-group" style="margin-bottom: 0;">
+              <label class="form-label" for="coachingTanggal">Tanggal Pelaksanaan <span class="text-danger">*</span></label>
+              <input type="date" id="coachingTanggal" class="form-control" required>
+            </div>
+            <div class="form-group" style="margin-bottom: 0;">
+              <label class="form-label" for="coachingTriwulan">Triwulan Evaluasi <span class="text-danger">*</span></label>
+              <select id="coachingTriwulan" class="form-control" required>
+                <option value="Q1">Q1 (Jan–Mar)</option>
+                <option value="Q2">Q2 (Apr–Jun)</option>
+                <option value="Q3">Q3 (Jul–Sep)</option>
+                <option value="Q4">Q4 (Okt–Des)</option>
+              </select>
+            </div>
+            <div class="form-group" style="margin-bottom: 0;">
+              <label class="form-label" for="coachingTipe">Jenis Pembinaan <span class="text-danger">*</span></label>
+              <select id="coachingTipe" class="form-control" required>
+                <option value="Coaching">Coaching Kinerja</option>
+                <option value="Mentoring">Mentoring Teknis</option>
+                <option value="Dialog Kinerja">Dialog Sasaran SKP</option>
+                <option value="Konseling Karir">Konseling Karir</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Baris 3: Fokus Kompetensi & Target Waktu -->
+          <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 16px; margin-bottom: 16px;">
+            <div class="form-group" style="margin-bottom: 0;">
+              <label class="form-label" for="coachingFokusKompetensi">Fokus Kompetensi / Sasaran Kinerja <span class="text-danger">*</span></label>
+              <input type="text" id="coachingFokusKompetensi" class="form-control" placeholder="Contoh: Analisis Data Kebijakan Makro, SPBE, Pengadaan" required>
+            </div>
+            <div class="form-group" style="margin-bottom: 0;">
+              <label class="form-label" for="coachingTargetWaktu">Target Penyelesaian</label>
+              <input type="text" id="coachingTargetWaktu" class="form-control" placeholder="Contoh: 1 Bulan / Triwulan II 2026">
+            </div>
+          </div>
+
+          <!-- Baris 4: Identifikasi Masalah / Kendala -->
+          <div class="form-group" style="margin-bottom: 16px;">
+            <label class="form-label" for="coachingKendala">Identifikasi Masalah, Kendala &amp; Analisis Kebutuhan <span class="text-danger">*</span></label>
+            <textarea id="coachingKendala" class="form-control" rows="2" placeholder="Uraikan kendala pelaksanaan tupoksi atau gap kompetensi pegawai..." required></textarea>
+          </div>
+
+          <!-- Baris 5: Hasil Diskusi & Kesepakatan Solusi -->
+          <div class="form-group" style="margin-bottom: 16px;">
+            <label class="form-label" for="coachingHasilDiskusi">Hasil Diskusi, Umpan Balik &amp; Solusi Alternatif <span class="text-danger">*</span></label>
+            <textarea id="coachingHasilDiskusi" class="form-control" rows="2" placeholder="Kesimpulan diskusi bersama atasan dan langkah perbaikan kinerja..." required></textarea>
+          </div>
+
+          <!-- Baris 6: Rencana Aksi Komitmen Pegawai -->
+          <div class="form-group" style="margin-bottom: 16px;">
+            <label class="form-label" for="coachingRekomendasiTindakan">Komitmen Rencana Aksi (Action Plan) Pegawai <span class="text-danger">*</span></label>
+            <textarea id="coachingRekomendasiTindakan" class="form-control" rows="2" placeholder="Langkah konkret yang disepakati akan dilaksanakan bawahan..." required></textarea>
+          </div>
+
+          <!-- Baris 7: Rekomendasi Terintegrasi Kalender Diklat 2026 -->
+          <div class="form-group" style="margin-bottom: 16px;">
+            <label class="form-label" for="coachingRekomendasiDiklat">
+              <span data-icon="GraduationCap" data-icon-size="14" style="color: #2563eb;"></span> Rekomendasi Program Pelatihan (Katalog Terpadu 2026)
+            </label>
+            <select id="coachingRekomendasiDiklat" class="form-control">
+              <!-- Diisi otomatis dari Store.state.kalenderDiklat -->
+            </select>
+            <small class="text-muted" style="display: block; margin-top: 4px; font-size: 11px;">Rekomendasi ini otomatis terhubung dengan usulan IDP &amp; Kalender Diklat BPSDMD/Bappenas 2026.</small>
+          </div>
+
+          <!-- Baris 8: Status & Catatan Mentor -->
+          <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 16px; margin-bottom: 0;">
+            <div class="form-group" style="margin-bottom: 0;">
+              <label class="form-label" for="coachingStatus">Status Sesi</label>
+              <select id="coachingStatus" class="form-control">
+                <option value="Menunggu Persetujuan">Menunggu Persetujuan</option>
+                <option value="Disetujui Pembina">Disetujui Pembina</option>
+                <option value="Terjadwal">Terjadwal</option>
+              </select>
+            </div>
+            <div class="form-group" style="margin-bottom: 0;">
+              <label class="form-label" for="coachingCatatanMentor">Catatan Arahan Khusus Atasan Langsung</label>
+              <input type="text" id="coachingCatatanMentor" class="form-control" placeholder="Pesan evaluasi atau arahan tambahan dari coach/atasan">
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer" style="display: flex; justify-content: flex-end; gap: 10px; padding: 14px 24px; border-top: 1px solid var(--color-border);">
+          <button type="button" class="btn btn-outline" onclick="App.closeModal('coachingSessionModal')">Batal</button>
+          <button type="submit" class="btn btn-primary">
+            <span data-icon="Save" data-icon-size="15"></span> Simpan Sesi Pembinaan
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL DETAIL BERITA ACARA & EVALUASI PEMBINAAN (TAHAP 4) -->
+  <div class="modal-overlay" id="coachingDetailModal" style="display: none;">
+    <div class="modal-card" style="max-width: 780px; width: 94%;">
+      <div class="modal-header">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <div style="width: 38px; height: 38px; border-radius: 9px; background: rgba(16, 185, 129, 0.12); color: #059669; display: grid; place-items: center;">
+            <span data-icon="FileText" data-icon-size="22"></span>
+          </div>
+          <div>
+            <h3 class="modal-title" id="coachingDetailTitle">Berita Acara Dialog Kinerja ASN</h3>
+            <p class="modal-subtitle">Format evaluasi pembinaan berkala atasan sesuai regulasi PermenPAN-RB</p>
+          </div>
+        </div>
+        <button class="btn-icon" onclick="App.closeModal('coachingDetailModal')" title="Tutup Modal">
+          <span data-icon="X" data-icon-size="18"></span>
+        </button>
+      </div>
+
+      <div class="modal-body" id="coachingDetailBody" style="padding: 20px 24px; max-height: 74vh; overflow-y: auto;">
+        <!-- Konten Berita Acara dirender secara dinamis oleh App.renderCoachingDetail() -->
+      </div>
+
+      <div class="modal-footer" id="coachingDetailFooter" style="display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 14px 24px; border-top: 1px solid var(--color-border); flex-wrap: wrap;">
+        <div id="coachingDetailLeftActions">
+          <!-- Tombol Cetak / TTE Berita Acara -->
+        </div>
+        <div style="display: flex; gap: 10px;">
+          <button type="button" class="btn btn-outline" onclick="App.closeModal('coachingDetailModal')">Tutup</button>
+          <div id="coachingDetailRightActions"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- TOAST CONTAINER -->
   <div class="toast-container" id="toastContainer"></div>
 
@@ -4406,10 +4714,10 @@
   <script src="assets/tte-service.js?v=20261023_v45"></script>
   <script src="js/icons.js?v=20261014_v16"></script>
   <script src="js/charts.js?v=20261008_fix"></script>
-  <script src="js/bappeda_data.js?v=20261026_v49"></script>
-  <script src="js/store.js?v=20261026_v49"></script>
-  <script src="js/export.js?v=20261026_v49"></script>
-  <script src="js/app.js?v=20261026_v49"></script>
+  <script src="js/bappeda_data.js?v=20261026_v50"></script>
+  <script src="js/store.js?v=20261026_v50"></script>
+  <script src="js/export.js?v=20261026_v50"></script>
+  <script src="js/app.js?v=20261026_v50"></script>
 </body>
 
 </html>

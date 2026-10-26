@@ -1375,6 +1375,281 @@ const ExportService = {
     setTimeout(() => {
       window.print();
     }, 150);
+  },
+
+  /**
+   * =========================================================================
+   * TAHAP 4: EKSPOR REKAP BUKU LOG PEMBINAAN & DIALOG KINERJA EXCEL
+   * Sesuai regulasi PermenPAN-RB No. 6 Tahun 2022
+   * =========================================================================
+   */
+  exportCoachingRecapExcel() {
+    const logs = (typeof Store !== 'undefined' && Store.getCoachingLogs) ? Store.getCoachingLogs() : [];
+    if (!logs || logs.length === 0) {
+      if (typeof App !== 'undefined' && App.toast) {
+        App.toast('Tidak ada data sesi pembinaan untuk diekspor.', 'warning');
+      }
+      return;
+    }
+
+    const headers = [
+      'No',
+      'ID Sesi',
+      'Tahun',
+      'Triwulan',
+      'Tanggal Pelaksanaan',
+      'Nama Pegawai ASN (Coachee)',
+      'NIP Pegawai',
+      'Jabatan Pegawai',
+      'Unit Kerja',
+      'Nama Atasan Langsung (Coach/Mentor)',
+      'NIP Atasan',
+      'Jabatan Atasan',
+      'Jenis Pembinaan',
+      'Fokus Sasaran Kompetensi',
+      'Identifikasi Kendala / Masalah',
+      'Hasil Diskusi & Solusi Alternatif',
+      'Komitmen Rencana Aksi Pegawai',
+      'Rekomendasi Pelatihan Terpadu (2026)',
+      'Target Waktu Penyelesaian',
+      'Status Pembinaan',
+      'Catatan / Arahan Khusus Atasan',
+      'Waktu Pengesahan Atasan'
+    ];
+
+    const rows = logs.map((l, idx) => [
+      idx + 1,
+      l.id,
+      l.tahun,
+      l.triwulan,
+      l.tanggal,
+      l.pegawaiNama,
+      `'${l.pegawaiNip}`,
+      l.pegawaiJabatan,
+      l.pegawaiUnit,
+      l.mentorNama,
+      `'${l.mentorNip}`,
+      l.mentorJabatan,
+      l.tipe,
+      l.fokusKompetensi,
+      l.kendalaTantangan,
+      l.hasilDiskusi,
+      l.rekomendasiTindakan,
+      l.rekomendasiDiklatJudul || '-',
+      l.targetWaktu || '-',
+      l.status,
+      l.catatanMentor || '-',
+      l.disetujuiPada || '-'
+    ]);
+
+    const activeYear = (typeof Store !== 'undefined' && Store.getActiveYear) ? Store.getActiveYear() : 2026;
+    const filename = `Rekap_Buku_Log_Pembinaan_ASN_Bappeda_${activeYear}`;
+    this.downloadExcel(filename, 'Buku Log PermenPAN-RB 6', headers, rows);
+
+    if (typeof App !== 'undefined' && App.toast) {
+      App.toast('Rekap Buku Log Pembinaan ASN berhasil diekspor ke format Excel!', 'success');
+    }
+  },
+
+  /**
+   * =========================================================================
+   * TAHAP 4: CETAK BERITA ACARA DIALOG KINERJA / COACHING RESMI (PRINT/PDF)
+   * Dilengkapi KOP Surat Resmi & Verifikasi Digital BSrE / SPBE
+   * =========================================================================
+   */
+  printCoachingDocument(sessionId) {
+    const log = (typeof Store !== 'undefined' && Store.getCoachingLogById) ? Store.getCoachingLogById(sessionId) : null;
+    if (!log) {
+      if (typeof App !== 'undefined' && App.toast) {
+        App.toast('Data sesi pembinaan tidak ditemukan.', 'error');
+      }
+      return;
+    }
+
+    const oldPrint = document.getElementById('officialPrintSection');
+    if (oldPrint) {
+      if (typeof oldPrint.remove === 'function') oldPrint.remove();
+      else if (oldPrint.parentNode) oldPrint.parentNode.removeChild(oldPrint);
+    }
+
+    const lambang = (typeof window !== 'undefined' && window.LAMBANG_LAMPUNG_SVG)
+      ? window.LAMBANG_LAMPUNG_SVG
+      : '<div style="font-size:28px;">🏛️</div>';
+
+    const qrData = encodeURIComponent(`BERITA_ACARA_PEMBINAAN_${log.id}_PEGAWAI_${log.pegawaiNip}_MENTOR_${log.mentorNip}_STATUS_${log.status}`);
+    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=110x110&data=${qrData}`;
+
+    const printContainer = document.createElement('div');
+    printContainer.id = 'officialPrintSection';
+    printContainer.className = 'print-only-container';
+
+    printContainer.innerHTML = `
+      <div style="font-family: 'Times New Roman', Times, serif; color: #000; padding: 12px 18px; line-height: 1.35; font-size: 11pt;">
+        <!-- KOP SURAT PEMERINTAH PROVINSI LAMPUNG -->
+        <div style="display: flex; align-items: center; border-bottom: 3px double #000; padding-bottom: 8px; margin-bottom: 16px;">
+          <div style="width: 72px; height: 72px; margin-right: 14px; display: flex; align-items: center; justify-content: center;">
+            ${lambang}
+          </div>
+          <div style="flex: 1; text-align: center;">
+            <div style="font-size: 13pt; font-weight: 700; letter-spacing: 0.5px;">PEMERINTAH PROVINSI LAMPUNG</div>
+            <div style="font-size: 15pt; font-weight: 800; letter-spacing: 0.5px;">BADAN PERENCANAAN PEMBANGUNAN DAERAH</div>
+            <div style="font-size: 9pt; font-family: Arial, sans-serif; margin-top: 2px;">
+              Jalan Wolter Monginsidi Nomor 224, Teluk Betung, Bandar Lampung Kode Pos 35215<br>
+              Telepon: (0721) 486255 • Pos-el: bappeda@lampungprov.go.id • Laman: bappeda.lampungprov.go.id
+            </div>
+          </div>
+        </div>
+
+        <!-- JUDUL SURAT -->
+        <div style="text-align: center; margin-bottom: 16px;">
+          <div style="font-size: 12.5pt; font-weight: 700; text-decoration: underline; text-transform: uppercase;">
+            BERITA ACARA EVALUASI DIALOG KINERJA &amp; PEMBINAAN ASN
+          </div>
+          <div style="font-size: 10.5pt; font-weight: 600; margin-top: 2px;">
+            Nomor: BA-DK / ${log.tahun} / ${log.triwulan} / ${log.id}
+          </div>
+          <div style="font-size: 9.5pt; font-style: italic; color: #333; margin-top: 2px;">
+            Berdasarkan Peraturan Menteri PAN-RB Nomor 6 Tahun 2022 tentang Pengelolaan Kinerja Pegawai ASN
+          </div>
+        </div>
+
+        <p style="text-align: justify; margin-bottom: 12px; font-size: 10.5pt;">
+          Pada hari ini, tanggal <b>${log.tanggal}</b>, bertempat di Kantor Badan Perencanaan Pembangunan Daerah Provinsi Lampung, telah dilaksanakan sesi pembinaan berkala aparatur (1-on-1 Dialogue) antara:
+        </p>
+
+        <!-- PIHAK I: ATASAN / PEMBINA -->
+        <table style="width: 100%; border-collapse: collapse; margin-bottom: 8px; font-size: 10pt;">
+          <tr>
+            <td style="width: 25px; vertical-align: top; font-weight: bold;">I.</td>
+            <td style="width: 150px; vertical-align: top;">Nama Atasan Langsung</td>
+            <td style="width: 15px; vertical-align: top;">:</td>
+            <td style="vertical-align: top; font-weight: bold;">${log.mentorNama}</td>
+          </tr>
+          <tr>
+            <td></td>
+            <td style="vertical-align: top;">N I P</td>
+            <td style="vertical-align: top;">:</td>
+            <td style="vertical-align: top;">${log.mentorNip}</td>
+          </tr>
+          <tr>
+            <td></td>
+            <td style="vertical-align: top;">Jabatan / Peran</td>
+            <td style="vertical-align: top;">:</td>
+            <td style="vertical-align: top;">${log.mentorJabatan} (Atasan Langsung / Coach / Mentor)</td>
+          </tr>
+        </table>
+
+        <!-- PIHAK II: PEGAWAI / COACHEE -->
+        <table style="width: 100%; border-collapse: collapse; margin-bottom: 14px; font-size: 10pt;">
+          <tr>
+            <td style="width: 25px; vertical-align: top; font-weight: bold;">II.</td>
+            <td style="width: 150px; vertical-align: top;">Nama Pegawai ASN</td>
+            <td style="width: 15px; vertical-align: top;">:</td>
+            <td style="vertical-align: top; font-weight: bold;">${log.pegawaiNama}</td>
+          </tr>
+          <tr>
+            <td></td>
+            <td style="vertical-align: top;">N I P</td>
+            <td style="vertical-align: top;">:</td>
+            <td style="vertical-align: top;">${log.pegawaiNip}</td>
+          </tr>
+          <tr>
+            <td></td>
+            <td style="vertical-align: top;">Jabatan / Unit Kerja</td>
+            <td style="vertical-align: top;">:</td>
+            <td style="vertical-align: top;">${log.pegawaiJabatan} — ${log.pegawaiUnit || 'Bappeda Prov. Lampung'}</td>
+          </tr>
+        </table>
+
+        <div style="font-weight: bold; margin-bottom: 6px; font-size: 10.5pt;">POKOK-POKOK KESEPAKATAN EVALUASI &amp; PEMBINAAN KINERJA:</div>
+
+        <table style="width: 100%; border-collapse: collapse; margin-bottom: 16px; font-size: 9.5pt;" border="1" cellpadding="6">
+          <thead style="background: #f1f5f9;">
+            <tr>
+              <th style="width: 28%; text-align: left; padding: 6px;">Komponen Evaluasi</th>
+              <th style="text-align: left; padding: 6px;">Uraian Hasil Pembinaan &amp; Kesepakatan Bersama</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="font-weight: 600; vertical-align: top;">Jenis &amp; Periode Pembinaan</td>
+              <td><b>${log.tipe}</b> (Periode Evaluasi: Triwulan ${log.triwulan} TA ${log.tahun})</td>
+            </tr>
+            <tr>
+              <td style="font-weight: 600; vertical-align: top;">Fokus Kompetensi / SKP</td>
+              <td>${log.fokusKompetensi}</td>
+            </tr>
+            <tr>
+              <td style="font-weight: 600; vertical-align: top;">Identifikasi Gap &amp; Kendala</td>
+              <td style="text-align: justify;">${log.kendalaTantangan}</td>
+            </tr>
+            <tr>
+              <td style="font-weight: 600; vertical-align: top;">Hasil Umpan Balik &amp; Solusi</td>
+              <td style="text-align: justify;">${log.hasilDiskusi}</td>
+            </tr>
+            <tr>
+              <td style="font-weight: 600; vertical-align: top;">Komitmen Rencana Aksi (Action Plan)</td>
+              <td style="text-align: justify; font-weight: 600;">${log.rekomendasiTindakan} <span style="font-weight: normal;">(Target Waktu: ${log.targetWaktu || '1 Bulan'})</span></td>
+            </tr>
+            <tr>
+              <td style="font-weight: 600; vertical-align: top;">Rekomendasi Diklat Terpadu</td>
+              <td style="color: #1e3a8a; font-weight: 600;">${log.rekomendasiDiklatJudul || 'Pemeliharaan Kompetensi Mandiri'}</td>
+            </tr>
+            <tr>
+              <td style="font-weight: 600; vertical-align: top;">Catatan Khusus Atasan Langsung</td>
+              <td style="font-style: italic;">"${log.catatanMentor || 'Telah disetujui untuk dilaksanakan secara bertanggung jawab.'}"</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <p style="text-align: justify; margin-bottom: 20px; font-size: 10pt;">
+          Demikian Berita Acara ini dibuat dan disepakati bersama oleh kedua belah pihak dengan penuh kesadaran dan tanggung jawab sebagai bukti pemenuhan kewajiban dialog kinerja berkala dan acuan penyusunan rencana pengembangan kompetensi ASN.
+        </p>
+
+        <!-- PENGESAHAN TANDA TANGAN (BSrE TTE QR CODE) -->
+        <div style="display: flex; justify-content: space-between; margin-top: 10px; font-size: 10pt;">
+          <div style="width: 45%; text-align: center;">
+            <div>Pegawai yang Dibina (Coachee),</div>
+            <div style="height: 55px; display: flex; align-items: center; justify-content: center;">
+              <span style="font-size: 9pt; color: #475569; font-style: italic;">[Telah Menyetujui Secara Elektronik]</span>
+            </div>
+            <div style="font-weight: bold; text-decoration: underline;">${log.pegawaiNama}</div>
+            <div>NIP. ${log.pegawaiNip}</div>
+          </div>
+
+          <div style="width: 48%; text-align: center;">
+            <div>Bandar Lampung, ${log.tanggal}</div>
+            <div style="font-weight: bold;">Atasan Langsung / Coach,</div>
+            <div style="margin: 6px auto; display: flex; flex-direction: column; align-items: center;">
+              <img src="${qrUrl}" alt="TTE BSrE" style="width: 65px; height: 65px; border: 1px solid #cbd5e1; padding: 2px;">
+              <div style="font-size: 7.5pt; font-family: Arial, sans-serif; color: #047857; font-weight: bold; margin-top: 2px;">
+                ✓ TTE Tersertifikasi BSrE / SPBE
+              </div>
+            </div>
+            <div style="font-weight: bold; text-decoration: underline;">${log.mentorNama}</div>
+            <div>NIP. ${log.mentorNip}</div>
+          </div>
+        </div>
+
+        <div style="margin-top: 16px; border-top: 1px dashed #94a3b8; padding-top: 4px; font-size: 7.5pt; color: #64748b; font-family: Arial, sans-serif; display: flex; justify-content: space-between;">
+          <span>Dokumen resmi Sistem Informasi Pengembangan Kompetensi (SIP-KOMPETENSI) Bappeda Provinsi Lampung</span>
+          <span>Dicetak: ${new Date().toLocaleString('id-ID')}</span>
+        </div>
+      </div>
+    `;
+
+    let styleEl = document.getElementById('dynamicPrintStyle');
+    if (!styleEl) {
+      styleEl = document.createElement('style');
+      styleEl.id = 'dynamicPrintStyle';
+      document.head.appendChild(styleEl);
+    }
+    styleEl.textContent = `@media print { @page { size: portrait; margin: 10mm 12mm 12mm 12mm; } }`;
+
+    document.body.insertBefore(printContainer, document.body.firstChild);
+    setTimeout(() => {
+      window.print();
+    }, 150);
   }
 };
 
