@@ -238,6 +238,63 @@
       .login-headline-centered { font-size: 21px; }
       .login-subheadline-centered { font-size: 12px; }
     }
+
+    /* TAHAP 7: WHATSAPP SMARTPHONE MOCKUP & LIVE CHAT STYLES */
+    .smartphone-frame {
+      box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.45), 0 0 0 1px rgba(255, 255, 255, 0.15) !important;
+      transition: transform 0.3s ease;
+    }
+    .smartphone-frame:hover {
+      transform: translateY(-2px);
+    }
+    .wa-bubble-inbound {
+      position: relative;
+      animation: fadeInBubble 0.25s ease-out;
+    }
+    .wa-bubble-inbound::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: -8px;
+      width: 0;
+      height: 0;
+      border: 8px solid transparent;
+      border-top-color: #ffffff;
+      border-right: 0;
+    }
+    @keyframes fadeInBubble {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .switch-toggle input[type="checkbox"] {
+      width: 36px;
+      height: 20px;
+      appearance: none;
+      background: #cbd5e1;
+      border-radius: 12px;
+      position: relative;
+      outline: none;
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+    .switch-toggle input[type="checkbox"]:checked {
+      background: #10b981;
+    }
+    .switch-toggle input[type="checkbox"]::after {
+      content: "";
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      width: 16px;
+      height: 16px;
+      background: #ffffff;
+      border-radius: 50%;
+      transition: transform 0.2s ease;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.25);
+    }
+    .switch-toggle input[type="checkbox"]:checked::after {
+      transform: translateX(16px);
+    }
   </style>
 </head>
 
@@ -2880,6 +2937,12 @@
           <div id="backupPageContent"></div>
         </section>
 
+        <!-- 12c. PUSAT PENGINGAT & NOTIFIKASI WHATSAPP GATEWAY (TAHAP 7: anotif) -->
+        <section id="page-anotif" class="page-view">
+          <!-- Dynamic Container rendered by ReminderService.renderReminderPage() -->
+          <div id="reminderPageContent"></div>
+        </section>
+
         <!-- ====================================================================
              ROLE 3: PIMPINAN PAGES (READ ONLY)
              ==================================================================== -->
@@ -4602,6 +4665,116 @@
     </div>
   </div>
 
+  <!-- MODAL KONFIGURASI WHATSAPP GATEWAY SPBE (TAHAP 7) -->
+  <div class="modal-overlay" id="waGatewayConfigModal" style="display: none;">
+    <div class="modal-card" style="max-width: 580px; width: 92%;">
+      <div class="modal-header">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <div style="width: 38px; height: 38px; border-radius: 8px; background: rgba(16, 185, 129, 0.12); color: #059669; display: grid; place-items: center;">
+            <span data-icon="MessageSquare" data-icon-size="20"></span>
+          </div>
+          <div>
+            <h3 class="modal-title">Konfigurasi WhatsApp Gateway SPBE</h3>
+            <p class="modal-subtitle">Integrasi Server Notifikasi Kedinasan Pemprov Lampung</p>
+          </div>
+        </div>
+        <button class="btn-icon" onclick="App.closeModal('waGatewayConfigModal')" title="Tutup Modal">
+          <span data-icon="X" data-icon-size="18"></span>
+        </button>
+      </div>
+
+      <div class="modal-body" style="padding: 20px 24px;">
+        <div class="form-group">
+          <label class="form-label" style="font-weight: 650;">Penyedia Layanan (Gateway Provider)</label>
+          <select id="gwProviderSelect" class="form-select" style="font-size: 12.5px;">
+            <option value="pemprov_gateway" selected>1. Gateway Resmi WhatsApp SPBE Pemprov Lampung (Diskominfo)</option>
+            <option value="fonnte">2. Fonnte WhatsApp API Gateway</option>
+            <option value="wablas">3. Wablas Enterprise Server</option>
+            <option value="twilio">4. Twilio Messaging API</option>
+            <option value="meta_cloud">5. Meta WhatsApp Cloud API Resmi</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="gwEndpointInput" style="font-weight: 650;">Endpoint URL REST API</label>
+          <input type="text" id="gwEndpointInput" class="form-control" value="https://gateway-wa.lampungprov.go.id/api/v1/send-message" style="font-family: monospace; font-size: 12px;">
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+          <div class="form-group">
+            <label class="form-label" for="gwApiKeyInput" style="font-weight: 650;">API Key / Bearer Token</label>
+            <input type="password" id="gwApiKeyInput" class="form-control" value="LMP-WA-SPBE-99X-BAPPEDA-SECURE" style="font-family: monospace; font-size: 12px;">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="gwDeviceIdInput" style="font-weight: 650;">Device ID / Sender Instance</label>
+            <input type="text" id="gwDeviceIdInput" class="form-control" value="BAPPEDA-NODE-01" style="font-family: monospace; font-size: 12px;">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="gwSenderNumberInput" style="font-weight: 650;">Nomor Ponsel Pengirim Resmi</label>
+          <input type="text" id="gwSenderNumberInput" class="form-control" value="0811-7201-9003" style="font-family: monospace; font-size: 12px;">
+          <div style="font-size: 11px; color: var(--color-text-muted); margin-top: 4px;">Nomor kedinasan Subbag Kepegawaian Bappeda yang terhubung ke server SPBE.</div>
+        </div>
+
+        <!-- Ping Result Box -->
+        <div id="gwPingResultBox" style="display: none; margin-top: 14px;"></div>
+      </div>
+
+      <div class="modal-footer" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+        <button type="button" class="btn btn-outline" id="btnTestPingGw" onclick="ReminderService.testGatewayPing()">
+          <span data-icon="Activity" data-icon-size="14"></span> Uji Ping Koneksi
+        </button>
+        <div style="display: flex; gap: 8px;">
+          <button type="button" class="btn btn-outline" onclick="App.closeModal('waGatewayConfigModal')">Batal</button>
+          <button type="button" class="btn btn-primary" onclick="ReminderService.saveGatewayConfigFromModal()">
+            <span data-icon="Check" data-icon-size="14"></span> Simpan Konfigurasi
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL EDIT NOMOR WHATSAPP ASN (TAHAP 7) -->
+  <div class="modal-overlay" id="editContactModal" style="display: none;">
+    <div class="modal-card" style="max-width: 440px; width: 90%;">
+      <div class="modal-header">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <div style="width: 36px; height: 36px; border-radius: 8px; background: rgba(37, 99, 235, 0.1); color: var(--color-primary); display: grid; place-items: center;">
+            <span data-icon="Phone" data-icon-size="18"></span>
+          </div>
+          <div>
+            <h3 class="modal-title">Edit Nomor WhatsApp ASN</h3>
+            <p class="modal-subtitle">Pembaruan kontak kedinasan pegawai</p>
+          </div>
+        </div>
+        <button class="btn-icon" onclick="App.closeModal('editContactModal')" title="Tutup Modal">
+          <span data-icon="X" data-icon-size="18"></span>
+        </button>
+      </div>
+
+      <div class="modal-body" style="padding: 18px 20px;">
+        <div style="background: var(--color-surface-subtle); padding: 10px 14px; border-radius: 8px; border: 1px solid var(--color-border); margin-bottom: 14px;">
+          <div id="editContactEmpName" style="font-weight: 750; font-size: 13px; color: var(--color-text-primary);">Nama Pegawai</div>
+          <div id="editContactEmpNip" style="font-size: 11px; color: var(--color-text-muted); margin-top: 2px;">NIP: -</div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="editContactPhoneInput" style="font-weight: 650;">Nomor WhatsApp Kedinasan</label>
+          <input type="text" id="editContactPhoneInput" class="form-control" placeholder="Contoh: 0812-7911-3401" style="font-family: monospace; font-size: 13px; font-weight: 700;">
+          <div style="font-size: 11px; color: var(--color-text-muted); margin-top: 4px;">Format bebas (08... atau 628...). Sistem otomatis menstandarisasi saat mengirim pesan.</div>
+        </div>
+      </div>
+
+      <div class="modal-footer" style="display: flex; justify-content: flex-end; gap: 8px;">
+        <button type="button" class="btn btn-outline" onclick="App.closeModal('editContactModal')">Batal</button>
+        <button type="button" class="btn btn-primary" onclick="ReminderService.saveContactPhone()">
+          <span data-icon="Save" data-icon-size="14"></span> Simpan Kontak
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- MODAL SINKRONISASI / IMPORT DUK PEGAWAI (TAHAP 2) -->
   <div class="modal-overlay" id="importEmployeeModal" style="display: none;">
     <div class="modal-card" style="max-width: 680px; width: 94%;">
@@ -5149,10 +5322,10 @@
   <script src="assets/tte-service.js?v=20261023_v45"></script>
   <script src="js/icons.js?v=20261014_v16"></script>
   <script src="js/charts.js?v=20261008_fix"></script>
-  <script src="js/bappeda_data.js?v=20261026_v53"></script>
-  <script src="js/store.js?v=20261026_v53"></script>
-  <script src="js/export.js?v=20261026_v53"></script>
-  <script src="js/app.js?v=20261026_v53"></script>
+  <script src="js/bappeda_data.js?v=20261026_v54"></script>
+  <script src="js/store.js?v=20261026_v54"></script>
+  <script src="js/export.js?v=20261026_v54"></script>
+  <script src="js/app.js?v=20261026_v54"></script>
 </body>
 
 </html>

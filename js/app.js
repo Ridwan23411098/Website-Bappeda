@@ -46,6 +46,7 @@ const NAV_CONFIG = {
           { id: 'ecoaching', icon: 'BookOpen', label: 'Buku Log Pembinaan' },
           { id: 'epascapelatihan', icon: 'Award', label: 'Evaluasi Dampak Bangkom' },
           { id: 'apelaksanaan', icon: 'CircleCheck', label: 'Pelaksanaan SDM' },
+          { id: 'anotif', icon: 'Bell', label: 'Pengingat & WhatsApp' },
           { id: 'abackup', icon: 'DatabaseBackup', label: 'Cadangan & Pemulihan' },
           { id: 'amaster', icon: 'Settings2', label: 'Master Data' }
         ]
@@ -69,6 +70,7 @@ const NAV_CONFIG = {
           { id: 'ekalender', icon: 'Calendar', label: 'Kalender Diklat' },
           { id: 'ecoaching', icon: 'BookOpen', label: 'Log Pembinaan ASN' },
           { id: 'epascapelatihan', icon: 'Award', label: 'Dampak Pasca-Diklat' },
+          { id: 'anotif', icon: 'Bell', label: 'Pengingat & WhatsApp' },
           { id: 'abackup', icon: 'DatabaseBackup', label: 'Keamanan Data & Audit' }
         ]
       }
@@ -407,8 +409,8 @@ const App = {
     const userRole = Store.state.currentSession?.role || Store.state.user?.role || 'pegawai';
     const roleAllowedPages = {
       pegawai: ['edash', 'eprofil', 'ekarier', 'ekompetensi', 'eidp', 'ekalender', 'ecoaching', 'epascapelatihan', 'ereview', 'epelaksanaan'],
-      admin: ['adash', 'averif', 'apegawai', 'ekalender', 'ecoaching', 'epascapelatihan', 'apelaksanaan', 'abackup', 'amaster', 'eprofil'],
-      pimpinan: ['pdash', 'pmonitoring', 'plaporan', 'ekalender', 'ecoaching', 'epascapelatihan', 'abackup', 'eprofil']
+      admin: ['adash', 'averif', 'apegawai', 'ekalender', 'ecoaching', 'epascapelatihan', 'apelaksanaan', 'anotif', 'abackup', 'amaster', 'eprofil'],
+      pimpinan: ['pdash', 'pmonitoring', 'plaporan', 'ekalender', 'ecoaching', 'epascapelatihan', 'anotif', 'abackup', 'eprofil']
     };
 
     const allowed = roleAllowedPages[userRole] || roleAllowedPages['pegawai'];
@@ -450,6 +452,7 @@ const App = {
       averif: 'Verifikasi IDP Pegawai',
       apegawai: 'Data Pegawai Bappeda',
       apelaksanaan: 'Pelaksanaan SDM Seluruh Unit',
+      anotif: 'Pusat Pengingat & Notifikasi WhatsApp Gateway',
       abackup: 'Pusat Cadangan & Pemulihan Data Cloud SPBE',
       amaster: 'Master Data Referensi',
       pdash: 'Dashboard Pimpinan',
@@ -520,6 +523,11 @@ const App = {
         break;
       case 'amaster':
         this.renderMasterData();
+        break;
+      case 'anotif':
+        if (typeof ReminderService !== 'undefined') {
+          ReminderService.renderReminderPage();
+        }
         break;
       case 'abackup':
         this.renderBackupPage();
@@ -5000,10 +5008,13 @@ const App = {
     }
   },
 
-  // POIN 4: SINGLE EMPLOYEE REMINDER
+  // POIN 4: SINGLE EMPLOYEE REMINDER (TAHAP 7: REMINDER SERVICE ENHANCED)
   _currentSingleReminderEmp: null,
 
   openSingleReminderModal(empId) {
+    if (typeof ReminderService !== 'undefined') {
+      return ReminderService.openSingleReminderModal(empId);
+    }
     const emps = Store.state.employees || [];
     const emp = emps.find(e => e.id === empId || String(e.nip).replace(/\s+/g, '') === String(empId).replace(/\s+/g, ''));
     if (!emp) return;
@@ -5043,6 +5054,9 @@ const App = {
   },
 
   async sendSingleReminderViaSystem() {
+    if (typeof ReminderService !== 'undefined') {
+      return ReminderService.sendSingleReminderViaSystem();
+    }
     const emp = this._currentSingleReminderEmp;
     if (!emp) return;
     const msg = document.getElementById('singleRemindMessage')?.value || '';
@@ -5081,6 +5095,9 @@ const App = {
   },
 
   sendSingleReminderViaWa() {
+    if (typeof ReminderService !== 'undefined') {
+      return ReminderService.sendSingleReminderViaWa();
+    }
     const emp = this._currentSingleReminderEmp;
     if (!emp) return;
     const msg = document.getElementById('singleRemindMessage')?.value || '';
