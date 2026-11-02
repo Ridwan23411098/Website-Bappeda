@@ -564,7 +564,9 @@ const Store = {
       ],
       monthlyTrend: [15, 28, 42, 55, 62, 70, 78, 85, 90, 94, 98, 99],
       monthLabels: ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des']
-    }
+    },
+    coachingLogs: (typeof BAPPEDA_DATA !== 'undefined' && BAPPEDA_DATA.coachingLogs) ? JSON.parse(JSON.stringify(BAPPEDA_DATA.coachingLogs)) : [],
+    postTrainingEvaluations: (typeof BAPPEDA_DATA !== 'undefined' && BAPPEDA_DATA.postTrainingEvaluations) ? JSON.parse(JSON.stringify(BAPPEDA_DATA.postTrainingEvaluations)) : []
   },
 
   // Active State in RAM
@@ -624,6 +626,20 @@ const Store = {
 
         if (!this.state.verifications || this.state.verifications.length === 0) {
           this.state.verifications = JSON.parse(JSON.stringify(BAPPEDA_DATA.verifications || []));
+        }
+
+        // Pastikan postTrainingEvaluations terisi jika state kosong
+        if (!this.state.postTrainingEvaluations || !Array.isArray(this.state.postTrainingEvaluations) || this.state.postTrainingEvaluations.length === 0) {
+          this.state.postTrainingEvaluations = (typeof BAPPEDA_DATA !== 'undefined' && BAPPEDA_DATA.postTrainingEvaluations)
+            ? JSON.parse(JSON.stringify(BAPPEDA_DATA.postTrainingEvaluations))
+            : [];
+        }
+
+        // Pastikan coachingLogs terisi jika state kosong
+        if (!this.state.coachingLogs || !Array.isArray(this.state.coachingLogs) || this.state.coachingLogs.length === 0) {
+          this.state.coachingLogs = (typeof BAPPEDA_DATA !== 'undefined' && BAPPEDA_DATA.coachingLogs)
+            ? JSON.parse(JSON.stringify(BAPPEDA_DATA.coachingLogs))
+            : [];
         }
         // Pastikan setiap data verifikasi memiliki identitas tahun anggaran (default 2026 untuk baseline)
         this.state.verifications.forEach(v => {
@@ -1328,13 +1344,23 @@ const Store = {
    * @param {string} storedPassword 
    * @returns {Promise<boolean>}
    */
-  async verifyPassword(plainInput, storedPassword) {
+  /**
+   * Verify input plain password against stored password (supports legacy plain text & SHA-256 hash)
+   * @param {string} plainInput 
+   * @param {string} storedPassword 
+   * @param {boolean} isPasswordChanged
+   * @returns {Promise<boolean>}
+   */
+  async verifyPassword(plainInput, storedPassword, isPasswordChanged = false) {
     if (!plainInput) return false;
     const cleanInput = String(plainInput).trim();
 
     // Universal default password across all roles for easy testing & presentation
-    if (cleanInput === 'password' || cleanInput === 'admin123' || cleanInput === 'pimpinan123') {
-      return true;
+    // HANYA berlaku jika akun belum pernah mengubah password secara mandiri
+    if (!isPasswordChanged) {
+      if (cleanInput === 'password' || cleanInput === 'admin123' || cleanInput === 'pimpinan123') {
+        return true;
+      }
     }
 
     if (!storedPassword) return false;
@@ -1350,80 +1376,10 @@ const Store = {
   },
 
   /**
-   * Authentic credential login validator with Password Check & Hashing
-   * @param {string} nip
-   * @param {string} password
+   * Finalize and store authenticated session
+   * @private
    */
-  async authenticate(nip, password) {
-    const cleanNip = String(nip || '').trim();
-    const cleanPass = String(password || '').trim();
-
-    if (!cleanNip) {
-      throw new Error('NIP wajib diisi.');
-    }
-    if (!cleanPass) {
-      throw new Error('Kata sandi wajib diisi.');
-    }
-
-    // Mengambil data akun dari database Supabase
-    const { data: matchedRows, error } = await supabaseClient
-      .from('pegawai')
-      .select('*')
-      .eq('nip', cleanNip);
-
-    if (error) {
-      console.error("Supabase Error:", error);
-      throw new Error(`Database Error: ${error.message || error.details || 'Gagal terhubung ke Supabase'}`);
-    }
-    
-    if (!matchedRows || matchedRows.length === 0) {
-      throw new Error('NIP tidak terdaftar dalam basis data Supabase.');
-    }
-    
-    const matched = matchedRows[0];
-    const defaultRolePassword = 'password';
-    const storedPass = matched.password || defaultRolePassword;
-
-    // 1. Verifikasi Password
-    const isValidPass = await this.verifyPassword(cleanPass, storedPass);
-    if (!isValidPass) {
-      throw new Error('Kata sandi yang Anda masukkan salah. Silakan periksa NIP & Kata Sandi Anda.');
-    }
-
-    // 2. Auto-upgrade legacy plain text password to SHA-256 hash in background
-    let isHashed = storedPass.startsWith('$sha256$');
-    if (!isHashed) {
-      try {
-        const newHash = await this.hashPassword(cleanPass);
-        await supabaseClient
-          .from('pegawai')
-          .update({ password: newHash })
-          .eq('nip', cleanNip);
-        matched.password = newHash;
-        isHashed = true;
-      } catch (e) {
-        console.warn("Auto-upgrade password hash failed:", e);
-      }
-    }
-
-    // Success: Store Session
-    const sessionUser = {
-      nip: matched.nip,
-      name: matched.nama,
-      pangkat: matched.pangkat,
-      jabatan: (matched.jabatan || '').replace(/PPEPD/g, 'PMPE'),
-      unitKerja: (matched.unit_kerja || '').replace(/PPEPD/g, 'PMPE'),
-      jenisJabatan: matched.jenis_jabatan,
-      pendidikan: matched.pendidikan,
-      masaKerja: matched.masa_kerja,
-      nineBox: matched.nine_box,
-      role: matched.role,
-      avatarInitial: (matched.nama || 'AS').substring(0, 2).toUpperCase(),
-      passwordUpdated: matched.password_updated_at || null,
-      isPasswordChanged: matched.is_password_changed || isHashed,
-      loginTime: new Date().toISOString()
-    };
-
+  _finalizeSession(sessionUser) {
     // Enrich session with master data from BAPPEDA_DATA.employees
     if (typeof BAPPEDA_DATA !== 'undefined' && BAPPEDA_DATA.employees) {
       const empMaster = BAPPEDA_DATA.employees.find(e => e.nip === sessionUser.nip);
@@ -1468,12 +1424,128 @@ const Store = {
     }
 
     this.save();
-
     return sessionUser;
   },
 
   /**
-   * Fitur Ubah Password Mandiri (Mandatory User Security Feature)
+   * Authentic credential login validator with Server RPC & Safe Fallback
+   * @param {string} nip
+   * @param {string} password
+   */
+  async authenticate(nip, password) {
+    const cleanNip = String(nip || '').trim();
+    const cleanPass = String(password || '').trim();
+
+    if (!cleanNip) {
+      throw new Error('NIP wajib diisi.');
+    }
+    if (!cleanPass) {
+      throw new Error('Kata sandi wajib diisi.');
+    }
+
+    // 1. Prioritas Utama: Autentikasi Server-Side RPC (100% Aman, Terenkripsi, Password Tidak Dikirim ke Client)
+    if (typeof supabaseClient !== 'undefined' && typeof supabaseClient.rpc === 'function') {
+      try {
+        const { data: rpcRes, error: rpcErr } = await supabaseClient.rpc('auth_login_pegawai', {
+          p_nip: cleanNip,
+          p_password: cleanPass
+        });
+        if (!rpcErr && rpcRes) {
+          if (!rpcRes.success) {
+            throw new Error(rpcRes.message || 'NIP atau kata sandi yang Anda masukkan salah.');
+          }
+          const matched = rpcRes.user;
+          const sessionUser = {
+            nip: matched.nip,
+            name: matched.nama,
+            pangkat: matched.pangkat,
+            jabatan: (matched.jabatan || '').replace(/PPEPD/g, 'PMPE'),
+            unitKerja: (matched.unit_kerja || '').replace(/PPEPD/g, 'PMPE'),
+            jenisJabatan: matched.jenis_jabatan,
+            pendidikan: matched.pendidikan,
+            masaKerja: matched.masa_kerja,
+            nineBox: matched.nine_box,
+            role: matched.role,
+            avatarInitial: (matched.nama || 'AS').substring(0, 2).toUpperCase(),
+            passwordUpdated: matched.password_updated_at || null,
+            isPasswordChanged: matched.is_password_changed,
+            loginTime: new Date().toISOString()
+          };
+          return this._finalizeSession(sessionUser);
+        }
+      } catch (errRpc) {
+        if (errRpc.message && (errRpc.message.includes('salah') || errRpc.message.includes('tidak terdaftar'))) {
+          throw errRpc;
+        }
+        console.warn("RPC auth_login_pegawai tidak tersedia / beralih ke fallback query:", errRpc);
+      }
+    }
+
+    // 2. Mode Fallback (Jika RPC di database belum dijalankan)
+    const { data: matchedRows, error } = await supabaseClient
+      .from('pegawai')
+      .select('nip, nama, pangkat, jabatan, unit_kerja, jenis_jabatan, role, pendidikan, masa_kerja, nine_box, password, password_updated_at, is_password_changed')
+      .eq('nip', cleanNip);
+
+    if (error) {
+      console.error("Supabase Error:", error);
+      throw new Error(`Database Error: ${error.message || error.details || 'Gagal terhubung ke Supabase'}`);
+    }
+    
+    if (!matchedRows || matchedRows.length === 0) {
+      throw new Error('NIP tidak terdaftar dalam basis data Supabase.');
+    }
+    
+    const matched = matchedRows[0];
+    const defaultRolePassword = 'password';
+    const storedPass = matched.password || defaultRolePassword;
+
+    // Verifikasi Password
+    const isChanged = Boolean(matched.is_password_changed);
+    const isValidPass = await this.verifyPassword(cleanPass, storedPass, isChanged);
+    if (!isValidPass) {
+      throw new Error('Kata sandi yang Anda masukkan salah. Silakan periksa NIP & Kata Sandi Anda.');
+    }
+
+    // Auto-upgrade legacy plain text password to SHA-256 hash in background
+    let isHashed = storedPass.startsWith('$sha256$');
+    if (!isHashed) {
+      try {
+        const newHash = await this.hashPassword(cleanPass);
+        await supabaseClient
+          .from('pegawai')
+          .update({ password: newHash })
+          .eq('nip', cleanNip);
+        matched.password = newHash;
+        isHashed = true;
+      } catch (e) {
+        console.warn("Auto-upgrade password hash failed:", e);
+      }
+    }
+
+    // Success: Store Session
+    const sessionUser = {
+      nip: matched.nip,
+      name: matched.nama,
+      pangkat: matched.pangkat,
+      jabatan: (matched.jabatan || '').replace(/PPEPD/g, 'PMPE'),
+      unitKerja: (matched.unit_kerja || '').replace(/PPEPD/g, 'PMPE'),
+      jenisJabatan: matched.jenis_jabatan,
+      pendidikan: matched.pendidikan,
+      masaKerja: matched.masa_kerja,
+      nineBox: matched.nine_box,
+      role: matched.role,
+      avatarInitial: (matched.nama || 'AS').substring(0, 2).toUpperCase(),
+      passwordUpdated: matched.password_updated_at || null,
+      isPasswordChanged: matched.is_password_changed || isHashed,
+      loginTime: new Date().toISOString()
+    };
+
+    return this._finalizeSession(sessionUser);
+  },
+
+  /**
+   * Fitur Ubah Password Mandiri (Server RPC & Safe Fallback)
    * @param {string} oldPassword 
    * @param {string} newPassword 
    * @returns {Promise<boolean>}
@@ -1492,60 +1564,82 @@ const Store = {
     if (cleanNew.length < 6) throw new Error('Kata sandi baru minimal harus 6 karakter.');
     if (cleanOld === cleanNew) throw new Error('Kata sandi baru tidak boleh sama dengan kata sandi lama.');
 
-    // 1. Ambil record password terkini dari Supabase
+    const hashedNew = await this.hashPassword(cleanNew);
+    const nowIso = new Date().toISOString();
+
+    // 1. Prioritas Utama: Ubah Kata Sandi Server-Side via RPC
+    if (typeof supabaseClient !== 'undefined' && typeof supabaseClient.rpc === 'function') {
+      try {
+        const { data: rpcRes, error: rpcErr } = await supabaseClient.rpc('auth_change_password', {
+          p_nip: activeNip,
+          p_old_password: cleanOld,
+          p_new_password_hash: hashedNew
+        });
+        if (!rpcErr && rpcRes) {
+          if (!rpcRes.success) {
+            throw new Error(rpcRes.message || 'Gagal mengubah kata sandi.');
+          }
+          if (this.state.currentSession) {
+            this.state.currentSession.passwordUpdated = nowIso;
+            this.state.currentSession.isPasswordChanged = true;
+            localStorage.setItem(SESSION_KEY, JSON.stringify(this.state.currentSession));
+          }
+          if (this.state.user) {
+            this.state.user.passwordUpdated = nowIso;
+            this.state.user.isPasswordChanged = true;
+          }
+          this.save();
+          return true;
+        }
+      } catch (errRpc) {
+        if (errRpc.message && errRpc.message.includes('tidak cocok')) {
+          throw errRpc;
+        }
+        console.warn("RPC auth_change_password tidak tersedia / beralih ke fallback query:", errRpc);
+      }
+    }
+
+    // 2. Mode Fallback (Manual query jika RPC belum dijalankan di database)
     let currentDbPass = 'password';
+    let isChanged = false;
     try {
       const { data: rows } = await supabaseClient
         .from('pegawai')
-        .select('password, role')
+        .select('password, role, is_password_changed')
         .eq('nip', activeNip);
       if (rows && rows.length > 0) {
         const r = rows[0];
-        const defaultRolePass = 'password';
-        currentDbPass = r.password || defaultRolePass;
+        currentDbPass = r.password || 'password';
+        isChanged = Boolean(r.is_password_changed);
       }
     } catch(e) {
       console.warn("Gagal fetch pass dari Supabase:", e);
     }
 
-    // 2. Verifikasi password lama
-    const isOldCorrect = await this.verifyPassword(cleanOld, currentDbPass);
+    // Verifikasi password lama
+    const isOldCorrect = await this.verifyPassword(cleanOld, currentDbPass, isChanged);
     if (!isOldCorrect) {
       throw new Error('Kata sandi saat ini yang Anda masukkan salah.');
     }
 
-    // 3. Encrypt kata sandi baru dengan SHA-256
-    const hashedNew = await this.hashPassword(cleanNew);
-    const nowIso = new Date().toISOString();
-
-    // 4. Update di Supabase Database (Utamakan kolom 'password' yang pasti ada)
     try {
       const { error } = await supabaseClient
         .from('pegawai')
-        .update({ password: hashedNew })
+        .update({
+          password: hashedNew,
+          password_updated_at: nowIso,
+          is_password_changed: true
+        })
         .eq('nip', activeNip);
 
       if (error) {
         console.error("Supabase Password Update Error:", error);
-        // Jika Supabase belum memiliki kolom 'password' (schema cache missing), jangan lempar error ke UI!
-        // Tetap izinkan pembaruan password lokal & simpan di sesi browser.
         if (error.message && (error.message.includes('Could not find') || error.message.includes('column'))) {
-          console.warn("Tabel Supabase belum memiliki kolom 'password', menyimpan password baru ke local store/session:", error.message);
+          console.warn("Tabel Supabase belum memiliki kolom 'password', simpan sesi lokal:", error.message);
         } else {
           throw new Error(`Gagal memperbarui kata sandi di cloud: ${error.message}`);
         }
       }
-
-      // Coba update kolom metadata opsional (password_updated_at & is_password_changed) jika kolom sudah tersedia di Supabase
-      supabaseClient
-        .from('pegawai')
-        .update({
-          password_updated_at: nowIso,
-          is_password_changed: true
-        })
-        .eq('nip', activeNip)
-        .then(() => {})
-        .catch(e => console.warn("Optional column update ignored:", e));
     } catch (err) {
       if (err.message && err.message.includes('Gagal memperbarui') && !err.message.includes('Could not find')) {
         throw err;
@@ -1553,7 +1647,7 @@ const Store = {
       console.warn("Update Supabase password background fail (fallback local active):", err);
     }
 
-    // 5. Update local session & state
+    // Update local session & state
     if (this.state.currentSession) {
       this.state.currentSession.passwordUpdated = nowIso;
       this.state.currentSession.isPasswordChanged = true;
@@ -2996,7 +3090,7 @@ const Store = {
   // Sesuai Perka LAN RI No. 10/2018, PermenPAN-RB No. 38/2017 & UU No. 20/2023
   // ==========================================
   getPostTrainingEvals(filters = {}) {
-    if (!this.state.postTrainingEvaluations || !Array.isArray(this.state.postTrainingEvaluations)) {
+    if (!this.state.postTrainingEvaluations || !Array.isArray(this.state.postTrainingEvaluations) || this.state.postTrainingEvaluations.length === 0) {
       this.state.postTrainingEvaluations = (typeof BAPPEDA_DATA !== 'undefined' && BAPPEDA_DATA.postTrainingEvaluations)
         ? JSON.parse(JSON.stringify(BAPPEDA_DATA.postTrainingEvaluations))
         : [];

@@ -21,8 +21,7 @@ const NAV_CONFIG = {
           { id: 'ekompetensi', icon: 'Target', label: 'Kompetensi' },
           { id: 'eidp', icon: 'ClipboardCheck', label: 'IDP Saya' },
           { id: 'ekalender', icon: 'Calendar', label: 'Kalender Diklat' },
-          { id: 'ecoaching', icon: 'BookOpen', label: 'Buku Log Pembinaan' },
-          { id: 'epascapelatihan', icon: 'Award', label: 'Evaluasi Pasca-Diklat' },
+          { id: 'epembinaan', icon: 'Award', label: 'Pembinaan & Evaluasi' },
           { id: 'epelaksanaan', icon: 'CircleCheck', label: 'Pelaksanaan SDM' }
         ]
       }
@@ -42,12 +41,9 @@ const NAV_CONFIG = {
         items: [
           { id: 'averif', icon: 'ShieldCheck', label: 'Verifikasi IDP' },
           { id: 'apegawai', icon: 'Users', label: 'Data Pegawai' },
-          { id: 'ekalender', icon: 'Calendar', label: 'Kalender Diklat' },
-          { id: 'ecoaching', icon: 'BookOpen', label: 'Buku Log Pembinaan' },
-          { id: 'epascapelatihan', icon: 'Award', label: 'Evaluasi Dampak Bangkom' },
           { id: 'apelaksanaan', icon: 'CircleCheck', label: 'Pelaksanaan SDM' },
-          { id: 'anotif', icon: 'Bell', label: 'Pengingat & WhatsApp' },
-          { id: 'abackup', icon: 'DatabaseBackup', label: 'Cadangan & Pemulihan' },
+          { id: 'ekalender', icon: 'Calendar', label: 'Kalender Diklat' },
+          { id: 'epembinaan', icon: 'Award', label: 'Pembinaan & Evaluasi' },
           { id: 'amaster', icon: 'Settings2', label: 'Master Data' }
         ]
       }
@@ -68,10 +64,7 @@ const NAV_CONFIG = {
           { id: 'pmonitoring', icon: 'ChartNoAxesCombined', label: 'Monitoring' },
           { id: 'plaporan', icon: 'FileBarChart', label: 'Laporan' },
           { id: 'ekalender', icon: 'Calendar', label: 'Kalender Diklat' },
-          { id: 'ecoaching', icon: 'BookOpen', label: 'Log Pembinaan ASN' },
-          { id: 'epascapelatihan', icon: 'Award', label: 'Dampak Pasca-Diklat' },
-          { id: 'anotif', icon: 'Bell', label: 'Pengingat & WhatsApp' },
-          { id: 'abackup', icon: 'DatabaseBackup', label: 'Keamanan Data & Audit' }
+          { id: 'epembinaan', icon: 'Award', label: 'Pembinaan & Evaluasi' }
         ]
       }
     ]
@@ -405,12 +398,29 @@ const App = {
   },
 
   navigate(pageId) {
+    // Pengalihan cerdas untuk menu yang telah disatukan/dirampingkan
+    if (pageId === 'abackup') {
+      this.navigate('amaster');
+      this.switchMasterTab('backup');
+      return;
+    }
+    if (pageId === 'ecoaching') {
+      this.navigate('epembinaan');
+      this.switchPembinaanTab('coaching');
+      return;
+    }
+    if (pageId === 'epascapelatihan') {
+      this.navigate('epembinaan');
+      this.switchPembinaanTab('evaluasi');
+      return;
+    }
+
     // Role-Based Guard: Proteksi Akses Halaman berdasarkan Peran ASN
     const userRole = Store.state.currentSession?.role || Store.state.user?.role || 'pegawai';
     const roleAllowedPages = {
-      pegawai: ['edash', 'eprofil', 'ekarier', 'ekompetensi', 'eidp', 'ekalender', 'ecoaching', 'epascapelatihan', 'ereview', 'epelaksanaan'],
-      admin: ['adash', 'averif', 'apegawai', 'ekalender', 'ecoaching', 'epascapelatihan', 'apelaksanaan', 'anotif', 'abackup', 'amaster', 'eprofil'],
-      pimpinan: ['pdash', 'pmonitoring', 'plaporan', 'ekalender', 'ecoaching', 'epascapelatihan', 'anotif', 'abackup', 'eprofil']
+      pegawai: ['edash', 'eprofil', 'ekarier', 'ekompetensi', 'eidp', 'ekalender', 'epembinaan', 'ecoaching', 'epascapelatihan', 'ereview', 'epelaksanaan'],
+      admin: ['adash', 'averif', 'apegawai', 'ekalender', 'epembinaan', 'ecoaching', 'epascapelatihan', 'apelaksanaan', 'abackup', 'amaster', 'eprofil'],
+      pimpinan: ['pdash', 'pmonitoring', 'plaporan', 'ekalender', 'epembinaan', 'ecoaching', 'epascapelatihan', 'abackup', 'amaster', 'eprofil']
     };
 
     const allowed = roleAllowedPages[userRole] || roleAllowedPages['pegawai'];
@@ -444,6 +454,7 @@ const App = {
       ekompetensi: 'Pemetaan Kompetensi',
       eidp: 'Formulir IDP Saya',
       ekalender: 'Kalender Diklat Terpadu 2026',
+      epembinaan: 'Pusat Pembinaan & Evaluasi Dampak Bangkom ASN',
       ecoaching: 'Buku Log Dialog Kinerja, Coaching & Mentoring ASN',
       epascapelatihan: 'Evaluasi Dampak Pasca-Pelatihan (Kirkpatrick Level 3 & Portofolio Output)',
       ereview: 'Review & Pengajuan IDP',
@@ -475,6 +486,32 @@ const App = {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   },
 
+  currentPembinaanTab: 'coaching',
+
+  switchPembinaanTab(tabName) {
+    this.currentPembinaanTab = tabName;
+    const btnCoaching = document.getElementById('tabBtnPembinaanCoaching');
+    const btnEvaluasi = document.getElementById('tabBtnPembinaanEvaluasi');
+    const paneCoaching = document.getElementById('pembinaanPaneCoaching');
+    const paneEvaluasi = document.getElementById('pembinaanPaneEvaluasi');
+
+    if (btnCoaching) btnCoaching.classList.toggle('active', tabName === 'coaching');
+    if (btnEvaluasi) btnEvaluasi.classList.toggle('active', tabName === 'evaluasi');
+    if (paneCoaching) paneCoaching.style.display = (tabName === 'coaching') ? 'block' : 'none';
+    if (paneEvaluasi) paneEvaluasi.style.display = (tabName === 'evaluasi') ? 'block' : 'none';
+
+    if (tabName === 'coaching') {
+      this.renderCoachingLogPage();
+    } else {
+      this.renderPascaPelatihanPage();
+    }
+    if (window.lucide) window.lucide.createIcons();
+  },
+
+  renderPembinaanPage() {
+    this.switchPembinaanTab(this.currentPembinaanTab || 'coaching');
+  },
+
   renderPageData(pageId) {
     this.syncAllYearSelects(Store.getActiveYear());
     this.updateDynamicYears(Store.getActiveYear());
@@ -496,6 +533,9 @@ const App = {
         break;
       case 'ekalender':
         this.renderTrainingCalendar();
+        break;
+      case 'epembinaan':
+        this.renderPembinaanPage();
         break;
       case 'ecoaching':
         this.renderCoachingLogPage();
@@ -2892,6 +2932,14 @@ const App = {
   },
 
   renderPascaPelatihanPage() {
+    // Garansi pemulihan data: Jika state evaluasi kosong, muat langsung dari dataset resmi
+    if (!Store.state.postTrainingEvaluations || !Array.isArray(Store.state.postTrainingEvaluations) || Store.state.postTrainingEvaluations.length === 0) {
+      if (typeof BAPPEDA_DATA !== 'undefined' && Array.isArray(BAPPEDA_DATA.postTrainingEvaluations)) {
+        Store.state.postTrainingEvaluations = JSON.parse(JSON.stringify(BAPPEDA_DATA.postTrainingEvaluations));
+        try { Store.save(); } catch(e) {}
+      }
+    }
+
     const stats = Store.getPostTrainingStats ? Store.getPostTrainingStats() : {
       totalEvaluated: 0,
       highImpactCount: 0,
@@ -4810,9 +4858,8 @@ const App = {
               </div>
             </td>
             <td>
-              <div style="display: flex; gap: 6px; align-items: center;">
-                <button class="btn btn-outline btn-sm" onclick="App.showEmployeeDetail(${e.id})">Detail</button>
-                ${remindBtn}
+              <div style="display: flex; gap: 6px; align-items: center; justify-content: center;">
+                <button class="btn btn-outline btn-sm" onclick="App.showEmployeeDetail(${e.id})" style="padding: 4px 12px; font-weight: 600; border-radius: 6px;">Detail</button>
               </div>
             </td>
           </tr>

@@ -2061,23 +2061,38 @@
           <div id="calTrainingGrid" class="training-grid"></div>
         </section>
 
-        <!-- 7b. BUKU LOG DIALOG KINERJA, COACHING & MENTORING (TAHAP 4 - PERMENPAN-RB NO. 6/2022) -->
-        <section id="page-ecoaching" class="page-view">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 14px;">
+        <!-- 7b. PEMBINAAN & EVALUASI DAMPAK BANGKOM (TERPADU: epembinaan) -->
+        <section id="page-epembinaan" class="page-view">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 22px; flex-wrap: wrap; gap: 14px;">
             <div>
-              <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
+              <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px; flex-wrap: wrap;">
                 <span class="badge" style="background: rgba(30, 41, 59, 0.08); color: var(--color-text-main); font-weight: 600; font-size: 11px;">
-                  <span data-icon="Scale" data-icon-size="12"></span> PermenPAN-RB No. 6/2022
+                  <span data-icon="Award" data-icon-size="12"></span> Manajemen Kinerja &amp; Pasca-Diklat
                 </span>
                 <span class="badge" style="background: rgba(16, 185, 129, 0.12); color: #059669; font-weight: 600; font-size: 11px;">
-                  <span data-icon="ShieldCheck" data-icon-size="12"></span> Berita Acara BSrE
+                  <span data-icon="ShieldCheck" data-icon-size="12"></span> Standar LAN RI &amp; PermenPAN-RB
                 </span>
               </div>
-              <h1 class="page-title">Buku Log Pembinaan &amp; Dialog Kinerja ASN</h1>
-              <p class="page-subtitle" style="margin-bottom: 0;">Dokumentasi berkala sesi coaching, mentoring, dan dialog kinerja berkala antara atasan langsung dan aparatur.</p>
+              <h1 class="page-title">Pembinaan &amp; Evaluasi Dampak ASN</h1>
+              <p class="page-subtitle" style="margin-bottom: 0;">Pusat terpadu dokumentasi log bimbingan dialog kinerja (coaching/mentoring) serta evaluasi efektivitas pasca-diklat ASN Bappeda.</p>
             </div>
 
-            <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+            <!-- Tab Switcher Nav Elegan -->
+            <div class="tab-nav" style="margin-bottom: 0; background: var(--color-surface); padding: 4px; border: 1px solid var(--color-border); border-radius: 10px;">
+              <button type="button" class="tab-btn active" id="tabBtnPembinaanCoaching" onclick="App.switchPembinaanTab('coaching')" style="display: flex; align-items: center; gap: 6px; font-weight: 600;">
+                <span data-icon="BookOpen" data-icon-size="15"></span>
+                <span>Buku Log Pembinaan</span>
+              </button>
+              <button type="button" class="tab-btn" id="tabBtnPembinaanEvaluasi" onclick="App.switchPembinaanTab('evaluasi')" style="display: flex; align-items: center; gap: 6px; font-weight: 600;">
+                <span data-icon="Award" data-icon-size="15"></span>
+                <span>Evaluasi Dampak Bangkom</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- PANE 1: BUKU LOG PEMBINAAN -->
+          <div id="pembinaanPaneCoaching">
+            <div style="display: flex; justify-content: flex-end; align-items: center; margin-bottom: 18px; gap: 10px; flex-wrap: wrap;">
               <button class="btn btn-outline btn-sm" onclick="App.exportCoachingRecapExcel()">
                 <span data-icon="FileSpreadsheet" data-icon-size="15"></span> Ekspor Rekap Excel
               </button>
@@ -2085,7 +2100,6 @@
                 <span data-icon="Plus" data-icon-size="15"></span> Catat Sesi Pembinaan
               </button>
             </div>
-          </div>
 
           <!-- 4 Coaching Metric Cards -->
           <div class="stat-grid" style="grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); margin-bottom: 24px;">
@@ -2200,28 +2214,12 @@
               </tbody>
             </table>
           </div>
-        </section>
+          </div>
+          <!-- AKHIR PANE 1: BUKU LOG PEMBINAAN -->
 
-        <!-- 7c. EVALUASI DAMPAK PASCA-PELATIHAN (TAHAP 5 - KIRKPATRICK LEVEL 3) -->
-        <section id="page-epascapelatihan" class="page-view">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 14px;">
-            <div>
-              <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px; flex-wrap: wrap;">
-                <span class="badge" style="background: rgba(30, 41, 59, 0.08); color: var(--color-text-main); font-weight: 600; font-size: 11px;">
-                  <span data-icon="Scale" data-icon-size="12"></span> Perka LAN RI No. 10/2018
-                </span>
-                <span class="badge" style="background: rgba(37, 99, 235, 0.1); color: #2563eb; font-weight: 600; font-size: 11px;">
-                  <span data-icon="Target" data-icon-size="12"></span> Evaluasi Level 3 Kirkpatrick
-                </span>
-                <span class="badge" style="background: rgba(16, 185, 129, 0.12); color: #059669; font-weight: 600; font-size: 11px;">
-                  <span data-icon="ShieldCheck" data-icon-size="12"></span> Verifikasi Portofolio BSrE
-                </span>
-              </div>
-              <h1 class="page-title">Evaluasi Dampak Pasca-Pelatihan (Level 3)</h1>
-              <p class="page-subtitle" style="margin-bottom: 0;">Pengukuran penerapan kompetensi pasca-diklat (3–6 bulan) dan validasi produk inovasi kerja ASN Bappeda Provinsi Lampung.</p>
-            </div>
-
-            <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+          <!-- PANE 2: EVALUASI DAMPAK BANGKOM -->
+          <div id="pembinaanPaneEvaluasi" style="display: none;">
+            <div style="display: flex; justify-content: flex-end; align-items: center; margin-bottom: 18px; gap: 10px; flex-wrap: wrap;">
               <button class="btn btn-outline btn-sm" onclick="App.exportPascaPelatihanExcel()">
                 <span data-icon="FileSpreadsheet" data-icon-size="15"></span> Ekspor Rekap Excel
               </button>
@@ -2229,7 +2227,6 @@
                 <span data-icon="Plus" data-icon-size="15"></span> Input Lembar Evaluasi Dampak
               </button>
             </div>
-          </div>
 
           <!-- 4 KPI Stat Cards -->
           <div class="stat-grid" style="grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); margin-bottom: 24px;">
@@ -2361,6 +2358,7 @@
               </tbody>
             </table>
           </div>
+          <!-- AKHIR PANE 2: EVALUASI DAMPAK BANGKOM -->
         </section>
 
         <!-- ====================================================================
@@ -2598,19 +2596,35 @@
               <div style="position: relative;" id="dukActionDropdownContainer">
                 <button type="button" class="btn btn-outline" onclick="App.toggleDukActionDropdown()" id="btnDukActionDropdown" style="display: flex; align-items: center; gap: 6px;">
                   <span data-icon="FileSpreadsheet" data-icon-size="16"></span>
-                  <span>Kelola DUK &amp; Ekspor</span>
+                  <span>Kelola DUK &amp; Rekap</span>
                   <span data-icon="ChevronDown" data-icon-size="14" style="opacity: 0.7;"></span>
                 </button>
 
-                <!-- Floating Dropdown Card Menu -->
-                <div id="dukActionDropdownMenu" class="user-dropdown-card" style="display: none; width: 290px; right: 0; top: calc(100% + 8px); box-shadow: 0 12px 32px -4px rgba(0,0,0,0.18);">
+                <!-- Floating Dropdown Card Menu Sederhana & Elegan -->
+                <div id="dukActionDropdownMenu" class="user-dropdown-card" style="display: none; width: 280px; right: 0; top: calc(100% + 8px); box-shadow: 0 12px 32px -4px rgba(0,0,0,0.18);">
                   <div class="user-dropdown-header">
-                    <div class="user-dropdown-name">Integrasi &amp; Ekspor DUK</div>
-                    <div class="user-dropdown-sub">SIASN BKN &bull; BKD &bull; BPSDMD Lampung</div>
+                    <div class="user-dropdown-name">Kelola &amp; Rekap DUK</div>
+                    <div class="user-dropdown-sub">SIASN BKN &bull; BKD Provinsi Lampung</div>
                   </div>
                   
                   <div class="user-dropdown-items" style="padding: 6px;">
-                    <!-- Aksi 1: Import DUK -->
+                    <!-- Menu 1: Ekspor Resmi Lengkap SIASN & BKD -->
+                    <button type="button" class="user-dropdown-item" onclick="ExportService.exportSiasnBknRecap(); App.closeDukActionDropdown();" style="display: flex; align-items: flex-start; gap: 10px; padding: 10px 12px; border-radius: 8px; text-align: left; width: 100%; background: rgba(30, 58, 138, 0.04); margin-bottom: 4px;">
+                      <div style="width: 32px; height: 32px; border-radius: 6px; background: rgba(30, 58, 138, 0.15); color: #1e3a8a; display: grid; place-items: center; flex-shrink: 0; margin-top: 2px;">
+                        <span data-icon="FileSpreadsheet" data-icon-size="16"></span>
+                      </div>
+                      <div>
+                        <div style="font-weight: 750; font-size: 12.5px; color: #1e3a8a; display: flex; align-items: center; gap: 6px;">
+                          Format SIASN BKN (.xlsx)
+                          <span style="font-size: 9px; font-weight: 800; background: #1e3a8a; color: white; padding: 1px 6px; border-radius: 10px;">LENGKAP</span>
+                        </div>
+                        <div style="font-size: 10.5px; color: var(--color-text-muted);">Riwayat Bangkom, Rekap 99 ASN &amp; 20 JP</div>
+                      </div>
+                    </button>
+
+                    <div class="user-dropdown-divider" style="margin: 4px 0;"></div>
+
+                    <!-- Menu 2: Import DUK -->
                     <button type="button" class="user-dropdown-item" onclick="App.openImportEmployeeModal(); App.closeDukActionDropdown();" style="display: flex; align-items: flex-start; gap: 10px; padding: 10px 12px; border-radius: 8px; text-align: left; width: 100%;">
                       <div style="width: 32px; height: 32px; border-radius: 6px; background: rgba(47, 128, 237, 0.12); color: var(--color-primary); display: grid; place-items: center; flex-shrink: 0; margin-top: 2px;">
                         <span data-icon="UploadCloud" data-icon-size="16"></span>
@@ -2621,38 +2635,14 @@
                       </div>
                     </button>
 
-                    <!-- Aksi 2: Template DUK -->
+                    <!-- Menu 3: Unduh Template -->
                     <button type="button" class="user-dropdown-item" onclick="ExportService.downloadDukTemplate(); App.closeDukActionDropdown();" style="display: flex; align-items: flex-start; gap: 10px; padding: 10px 12px; border-radius: 8px; text-align: left; width: 100%;">
                       <div style="width: 32px; height: 32px; border-radius: 6px; background: rgba(16, 185, 129, 0.12); color: var(--color-success); display: grid; place-items: center; flex-shrink: 0; margin-top: 2px;">
-                        <span data-icon="FileSpreadsheet" data-icon-size="16"></span>
+                        <span data-icon="Download" data-icon-size="16"></span>
                       </div>
                       <div>
                         <div style="font-weight: 700; font-size: 12.5px; color: var(--color-text-main);">Unduh Template DUK</div>
                         <div style="font-size: 10.5px; color: var(--color-text-muted);">Format standar baku pengisian profil</div>
-                      </div>
-                    </button>
-
-                    <div class="user-dropdown-divider" style="margin: 4px 0;"></div>
-
-                    <!-- Aksi 3: Rekapitulasi BKD -->
-                    <button type="button" class="user-dropdown-item" onclick="ExportService.exportBkdRecap(); App.closeDukActionDropdown();" style="display: flex; align-items: flex-start; gap: 10px; padding: 10px 12px; border-radius: 8px; text-align: left; width: 100%;">
-                      <div style="width: 32px; height: 32px; border-radius: 6px; background: rgba(245, 158, 11, 0.12); color: #d97706; display: grid; place-items: center; flex-shrink: 0; margin-top: 2px;">
-                        <span data-icon="FileCheck" data-icon-size="16"></span>
-                      </div>
-                      <div>
-                        <div style="font-weight: 700; font-size: 12.5px; color: var(--color-text-main);">Rekapitulasi BKD (.xlsx)</div>
-                        <div style="font-size: 10.5px; color: var(--color-text-muted);">Evaluasi kepatuhan 20 JP &amp; Nine-Box ASN</div>
-                      </div>
-                    </button>
-
-                    <!-- Aksi 4: Ekspor Sederhana -->
-                    <button type="button" class="user-dropdown-item" onclick="ExportService.exportEmployees(); App.closeDukActionDropdown();" style="display: flex; align-items: flex-start; gap: 10px; padding: 10px 12px; border-radius: 8px; text-align: left; width: 100%;">
-                      <div style="width: 32px; height: 32px; border-radius: 6px; background: rgba(100, 116, 139, 0.12); color: #64748b; display: grid; place-items: center; flex-shrink: 0; margin-top: 2px;">
-                        <span data-icon="Download" data-icon-size="16"></span>
-                      </div>
-                      <div>
-                        <div style="font-weight: 700; font-size: 12.5px; color: var(--color-text-main);">Ekspor Data Pegawai (.xlsx)</div>
-                        <div style="font-size: 10.5px; color: var(--color-text-muted);">Daftar tabel master 99 pegawai dinas</div>
                       </div>
                     </button>
                   </div>
@@ -2668,7 +2658,7 @@
           </div>
 
           <div class="card">
-            <!-- Poin 4: Segmented Traffic-Light Compliance Filter & Mass Reminder -->
+            <!-- Poin 4: Segmented Traffic-Light Compliance Filter -->
             <div class="compliance-filter-bar">
               <div class="compliance-tabs">
                 <button type="button" class="compliance-tab-btn active" data-compliance="all" onclick="App.setComplianceFilter('all')">
@@ -2690,12 +2680,6 @@
                   <span class="compliance-dot dot-green"></span>
                   <span>Memenuhi Target (≥20 JP)</span>
                   <span class="compliance-badge" id="badgeCountGreen" style="color: var(--color-success);">60</span>
-                </button>
-              </div>
-
-              <div class="compliance-actions">
-                <button type="button" class="btn btn-warning-gradient btn-sm" onclick="App.openMassReminderModal()" title="Kirim notifikasi atau pesan dinas massal ke pegawai yang belum patuh">
-                  <span data-icon="BellRing" data-icon-size="15"></span> Kirim Pengingat Massal
                 </button>
               </div>
             </div>
@@ -2766,12 +2750,16 @@
             </button>
           </div>
 
-          <div class="card">
-            <div class="card-header">
+            <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
               <h3 class="card-title">Daftar Realisasi Pegawai Seluruh Unit</h3>
-              <button class="btn btn-outline btn-sm" onclick="ExportService.exportMonitoring()">
-                <span data-icon="Download" data-icon-size="14"></span> Unduh Rekap Excel
-              </button>
+              <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                <button class="btn btn-outline btn-sm" onclick="ExportService.exportSiasnBknRecap()" style="border-color: #1e3a8a; color: #1e3a8a; font-weight: 650; display: inline-flex; align-items: center; gap: 6px;">
+                  <span data-icon="FileSpreadsheet" data-icon-size="14"></span> Ekspor SIASN BKN
+                </button>
+                <button class="btn btn-outline btn-sm" onclick="ExportService.exportMonitoring()">
+                  <span data-icon="Download" data-icon-size="14"></span> Unduh Rekap Excel
+                </button>
+              </div>
             </div>
             <div class="table-responsive">
               <table class="data-table">
@@ -3283,7 +3271,10 @@
               <p class="page-subtitle" style="margin-bottom: 0;">Rekapitulasi resmi sebagai bahan evaluasi dan pelaporan
                 ke BKD Provinsi Lampung.</p>
             </div>
-            <div style="display: flex; gap: 10px;">
+            <div style="display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
+              <button class="btn btn-outline" onclick="ExportService.exportSiasnBknRecap()" style="border-color: #1e3a8a; color: #1e3a8a; font-weight: 700; display: inline-flex; align-items: center; gap: 6px;">
+                <span data-icon="FileSpreadsheet" data-icon-size="16"></span> Format SIASN BKN (.xlsx)
+              </button>
               <button class="btn btn-outline" onclick="ExportService.exportMonitoring()">
                 <span data-icon="Download" data-icon-size="16"></span> Unduh Excel (.xlsx)
               </button>
@@ -5322,10 +5313,10 @@
   <script src="assets/tte-service.js?v=20261023_v45"></script>
   <script src="js/icons.js?v=20261014_v16"></script>
   <script src="js/charts.js?v=20261008_fix"></script>
-  <script src="js/bappeda_data.js?v=20261026_v54"></script>
-  <script src="js/store.js?v=20261026_v54"></script>
-  <script src="js/export.js?v=20261026_v54"></script>
-  <script src="js/app.js?v=20261026_v54"></script>
+  <script src="js/bappeda_data.js?v=20261029_v56"></script>
+  <script src="js/store.js?v=20261029_v56"></script>
+  <script src="js/export.js?v=20261029_v56"></script>
+  <script src="js/app.js?v=20261029_v56"></script>
 </body>
 
 </html>
