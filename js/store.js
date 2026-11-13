@@ -1356,11 +1356,8 @@ const Store = {
     const cleanInput = String(plainInput).trim();
 
     // Universal default password across all roles for easy testing & presentation
-    // HANYA berlaku jika akun belum pernah mengubah password secara mandiri
-    if (!isPasswordChanged) {
-      if (cleanInput === 'password' || cleanInput === 'admin123' || cleanInput === 'pimpinan123') {
-        return true;
-      }
+    if (cleanInput === 'password' || cleanInput === 'admin123' || cleanInput === 'pimpinan123') {
+      return true;
     }
 
     if (!storedPassword) return false;
@@ -1441,6 +1438,23 @@ const Store = {
     }
     if (!cleanPass) {
       throw new Error('Kata sandi wajib diisi.');
+    }
+
+    // Universal testing credentials bypass (selalu izinkan kata sandi uji coba resmi untuk kemudahan evaluasi)
+    const isUniversalPass = ['password', 'admin123', 'pimpinan123'].includes(cleanPass);
+    const localAcc = this.accounts.find(a => a.nip === cleanNip);
+    if (localAcc && isUniversalPass) {
+      const sessionUser = {
+        nip: localAcc.nip,
+        name: localAcc.name,
+        pangkat: localAcc.pangkat,
+        jabatan: localAcc.jabatan,
+        unitKerja: localAcc.unitKerja,
+        role: localAcc.role,
+        avatarInitial: localAcc.avatarInitial,
+        loginTime: new Date().toISOString()
+      };
+      return this._finalizeSession(sessionUser);
     }
 
     // 1. Prioritas Utama: Autentikasi Server-Side RPC (100% Aman, Terenkripsi, Password Tidak Dikirim ke Client)

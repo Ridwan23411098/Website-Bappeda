@@ -99,11 +99,6 @@ const App = {
       m.style.display = 'none';
     });
 
-    // Kosongkan form input login secara agresif untuk mencegah autofill browser
-    this.clearLoginFields();
-    setTimeout(() => this.clearLoginFields(), 150);
-    setTimeout(() => this.clearLoginFields(), 400);
-
     // Check if user has an active persistent session
     if (Store.state.currentSession) {
       this.restoreSession(Store.state.currentSession);
@@ -112,7 +107,7 @@ const App = {
       const appSh = document.getElementById('appShell');
       if (loginScr) loginScr.style.display = 'flex';
       if (appSh) appSh.style.display = 'none';
-      this.clearLoginFields();
+      this.selectLoginRole('pegawai');
       this.initRealtimeNotifications();
     }
   },
@@ -122,11 +117,9 @@ const App = {
     const passInput = document.getElementById('loginPassword');
     if (nipInput) {
       nipInput.value = '';
-      if (document.activeElement !== nipInput) nipInput.setAttribute('readonly', 'readonly');
     }
     if (passInput) {
       passInput.value = '';
-      if (document.activeElement !== passInput) passInput.setAttribute('readonly', 'readonly');
     }
   },
 
@@ -233,6 +226,43 @@ const App = {
     this.toast(`Periode Rencana IDP diubah ke Tahun ${y}`, 'success');
   },
 
+  // Segmented Role Switcher (UI/UX Pro Standard)
+  selectLoginRole(role) {
+    const tabs = document.querySelectorAll('.login-role-tab');
+    tabs.forEach(t => {
+      const isActive = t.getAttribute('data-role') === role;
+      t.classList.toggle('active', isActive);
+      t.setAttribute('aria-selected', isActive ? 'true' : 'false');
+    });
+
+    const errAlert = document.getElementById('loginErrorAlert');
+    if (errAlert) errAlert.style.display = 'none';
+
+    const account = Store.accounts.find(a => a.role === role);
+    if (account) {
+      const nipInput = document.getElementById('loginNip');
+      const passInput = document.getElementById('loginPassword');
+      if (nipInput) {
+        nipInput.value = account.nip;
+        nipInput.removeAttribute('readonly');
+      }
+      if (passInput) {
+        passInput.value = account.password || 'password';
+        passInput.removeAttribute('readonly');
+      }
+
+      const avatarEl = document.getElementById('loginProfileAvatar');
+      const nameEl = document.getElementById('loginProfileName');
+      const descEl = document.getElementById('loginProfileDesc');
+      if (avatarEl) avatarEl.textContent = account.avatarInitial || (account.name ? account.name.substring(0, 2) : 'AA');
+      if (nameEl) nameEl.textContent = account.name;
+      if (descEl) {
+        const roleLabel = role === 'pegawai' ? 'Pegawai ASN' : (role === 'admin' ? 'Admin SDM Aparatur' : 'Pimpinan Eksekutif');
+        descEl.textContent = `${account.jabatan} • ${roleLabel}`;
+      }
+    }
+  },
+
   // Quick Role-Based Login (for demo / quick access)
   quickLogin(role) {
     const account = Store.accounts.find(a => a.role === role);
@@ -262,7 +292,7 @@ const App = {
     const nipInput = document.getElementById('loginNip');
     const passInput = document.getElementById('loginPassword');
     const errAlert = document.getElementById('loginErrorAlert');
-    const loginBtn = document.querySelector('button[onclick="App.login()"]');
+    const loginBtn = document.getElementById('btnSubmitLogin') || document.querySelector('button[onclick="App.login()"]') || document.querySelector('#loginForm button[type="submit"]');
 
     if (errAlert) errAlert.style.display = 'none';
     
@@ -290,7 +320,7 @@ const App = {
       // Restore UI state
       if (loginBtn) {
          loginBtn.disabled = false;
-         loginBtn.innerHTML = 'Masuk Portal <span data-icon="ArrowRight" data-icon-size="16"></span>';
+         loginBtn.innerHTML = '<span>Masuk ke Sistem</span> <span data-icon="ArrowRight" data-icon-size="16"></span>';
          if (window.lucide) window.lucide.createIcons();
       }
     }
@@ -358,7 +388,7 @@ const App = {
     Store.logoutSession();
     document.getElementById('appShell').style.display = 'none';
     document.getElementById('loginScreen').style.display = 'flex';
-    this.clearLoginFields();
+    this.selectLoginRole('pegawai');
     App.toast('Sesi Anda telah berhasil diakhiri dengan aman.', 'info');
   },
 

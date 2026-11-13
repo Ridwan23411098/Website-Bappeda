@@ -1,0 +1,855 @@
+/* ==========================================================================
+   SIP-KOMPETENSI — BAPPEDA PROVINSI LAMPUNG
+   UI/UX PRO MAX DESIGN SYSTEM STYLESHEET
+   Version: 2026.11-PRO-MAX-V1
+   ========================================================================== */
+
+:root {
+  /* Typography */
+  --pro-font: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  
+  /* Brand Navy Palette */
+  --pro-navy-950: #06152B;
+  --pro-navy-900: #0A1E3F;
+  --pro-navy-800: #0F2E5A;
+  --pro-navy-700: #16427D;
+  --pro-blue-600: #1D68BD;
+  --pro-blue-500: #2563EB;
+  --pro-blue-400: #38BDF8;
+  --pro-blue-50:  #EFF6FF;
+
+  /* Accent Siger Gold */
+  --pro-gold-600: #B45309;
+  --pro-gold-500: #D97706;
+  --pro-gold-400: #F59E0B;
+  --pro-gold-100: #FEF3C7;
+  --pro-gold-50:  #FFFBEB;
+
+  /* Semantic Colors */
+  --pro-emerald-600: #059669;
+  --pro-emerald-500: #10B981;
+  --pro-emerald-50:  #ECFDF5;
+  --pro-rose-600:    #DC2626;
+  --pro-rose-500:    #EF4444;
+  --pro-rose-50:     #FEF2F2;
+
+  /* Neutrals */
+  --pro-slate-50:  #F8FAFC;
+  --pro-slate-100: #F1F5F9;
+  --pro-slate-200: #E2E8F0;
+  --pro-slate-300: #CBD5E1;
+  --pro-slate-400: #94A3B8;
+  --pro-slate-500: #64748B;
+  --pro-slate-600: #475569;
+  --pro-slate-700: #334155;
+  --pro-slate-800: #1E293B;
+  --pro-slate-900: #0F172A;
+
+  /* Elevations */
+  --pro-shadow-xs: 0 1px 2px rgba(15, 30, 63, 0.05);
+  --pro-shadow-card: 0 4px 20px -2px rgba(15, 30, 63, 0.07), 0 2px 6px -1px rgba(15, 30, 63, 0.04);
+  --pro-shadow-card-hover: 0 12px 30px -4px rgba(15, 30, 63, 0.12), 0 4px 10px -2px rgba(15, 30, 63, 0.05);
+  --pro-shadow-lg: 0 20px 40px -8px rgba(15, 30, 63, 0.18);
+  --pro-shadow-login: 0 25px 60px -12px rgba(10, 30, 63, 0.22), 0 0 0 1px rgba(226, 232, 240, 0.8);
+}
+
+/* ==========================================================================
+   GLOBAL RESET & POLISH
+   ========================================================================== */
+body {
+  font-family: var(--pro-font) !important;
+  background-color: #F4F7FB !important;
+  color: var(--pro-slate-800) !important;
+  -webkit-font-smoothing: antialiased !important;
+}
+
+/* ==========================================================================
+   LOGIN SCREEN (UI UX PRO EDITION)
+   ========================================================================== */
+.login-screen-centered {
+  min-height: 100vh !important;
+  width: 100% !important;
+  display: flex;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 28px 16px !important;
+  position: relative !important;
+  background: #F1F5F9 url('Gambar/bg-login.jpg') center / cover no-repeat !important;
+}
+
+#loginScreen[style*="display: none"],
+#loginScreen[style*="display:none"],
+.login-screen-centered.hidden {
+  display: none !important;
+}
+
+#appShell[style*="display: none"],
+#appShell[style*="display:none"] {
+  display: none !important;
+}
+
+.login-screen-centered::before {
+  content: '' !important;
+  position: absolute !important;
+  inset: 0 !important;
+  background: rgba(248, 250, 252, 0.95) !important;
+  backdrop-filter: blur(4px) !important;
+  -webkit-backdrop-filter: blur(4px) !important;
+  z-index: 1 !important;
+}
+
+.login-content-wrapper {
+  position: relative !important;
+  z-index: 2 !important;
+  width: 100% !important;
+  max-width: 490px !important;
+  margin: 0 auto !important;
+}
+
+.login-header-centered {
+  text-align: center !important;
+  margin-bottom: 16px !important;
+}
+
+.login-header-centered .brand-badge-card {
+  width: 80px !important;
+  height: 80px !important;
+  max-width: 80px !important;
+  max-height: 80px !important;
+  margin: 0 auto 14px !important;
+  border-radius: 18px !important;
+  background: #FFFFFF !important;
+  box-shadow: 0 10px 25px -4px rgba(10, 30, 63, 0.15), 0 0 0 1px rgba(10, 30, 63, 0.08) !important;
+  padding: 6px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.gov-badge-tag {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 7px !important;
+  padding: 5px 14px !important;
+  background: #FFFFFF !important;
+  border: 1px solid rgba(15, 46, 90, 0.14) !important;
+  border-radius: var(--pro-radius-pill) !important;
+  font-size: 10.5px !important;
+  font-weight: 800 !important;
+  color: var(--pro-navy-900) !important;
+  letter-spacing: 0.08em !important;
+  margin-bottom: 10px !important;
+  text-transform: uppercase !important;
+  box-shadow: 0 2px 6px rgba(15, 30, 63, 0.06) !important;
+}
+
+.gov-badge-tag .badge-dot {
+  width: 8px !important;
+  height: 8px !important;
+  border-radius: 50% !important;
+  background: var(--pro-gold-500) !important;
+  box-shadow: 0 0 8px rgba(217, 119, 6, 0.7) !important;
+}
+
+.login-headline-centered {
+  font-size: 22px !important;
+  line-height: 1.35 !important;
+  font-weight: 700 !important;
+  color: var(--pro-navy-900) !important;
+  margin: 0 0 6px !important;
+  letter-spacing: normal !important;
+}
+
+.login-subheadline-centered {
+  font-size: 12.5px !important;
+  line-height: 1.5 !important;
+  color: var(--pro-slate-600) !important;
+  margin: 0 0 14px !important;
+  padding: 0 10px !important;
+}
+
+.login-card {
+  background: #FFFFFF !important;
+  border-radius: 20px !important;
+  padding: 26px 24px !important;
+  box-shadow: var(--pro-shadow-login) !important;
+  border: 1px solid rgba(226, 232, 240, 0.9) !important;
+}
+
+.login-card .form-control {
+  height: 46px !important;
+  border-radius: 12px !important;
+  border: 1.5px solid var(--pro-slate-300) !important;
+  padding-left: 42px !important;
+  font-size: 13.5px !important;
+  color: var(--pro-slate-900) !important;
+  font-weight: 500 !important;
+  transition: all 180ms ease !important;
+  background: #FFFFFF !important;
+}
+
+.login-card .form-control:focus {
+  border-color: var(--pro-blue-500) !important;
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.14) !important;
+}
+
+.login-card .input-icon-left {
+  left: 14px !important;
+  color: var(--pro-slate-500) !important;
+}
+
+.login-card .btn-primary {
+  height: 46px !important;
+  border-radius: 12px !important;
+  background: linear-gradient(135deg, var(--pro-navy-900) 0%, var(--pro-navy-700) 50%, var(--pro-blue-600) 100%) !important;
+  border: none !important;
+  font-size: 13.5px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.01em !important;
+  box-shadow: 0 6px 18px rgba(10, 30, 63, 0.25) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+  transition: all 200ms ease !important;
+}
+
+.login-card .btn-primary:hover {
+  transform: translateY(-1px) !important;
+  box-shadow: 0 8px 24px rgba(10, 30, 63, 0.32) !important;
+  opacity: 0.98 !important;
+}
+
+/* ==========================================================================
+   SEGMENTED ROLE TABS & PROFILE CARD (UI/UX PRO SIMPLIFIED)
+   ========================================================================== */
+.login-role-tabs-wrap {
+  margin-bottom: 12px !important;
+}
+
+.login-role-tabs {
+  display: flex !important;
+  background: var(--pro-slate-100) !important;
+  padding: 4px !important;
+  border-radius: 12px !important;
+  gap: 4px !important;
+  border: 1px solid var(--pro-slate-200) !important;
+}
+
+.login-role-tab {
+  flex: 1 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 6px !important;
+  padding: 8px 10px !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  color: var(--pro-slate-600) !important;
+  background: transparent !important;
+  border: none !important;
+  border-radius: 8px !important;
+  cursor: pointer !important;
+  transition: all 180ms ease !important;
+  white-space: nowrap !important;
+}
+
+.login-role-tab:hover {
+  color: var(--pro-slate-900) !important;
+  background: rgba(255, 255, 255, 0.6) !important;
+}
+
+.login-role-tab.active {
+  background: #FFFFFF !important;
+  color: var(--pro-navy-900) !important;
+  font-weight: 700 !important;
+  box-shadow: 0 2px 6px rgba(10, 30, 63, 0.08), 0 0 0 1px rgba(10, 30, 63, 0.04) !important;
+}
+
+.login-role-tab.active .login-role-tab-icon {
+  color: var(--pro-blue-600) !important;
+}
+
+/* Selected Role Profile Context Card */
+.login-selected-profile {
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+  padding: 9px 12px !important;
+  background: #F8FAFC !important;
+  border: 1px solid #E2E8F0 !important;
+  border-radius: 12px !important;
+  margin-bottom: 16px !important;
+  transition: all 200ms ease !important;
+}
+
+.profile-badge-avatar {
+  width: 34px !important;
+  height: 34px !important;
+  border-radius: 9px !important;
+  background: linear-gradient(135deg, var(--pro-navy-900) 0%, var(--pro-blue-600) 100%) !important;
+  color: #FFFFFF !important;
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex-shrink: 0 !important;
+  box-shadow: 0 2px 6px rgba(10, 30, 63, 0.16) !important;
+}
+
+.profile-badge-text {
+  flex: 1 !important;
+  min-width: 0 !important;
+}
+
+.profile-badge-name {
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  color: var(--pro-slate-900) !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  line-height: 1.3 !important;
+}
+
+.profile-badge-desc {
+  font-size: 11px !important;
+  color: var(--pro-slate-500) !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  line-height: 1.3 !important;
+}
+
+/* Login Card Footer */
+.login-card-footer {
+  margin-top: 18px !important;
+  padding-top: 14px !important;
+  border-top: 1px solid var(--pro-slate-100) !important;
+  text-align: center !important;
+  font-size: 11.5px !important;
+  color: var(--pro-slate-500) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 6px !important;
+}
+
+.login-footer-link {
+  color: var(--pro-blue-600) !important;
+  font-weight: 650 !important;
+  text-decoration: none !important;
+  transition: color 150ms ease !important;
+}
+
+.login-footer-link:hover {
+  color: var(--pro-navy-900) !important;
+  text-decoration: underline !important;
+}
+
+/* Quick Role Selector Grid (Backwards compatibility) */
+.quick-role-grid {
+  display: grid !important;
+  grid-template-columns: repeat(3, 1fr) !important;
+  gap: 8px !important;
+  width: 100% !important;
+  margin-top: 8px !important;
+}
+
+.quick-role-card {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  text-align: center !important;
+  padding: 12px 6px 10px !important;
+  background: var(--pro-slate-50) !important;
+  border: 1.5px solid var(--pro-slate-200) !important;
+  border-radius: 14px !important;
+  cursor: pointer !important;
+  transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1) !important;
+  text-decoration: none !important;
+  position: relative !important;
+}
+
+.quick-role-card:hover {
+  background: var(--pro-blue-50) !important;
+  border-color: var(--pro-blue-500) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 6px 16px -2px rgba(37, 99, 235, 0.16) !important;
+}
+
+.quick-role-card:active {
+  transform: translateY(0) !important;
+}
+
+.quick-role-icon {
+  width: 36px !important;
+  height: 36px !important;
+  border-radius: 10px !important;
+  background: rgba(10, 30, 63, 0.07) !important;
+  color: var(--pro-navy-900) !important;
+  display: grid !important;
+  place-items: center !important;
+  margin-bottom: 6px !important;
+  transition: all 180ms ease !important;
+}
+
+.quick-role-card:hover .quick-role-icon {
+  background: var(--pro-blue-500) !important;
+  color: #FFFFFF !important;
+  transform: scale(1.08) !important;
+}
+
+.quick-role-name {
+  font-size: 11.5px !important;
+  font-weight: 600 !important;
+  color: var(--pro-slate-900) !important;
+  line-height: 1.25 !important;
+}
+
+.quick-role-sub {
+  font-size: 10px !important;
+  color: var(--pro-slate-500) !important;
+  margin-top: 2px !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  max-width: 100% !important;
+  display: block !important;
+}
+
+/* ==========================================================================
+   APP SHELL (SIDEBAR & TOPBAR UI UX PRO)
+   ========================================================================== */
+.sidebar {
+  background: linear-gradient(180deg, #07162C 0%, #0D2447 50%, #13335F 100%) !important;
+  border-right: 1px solid rgba(255, 255, 255, 0.08) !important;
+  box-shadow: 6px 0 28px rgba(7, 22, 44, 0.2) !important;
+}
+
+.sidebar-header {
+  padding: 18px 16px 14px !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+.sidebar-brand .brand-badge-card {
+  width: 40px !important;
+  height: 40px !important;
+  border-radius: 10px !important;
+  background: #FFFFFF !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+  padding: 4px !important;
+}
+
+.sidebar-role-badge {
+  background: rgba(255, 255, 255, 0.08) !important;
+  border: 1px solid rgba(255, 255, 255, 0.16) !important;
+  color: #7DD3FC !important;
+  border-radius: var(--pro-radius-pill) !important;
+  padding: 4px 10px !important;
+  font-size: 10.5px !important;
+  font-weight: 700 !important;
+}
+
+.nav-item {
+  border-radius: 10px !important;
+  margin: 3px 0 !important;
+  padding: 10px 14px !important;
+  font-size: 13px !important;
+  font-weight: 550 !important;
+  color: #CBD5E1 !important;
+  transition: all 180ms ease !important;
+  position: relative !important;
+}
+
+.nav-item:hover {
+  background: rgba(255, 255, 255, 0.09) !important;
+  color: #FFFFFF !important;
+  transform: translateX(2px) !important;
+}
+
+.nav-item.active {
+  background: rgba(56, 189, 248, 0.14) !important;
+  color: #FFFFFF !important;
+  font-weight: 700 !important;
+  border-left: 3.5px solid var(--pro-blue-400) !important;
+  box-shadow: 0 4px 14px rgba(6, 21, 43, 0.25) !important;
+}
+
+.nav-item.active svg {
+  color: #FFFFFF !important;
+}
+
+/* TOPBAR */
+.topbar {
+  background: rgba(255, 255, 255, 0.94) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  border-bottom: 1px solid var(--pro-slate-200) !important;
+  box-shadow: 0 2px 10px rgba(15, 30, 63, 0.03) !important;
+}
+
+.breadcrumb-nav .current-page {
+  font-weight: 800 !important;
+  color: var(--pro-navy-900) !important;
+  background: var(--pro-blue-50) !important;
+  border: 1px solid rgba(37, 99, 235, 0.15) !important;
+  padding: 3px 10px !important;
+  border-radius: var(--pro-radius-pill) !important;
+  font-size: 11.5px !important;
+}
+
+.topbar-search input {
+  border-radius: var(--pro-radius-pill) !important;
+  border: 1.5px solid var(--pro-slate-200) !important;
+  background: var(--pro-slate-50) !important;
+  font-size: 13px !important;
+  transition: all 180ms ease !important;
+}
+
+.topbar-search input:focus {
+  background: #FFFFFF !important;
+  border-color: var(--pro-blue-500) !important;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12) !important;
+}
+
+/* ==========================================================================
+   CARDS & GRIDS (UI UX PRO)
+   ========================================================================== */
+.card {
+  background: #FFFFFF !important;
+  border: 1px solid var(--pro-slate-200) !important;
+  border-radius: 16px !important;
+  padding: 24px !important;
+  box-shadow: var(--pro-shadow-card) !important;
+  transition: transform 220ms ease, box-shadow 220ms ease, border-color 220ms ease !important;
+}
+
+.card:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: var(--pro-shadow-card-hover) !important;
+  border-color: var(--pro-slate-300) !important;
+}
+
+.card-title {
+  font-size: 15px !important;
+  font-weight: 600 !important;
+  color: var(--pro-navy-900) !important;
+  letter-spacing: normal !important;
+}
+
+/* ==========================================================================
+   STAT CARDS (KPIs)
+   ========================================================================== */
+.stat-card {
+  background: #FFFFFF !important;
+  border: 1px solid var(--pro-slate-200) !important;
+  border-radius: 12px !important;
+  padding: 16px 18px !important;
+  box-shadow: 0 1px 3px rgba(15, 30, 63, 0.04) !important;
+  transition: transform 150ms ease, box-shadow 150ms ease !important;
+}
+
+.stat-card:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 4px 12px rgba(15, 30, 63, 0.08) !important;
+  border-color: #CBD5E1 !important;
+}
+
+.stat-card-label {
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  color: var(--pro-slate-500) !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.02em !important;
+  line-height: 1.3 !important;
+}
+
+.stat-card-value {
+  font-size: 20px !important;
+  font-weight: 700 !important;
+  color: var(--pro-navy-900) !important;
+  margin: 4px 0 2px !important;
+  letter-spacing: normal !important;
+  line-height: 1.25 !important;
+  display: flex !important;
+  align-items: baseline !important;
+  gap: 4px !important;
+  white-space: nowrap !important;
+}
+
+.grid-cols-5 .stat-card-value {
+  font-size: 15.5px !important;
+  font-weight: 700 !important;
+  white-space: normal !important;
+  word-break: break-word !important;
+  line-height: 1.3 !important;
+}
+
+.stat-card-value .unit {
+  font-size: 12px !important;
+  font-weight: 500 !important;
+  color: var(--pro-slate-500) !important;
+}
+
+.stat-card-desc {
+  font-size: 11px !important;
+  color: var(--pro-slate-500) !important;
+  line-height: 1.35 !important;
+  margin-top: 2px !important;
+}
+
+.stat-card-icon {
+  width: 40px !important;
+  height: 40px !important;
+  border-radius: 10px !important;
+  background: rgba(15, 46, 74, 0.06) !important;
+  color: var(--pro-navy-900) !important;
+  display: grid !important;
+  place-items: center !important;
+  flex-shrink: 0 !important;
+}
+
+.stat-card:hover .stat-card-icon {
+  transform: none !important;
+}
+
+.stat-card.success .stat-card-icon {
+  background: var(--pro-emerald-50) !important;
+  color: var(--pro-emerald-600) !important;
+}
+
+.stat-card.warning .stat-card-icon {
+  background: var(--pro-gold-50) !important;
+  color: var(--pro-gold-600) !important;
+}
+
+.stat-card.danger .stat-card-icon {
+  background: var(--pro-rose-50) !important;
+  color: var(--pro-rose-600) !important;
+}
+
+.stat-card-mini-progress {
+  margin-top: 16px !important;
+  height: 6px !important;
+  border-radius: var(--pro-radius-pill) !important;
+  background: var(--pro-slate-100) !important;
+  overflow: hidden !important;
+}
+
+.stat-card-mini-progress .fill {
+  height: 100% !important;
+  border-radius: var(--pro-radius-pill) !important;
+  background: linear-gradient(90deg, var(--pro-blue-500), var(--pro-blue-600)) !important;
+}
+
+/* ==========================================================================
+   BUTTONS (UI UX PRO)
+   ========================================================================== */
+.btn {
+  border-radius: 10px !important;
+  font-weight: 650 !important;
+  font-size: 13px !important;
+  transition: all 180ms ease !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 7px !important;
+  cursor: pointer !important;
+}
+
+.btn:hover {
+  transform: translateY(-1px) !important;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--pro-navy-900) 0%, var(--pro-navy-700) 60%, var(--pro-blue-600) 100%) !important;
+  color: #FFFFFF !important;
+  border: none !important;
+  box-shadow: 0 4px 12px rgba(10, 30, 63, 0.2) !important;
+}
+
+.btn-primary:hover {
+  box-shadow: 0 6px 18px rgba(10, 30, 63, 0.3) !important;
+}
+
+.btn-outline {
+  border: 1.5px solid var(--pro-slate-200) !important;
+  background: #FFFFFF !important;
+  color: var(--pro-slate-700) !important;
+}
+
+.btn-outline:hover {
+  border-color: var(--pro-slate-300) !important;
+  background: var(--pro-slate-50) !important;
+  color: var(--pro-navy-900) !important;
+}
+
+.btn-outline-primary {
+  border: 1.5px solid var(--pro-blue-500) !important;
+  background: #FFFFFF !important;
+  color: var(--pro-blue-500) !important;
+}
+
+.btn-outline-primary:hover {
+  background: var(--pro-blue-50) !important;
+  color: var(--pro-navy-900) !important;
+}
+
+/* ==========================================================================
+   STEPPER & PROGRESS
+   ========================================================================== */
+.step-item.active .step-number {
+  border-color: var(--pro-navy-900) !important;
+  background: var(--pro-navy-900) !important;
+  color: #FFFFFF !important;
+  box-shadow: 0 0 0 4px rgba(10, 30, 63, 0.16) !important;
+}
+
+.step-item.completed .step-number {
+  border-color: var(--pro-emerald-500) !important;
+  background: var(--pro-emerald-500) !important;
+  color: #FFFFFF !important;
+}
+
+
+
+/* ==========================================================================
+   DATA TABLES (UI UX PRO)
+   ========================================================================== */
+.data-table {
+  width: 100% !important;
+  border-collapse: separate !important;
+  border-spacing: 0 !important;
+  font-size: 13px !important;
+}
+
+.data-table th {
+  background: var(--pro-slate-50) !important;
+  color: var(--pro-slate-600) !important;
+  font-weight: 600 !important;
+  font-size: 11px !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.05em !important;
+  padding: 14px 18px !important;
+  border-bottom: 1.5px solid var(--pro-slate-200) !important;
+  border-top: 1px solid var(--pro-slate-200) !important;
+}
+
+.data-table td {
+  padding: 14px 18px !important;
+  border-bottom: 1px solid var(--pro-slate-200) !important;
+  color: var(--pro-slate-800) !important;
+  vertical-align: middle !important;
+  font-size: 13px !important;
+}
+
+.data-table tbody tr {
+  transition: background 150ms ease !important;
+}
+
+.data-table tbody tr:hover {
+  background: var(--pro-blue-50) !important;
+}
+
+/* ==========================================================================
+   BADGES & PILLS (UI UX PRO)
+   ========================================================================== */
+.badge {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 5px !important;
+  padding: 4px 10px !important;
+  border-radius: var(--pro-radius-pill) !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.02em !important;
+  white-space: nowrap !important;
+}
+
+.badge-blue {
+  background: rgba(37, 99, 235, 0.1) !important;
+  color: var(--pro-blue-600) !important;
+  border: 1px solid rgba(37, 99, 235, 0.2) !important;
+}
+
+.badge-success {
+  background: var(--pro-emerald-50) !important;
+  color: var(--pro-emerald-600) !important;
+  border: 1px solid rgba(16, 185, 129, 0.25) !important;
+}
+
+.badge-warning {
+  background: var(--pro-gold-50) !important;
+  color: var(--pro-gold-600) !important;
+  border: 1px solid rgba(217, 119, 6, 0.25) !important;
+}
+
+.badge-danger {
+  background: var(--pro-rose-50) !important;
+  color: var(--pro-rose-600) !important;
+  border: 1px solid rgba(239, 68, 68, 0.25) !important;
+}
+
+/* ==========================================================================
+   MODAL & DIALOGS (UI UX PRO)
+   ========================================================================== */
+.modal-overlay {
+  backdrop-filter: blur(8px) !important;
+  -webkit-backdrop-filter: blur(8px) !important;
+  background: rgba(10, 25, 47, 0.6) !important;
+}
+
+.modal-card {
+  border-radius: 20px !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  box-shadow: 0 30px 60px -12px rgba(10, 25, 47, 0.35) !important;
+}
+
+/* ==========================================================================
+   FORM CONTROLS (UI UX PRO)
+   ========================================================================== */
+.form-select,
+.form-control {
+  border-radius: 10px !important;
+  border: 1.5px solid var(--pro-slate-300) !important;
+  font-family: var(--pro-font) !important;
+  font-size: 13px !important;
+  color: var(--pro-slate-800) !important;
+  transition: all 180ms ease !important;
+}
+
+.form-select:focus,
+.form-control:focus {
+  border-color: var(--pro-blue-500) !important;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15) !important;
+}
+
+/* ==========================================================================
+   EXECUTIVE DIRECTIVE BANNER (UI UX PRO)
+   ========================================================================== */
+.executive-directive-card {
+  background: linear-gradient(135deg, #EFF6FF 0%, #F0FDF4 100%) !important;
+  border: 1.5px solid #BFDBFE !important;
+  border-left: 5px solid var(--pro-navy-800) !important;
+  border-radius: 14px !important;
+  box-shadow: var(--pro-shadow-card) !important;
+}
+
+/* ==========================================================================
+   CUSTOM SCROLLBAR
+   ========================================================================== */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--pro-slate-300);
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--pro-slate-400);
+}
