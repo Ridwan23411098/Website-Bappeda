@@ -44,7 +44,7 @@
     rel="stylesheet">
 
   <!-- Core Stylesheet -->
-  <link rel="stylesheet" href="css/app.css?v=20261113_nobox_v5">
+  <link rel="stylesheet" href="css/app.css?v=20261113_clean_v6">
 
   <!-- Critical Inlined CSS (Ensures 100% Instant & Flawless Mobile / PWA Rendering) -->
   <style>
@@ -366,7 +366,7 @@
   </style>
 
   <!-- STYLESHEET STANDAR KEDINASAN RESMI BAPPEDA -->
-  <link rel="stylesheet" href="css/ui-ux-pro.css?v=20261113_nobox_v5">
+  <link rel="stylesheet" href="css/ui-ux-pro.css?v=20261113_clean_v6">
 </head>
 
 <body>
@@ -396,32 +396,7 @@
 
       <!-- Auth Card -->
       <div class="login-card">
-        <!-- Segmented Role Selector (Clean UI/UX Pro Standard) -->
-        <div class="login-role-tabs-wrap">
-          <div class="login-role-tabs" role="tablist" aria-label="Pilih Akses Pengguna">
-            <button type="button" class="login-role-tab active" data-role="pegawai" onclick="App.selectLoginRole('pegawai')" role="tab" aria-selected="true">
-              <span class="login-role-tab-icon" data-icon="UserRound" data-icon-size="14"></span>
-              <span>Pegawai</span>
-            </button>
-            <button type="button" class="login-role-tab" data-role="admin" onclick="App.selectLoginRole('admin')" role="tab" aria-selected="false">
-              <span class="login-role-tab-icon" data-icon="ShieldCheck" data-icon-size="14"></span>
-              <span>Admin SDM</span>
-            </button>
-            <button type="button" class="login-role-tab" data-role="pimpinan" onclick="App.selectLoginRole('pimpinan')" role="tab" aria-selected="false">
-              <span class="login-role-tab-icon" data-icon="Award" data-icon-size="14"></span>
-              <span>Pimpinan</span>
-            </button>
-          </div>
-        </div>
-
-        <!-- Selected Role Context Banner -->
-        <div class="login-selected-profile" id="loginSelectedProfile">
-          <div class="profile-badge-avatar" id="loginProfileAvatar">AA</div>
-          <div class="profile-badge-text">
-            <div class="profile-badge-name" id="loginProfileName">ANDI ARAFAT S.T., M.E.</div>
-            <div class="profile-badge-desc" id="loginProfileDesc">Sekretaris Bappeda • Pengguna Standar</div>
-          </div>
-        </div>
+        <p style="font-size: 12.5px; color: #64748B; margin-bottom: 20px; text-align: center;">Silakan masuk menggunakan NIP resmi dan kata sandi kedinasan Anda.</p>
 
         <!-- Error Alert Container -->
         <div id="loginErrorAlert"
