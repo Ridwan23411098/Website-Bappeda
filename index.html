@@ -44,7 +44,7 @@
     rel="stylesheet">
 
   <!-- Core Stylesheet -->
-  <link rel="stylesheet" href="css/app.css?v=20261113_final_v7">
+  <link rel="stylesheet" href="css/app.css?v=20261113_responsive_v8">
 
   <!-- Critical Inlined CSS (Ensures 100% Instant & Flawless Mobile / PWA Rendering) -->
   <style>
@@ -366,7 +366,7 @@
   </style>
 
   <!-- STYLESHEET STANDAR KEDINASAN RESMI BAPPEDA -->
-  <link rel="stylesheet" href="css/ui-ux-pro.css?v=20261113_final_v7">
+  <link rel="stylesheet" href="css/ui-ux-pro.css?v=20261113_responsive_v8">
 </head>
 
 <body>
@@ -859,31 +859,30 @@
                 <button class="btn btn-outline btn-sm" onclick="App.navigate('ekompetensi')">Lihat Detail</button>
               </div>
               <div style="display: flex; flex-direction: column; gap: 16px; margin-top: 8px;">
-                <div>
-                  <div
-                    style="display: flex; justify-content: space-between; font-size: 12.5px; font-weight: 600; margin-bottom: 6px;">
-                    <span>Kompetensi Teknis (Perencanaan & Analisis)</span>
-                    <span class="text-primary">67% (2 / 3 Selesai)</span>
+                <div class="competency-progress-item">
+                  <div class="competency-progress-header">
+                    <span class="competency-progress-title">Kompetensi Teknis (Perencanaan &amp; Analisis)</span>
+                    <span class="competency-progress-val text-primary">67% (2 / 3 Selesai)</span>
                   </div>
                   <div class="progress-track lg">
                     <div class="progress-fill" style="width: 67%;"></div>
                   </div>
                 </div>
-                <div>
-                  <div
-                    style="display: flex; justify-content: space-between; font-size: 12.5px; font-weight: 600; margin-bottom: 6px;">
-                    <span>Kompetensi Manajerial (Kepemimpinan & Pelayanan)</span>
-                    <span class="text-primary">50% (4 / 8 Selesai)</span>
+
+                <div class="competency-progress-item">
+                  <div class="competency-progress-header">
+                    <span class="competency-progress-title">Kompetensi Manajerial (Kepemimpinan &amp; Pelayanan)</span>
+                    <span class="competency-progress-val text-warning">50% (4 / 8 Selesai)</span>
                   </div>
                   <div class="progress-track lg">
                     <div class="progress-fill warning" style="width: 50%;"></div>
                   </div>
                 </div>
-                <div>
-                  <div
-                    style="display: flex; justify-content: space-between; font-size: 12.5px; font-weight: 600; margin-bottom: 6px;">
-                    <span>Kompetensi Sosial Kultural (Perekat Bangsa)</span>
-                    <span class="text-primary">100% (Terpenuhi)</span>
+
+                <div class="competency-progress-item">
+                  <div class="competency-progress-header">
+                    <span class="competency-progress-title">Kompetensi Sosial Kultural (Perekat Bangsa)</span>
+                    <span class="competency-progress-val text-success">100% (Terpenuhi)</span>
                   </div>
                   <div class="progress-track lg">
                     <div class="progress-fill success" style="width: 100%;"></div>
@@ -901,59 +900,56 @@
                 </div>
                 <span class="badge badge-warning" style="font-weight: 700;">3 Tindak Lanjut</span>
               </div>
-              <div style="display: flex; flex-direction: column; gap: 10px;">
+              <div class="action-card-list">
                 <!-- Action 1 -->
-                <div
-                  style="display: flex; align-items: center; justify-content: space-between; padding: 12px 14px; background: #FFFBEB; border: 1.5px solid #FDE68A; border-radius: var(--radius-md); transition: all 150ms ease;">
-                  <div style="display: flex; align-items: center; gap: 12px;">
-                    <div style="width: 36px; height: 36px; border-radius: 9px; background: #FEF3C7; color: #B45309; display: grid; place-items: center; flex-shrink: 0;">
+                <div class="action-card-item warning">
+                  <div class="action-card-header">
+                    <div class="action-card-icon warning">
                       <span data-icon="ClipboardCheck" data-icon-size="18"></span>
                     </div>
-                    <div>
-                      <div style="display: flex; align-items: center; gap: 6px;">
-                        <span style="font-weight: 700; font-size: 12.5px; color: #92400E;">Lengkapi Program IDP</span>
-                        <span class="badge badge-warning" style="font-size: 9.5px; padding: 1px 6px;">Mendesak</span>
+                    <div class="action-card-info">
+                      <div class="action-card-title-row">
+                        <span class="action-card-title">Lengkapi Program IDP</span>
+                        <span class="badge badge-warning">Mendesak</span>
                       </div>
-                      <div style="font-size: 11px; color: #78350F; margin-top: 1px;">Tuntaskan program coaching &amp; mentoring 2026</div>
+                      <div class="action-card-subtitle">Tuntaskan program coaching &amp; mentoring 2026</div>
                     </div>
                   </div>
-                  <button class="btn btn-primary btn-sm" onclick="App.navigate('eidp')" style="padding: 5px 12px; font-weight: 650; white-space: nowrap;">Buka IDP</button>
+                  <button class="btn btn-primary btn-sm action-card-btn" onclick="App.navigate('eidp')">Buka IDP</button>
                 </div>
 
                 <!-- Action 2 -->
-                <div
-                  style="display: flex; align-items: center; justify-content: space-between; padding: 12px 14px; background: #F0FDF4; border: 1.5px solid #BBF7D0; border-radius: var(--radius-md); transition: all 150ms ease;">
-                  <div style="display: flex; align-items: center; gap: 12px;">
-                    <div style="width: 36px; height: 36px; border-radius: 9px; background: #DCFCE7; color: #15803D; display: grid; place-items: center; flex-shrink: 0;">
+                <div class="action-card-item success">
+                  <div class="action-card-header">
+                    <div class="action-card-icon success">
                       <span data-icon="Upload" data-icon-size="18"></span>
                     </div>
-                    <div>
-                      <div style="display: flex; align-items: center; gap: 6px;">
-                        <span style="font-weight: 700; font-size: 12.5px; color: #166534;">Upload Bukti Pelatihan</span>
-                        <span class="badge badge-success" style="font-size: 9.5px; padding: 1px 6px;">Siap Unggah</span>
+                    <div class="action-card-info">
+                      <div class="action-card-title-row">
+                        <span class="action-card-title">Upload Bukti Pelatihan</span>
+                        <span class="badge badge-success">Siap Unggah</span>
                       </div>
-                      <div style="font-size: 11px; color: #14532D; margin-top: 1px;">Sertifikat analisis data siap diunggah</div>
+                      <div class="action-card-subtitle">Sertifikat analisis data siap diunggah</div>
                     </div>
                   </div>
-                  <button class="btn btn-outline-primary btn-sm" onclick="App.openInputRealizationDrawer()" style="padding: 5px 12px; font-weight: 650; white-space: nowrap;">Unggah</button>
+                  <button class="btn btn-outline-primary btn-sm action-card-btn" onclick="App.openInputRealizationDrawer()">Unggah</button>
                 </div>
 
                 <!-- Action 3 -->
-                <div
-                  style="display: flex; align-items: center; justify-content: space-between; padding: 12px 14px; background: var(--color-surface-subtle); border: 1px solid var(--color-border); border-radius: var(--radius-md); transition: all 150ms ease;">
-                  <div style="display: flex; align-items: center; gap: 12px;">
-                    <div style="width: 36px; height: 36px; border-radius: 9px; background: var(--color-light-blue); color: var(--color-primary); display: grid; place-items: center; flex-shrink: 0;">
+                <div class="action-card-item neutral">
+                  <div class="action-card-header">
+                    <div class="action-card-icon neutral">
                       <span data-icon="TrendingUp" data-icon-size="18"></span>
                     </div>
-                    <div>
-                      <div style="display: flex; align-items: center; gap: 6px;">
-                        <span style="font-weight: 700; font-size: 12.5px; color: var(--color-text-primary);">Review Target Karier</span>
-                        <span class="badge badge-blue" style="font-size: 9.5px; padding: 1px 6px;">Berkala</span>
+                    <div class="action-card-info">
+                      <div class="action-card-title-row">
+                        <span class="action-card-title">Review Target Karier</span>
+                        <span class="badge badge-blue">Berkala</span>
                       </div>
-                      <div style="font-size: 11px; color: var(--color-text-muted); margin-top: 1px;">Pastikan keselarasan target JFT Muda Level 3</div>
+                      <div class="action-card-subtitle">Pastikan keselarasan target JFT Muda Level 3</div>
                     </div>
                   </div>
-                  <button class="btn btn-outline btn-sm" onclick="App.navigate('ekarier')" style="padding: 5px 12px; font-weight: 650; white-space: nowrap;">Lihat</button>
+                  <button class="btn btn-outline btn-sm action-card-btn" onclick="App.navigate('ekarier')">Lihat</button>
                 </div>
               </div>
             </div>

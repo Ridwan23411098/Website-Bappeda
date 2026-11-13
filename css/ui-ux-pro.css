@@ -874,3 +874,179 @@ body {
 ::-webkit-scrollbar-thumb:hover {
   background: var(--pro-slate-400);
 }
+
+/* ==========================================================================
+   DASHBOARD WIDGETS RESPONSIVE FIXES (NO COLLISION / NO OVERFLOW)
+   ========================================================================== */
+
+/* 1. Competency Progress Headers */
+.competency-progress-item {
+  width: 100% !important;
+}
+
+.competency-progress-header {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: flex-end !important;
+  gap: 10px !important;
+  margin-bottom: 6px !important;
+  width: 100% !important;
+}
+
+.competency-progress-title {
+  font-size: 12.5px !important;
+  font-weight: 650 !important;
+  color: var(--pro-slate-900) !important;
+  line-height: 1.35 !important;
+  flex: 1 1 auto !important;
+  min-width: 0 !important;
+}
+
+.competency-progress-val {
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  white-space: nowrap !important;
+  flex-shrink: 0 !important;
+  text-align: right !important;
+}
+
+/* 2. Action Required Priority Cards */
+.action-card-list {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 10px !important;
+  width: 100% !important;
+}
+
+.action-card-item {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 12px !important;
+  padding: 12px 14px !important;
+  border-radius: 12px !important;
+  transition: all 180ms ease !important;
+  border: 1px solid #E2E8F0 !important;
+  box-sizing: border-box !important;
+  width: 100% !important;
+}
+
+.action-card-item.warning {
+  background: #FFFBEB !important;
+  border-color: #FDE68A !important;
+}
+
+.action-card-item.success {
+  background: #F0FDF4 !important;
+  border-color: #BBF7D0 !important;
+}
+
+.action-card-item.neutral {
+  background: #F8FAFC !important;
+  border-color: #E2E8F0 !important;
+}
+
+.action-card-header {
+  display: flex !important;
+  align-items: flex-start !important;
+  gap: 12px !important;
+  flex: 1 1 auto !important;
+  min-width: 0 !important;
+}
+
+.action-card-icon {
+  width: 36px !important;
+  height: 36px !important;
+  border-radius: 9px !important;
+  display: grid !important;
+  place-items: center !important;
+  flex-shrink: 0 !important;
+}
+
+.action-card-icon.warning {
+  background: #FEF3C7 !important;
+  color: #B45309 !important;
+}
+
+.action-card-icon.success {
+  background: #DCFCE7 !important;
+  color: #15803D !important;
+}
+
+.action-card-icon.neutral {
+  background: #EFF6FF !important;
+  color: #1D4ED8 !important;
+}
+
+.action-card-info {
+  flex: 1 1 auto !important;
+  min-width: 0 !important;
+}
+
+.action-card-title-row {
+  display: flex !important;
+  align-items: center !important;
+  flex-wrap: wrap !important;
+  gap: 6px !important;
+  margin-bottom: 2px !important;
+}
+
+.action-card-title {
+  font-weight: 700 !important;
+  font-size: 13px !important;
+  line-height: 1.35 !important;
+  word-break: break-word !important;
+}
+
+.action-card-item.warning .action-card-title { color: #92400E !important; }
+.action-card-item.success .action-card-title { color: #166534 !important; }
+.action-card-item.neutral .action-card-title { color: #1E293B !important; }
+
+.action-card-subtitle {
+  font-size: 11px !important;
+  line-height: 1.35 !important;
+  word-break: break-word !important;
+}
+
+.action-card-item.warning .action-card-subtitle { color: #78350F !important; }
+.action-card-item.success .action-card-subtitle { color: #14532D !important; }
+.action-card-item.neutral .action-card-subtitle { color: #64748B !important; }
+
+.action-card-btn {
+  flex-shrink: 0 !important;
+  padding: 6px 14px !important;
+  font-weight: 650 !important;
+  font-size: 12px !important;
+  border-radius: 8px !important;
+  white-space: nowrap !important;
+}
+
+/* Mobile Screens (iPhone, Android, Small Viewports):
+   Stack card content vertically so button and badge NEVER collide */
+@media (max-width: 640px) {
+  .competency-progress-header {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 2px !important;
+  }
+  .competency-progress-val {
+    align-self: flex-start !important;
+    font-size: 11.5px !important;
+    margin-bottom: 2px !important;
+  }
+  .action-card-item {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 10px !important;
+    padding: 12px !important;
+  }
+  .action-card-header {
+    width: 100% !important;
+  }
+  .action-card-btn {
+    width: 100% !important;
+    justify-content: center !important;
+    height: 38px !important;
+    font-size: 13px !important;
+  }
+}
