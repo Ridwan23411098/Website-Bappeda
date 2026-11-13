@@ -171,9 +171,15 @@ body {
 .login-card {
   background: #FFFFFF !important;
   border-radius: 20px !important;
-  padding: 26px 24px !important;
+  padding: 32px 28px 24px !important;
   box-shadow: var(--pro-shadow-login) !important;
   border: 1px solid rgba(226, 232, 240, 0.9) !important;
+}
+
+/* Hide legacy / removed role tabs & preview card */
+.login-role-tabs-wrap,
+.login-selected-profile {
+  display: none !important;
 }
 
 .login-card .form-control {
