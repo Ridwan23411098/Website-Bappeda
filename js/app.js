@@ -4361,7 +4361,7 @@ const App = {
       const tanggal = metadata.tanggal || '15 November 2026';
       const nomor = metadata.nomor || '893.3/0481/BAPPEDA/2026';
 
-      const lampungSvg = typeof LambangLampung !== 'undefined' ? LambangLampung.getSvg(50) : '';
+      const lampungSvg = typeof LambangLampung !== 'undefined' ? LambangLampung.getSvg(74) : '';
       const qrSvg = typeof TTEService !== 'undefined' && TTEService.generateQrSvg 
         ? TTEService.generateQrSvg(`https://bappeda.lampungprov.go.id/tte/verify?doc=${encodeURIComponent(nomor)}&nip=${encodeURIComponent(nip)}`, 62) 
         : '';
@@ -4381,24 +4381,37 @@ const App = {
             </div>
 
             <div style="position: relative; z-index: 2;">
-              <!-- Header -->
-              <div style="text-align: center; border-bottom: 2px solid #1e3a8a; padding-bottom: 10px; margin-bottom: 14px;">
-                <div style="display: flex; justify-content: center; margin-bottom: 6px;">
+              <!-- KOP SURAT RESMI PEMERINTAH PROVINSI LAMPUNG (STANDAR TATA NASKAH DINAS TAHUN 2026) -->
+              <div style="display: flex; align-items: center; gap: 18px; padding-bottom: 6px;">
+                <div style="width: 74px; height: 74px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
                   ${lampungSvg}
                 </div>
-                <div style="font-size: 12.5px; font-weight: 700; letter-spacing: 1px; color: #1e3a8a; font-family: system-ui, sans-serif;">PEMERINTAH PROVINSI LAMPUNG</div>
-                <div style="font-size: 14.5px; font-weight: 800; letter-spacing: 0.5px; color: #0b2545; font-family: system-ui, sans-serif;">BADAN PERENCANAAN PEMBANGUNAN DAERAH</div>
-                <div style="font-size: 9.5px; color: #64748b; font-family: system-ui, sans-serif; margin-top: 2px;">
-                  Jl. Wolter Monginsidi No. 220, Teluk Betung, Bandar Lampung • Telp: (0721) 486124 • Portal SPBE: bappeda.lampungprov.go.id
+                <div style="flex: 1; text-align: center; color: #000000;">
+                  <div style="font-size: 14px; font-weight: 700; letter-spacing: 0.8px; font-family: Arial, Helvetica, sans-serif; color: #000000; text-transform: uppercase;">
+                    PEMERINTAH PROVINSI LAMPUNG
+                  </div>
+                  <div style="font-size: 16.5px; font-weight: 850; letter-spacing: 0.5px; font-family: Arial, Helvetica, sans-serif; color: #000000; text-transform: uppercase; margin: 2px 0;">
+                    BADAN PERENCANAAN PEMBANGUNAN DAERAH
+                  </div>
+                  <div style="font-size: 10px; font-family: Arial, Helvetica, sans-serif; color: #1e293b; line-height: 1.4; margin-top: 3px;">
+                    Jalan Wolter Monginsidi Nomor 224 Telukbetung, Bandar Lampung Kode Pos 35215<br>
+                    Telepon: (0721) 486255 • Pos-el: bappeda@lampungprov.go.id • Laman: bappeda.lampungprov.go.id
+                  </div>
                 </div>
+              </div>
+
+              <!-- GARIS PEMBATAS GANDA RESMI NASKAH DINAS (TEBAL-TIPIS) -->
+              <div style="margin-top: 6px; margin-bottom: 16px;">
+                <div style="border-top: 2.5px solid #000000; margin-bottom: 2px;"></div>
+                <div style="border-top: 1px solid #000000;"></div>
               </div>
 
               <!-- Title -->
               <div style="text-align: center; margin-bottom: 16px;">
-                <div style="font-size: 17px; font-weight: 800; color: #1e3a8a; letter-spacing: 1px; text-decoration: underline; margin-bottom: 2px;">
+                <div style="font-size: 17px; font-weight: 800; color: #0b2545; letter-spacing: 1px; text-decoration: underline; margin-bottom: 2px; font-family: 'Times New Roman', Times, serif;">
                   SURAT TANDA TAMAT PENDIDIKAN &amp; PELATIHAN
                 </div>
-                <div style="font-size: 11px; font-weight: 600; color: #d97706; letter-spacing: 1px;">( S T T P L )</div>
+                <div style="font-size: 11px; font-weight: 700; color: #b45309; letter-spacing: 1.5px; font-family: Arial, sans-serif;">( S T T P L )</div>
                 <div style="font-size: 11px; color: #334155; margin-top: 4px; font-family: monospace;">Nomor Registrasi: ${nomor}</div>
               </div>
 
