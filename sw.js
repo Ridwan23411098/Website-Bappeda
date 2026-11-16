@@ -1,7 +1,7 @@
 // SIP-KOMPETENSI — Bappeda Provinsi Lampung
 // Service Worker for PWA & Background Push Notifications
 
-const CACHE_NAME = 'sip-bappeda-garisrapi-v17';
+const CACHE_NAME = 'sip-bappeda-realtime-v18';
 
 self.addEventListener('install', event => {
   self.skipWaiting();

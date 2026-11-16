@@ -99,6 +99,11 @@ const App = {
       m.style.display = 'none';
     });
 
+    // Inisialisasi Realtime Service (Multi-Transport Sync)
+    if (typeof RealtimeService !== 'undefined') {
+      RealtimeService.init();
+    }
+
     // Check if user has an active persistent session
     if (Store.state.currentSession) {
       this.restoreSession(Store.state.currentSession);
@@ -7323,6 +7328,71 @@ const App = {
         this.closeDukActionDropdown();
       }
     });
+  },
+
+  showRealtimeStatusModal() {
+    this.openModal('realtimeStatusModal');
+    const label = document.getElementById('rtLastSyncLabel');
+    if (label && typeof RealtimeService !== 'undefined') {
+      const d = RealtimeService.lastSyncTime || new Date();
+      label.textContent = `Terakhir sinkron: ${d.toLocaleTimeString('id-ID')} WIB`;
+    }
+    const badge = document.getElementById('rtSupabaseBadge');
+    if (badge && typeof RealtimeService !== 'undefined') {
+      if (RealtimeService.isConnected) {
+        badge.textContent = 'Tersambung (WebSocket Active)';
+        badge.style.color = '#0369a1';
+        badge.style.background = '#e0f2fe';
+      } else {
+        badge.textContent = navigator.onLine ? 'Cloud Standby' : 'Offline Cache Mode';
+        badge.style.color = navigator.onLine ? '#0369a1' : '#b45309';
+        badge.style.background = navigator.onLine ? '#e0f2fe' : '#fef3c7';
+      }
+    }
+    if (typeof renderAllIcons === 'function') renderAllIcons();
+  },
+
+  testRealtimePing() {
+    const start = performance.now();
+    const consoleEl = document.getElementById('rtActivityConsole');
+    if (typeof RealtimeService !== 'undefined') {
+      RealtimeService.broadcast('PING_TEST', { clientTime: Date.now() });
+    }
+    const elapsed = (performance.now() - start).toFixed(1);
+    if (consoleEl) {
+      const timeStr = new Date().toLocaleTimeString('id-ID');
+      const logLine = document.createElement('div');
+      logLine.style.color = '#4ade80';
+      logLine.textContent = `[${timeStr}] ⚡ PING broadcast terkirim ke semua tab/perangkat (Latensi internal: ${elapsed} ms)`;
+      consoleEl.appendChild(logLine);
+      consoleEl.scrollTop = consoleEl.scrollHeight;
+    }
+    this.toast(`⚡ Sinyal Real-time berhasil dikirim! Latensi: ${elapsed} ms`, 'success', 3000);
+  },
+
+  sendTestRealtimeBroadcast() {
+    const user = Store.state?.user?.name || 'Pengguna SIP';
+    const notif = {
+      id: Date.now(),
+      penerima: 'all',
+      judul: 'Uji Sinyal Real-Time',
+      pesan: `Sinyal sinkronisasi instan dikirim oleh ${user} pada pukul ${new Date().toLocaleTimeString('id-ID')} WIB.`,
+      tipe: 'info',
+      created_at: new Date().toISOString()
+    };
+    if (typeof RealtimeService !== 'undefined') {
+      RealtimeService.broadcast('NEW_NOTIFICATION', notif);
+    }
+    const consoleEl = document.getElementById('rtActivityConsole');
+    if (consoleEl) {
+      const timeStr = new Date().toLocaleTimeString('id-ID');
+      const logLine = document.createElement('div');
+      logLine.style.color = '#38bdf8';
+      logLine.textContent = `[${timeStr}] 📢 Broadcast [NEW_NOTIFICATION] disiarkan ke bus jaringan`;
+      consoleEl.appendChild(logLine);
+      consoleEl.scrollTop = consoleEl.scrollHeight;
+    }
+    this.toast('📡 Sinyal siaran notifikasi instan berhasil dikirim ke seluruh tab!', 'info', 3000);
   }
 };
 

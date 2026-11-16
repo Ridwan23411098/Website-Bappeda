@@ -2095,6 +2095,11 @@ const Store = {
       console.warn("Gagal broadcast notifikasi arahan:", e);
     }
 
+    // Siarkan ke kanal real-time (Multi-Tab & Multi-Device)
+    if (typeof RealtimeService !== 'undefined') {
+      RealtimeService.broadcast('NEW_EXECUTIVE_DIRECTIVE', newDir);
+    }
+
     return newDir;
   },
 
@@ -2288,6 +2293,17 @@ const Store = {
     } catch (e) {
       if (typeof App !== 'undefined') App.toast("Error Notif: " + e.message, 'warning');
     }
+
+    // Siarkan ke kanal real-time
+    if (typeof RealtimeService !== 'undefined') {
+      RealtimeService.broadcast('IDP_SUBMITTED', {
+        pegawai: this.state.user?.name || 'Pegawai ASN',
+        nip: cleanUserNip,
+        totalJp: summary.totalJp,
+        totalProgram: summary.totalProgram,
+        tahun: this.getActiveYear()
+      });
+    }
   },
 
   async syncVerificationsFromSupabase() {
@@ -2424,6 +2440,16 @@ const Store = {
         pesan: `Selamat! Dokumen rencana IDP Tahun ${item.tahun || this.getActiveYear()} Anda telah diverifikasi & disetujui resmi oleh ${this.state.user?.name || 'Pengelola SDM'}.`,
         tipe: 'success'
       });
+
+      // Siarkan update verifikasi secara real-time
+      if (typeof RealtimeService !== 'undefined') {
+        RealtimeService.broadcast('IDP_VERIFIED', {
+          nip: item.nip,
+          status: newStatus,
+          notes: note,
+          tahun: item.tahun || this.getActiveYear()
+        });
+      }
     }
   },
 
@@ -2463,6 +2489,16 @@ const Store = {
         pesan: `Rencana IDP Anda memerlukan perbaikan. Catatan verifikator: "${note || 'Silakan cek kelengkapan dokumen'}".`,
         tipe: 'warning'
       });
+
+      // Siarkan update revisi secara real-time
+      if (typeof RealtimeService !== 'undefined') {
+        RealtimeService.broadcast('IDP_VERIFIED', {
+          nip: item.nip,
+          status: 'Perlu Revisi',
+          notes: note,
+          tahun: item.tahun || this.getActiveYear()
+        });
+      }
     }
   },
 
@@ -2629,6 +2665,15 @@ const Store = {
         tipe: 'success'
       });
     } catch(e) {}
+
+    // Siarkan ke kanal real-time
+    if (typeof RealtimeService !== 'undefined') {
+      RealtimeService.broadcast('REALIZATION_ADDED', {
+        pegawai: entryPegawai,
+        program: realizationData.program,
+        jp: realizationData.jp
+      });
+    }
   },
 
   updateUserStats() {
@@ -2691,6 +2736,8 @@ const Store = {
       created_at: new Date().toISOString()
     };
 
+    let resultNotif = newNotif;
+
     if (typeof supabaseClient !== 'undefined') {
       try {
         const { data, error } = await supabaseClient
@@ -2701,20 +2748,28 @@ const Store = {
         if (error) {
           console.error("Gagal mengirim notifikasi ke Supabase:", error);
         } else if (data && data.length > 0) {
-          return data[0];
+          resultNotif = data[0];
         }
       } catch (err) {
         console.error("Error sendNotification:", err);
       }
     }
 
-    // Fallback simpan lokal jika offline
-    newNotif.id = Date.now();
+    // Fallback simpan lokal jika offline atau melengkapi state
+    if (!resultNotif.id) resultNotif.id = Date.now();
     if (!this.state.notifications) this.state.notifications = [];
-    this.state.notifications.unshift(newNotif);
+    if (!this.state.notifications.some(n => n.id === resultNotif.id)) {
+      this.state.notifications.unshift(resultNotif);
+    }
     this.updateNotificationUnreadCount();
     this.save();
-    return newNotif;
+
+    // Siarkan ke kanal real-time
+    if (typeof RealtimeService !== 'undefined') {
+      RealtimeService.broadcast('NEW_NOTIFICATION', resultNotif);
+    }
+
+    return resultNotif;
   },
 
   async markNotificationAsRead(id) {
