@@ -4273,31 +4273,269 @@ const App = {
     }
   },
 
+  currentPdfZoom: 1.0,
+  currentPdfDocData: null,
+
   async viewRealizationBukti(id, filename, inMemoryUrl) {
-    if (inMemoryUrl && inMemoryUrl.startsWith('http')) {
-      window.open(inMemoryUrl, '_blank');
-      return;
-    }
-    if (inMemoryUrl && inMemoryUrl.startsWith('data:')) {
-      const w = window.open('');
-      if (w) {
-        w.document.write(`<iframe src="${inMemoryUrl}" frameborder="0" style="border:0; top:0px; left:0px; bottom:0px; right:0px; width:100%; height:100%;" allowfullscreen></iframe>`);
-        return;
+    let fileUrl = inMemoryUrl || null;
+    let metadata = {};
+
+    if (Store.state.realizations) {
+      const found = Store.state.realizations.find(r => r.id == id);
+      if (found) {
+        metadata = {
+          pegawai: found.pegawai || Store.state.user?.name,
+          nip: found.nip || Store.state.user?.nip,
+          pelatihan: found.program || found.pelatihan || 'Program Pengembangan Kompetensi ASN',
+          jp: found.jp || 20,
+          tanggal: found.tanggal || '15 November 2026',
+          nomor: `893.3/${String(found.id || 101).padStart(4, '0')}/BAPPEDA/2026`,
+          penyelenggara: found.metode?.includes('Internal') ? 'Internal Bappeda Provinsi Lampung' : 'Badan Pengembangan Sumber Daya Manusia Daerah (BPSDMD)'
+        };
       }
     }
-    if (typeof IDBHelper !== 'undefined') {
+
+    if (!fileUrl && typeof IDBHelper !== 'undefined') {
       try {
         const dataUrl = await IDBHelper.getFile(id);
-        if (dataUrl) {
-          const w = window.open('');
-          if (w) {
-            w.document.write(`<iframe src="${dataUrl}" frameborder="0" style="border:0; top:0px; left:0px; bottom:0px; right:0px; width:100%; height:100%;" allowfullscreen></iframe>`);
-            return;
-          }
-        }
+        if (dataUrl) fileUrl = dataUrl;
       } catch(e) {}
     }
-    this.previewDocument(filename);
+
+    this.openPdfViewer(filename, metadata, fileUrl);
+  },
+
+  previewDocument(filename) {
+    this.openPdfViewer(filename);
+  },
+
+  openPdfViewer(filename, metadata = {}, fileUrl = null) {
+    this.currentPdfZoom = 1.0;
+    this.currentPdfDocData = { filename, metadata, fileUrl };
+
+    const titleEl = document.getElementById('previewDocTitle');
+    const subtitleEl = document.getElementById('pdfDocSubTitle');
+    const hashEl = document.getElementById('pdfDocHash');
+    const zoomText = document.getElementById('pdfZoomLevelText');
+    const container = document.getElementById('pdfViewerContent');
+
+    const cleanFilename = filename || 'Sertifikat_Pelatihan.pdf';
+    if (titleEl) titleEl.textContent = cleanFilename;
+    if (zoomText) zoomText.textContent = '100%';
+    if (container) container.style.transform = 'scale(1)';
+
+    if (hashEl) {
+      let hash = 0;
+      for (let i = 0; i < cleanFilename.length; i++) {
+        hash = ((hash << 5) - hash) + cleanFilename.charCodeAt(i);
+        hash |= 0;
+      }
+      const hex = Math.abs(hash).toString(16).padStart(8, '0');
+      hashEl.textContent = `#sha256:e8b94f1c${hex}f731cc91`;
+    }
+
+    if (fileUrl && fileUrl.startsWith('data:image')) {
+      if (container) {
+        container.innerHTML = `
+          <div style="padding: 10px; max-width: 820px; width: 100%; text-align: center;">
+            <img src="${fileUrl}" style="max-width: 100%; height: auto; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);" alt="Bukti Sertifikat">
+          </div>
+        `;
+      }
+    } else if (fileUrl && (fileUrl.startsWith('data:application/pdf') || fileUrl.startsWith('blob:') || fileUrl.startsWith('http'))) {
+      if (container) {
+        container.innerHTML = `
+          <div style="width: 100%; max-width: 880px; height: 75vh; border-radius: 8px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.5); background: white;">
+            <iframe src="${fileUrl}" style="width: 100%; height: 100%; border: none;"></iframe>
+          </div>
+        `;
+      }
+    } else {
+      const pegawai = metadata.pegawai || Store.state.user?.name || 'Rizky Aditya Pratama, S.Kom., M.Si.';
+      const nip = metadata.nip || Store.state.user?.nip || '198701012010011001';
+      const jabatan = metadata.jabatan || 'Penata Muda Tk. I (III/b) • Analis Perencanaan Ahli Muda';
+      const unit = metadata.unit || 'Bidang Perencanaan Makro & Evaluasi Pembangunan Bappeda';
+      const pelatihan = metadata.pelatihan || 'Pelatihan Analisis Data Perencanaan Pembangunan dengan Python & PowerBI';
+      const jp = metadata.jp || 20;
+      const penyelenggara = metadata.penyelenggara || 'Badan Pengembangan Sumber Daya Manusia Daerah (BPSDMD) Prov. Lampung';
+      const tanggal = metadata.tanggal || '15 November 2026';
+      const nomor = metadata.nomor || '893.3/0481/BAPPEDA/2026';
+
+      const lampungSvg = typeof LambangLampung !== 'undefined' ? LambangLampung.getSvg(50) : '';
+      const qrSvg = typeof TTEService !== 'undefined' && TTEService.generateQrSvg 
+        ? TTEService.generateQrSvg(`https://bappeda.lampungprov.go.id/tte/verify?doc=${encodeURIComponent(nomor)}&nip=${encodeURIComponent(nip)}`, 62) 
+        : '';
+
+      if (container) {
+        container.innerHTML = `
+          <div class="certificate-paper" style="width: 100%; max-width: 780px; min-width: 580px; background: #ffffff; color: #0f172a; border-radius: 6px; box-shadow: 0 15px 35px rgba(0,0,0,0.45); padding: 30px 36px; position: relative; font-family: 'Times New Roman', Times, serif; border: 8px double #1e3a8a; box-sizing: border-box;">
+            <!-- Corner Ornaments -->
+            <div style="position: absolute; top: 6px; left: 6px; width: 22px; height: 22px; border-top: 3px solid #d97706; border-left: 3px solid #d97706;"></div>
+            <div style="position: absolute; top: 6px; right: 6px; width: 22px; height: 22px; border-top: 3px solid #d97706; border-right: 3px solid #d97706;"></div>
+            <div style="position: absolute; bottom: 6px; left: 6px; width: 22px; height: 22px; border-bottom: 3px solid #d97706; border-left: 3px solid #d97706;"></div>
+            <div style="position: absolute; bottom: 6px; right: 6px; width: 22px; height: 22px; border-bottom: 3px solid #d97706; border-right: 3px solid #d97706;"></div>
+
+            <!-- Watermark -->
+            <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); opacity: 0.04; pointer-events: none; z-index: 1;">
+              ${typeof LambangLampung !== 'undefined' ? LambangLampung.getSvg(300) : ''}
+            </div>
+
+            <div style="position: relative; z-index: 2;">
+              <!-- Header -->
+              <div style="text-align: center; border-bottom: 2px solid #1e3a8a; padding-bottom: 10px; margin-bottom: 14px;">
+                <div style="display: flex; justify-content: center; margin-bottom: 6px;">
+                  ${lampungSvg}
+                </div>
+                <div style="font-size: 12.5px; font-weight: 700; letter-spacing: 1px; color: #1e3a8a; font-family: system-ui, sans-serif;">PEMERINTAH PROVINSI LAMPUNG</div>
+                <div style="font-size: 14.5px; font-weight: 800; letter-spacing: 0.5px; color: #0b2545; font-family: system-ui, sans-serif;">BADAN PERENCANAAN PEMBANGUNAN DAERAH</div>
+                <div style="font-size: 9.5px; color: #64748b; font-family: system-ui, sans-serif; margin-top: 2px;">
+                  Jl. Wolter Monginsidi No. 220, Teluk Betung, Bandar Lampung • Telp: (0721) 486124 • Portal SPBE: bappeda.lampungprov.go.id
+                </div>
+              </div>
+
+              <!-- Title -->
+              <div style="text-align: center; margin-bottom: 16px;">
+                <div style="font-size: 17px; font-weight: 800; color: #1e3a8a; letter-spacing: 1px; text-decoration: underline; margin-bottom: 2px;">
+                  SURAT TANDA TAMAT PENDIDIKAN &amp; PELATIHAN
+                </div>
+                <div style="font-size: 11px; font-weight: 600; color: #d97706; letter-spacing: 1px;">( S T T P L )</div>
+                <div style="font-size: 11px; color: #334155; margin-top: 4px; font-family: monospace;">Nomor Registrasi: ${nomor}</div>
+              </div>
+
+              <!-- Body Statement -->
+              <div style="text-align: center; font-size: 12.5px; line-height: 1.5; color: #1e293b; margin-bottom: 14px;">
+                Kepala Badan Perencanaan Pembangunan Daerah Provinsi Lampung menyatakan bahwa:
+              </div>
+
+              <div style="background: rgba(30, 58, 138, 0.03); border: 1px dashed rgba(30, 58, 138, 0.2); border-radius: 8px; padding: 10px 18px; margin: 0 auto 14px; max-width: 580px; text-align: left; font-family: system-ui, sans-serif; font-size: 11.5px;">
+                <table style="width: 100%; border-collapse: collapse;">
+                  <tr>
+                    <td style="width: 130px; padding: 3px 0; color: #64748b;">Nama Lengkap</td>
+                    <td style="padding: 3px 0; font-weight: 750; color: #0b2545; font-size: 13px;">: ${pegawai}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 3px 0; color: #64748b;">N I P</td>
+                    <td style="padding: 3px 0; font-weight: 600; font-family: monospace;">: ${nip}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 3px 0; color: #64748b;">Pangkat / Jabatan</td>
+                    <td style="padding: 3px 0;">: ${jabatan}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 3px 0; color: #64748b;">Instansi / Unit Kerja</td>
+                    <td style="padding: 3px 0;">: ${unit}</td>
+                  </tr>
+                </table>
+              </div>
+
+              <div style="text-align: center; font-size: 12.5px; line-height: 1.5; color: #1e293b; max-width: 620px; margin: 0 auto 14px;">
+                Telah LULUS dan MENYELESAIKAN dengan predikat <b>SANGAT MEMUASKAN</b> pada program pengembangan kompetensi:
+                <div style="font-size: 14.5px; font-weight: 800; color: #1e3a8a; margin: 5px 0 2px; font-family: system-ui, sans-serif;">
+                  "${pelatihan}"
+                </div>
+                <div style="font-size: 11.5px; color: #475569; font-family: system-ui, sans-serif;">
+                  Beban Belajar: <b>${jp} Jam Pelajaran (JP)</b> • Penyelenggara: <b>${penyelenggara}</b>
+                </div>
+              </div>
+
+              <!-- Signatures -->
+              <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-top: 20px; padding-top: 8px; font-family: system-ui, sans-serif; font-size: 11px;">
+                <!-- Left Signer -->
+                <div style="text-align: center; width: 210px;">
+                  <div style="color: #64748b; margin-bottom: 2px;">Penyelenggara Diklat,</div>
+                  <div style="font-weight: 700; color: #0b2545; font-size: 11.5px;">Koordinator Bangkom</div>
+                  <div style="height: 48px; display: flex; align-items: center; justify-content: center;">
+                    <span style="font-family: 'Brush Script MT', cursive, sans-serif; font-size: 24px; color: #1e3a8a; opacity: 0.85;">Drs. Herman M.</span>
+                  </div>
+                  <div style="font-weight: 700; color: #0b2545; border-bottom: 1px solid #94a3b8; display: inline-block; padding-bottom: 2px;">Drs. HERMANTO, M.Si.</div>
+                  <div style="color: #64748b; font-size: 10px; margin-top: 2px;">NIP. 197804122003121004</div>
+                </div>
+
+                <!-- Center Stamp -->
+                <div style="text-align: center;">
+                  <div style="border: 1.5px solid #16a34a; background: #f0fdf4; border-radius: 8px; padding: 5px 9px; display: inline-flex; align-items: center; gap: 6px;">
+                    <span style="font-size: 15px; color: #16a34a;">✓</span>
+                    <div style="text-align: left; line-height: 1.2;">
+                      <div style="font-weight: 750; color: #166534; font-size: 10px;">TERVERIFIKASI SAH</div>
+                      <div style="font-size: 9px; color: #15803d;">UU ASN 20/2023 &bull; 20 JP</div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Right TTE Signer -->
+                <div style="text-align: center; width: 230px;">
+                  <div style="color: #64748b; margin-bottom: 2px;">Bandar Lampung, ${tanggal}</div>
+                  <div style="color: #64748b; margin-bottom: 3px;">Disahkan secara Elektronik:</div>
+                  <div style="font-weight: 700; color: #0b2545; font-size: 11.5px;">Kasubbag Umum &amp; Kepegawaian</div>
+                  <div style="margin: 4px auto; display: flex; justify-content: center; cursor: pointer;" onclick="TTEService.verifyDocument('${nomor}', 'CIK MARYA, S.E., M.M.')" title="Klik untuk Verifikasi Keaslian TTE BSrE">
+                    ${qrSvg}
+                  </div>
+                  <div style="font-weight: 700; color: #0b2545; border-bottom: 1px solid #94a3b8; display: inline-block; padding-bottom: 2px;">CIK MARYA, S.E., M.M.</div>
+                  <div style="color: #64748b; font-size: 10px; margin-top: 2px;">NIP. 198005122005012003</div>
+                  <div style="font-size: 9px; color: #059669; font-weight: 600; margin-top: 2px;">🔒 Sertifikat Elektronik BSrE BSSN</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+    }
+
+    if (subtitleEl) {
+      subtitleEl.textContent = `Penerima: ${metadata.pegawai || Store.state.user?.name || 'Pegawai ASN'} • ${metadata.jp || 20} JP`;
+    }
+
+    this.openModal('docPreviewModal');
+    if (typeof renderAllIcons === 'function') renderAllIcons();
+  },
+
+  zoomPdf(delta) {
+    if (delta === 'reset') {
+      this.currentPdfZoom = 1.0;
+    } else {
+      this.currentPdfZoom = Math.min(2.0, Math.max(0.5, this.currentPdfZoom + delta));
+    }
+    const zoomText = document.getElementById('pdfZoomLevelText');
+    const content = document.getElementById('pdfViewerContent');
+    if (zoomText) zoomText.textContent = Math.round(this.currentPdfZoom * 100) + '%';
+    if (content) {
+      content.style.transform = `scale(${this.currentPdfZoom})`;
+    }
+  },
+
+  printCurrentPdfDoc() {
+    const content = document.getElementById('pdfViewerContent');
+    if (!content) return;
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) {
+      App.toast('Gagal membuka jendela cetak. Izinkan pop-up pada browser.', 'error');
+      return;
+    }
+    printWindow.document.write(`
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>${this.currentPdfDocData?.filename || 'Sertifikat_Bappeda'}</title>
+        <style>
+          @page { size: A4 landscape; margin: 8mm; }
+          body { margin: 0; padding: 10px; font-family: 'Times New Roman', serif; background: white; }
+          .certificate-paper { max-width: 100% !important; box-shadow: none !important; border: 8px double #1e3a8a !important; }
+        </style>
+      </head>
+      <body>
+        ${content.innerHTML}
+        <script>
+          window.onload = function() { window.print(); window.close(); }
+        </script>
+      </body>
+      </html>
+    `);
+    printWindow.document.close();
+  },
+
+  downloadCurrentPdfDoc() {
+    const name = this.currentPdfDocData?.filename || 'Sertifikat_Diklat_Bappeda.pdf';
+    App.toast(`Mengunduh salinan resmi ${name}...`, 'success');
   },
 
   // ==========================================

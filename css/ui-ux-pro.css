@@ -970,6 +970,7 @@ body {
   border: 1px solid #E2E8F0 !important;
   box-sizing: border-box !important;
   width: 100% !important;
+  flex-wrap: wrap !important;
 }
 
 .action-card-item.warning {
@@ -1062,9 +1063,9 @@ body {
   white-space: nowrap !important;
 }
 
-/* Mobile Screens (iPhone, Android, Small Viewports):
+/* Mobile & Tablet Screens (iPhone, Android, iPad Portrait, Small Viewports):
    Stack card content vertically so button and badge NEVER collide */
-@media (max-width: 640px) {
+@media (max-width: 768px) {
   .competency-progress-header {
     flex-direction: column !important;
     align-items: flex-start !important;
