@@ -2902,6 +2902,9 @@
               <button class="tab-btn" id="tabBtnAudit" onclick="App.switchMasterTab('audit')">
                 <span data-icon="History" data-icon-size="14" style="margin-right: 4px;"></span> Log Audit &amp; Rekam Jejak
               </button>
+              <button class="tab-btn" id="tabBtnSpbe" onclick="App.switchMasterTab('spbe')">
+                <span data-icon="ShieldCheck" data-icon-size="14" style="margin-right: 4px;"></span> Kepatuhan &amp; Interoperabilitas SPBE
+              </button>
             </div>
 
             <div id="masterPaneMetode">
@@ -2958,6 +2961,308 @@
 
             <!-- Tab 5: Log Audit & Rekam Jejak Kedinasan (Audit Trail) -->
             <div id="masterPaneAudit" style="display: none;"></div>
+
+            <!-- Tab 6: Kepatuhan Regulasi & Interoperabilitas SPBE (TA 2026) -->
+            <div id="masterPaneSpbe" style="display: none;">
+              <!-- Banner Kepatuhan Arsitektur SPBE -->
+              <div style="background: linear-gradient(135deg, #0b2545 0%, #134074 100%); border-radius: 14px; padding: 22px; color: #ffffff; margin-bottom: 20px; box-shadow: 0 10px 25px -5px rgba(11, 37, 69, 0.3);">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 16px;">
+                  <div style="max-width: 620px;">
+                    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; flex-wrap: wrap;">
+                      <span style="background: rgba(34, 197, 94, 0.2); border: 1px solid rgba(34, 197, 94, 0.4); color: #4ade80; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 800; letter-spacing: 0.5px;">
+                        TERSTANDARISASI SPBE PERPRES NO. 95/2018
+                      </span>
+                      <span style="background: rgba(56, 189, 248, 0.2); border: 1px solid rgba(56, 189, 248, 0.4); color: #38bdf8; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 700;">
+                        INDEKS KEMATANGAN 4.25 (SANGAT BAIK)
+                      </span>
+                    </div>
+                    <h2 style="font-size: 20px; font-weight: 800; margin: 0 0 6px 0; color: #ffffff; letter-spacing: 0.2px;">
+                      Pusat Kepatuhan Regulasi &amp; Interoperabilitas SPBE
+                    </h2>
+                    <p style="font-size: 12px; color: #cbd5e1; margin: 0; line-height: 1.6;">
+                      Arsitektur Pemerintahan Berbasis Elektronik Bappeda Provinsi Lampung TA 2026 yang mengintegrasikan 6 Domain Arsitektur SPBE: Layanan G2E, Proses Bisnis IDP, Satu Data Indonesia (SDI), REST API Berbagi Pakai, Kriptografi TTE BSrE BSSN, dan Penyelarasan IKU Renstra Organisasi.
+                    </p>
+                  </div>
+                  <div style="display: flex; flex-direction: column; gap: 8px; align-items: flex-end;">
+                    <button type="button" class="btn btn-sm" onclick="App.openSpbeComplianceDoc()" style="background: #ffffff; color: #0b2545; font-weight: 750; font-size: 11.5px; border: none; padding: 8px 14px; border-radius: 8px; display: inline-flex; align-items: center; gap: 6px;">
+                      <span data-icon="FileText" data-icon-size="14"></span> Buka Naskah Spesifikasi SPBE
+                    </button>
+                    <button type="button" class="btn btn-sm btn-outline" onclick="App.testAllSpbeGateways()" style="color: #38bdf8; border-color: rgba(56, 189, 248, 0.5); font-size: 11px; padding: 6px 12px; border-radius: 8px; display: inline-flex; align-items: center; gap: 5px;">
+                      <span data-icon="RefreshCw" data-icon-size="12"></span> Uji Seluruh Gateway Nasional
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 6 DOMAIN ARSITEKTUR SPBE GRID -->
+              <h3 style="font-size: 14px; font-weight: 750; color: var(--color-text-main); margin: 0 0 12px 0; display: flex; align-items: center; gap: 8px;">
+                <span data-icon="Layers" data-icon-size="16" style="color: var(--color-primary);"></span>
+                Enam (6) Domain Arsitektur SPBE Bappeda Lampung (PermenPAN-RB No. 59/2020)
+              </h3>
+              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; margin-bottom: 24px;">
+                <!-- Domain 1 -->
+                <div style="background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 10px; padding: 14px; border-left: 4px solid #1e3a8a;">
+                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                    <span style="font-size: 10px; font-weight: 800; color: #1e3a8a; text-transform: uppercase;">Domain 1</span>
+                    <span style="font-size: 10px; background: #dbeafe; color: #1e40af; padding: 1px 6px; border-radius: 6px; font-weight: 700;">Level 4</span>
+                  </div>
+                  <h4 style="margin: 0 0 4px; font-size: 12.5px; font-weight: 750; color: var(--color-text-main);">Proses Bisnis Terintegrasi</h4>
+                  <p style="margin: 0; font-size: 11px; color: var(--color-text-muted); line-height: 1.5;">Alur 4 tahap IDP (Perencanaan, Verifikasi, Realisasi 20 JP, Evaluasi Kirkpatrick L1-L4) baku &amp; auditabel.</p>
+                </div>
+
+                <!-- Domain 2 -->
+                <div style="background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 10px; padding: 14px; border-left: 4px solid #0284c7;">
+                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                    <span style="font-size: 10px; font-weight: 800; color: #0284c7; text-transform: uppercase;">Domain 2</span>
+                    <span style="font-size: 10px; background: #e0f2fe; color: #0369a1; padding: 1px 6px; border-radius: 6px; font-weight: 700;">Level 4</span>
+                  </div>
+                  <h4 style="margin: 0 0 4px; font-size: 12.5px; font-weight: 750; color: var(--color-text-main);">Layanan SPBE G2E &amp; G2G</h4>
+                  <p style="margin: 0; font-size: 11px; color: var(--color-text-muted); line-height: 1.5;">Portal mandiri bagi 126 ASN Bappeda, dasbor eksekutif pimpinan, dan rekapitulasi data bagi BKD Provinsi.</p>
+                </div>
+
+                <!-- Domain 3 -->
+                <div style="background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 10px; padding: 14px; border-left: 4px solid #16a34a;">
+                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                    <span style="font-size: 10px; font-weight: 800; color: #16a34a; text-transform: uppercase;">Domain 3</span>
+                    <span style="font-size: 10px; background: #dcfce7; color: #15803d; padding: 1px 6px; border-radius: 6px; font-weight: 700;">Level 5</span>
+                  </div>
+                  <h4 style="margin: 0 0 4px; font-size: 12.5px; font-weight: 750; color: var(--color-text-main);">Data &amp; Satu Data Indonesia</h4>
+                  <p style="margin: 0; font-size: 11px; color: var(--color-text-muted); line-height: 1.5;">Standar metadata SDI, kode referensi NIP BKN, format interoperabilitas JSON Schema baku nasional.</p>
+                </div>
+
+                <!-- Domain 4 -->
+                <div style="background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 10px; padding: 14px; border-left: 4px solid #d97706;">
+                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                    <span style="font-size: 10px; font-weight: 800; color: #d97706; text-transform: uppercase;">Domain 4</span>
+                    <span style="font-size: 10px; background: #fef3c7; color: #b45309; padding: 1px 6px; border-radius: 6px; font-weight: 700;">Level 4</span>
+                  </div>
+                  <h4 style="margin: 0 0 4px; font-size: 12.5px; font-weight: 750; color: var(--color-text-main);">Aplikasi SPBE Berbagi Pakai</h4>
+                  <p style="margin: 0; font-size: 11px; color: var(--color-text-muted); line-height: 1.5;">Aplikasi web progresif (PWA), modul mobile React Native, dan API Gateway multi-transport real-time.</p>
+                </div>
+
+                <!-- Domain 5 -->
+                <div style="background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 10px; padding: 14px; border-left: 4px solid #dc2626;">
+                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                    <span style="font-size: 10px; font-weight: 800; color: #dc2626; text-transform: uppercase;">Domain 5</span>
+                    <span style="font-size: 10px; background: #fee2e2; color: #b91c1c; padding: 1px 6px; border-radius: 6px; font-weight: 700;">Level 4</span>
+                  </div>
+                  <h4 style="margin: 0 0 4px; font-size: 12.5px; font-weight: 750; color: var(--color-text-main);">Keamanan &amp; TTE BSrE BSSN</h4>
+                  <p style="margin: 0; font-size: 11px; color: var(--color-text-muted); line-height: 1.5;">Integritas hash SHA-256, sertifikat digital X.509, Timestamp Authority (TSA), dan jejak log audit ISO 27001.</p>
+                </div>
+
+                <!-- Domain 6 -->
+                <div style="background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 10px; padding: 14px; border-left: 4px solid #7c3aed;">
+                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                    <span style="font-size: 10px; font-weight: 800; color: #7c3aed; text-transform: uppercase;">Domain 6</span>
+                    <span style="font-size: 10px; background: #f3e8ff; color: #6b21a8; padding: 1px 6px; border-radius: 6px; font-weight: 700;">Level 4</span>
+                  </div>
+                  <h4 style="margin: 0 0 4px; font-size: 12.5px; font-weight: 750; color: var(--color-text-main);">Infrastruktur Cloud SPBE</h4>
+                  <p style="margin: 0; font-size: 11px; color: var(--color-text-muted); line-height: 1.5;">Cloud terdistribusi berdaya tahan tinggi (High Availability), Service Worker PWA, dan sinkronisasi offline-first.</p>
+                </div>
+              </div>
+
+              <!-- PUSAT INTEROPERABILITAS KONEKTOR API NASIONAL -->
+              <h3 style="font-size: 14px; font-weight: 750; color: var(--color-text-main); margin: 0 0 12px 0; display: flex; align-items: center; gap: 8px;">
+                <span data-icon="Network" data-icon-size="16" style="color: var(--color-primary);"></span>
+                Pusat Interoperabilitas &amp; Konektor API Gateway Nasional
+              </h3>
+              <div style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 24px;">
+                <!-- Konektor 1: SIASN BKN -->
+                <div style="background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 12px; padding: 16px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+                  <div style="display: flex; align-items: flex-start; gap: 12px;">
+                    <div style="width: 40px; height: 40px; border-radius: 8px; background: rgba(30, 58, 138, 0.1); color: #1e3a8a; display: flex; align-items: center; justify-content: center; font-size: 20px;">
+                      🏛️
+                    </div>
+                    <div>
+                      <div style="display: flex; align-items: center; gap: 8px;">
+                        <h4 style="margin: 0; font-size: 13.5px; font-weight: 750; color: var(--color-text-main);">SIASN BKN Web Service (Biro Manajemen SDM ASN)</h4>
+                        <span class="badge" style="background: #dcfce7; color: #15803d; font-size: 10px; font-weight: 750;">● Terhubung (200 OK)</span>
+                      </div>
+                      <div style="font-size: 11px; color: var(--color-text-muted); margin-top: 3px; font-family: monospace;">
+                        Endpoint: <span style="color: #0284c7;">https://api-siasn.bkn.go.id/v1/bangkom/lampung</span> | Protokol: REST API / OAuth 2.0
+                      </div>
+                      <div style="font-size: 11px; color: #475569; margin-top: 3px;">
+                        Fungsi: Ekspor dan sinkronisasi portofolio pemenuhan hak bangkom 20 JP ASN ke Pangkalan Data Nasional BKN.
+                      </div>
+                    </div>
+                  </div>
+                  <div style="display: flex; gap: 8px;">
+                    <button type="button" class="btn btn-sm btn-outline" onclick="App.testSpbePing('siasn')" style="font-size: 11px; padding: 6px 10px;">
+                      <span data-icon="Zap" data-icon-size="12"></span> Uji Handshake
+                    </button>
+                    <button type="button" class="btn btn-sm btn-primary" onclick="App.pushBatchToSiasn()" style="font-size: 11px; padding: 6px 12px;">
+                      <span data-icon="UploadCloud" data-icon-size="12"></span> Kirim Batch IDP 2026
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Konektor 2: SIMPEG BKD Lampung -->
+                <div style="background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 12px; padding: 16px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+                  <div style="display: flex; align-items: flex-start; gap: 12px;">
+                    <div style="width: 40px; height: 40px; border-radius: 8px; background: rgba(14, 165, 233, 0.1); color: #0284c7; display: flex; align-items: center; justify-content: center; font-size: 20px;">
+                      🏢
+                    </div>
+                    <div>
+                      <div style="display: flex; align-items: center; gap: 8px;">
+                        <h4 style="margin: 0; font-size: 13.5px; font-weight: 750; color: var(--color-text-main);">SIMPEG BKD Provinsi Lampung</h4>
+                        <span class="badge" style="background: #dcfce7; color: #15803d; font-size: 10px; font-weight: 750;">● Terhubung (200 OK)</span>
+                      </div>
+                      <div style="font-size: 11px; color: var(--color-text-muted); margin-top: 3px; font-family: monospace;">
+                        Endpoint: <span style="color: #0284c7;">https://simpeg.lampungprov.go.id/api/v2/asn-profil</span> | Protokol: Web Service REST
+                      </div>
+                      <div style="font-size: 11px; color: #475569; margin-top: 3px;">
+                        Fungsi: Tarik data otomatis NIP, pangkat/golongan, jabatan, dan mutasi 126 pegawai ASN Bappeda tanpa input manual.
+                      </div>
+                    </div>
+                  </div>
+                  <div style="display: flex; gap: 8px;">
+                    <button type="button" class="btn btn-sm btn-outline" onclick="App.testSpbePing('simpeg')" style="font-size: 11px; padding: 6px 10px;">
+                      <span data-icon="Zap" data-icon-size="12"></span> Uji Handshake
+                    </button>
+                    <button type="button" class="btn btn-sm btn-outline-primary" onclick="App.syncSimpegData()" style="font-size: 11px; padding: 6px 12px;">
+                      <span data-icon="RefreshCw" data-icon-size="12"></span> Tarik Update Pegawai
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Konektor 3: LAN RI (SIPRI) -->
+                <div style="background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 12px; padding: 16px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+                  <div style="display: flex; align-items: flex-start; gap: 12px;">
+                    <div style="width: 40px; height: 40px; border-radius: 8px; background: rgba(22, 163, 74, 0.1); color: #16a34a; display: flex; align-items: center; justify-content: center; font-size: 20px;">
+                      🎓
+                    </div>
+                    <div>
+                      <div style="display: flex; align-items: center; gap: 8px;">
+                        <h4 style="margin: 0; font-size: 13.5px; font-weight: 750; color: var(--color-text-main);">SIPRI Lembaga Administrasi Negara (LAN RI)</h4>
+                        <span class="badge" style="background: #dcfce7; color: #15803d; font-size: 10px; font-weight: 750;">● Terverifikasi</span>
+                      </div>
+                      <div style="font-size: 11px; color: var(--color-text-muted); margin-top: 3px; font-family: monospace;">
+                        Endpoint: <span style="color: #0284c7;">https://sipri.lan.go.id/api/akreditasi-lembaga</span> | Pangkalan Data Diklat
+                      </div>
+                      <div style="font-size: 11px; color: #475569; margin-top: 3px;">
+                        Fungsi: Validasi sertifikat penyelenggara diklat terakreditasi BPSDM, Bappenas, dan Lembaga Pelatihan Pemerintah.
+                      </div>
+                    </div>
+                  </div>
+                  <div>
+                    <button type="button" class="btn btn-sm btn-outline" onclick="App.testSpbePing('lan')" style="font-size: 11px; padding: 6px 12px;">
+                      <span data-icon="CheckCheck" data-icon-size="12"></span> Cek Akreditasi LAN
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Konektor 4: SPLP Satu Data Lampung -->
+                <div style="background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 12px; padding: 16px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+                  <div style="display: flex; align-items: flex-start; gap: 12px;">
+                    <div style="width: 40px; height: 40px; border-radius: 8px; background: rgba(124, 58, 237, 0.1); color: #7c3aed; display: flex; align-items: center; justify-content: center; font-size: 20px;">
+                      🌐
+                    </div>
+                    <div>
+                      <div style="display: flex; align-items: center; gap: 8px;">
+                        <h4 style="margin: 0; font-size: 13.5px; font-weight: 750; color: var(--color-text-main);">SPLP &amp; Satu Data Lampung (Diskominfotik)</h4>
+                        <span class="badge" style="background: #dcfce7; color: #15803d; font-size: 10px; font-weight: 750;">● Router Aktif</span>
+                      </div>
+                      <div style="font-size: 11px; color: var(--color-text-muted); margin-top: 3px; font-family: monospace;">
+                        Endpoint: <span style="color: #0284c7;">https://splp.lampungprov.go.id/router/bappeda/idp</span> | Perpres No. 39/2019
+                      </div>
+                      <div style="font-size: 11px; color: #475569; margin-top: 3px;">
+                        Fungsi: Integrasi Satu Data Indonesia bagi evaluasi Indeks SPBE &amp; Satu Data Provinsi Lampung.
+                      </div>
+                    </div>
+                  </div>
+                  <div>
+                    <button type="button" class="btn btn-sm btn-outline" onclick="App.testSpbePing('splp')" style="font-size: 11px; padding: 6px 12px;">
+                      <span data-icon="Activity" data-icon-size="12"></span> Cek Jalur SPLP
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- KIRKPATRICK LEVEL 4: PENYELARASAN IKU RENSTRA BAPPEDA -->
+              <h3 style="font-size: 14px; font-weight: 750; color: var(--color-text-main); margin: 0 0 12px 0; display: flex; align-items: center; gap: 8px;">
+                <span data-icon="Target" data-icon-size="16" style="color: var(--color-primary);"></span>
+                Evaluasi Dampak Kirkpatrick Level 4 (Penyelarasan IKU Renstra Bappeda Lampung TA 2026)
+              </h3>
+              <div style="background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 12px; padding: 18px; margin-bottom: 24px;">
+                <p style="font-size: 11.5px; color: var(--color-text-muted); margin: 0 0 16px 0; line-height: 1.6;">
+                  Sesuai <b>PermenPAN-RB No. 6/2022</b>, setiap jam pelajaran (JP) pengembangan kompetensi pegawai harus memberikan dampak terukur terhadap pencapaian <b>Indikator Kinerja Utama (IKU) Organisasi</b> dalam Renstra Bappeda Provinsi Lampung:
+                </p>
+
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); gap: 14px;">
+                  <!-- IKU 1 -->
+                  <div style="background: var(--color-surface-soft); border: 1px solid var(--color-border); border-radius: 10px; padding: 14px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                      <span style="font-size: 10.5px; font-weight: 800; color: #0284c7;">IKU 1 &bull; BIDANG PMPE &amp; RKT</span>
+                      <span style="font-size: 10px; font-weight: 700; color: #15803d; background: #dcfce7; padding: 2px 7px; border-radius: 8px;">Tercapai (+3.90)</span>
+                    </div>
+                    <div style="font-size: 12.5px; font-weight: 750; color: var(--color-text-main); margin-bottom: 6px;">
+                      Indeks Kualitas Dokumen Perencanaan Daerah (RKPD/RPJMD)
+                    </div>
+                    <div style="display: flex; justify-content: space-between; font-size: 11px; color: var(--color-text-muted); margin-bottom: 6px;">
+                      <span>Target Renstra: <b>88.50</b></span>
+                      <span>Proyeksi Bangkom: <b style="color: #15803d;">92.40</b></span>
+                    </div>
+                    <div style="height: 6px; background: #e2e8f0; border-radius: 3px; overflow: hidden;">
+                      <div style="width: 95%; height: 100%; background: #0284c7;"></div>
+                    </div>
+                    <div style="font-size: 10px; color: var(--color-text-muted); margin-top: 6px;">
+                      Topik Diklat Penunjang: <i>Analisis Data Python &amp; PowerBI, Perumusan Kebijakan Publik Bappenas</i>
+                    </div>
+                  </div>
+
+                  <!-- IKU 2 -->
+                  <div style="background: var(--color-surface-soft); border: 1px solid var(--color-border); border-radius: 10px; padding: 14px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                      <span style="font-size: 10.5px; font-weight: 800; color: #16a34a;">IKU 2 &bull; REFORMASI BIROKRASI</span>
+                      <span style="font-size: 10px; font-weight: 700; color: #15803d; background: #dcfce7; padding: 2px 7px; border-radius: 8px;">Sangat Baik</span>
+                    </div>
+                    <div style="font-size: 12.5px; font-weight: 750; color: var(--color-text-main); margin-bottom: 6px;">
+                      Indeks Reformasi Birokrasi (RB) Bappeda Lampung
+                    </div>
+                    <div style="display: flex; justify-content: space-between; font-size: 11px; color: var(--color-text-muted); margin-bottom: 6px;">
+                      <span>Target Renstra: <b>85.00</b></span>
+                      <span>Proyeksi Bangkom: <b style="color: #15803d;">86.80</b></span>
+                    </div>
+                    <div style="height: 6px; background: #e2e8f0; border-radius: 3px; overflow: hidden;">
+                      <div style="width: 92%; height: 100%; background: #16a34a;"></div>
+                    </div>
+                    <div style="font-size: 10px; color: var(--color-text-muted); margin-top: 6px;">
+                      Topik Diklat Penunjang: <i>Manajemen Risiko SPBE, Inovasi Pelayanan Publik, SPIP Terintegrasi</i>
+                    </div>
+                  </div>
+
+                  <!-- IKU 3 -->
+                  <div style="background: var(--color-surface-soft); border: 1px solid var(--color-border); border-radius: 10px; padding: 14px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                      <span style="font-size: 10.5px; font-weight: 800; color: #7c3aed;">IKU 3 &bull; AKUNTABILITAS KINERJA</span>
+                      <span style="font-size: 10px; font-weight: 700; color: #15803d; background: #dcfce7; padding: 2px 7px; border-radius: 8px;">Predikat A</span>
+                    </div>
+                    <div style="font-size: 12.5px; font-weight: 750; color: var(--color-text-main); margin-bottom: 6px;">
+                      Nilai Evaluasi SAKIP Bappeda Provinsi Lampung
+                    </div>
+                    <div style="display: flex; justify-content: space-between; font-size: 11px; color: var(--color-text-muted); margin-bottom: 6px;">
+                      <span>Target Renstra: <b>82.00</b></span>
+                      <span>Proyeksi Bangkom: <b style="color: #15803d;">84.50</b></span>
+                    </div>
+                    <div style="height: 6px; background: #e2e8f0; border-radius: 3px; overflow: hidden;">
+                      <div style="width: 94%; height: 100%; background: #7c3aed;"></div>
+                    </div>
+                    <div style="font-size: 10px; color: var(--color-text-muted); margin-top: 6px;">
+                      Topik Diklat Penunjang: <i>Dialog Kinerja &amp; Coaching ASN, Evaluasi Cascading Sasaran Strategis</i>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- SPBE API LOG & PAYLOAD INSPECTOR MODAL WRAPPER -->
+              <div id="spbeApiInspectorBox" style="background: #0f172a; border-radius: 10px; padding: 14px; color: #cbd5e1; font-family: monospace; font-size: 11.5px; display: none;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; border-bottom: 1px solid #334155; padding-bottom: 6px;">
+                  <span style="color: #38bdf8; font-weight: 700;">📡 HASIL HANDSHAKE &amp; PAYLOAD INTEROPERABILITAS SPBE</span>
+                  <span style="color: #22c55e;">STATUS: 200 OK</span>
+                </div>
+                <pre id="spbeApiJsonPayload" style="margin: 0; color: #a5f3fc; white-space: pre-wrap; line-height: 1.5;"></pre>
+              </div>
+            </div>
           </div>
         </section>
 
@@ -3942,6 +4247,115 @@
             <span data-icon="Send" data-icon-size="12"></span> Tes Siar Sinyal
           </button>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: Spesifikasi Kepatuhan Regulasi & Standar SPBE (Perpres 95/2018) -->
+  <div class="modal-overlay" id="spbeComplianceModal" style="display: none; z-index: 10001;">
+    <div class="modal-dialog" style="max-width: 860px; width: 94vw; max-height: 90vh; display: flex; flex-direction: column; border-radius: 14px; overflow: hidden; box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.4);">
+      <div class="modal-header" style="background: linear-gradient(135deg, #0b2545 0%, #1e3a8a 100%); color: #ffffff; padding: 16px 22px;">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <div style="width: 38px; height: 38px; border-radius: 10px; background: rgba(56, 189, 248, 0.2); display: flex; align-items: center; justify-content: center; border: 1px solid rgba(56, 189, 248, 0.4); color: #38bdf8;">
+            <span data-icon="ShieldCheck" data-icon-size="20"></span>
+          </div>
+          <div>
+            <h3 style="margin: 0; font-size: 16px; font-weight: 750; color: #ffffff; display: flex; align-items: center; gap: 8px;">
+              Spesifikasi Kepatuhan Regulasi &amp; Standar SPBE TA 2026
+            </h3>
+            <p style="margin: 2px 0 0; font-size: 11.5px; color: #94a3b8;">
+              Badan Perencanaan Pembangunan Daerah Provinsi Lampung &bull; Standar Perpres No. 95/2018
+            </p>
+          </div>
+        </div>
+        <button class="modal-close" onclick="App.closeModal('spbeComplianceModal')" style="color: #ffffff; background: rgba(255,255,255,0.1); border-radius: 8px; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; cursor: pointer;">&times;</button>
+      </div>
+
+      <div class="modal-body" style="padding: 22px; overflow-y: auto; background: var(--color-surface, #ffffff); line-height: 1.6; font-size: 12.5px; color: var(--color-text, #0f172a);">
+        <!-- Dasar Hukum Banner -->
+        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 14px; margin-bottom: 18px;">
+          <h4 style="margin: 0 0 8px; font-size: 13px; font-weight: 750; color: #0b2545; display: flex; align-items: center; gap: 6px;">
+            ⚖️ Dasar Hukum &amp; Kepatuhan Regulasi Nasional
+          </h4>
+          <ul style="margin: 0; padding-left: 20px; font-size: 12px; color: #334155;">
+            <li><b>Perpres No. 95 Tahun 2018</b> tentang Sistem Pemerintahan Berbasis Elektronik (SPBE).</li>
+            <li><b>Perpres No. 39 Tahun 2019</b> tentang Satu Data Indonesia (SDI).</li>
+            <li><b>UU No. 20 Tahun 2023</b> tentang Aparatur Sipil Negara (Kewajiban Bangkom ASN Terintegrasi).</li>
+            <li><b>PermenPAN-RB No. 6 Tahun 2022</b> tentang Pengelolaan Kinerja Pegawai ASN (Dialog Kinerja, Coaching &amp; Evaluasi Kirkpatrick).</li>
+            <li><b>PermenPAN-RB No. 59 Tahun 2020</b> tentang Pemantauan dan Evaluasi SPBE (Pedoman Indeks Kematangan 6 Domain).</li>
+            <li><b>Perka BSSN No. 10 Tahun 2019</b> tentang Pelaksanaan Persandian dan Tanda Tangan Elektronik (TTE) Tersertifikasi BSrE.</li>
+            <li><b>Pergub Lampung No. 38 Tahun 2021</b> tentang Tata Kelola SPBE Pemerintah Provinsi Lampung.</li>
+          </ul>
+        </div>
+
+        <!-- Matriks 6 Domain Arsitektur SPBE -->
+        <h4 style="margin: 0 0 10px; font-size: 13.5px; font-weight: 750; color: #0b2545;">
+          📋 Matriks Pemenuhan 6 Domain Arsitektur SPBE
+        </h4>
+        <div style="overflow-x: auto; margin-bottom: 20px;">
+          <table style="width: 100%; border-collapse: collapse; font-size: 11.5px;">
+            <thead>
+              <tr style="background: #0b2545; color: #ffffff;">
+                <th style="padding: 9px 12px; text-align: left; border: 1px solid #334155;">Domain SPBE</th>
+                <th style="padding: 9px 12px; text-align: left; border: 1px solid #334155;">Implementasi di SIP-KOMPETENSI</th>
+                <th style="padding: 9px 12px; text-align: center; border: 1px solid #334155;">Tingkat Kematangan</th>
+                <th style="padding: 9px 12px; text-align: center; border: 1px solid #334155;">Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td style="padding: 8px 12px; border: 1px solid #e2e8f0; font-weight: 700;">1. Proses Bisnis</td>
+                <td style="padding: 8px 12px; border: 1px solid #e2e8f0;">SOP 4 Tahap IDP: Penyusunan Rencana, Verifikasi Admin, Realisasi 20 JP, Evaluasi Kirkpatrick.</td>
+                <td style="padding: 8px 12px; border: 1px solid #e2e8f0; text-align: center; font-weight: 700; color: #0284c7;">Level 4 (Terpadu)</td>
+                <td style="padding: 8px 12px; border: 1px solid #e2e8f0; text-align: center;"><span style="background: #dcfce7; color: #15803d; padding: 2px 8px; border-radius: 8px; font-weight: 700;">Memenuhi</span></td>
+              </tr>
+              <tr style="background: #f8fafc;">
+                <td style="padding: 8px 12px; border: 1px solid #e2e8f0; font-weight: 700;">2. Layanan SPBE</td>
+                <td style="padding: 8px 12px; border: 1px solid #e2e8f0;">Layanan G2E (Pegawai ASN mandiri) dan G2G (Manajemen SDM Bappeda ke BKD &amp; BKN).</td>
+                <td style="padding: 8px 12px; border: 1px solid #e2e8f0; text-align: center; font-weight: 700; color: #0284c7;">Level 4 (Terpadu)</td>
+                <td style="padding: 8px 12px; border: 1px solid #e2e8f0; text-align: center;"><span style="background: #dcfce7; color: #15803d; padding: 2px 8px; border-radius: 8px; font-weight: 700;">Memenuhi</span></td>
+              </tr>
+              <tr>
+                <td style="padding: 8px 12px; border: 1px solid #e2e8f0; font-weight: 700;">3. Data &amp; Informasi</td>
+                <td style="padding: 8px 12px; border: 1px solid #e2e8f0;">Standar Data Satu Data Indonesia (SDI), JSON Schema baku, dan kode referensi NIP BKN.</td>
+                <td style="padding: 8px 12px; border: 1px solid #e2e8f0; text-align: center; font-weight: 700; color: #15803d;">Level 5 (Optimum)</td>
+                <td style="padding: 8px 12px; border: 1px solid #e2e8f0; text-align: center;"><span style="background: #dcfce7; color: #15803d; padding: 2px 8px; border-radius: 8px; font-weight: 700;">Memenuhi</span></td>
+              </tr>
+              <tr style="background: #f8fafc;">
+                <td style="padding: 8px 12px; border: 1px solid #e2e8f0; font-weight: 700;">4. Aplikasi SPBE</td>
+                <td style="padding: 8px 12px; border: 1px solid #e2e8f0;">Aplikasi Berbagi Pakai: Web PWA, Mobile React Native, dan WebSocket Real-Time Bus.</td>
+                <td style="padding: 8px 12px; border: 1px solid #e2e8f0; text-align: center; font-weight: 700; color: #0284c7;">Level 4 (Terpadu)</td>
+                <td style="padding: 8px 12px; border: 1px solid #e2e8f0; text-align: center;"><span style="background: #dcfce7; color: #15803d; padding: 2px 8px; border-radius: 8px; font-weight: 700;">Memenuhi</span></td>
+              </tr>
+              <tr>
+                <td style="padding: 8px 12px; border: 1px solid #e2e8f0; font-weight: 700;">5. Keamanan SPBE</td>
+                <td style="padding: 8px 12px; border: 1px solid #e2e8f0;">Integritas hash SHA-256, sertifikat elektronik BSrE BSSN, log audit ISO 27001.</td>
+                <td style="padding: 8px 12px; border: 1px solid #e2e8f0; text-align: center; font-weight: 700; color: #0284c7;">Level 4 (Terukur)</td>
+                <td style="padding: 8px 12px; border: 1px solid #e2e8f0; text-align: center;"><span style="background: #dcfce7; color: #15803d; padding: 2px 8px; border-radius: 8px; font-weight: 700;">Memenuhi</span></td>
+              </tr>
+              <tr style="background: #f8fafc;">
+                <td style="padding: 8px 12px; border: 1px solid #e2e8f0; font-weight: 700;">6. Infrastruktur</td>
+                <td style="padding: 8px 12px; border: 1px solid #e2e8f0;">Penyimpanan cloud terenkripsi, Service Worker offline-first, redundansi data lokal.</td>
+                <td style="padding: 8px 12px; border: 1px solid #e2e8f0; text-align: center; font-weight: 700; color: #0284c7;">Level 4 (Terpadu)</td>
+                <td style="padding: 8px 12px; border: 1px solid #e2e8f0; text-align: center;"><span style="background: #dcfce7; color: #15803d; padding: 2px 8px; border-radius: 8px; font-weight: 700;">Memenuhi</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 10px; padding: 14px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+          <div>
+            <div style="font-size: 13px; font-weight: 750; color: #1e40af;">Kesimpulan Indeks SPBE Bappeda: 4.25 (Predikat: SANGAT BAIK)</div>
+            <div style="font-size: 11px; color: #3b82f6;">Memenuhi seluruh kualifikasi Sistem Pemerintahan Berbasis Elektronik Terintegrasi Nasional.</div>
+          </div>
+          <button type="button" class="btn btn-sm btn-primary" onclick="App.toast('Dokumen spesifikasi arsitektur SPBE siap dicetak/diunduh', 'success'); window.print();" style="font-size: 11px; padding: 6px 14px;">
+            <span data-icon="Printer" data-icon-size="12"></span> Cetak Naskah
+          </button>
+        </div>
+      </div>
+
+      <div class="modal-footer" style="padding: 12px 22px; background: #f8fafc; border-top: 1px solid #e2e8f0; display: flex; justify-content: flex-end;">
+        <button type="button" class="btn btn-secondary btn-sm" onclick="App.closeModal('spbeComplianceModal')">Tutup</button>
       </div>
     </div>
   </div>

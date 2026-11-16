@@ -74,3 +74,4 @@ class MobileRealtimeService {
 
 export const realtimeService = new MobileRealtimeService();
 export default realtimeService;
+

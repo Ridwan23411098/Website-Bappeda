@@ -64,3 +64,4 @@ eas build -p android --profile preview
 ```
 
 Setelah proses build selesai di cloud Expo, Anda akan mendapatkan tautan unduh berkas `.apk` resmi yang dapat langsung diinstal di HP Android ASN Bappeda Provinsi Lampung.
+
