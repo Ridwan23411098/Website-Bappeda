@@ -294,6 +294,11 @@ const App = {
 
   // Real Authentication via NIP & Password (Supabase)
   async login() {
+    if (typeof SecurityService !== 'undefined' && SecurityService.isLockedOut) {
+      App.toast('Akses login sementara dikunci demi keamanan sistem (terdeteksi percobaan gagal berulang).', 'warning');
+      return;
+    }
+
     const nipInput = document.getElementById('loginNip');
     const passInput = document.getElementById('loginPassword');
     const errAlert = document.getElementById('loginErrorAlert');
@@ -310,12 +315,23 @@ const App = {
     try {
       // Tunggu hasil dari Supabase
       const sessionUser = await Store.authenticate(nipInput.value, passInput.value);
+      if (typeof SecurityService !== 'undefined') SecurityService.resetFailedAttempts();
       this.restoreSession(sessionUser);
       if (typeof AuditService !== 'undefined') {
         AuditService.log('Otentikasi', 'Login Sesi Portal', `Pengguna ${sessionUser.name} (${sessionUser.nip}) berhasil masuk sistem.`, 'Sukses', sessionUser);
       }
       App.toast(`Autentikasi berhasil. Selamat datang, ${sessionUser.name}`, 'success');
     } catch (error) {
+      if (typeof SecurityService !== 'undefined') {
+        const isLocked = SecurityService.registerFailedLogin();
+        if (isLocked) {
+          if (errAlert) {
+            errAlert.textContent = 'Akses dikunci selama 60 detik akibat 3x kegagalan autentikasi.';
+            errAlert.style.display = 'block';
+          }
+          return;
+        }
+      }
       if (errAlert) {
         errAlert.textContent = error.message;
         errAlert.style.display = 'block';
@@ -4482,7 +4498,7 @@ const App = {
                   <div style="height: 48px; display: flex; align-items: center; justify-content: center;">
                     <span style="font-family: 'Brush Script MT', cursive, sans-serif; font-size: 24px; color: #1e3a8a; opacity: 0.85;">Drs. Herman M.</span>
                   </div>
-                  <div style="font-weight: 700; color: #0b2545; border-bottom: 1px solid #94a3b8; display: inline-block; padding-bottom: 2px;">Drs. HERMANTO, M.Si.</div>
+                  <div style="font-weight: 700; color: #0b2545; border-bottom: 1px solid #94a3b8; display: inline-block; padding-bottom: 2px; text-decoration: none !important;">Drs. HERMANTO, M.Si.</div>
                   <div style="color: #64748b; font-size: 10px; margin-top: 2px;">NIP. 197804122003121004</div>
                 </div>
 
@@ -4505,7 +4521,7 @@ const App = {
                   <div style="margin: 4px auto; display: flex; justify-content: center; cursor: pointer;" onclick="TTEService.openVerificationModal('${nomor}', 'Surat Tanda Tamat Pendidikan &amp; Pelatihan (STTPL)', '${pegawai}', 'Dr. ANANG RISGIYANTO, S.K.M., M.Kes.')" title="Klik untuk Verifikasi Keaslian TTE BSrE BSSN">
                     ${qrSvg}
                   </div>
-                  <div style="font-weight: 800; color: #0b2545; font-size: 11.5px; border-bottom: 1.5px solid #0b2545; display: inline-block; padding-bottom: 2px;">
+                  <div style="font-weight: 800; color: #0b2545; font-size: 11.5px; border-bottom: 1.5px solid #0b2545; display: inline-block; padding-bottom: 2px; text-decoration: none !important;">
                     Dr. ANANG RISGIYANTO, S.K.M., M.Kes.
                   </div>
                   <div style="color: #334155; font-size: 9.5px; font-weight: 650; margin-top: 2px;">Pembina Utama Madya (IV/d)</div>
@@ -4805,13 +4821,22 @@ const App = {
   approveVerification(id, newStatus = 'Final') {
     const note = document.getElementById('verifNotesInput').value;
     const v = (Store.state.verifications || []).find(x => x.id === id);
-    Store.approveIdp(id, note || 'Disetujui tanpa catatan perbaikan.', newStatus);
-    if (typeof AuditService !== 'undefined') {
-      AuditService.log('Verifikasi', `Verifikasi Dokumen IDP (${newStatus})`, `Menyetujui IDP pegawai ${v?.pegawai || 'ASN'} dengan status ${newStatus}. Catatan: ${note || 'Sesuai standar'}`, 'Sukses');
+
+    const executeApproval = () => {
+      Store.approveIdp(id, note || 'Disetujui tanpa catatan perbaikan.', newStatus);
+      if (typeof AuditService !== 'undefined') {
+        AuditService.log('Verifikasi', `Verifikasi Dokumen IDP (${newStatus})`, `Menyetujui IDP pegawai ${v?.pegawai || 'ASN'} dengan status ${newStatus}. Catatan: ${note || 'Sesuai standar'}. Otorisasi 2FA Sah.`, 'Sukses');
+      }
+      this.closeDrawer('reviewDrawer');
+      App.toast(`✅ IDP Pegawai resmi disahkan (${newStatus}) dengan otorisasi 2-Faktor (2FA).`, 'success');
+      this.renderAdminVerification();
+    };
+
+    if (typeof SecurityService !== 'undefined') {
+      SecurityService.require2FA(`Pengesahan IDP: ${v?.pegawai || 'Pegawai ASN'}`, executeApproval);
+    } else {
+      executeApproval();
     }
-    this.closeDrawer('reviewDrawer');
-    App.toast(`IDP Pegawai resmi diperbarui (Status: ${newStatus})`, 'success');
-    this.renderAdminVerification();
   },
 
   requestRevisionModal(id) {

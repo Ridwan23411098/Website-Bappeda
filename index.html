@@ -442,6 +442,15 @@
             <span>Masuk ke Sistem</span>
             <span data-icon="ArrowRight" data-icon-size="16"></span>
           </button>
+
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px; font-size: 11.5px;">
+            <label style="display: flex; align-items: center; gap: 5px; color: #64748b; cursor: pointer; user-select: none;">
+              <input type="checkbox" id="rememberMeCheck" checked style="accent-color: #1e3a8a;"> Ingat Sesi ASN
+            </label>
+            <a href="javascript:void(0)" onclick="SecurityService.openForgotPasswordModal()" style="color: #1e3a8a; font-weight: 650; text-decoration: none;">
+              Lupa Kata Sandi?
+            </a>
+          </div>
         </form>
 
         <!-- Quick Login / Akses Cepat Simulasi (Khusus Pengujian) -->
@@ -4360,6 +4369,114 @@
     </div>
   </div>
 
+  <!-- MODAL: Verifikasi Dua-Faktor (2FA Kedinasan / Standar BSSN) -->
+  <div class="modal-overlay" id="twoFactorModal" style="display: none; z-index: 10002;">
+    <div class="modal-dialog modal-sm" style="max-width: 440px; border-radius: 14px; overflow: hidden; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);">
+      <div class="modal-header" style="background: linear-gradient(135deg, #0b2545 0%, #1e3a8a 100%); color: #ffffff; padding: 16px 20px;">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <div style="width: 36px; height: 36px; border-radius: 8px; background: rgba(245, 158, 11, 0.2); border: 1px solid rgba(245, 158, 11, 0.4); display: flex; align-items: center; justify-content: center; color: #f59e0b;">
+            <span data-icon="ShieldAlert" data-icon-size="18"></span>
+          </div>
+          <div>
+            <h3 style="margin: 0; font-size: 15px; font-weight: 750; color: #ffffff;">Otorisasi 2-Faktor (2FA)</h3>
+            <p style="margin: 2px 0 0; font-size: 11px; color: #94a3b8;">Prosedur Keamanan Tingkat Tinggi BSSN &amp; ISO 27001</p>
+          </div>
+        </div>
+        <button class="modal-close" onclick="App.closeModal('twoFactorModal')" style="color: #ffffff; background: rgba(255,255,255,0.1); border-radius: 6px; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; cursor: pointer;">&times;</button>
+      </div>
+
+      <div class="modal-body" style="padding: 20px; background: var(--color-surface, #ffffff); text-align: center;">
+        <p style="font-size: 12px; color: var(--color-text-muted, #64748b); margin: 0 0 14px 0; line-height: 1.5;">
+          Aksi sensitif kedinasan: <b id="twoFactorActionTitle" style="color: var(--color-text, #0f172a);">Persetujuan IDP</b>.<br>
+          Masukkan kode OTP 6-digit yang terkirim ke perangkat aman Anda:
+        </p>
+
+        <div style="margin-bottom: 14px;">
+          <input type="text" id="twoFactorOtpInput" maxlength="6" placeholder="• • • • • •"
+            style="font-size: 24px; font-weight: 800; letter-spacing: 8px; text-align: center; width: 200px; padding: 8px; border: 2px solid #1e3a8a; border-radius: 10px; color: #0b2545; background: #f8fafc;"
+            onkeydown="if(event.key === 'Enter') SecurityService.verify2FA()">
+        </div>
+
+        <div style="background: rgba(30, 58, 138, 0.06); border: 1px dashed rgba(30, 58, 138, 0.3); border-radius: 8px; padding: 8px 12px; font-size: 11px; color: #1e3a8a; margin-bottom: 16px;">
+          💡 Kode OTP Pengujian Simulasi: <b id="twoFactorHintOtp" style="font-size: 12px; font-family: monospace;">892601</b>
+        </div>
+
+        <div style="display: flex; gap: 8px; justify-content: center;">
+          <button type="button" class="btn btn-secondary btn-sm" onclick="App.closeModal('twoFactorModal')" style="flex: 1;">Batal</button>
+          <button type="button" class="btn btn-primary btn-sm" onclick="SecurityService.verify2FA()" style="flex: 1.5;">
+            <span data-icon="Lock" data-icon-size="12"></span> Konfirmasi Sah
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: Pemulihan Kata Sandi Mandiri (Self-Service Password Reset) -->
+  <div class="modal-overlay" id="forgotPasswordModal" style="display: none; z-index: 10002;">
+    <div class="modal-dialog modal-sm" style="max-width: 460px; border-radius: 14px; overflow: hidden; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);">
+      <div class="modal-header" style="background: linear-gradient(135deg, #0b2545 0%, #1e3a8a 100%); color: #ffffff; padding: 16px 20px;">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <div style="width: 36px; height: 36px; border-radius: 8px; background: rgba(56, 189, 248, 0.2); border: 1px solid rgba(56, 189, 248, 0.4); display: flex; align-items: center; justify-content: center; color: #38bdf8;">
+            <span data-icon="KeyRound" data-icon-size="18"></span>
+          </div>
+          <div>
+            <h3 style="margin: 0; font-size: 15px; font-weight: 750; color: #ffffff;">Pemulihan Kata Sandi ASN</h3>
+            <p style="margin: 2px 0 0; font-size: 11px; color: #94a3b8;">Verifikasi Mandiri Email Kedinasan Bappeda Lampung</p>
+          </div>
+        </div>
+        <button class="modal-close" onclick="App.closeModal('forgotPasswordModal')" style="color: #ffffff; background: rgba(255,255,255,0.1); border-radius: 6px; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; cursor: pointer;">&times;</button>
+      </div>
+
+      <div class="modal-body" style="padding: 20px; background: var(--color-surface, #ffffff);">
+        <!-- Step 1: Input NIP -->
+        <div id="stepForgot1">
+          <p style="font-size: 12px; color: var(--color-text-muted, #64748b); margin: 0 0 14px 0; line-height: 1.5;">
+            Masukkan 18 Digit Nomor Induk Pegawai (NIP) Anda. Sistem keamanan akan memverifikasi akun dan mengirimkan kode OTP ke email kedinasan resmi Anda.
+          </p>
+          <div style="margin-bottom: 14px;">
+            <label style="font-size: 11px; font-weight: 700; color: #0b2545; display: block; margin-bottom: 4px;">NIP Pegawai ASN:</label>
+            <input type="text" id="forgotNipInput" placeholder="Contoh: 198503152010011015"
+              style="width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px;"
+              onkeydown="if(event.key === 'Enter') SecurityService.sendResetOtp()">
+          </div>
+          <button type="button" class="btn btn-primary btn-block" onclick="SecurityService.sendResetOtp()" style="padding: 10px; font-weight: 700;">
+            Kirim Kode OTP Verifikasi &rarr;
+          </button>
+        </div>
+
+        <!-- Step 2: Input OTP & New Password -->
+        <div id="stepForgot2" style="display: none;">
+          <div style="background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.3); border-radius: 8px; padding: 10px 12px; font-size: 11px; color: #166534; margin-bottom: 14px;">
+            ✉️ Kode OTP telah dikirimkan ke: <b id="forgotEmailTarget">asn@lampungprov.go.id</b><br>
+            💡 Kode OTP Simulasi: <b id="forgotOtpTestHint" style="font-family: monospace;">742918</b>
+          </div>
+
+          <div style="margin-bottom: 12px;">
+            <label style="font-size: 11px; font-weight: 700; color: #0b2545; display: block; margin-bottom: 4px;">Kode OTP 6-Digit:</label>
+            <input type="text" id="forgotOtpInput" maxlength="6" placeholder="742918"
+              style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; font-weight: 750; letter-spacing: 3px;">
+          </div>
+
+          <div style="margin-bottom: 12px;">
+            <label style="font-size: 11px; font-weight: 700; color: #0b2545; display: block; margin-bottom: 4px;">Kata Sandi Baru (Min. 8 Karakter):</label>
+            <input type="password" id="forgotNewPassInput" placeholder="Kombinasi huruf, angka & simbol..."
+              style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px;">
+          </div>
+
+          <div style="margin-bottom: 16px;">
+            <label style="font-size: 11px; font-weight: 700; color: #0b2545; display: block; margin-bottom: 4px;">Konfirmasi Kata Sandi Baru:</label>
+            <input type="password" id="forgotConfirmPassInput" placeholder="Ulangi kata sandi baru..."
+              style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px;">
+          </div>
+
+          <button type="button" class="btn btn-primary btn-block" onclick="SecurityService.saveNewPasswordFromReset()" style="padding: 10px; font-weight: 700;">
+            Simpan Kata Sandi Baru
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- MODAL: Pratinjau & Cetak Rapor Diagnostik Kompetensi & Peta Karier -->
   <div class="modal-overlay" id="diagnosticReportModal" style="display: none; z-index: 9999;">
     <div class="modal-dialog" style="max-width: 900px; width: 95vw; max-height: 90vh; display: flex; flex-direction: column;">
@@ -5972,15 +6089,16 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
   <script src="js/supabase.js?v=20261008_fix"></script>
-  <script src="js/realtime.js?v=20261116_mobile_v19"></script>
+  <script src="js/security.js?v=20261116_sec_v20"></script>
+  <script src="js/realtime.js?v=20261116_sec_v20"></script>
   <script src="assets/lambang-lampung.js?v=20261116_kepalabappeda_v16"></script>
   <script src="assets/tte-service.js?v=20261116_kepalabappeda_v16"></script>
   <script src="js/icons.js?v=20261014_v16"></script>
   <script src="js/charts.js?v=20261008_fix"></script>
   <script src="js/bappeda_data.js?v=20261029_v56"></script>
-  <script src="js/store.js?v=20261116_mobile_v19"></script>
+  <script src="js/store.js?v=20261116_sec_v21"></script>
   <script src="js/export.js?v=20261029_v56"></script>
-  <script src="js/app.js?v=20261116_mobile_v19"></script>
+  <script src="js/app.js?v=20261116_sec_v21"></script>
 </body>
 
 </html>
