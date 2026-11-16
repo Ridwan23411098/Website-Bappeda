@@ -4361,58 +4361,64 @@ const App = {
       const tanggal = metadata.tanggal || '15 November 2026';
       const nomor = metadata.nomor || '893.3/0481/BAPPEDA/2026';
 
-      const lampungLogo = `<img src="assets/logo-lampung.png" alt="Lambang Daerah Provinsi Lampung" style="height: 78px; width: auto; max-width: 65px; object-fit: contain; flex-shrink: 0;" />`;
+      const lampungLogo = `<img src="assets/logo-lampung.png" alt="Lambang Daerah Provinsi Lampung" style="height: 84px; width: auto; max-width: 76px; object-fit: contain; flex-shrink: 0; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.12));" />`;
       const qrSvg = typeof TTEService !== 'undefined' && TTEService.generateQrSvg 
         ? TTEService.generateQrSvg(`https://bappeda.lampungprov.go.id/tte/verify?doc=${encodeURIComponent(nomor)}&nip=${encodeURIComponent(nip)}`, 62) 
         : '';
 
       if (container) {
         container.innerHTML = `
-          <div class="certificate-paper" style="width: 100%; max-width: 780px; min-width: 580px; background: #ffffff; color: #0f172a; border-radius: 6px; box-shadow: 0 15px 35px rgba(0,0,0,0.45); padding: 30px 36px; position: relative; font-family: 'Times New Roman', Times, serif; border: 8px double #1e3a8a; box-sizing: border-box;">
-            <!-- Corner Ornaments -->
-            <div style="position: absolute; top: 6px; left: 6px; width: 22px; height: 22px; border-top: 3px solid #d97706; border-left: 3px solid #d97706;"></div>
-            <div style="position: absolute; top: 6px; right: 6px; width: 22px; height: 22px; border-top: 3px solid #d97706; border-right: 3px solid #d97706;"></div>
-            <div style="position: absolute; bottom: 6px; left: 6px; width: 22px; height: 22px; border-bottom: 3px solid #d97706; border-left: 3px solid #d97706;"></div>
-            <div style="position: absolute; bottom: 6px; right: 6px; width: 22px; height: 22px; border-bottom: 3px solid #d97706; border-right: 3px solid #d97706;"></div>
+          <div class="certificate-paper" style="width: 100%; max-width: 800px; min-width: 580px; background: #ffffff; color: #0f172a; border-radius: 6px; box-shadow: 0 15px 35px rgba(0,0,0,0.45); padding: 34px 44px; position: relative; font-family: 'Times New Roman', Times, serif; border: 8px double #1e3a8a; box-sizing: border-box;">
+            <!-- Corner Ornaments (Gold Accent with Breathing Room) -->
+            <div style="position: absolute; top: 10px; left: 10px; width: 26px; height: 26px; border-top: 3.5px solid #d97706; border-left: 3.5px solid #d97706;"></div>
+            <div style="position: absolute; top: 10px; right: 10px; width: 26px; height: 26px; border-top: 3.5px solid #d97706; border-right: 3.5px solid #d97706;"></div>
+            <div style="position: absolute; bottom: 10px; left: 10px; width: 26px; height: 26px; border-bottom: 3.5px solid #d97706; border-left: 3.5px solid #d97706;"></div>
+            <div style="position: absolute; bottom: 10px; right: 10px; width: 26px; height: 26px; border-bottom: 3.5px solid #d97706; border-right: 3.5px solid #d97706;"></div>
 
             <!-- Watermark Lambang Resmi Lampung -->
-            <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); opacity: 0.05; pointer-events: none; z-index: 1;">
-              <img src="assets/logo-lampung.png" alt="Watermark Lambang Lampung" style="width: 260px; height: auto; object-fit: contain;" />
+            <div style="position: absolute; top: 52%; left: 50%; transform: translate(-50%, -50%); opacity: 0.055; pointer-events: none; z-index: 1;">
+              <img src="assets/logo-lampung.png" alt="Watermark Lambang Lampung" style="width: 280px; height: auto; object-fit: contain;" />
             </div>
 
             <div style="position: relative; z-index: 2;">
-              <!-- KOP SURAT RESMI PEMERINTAH PROVINSI LAMPUNG (STANDAR TATA NASKAH DINAS TAHUN 2026) -->
-              <div style="display: flex; align-items: center; gap: 18px; padding-bottom: 6px;">
-                <div style="width: 72px; min-width: 72px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+              <!-- KOP SURAT RESMI PEMERINTAH PROVINSI LAMPUNG (SIMETRIS PRESISI & STANDAR TATA NASKAH DINAS 2026) -->
+              <div style="display: flex; align-items: center; justify-content: space-between; padding-bottom: 4px;">
+                <!-- Logo Lampung Sisi Kiri (width 82px) -->
+                <div style="width: 82px; display: flex; align-items: center; justify-content: flex-start; flex-shrink: 0;">
                   ${lampungLogo}
                 </div>
-                <div style="flex: 1; text-align: center; color: #000000;">
-                  <div style="font-size: 14px; font-weight: 700; letter-spacing: 0.8px; font-family: Arial, Helvetica, sans-serif; color: #000000; text-transform: uppercase;">
+                
+                <!-- Teks Kop Kedinasan Sisi Tengah (100% Center Horizontally) -->
+                <div style="flex: 1; text-align: center; color: #000000; padding: 0 10px;">
+                  <div style="font-size: 14.5px; font-weight: 700; letter-spacing: 1.5px; font-family: Arial, 'Helvetica Neue', Helvetica, sans-serif; color: #0b2545; text-transform: uppercase; margin-bottom: 2px;">
                     PEMERINTAH PROVINSI LAMPUNG
                   </div>
-                  <div style="font-size: 16.5px; font-weight: 850; letter-spacing: 0.5px; font-family: Arial, Helvetica, sans-serif; color: #000000; text-transform: uppercase; margin: 2px 0;">
+                  <div style="font-size: 18px; font-weight: 900; letter-spacing: 0.8px; font-family: Arial, 'Helvetica Neue', Helvetica, sans-serif; color: #0b2545; text-transform: uppercase; margin-bottom: 4px;">
                     BADAN PERENCANAAN PEMBANGUNAN DAERAH
                   </div>
-                  <div style="font-size: 10px; font-family: Arial, Helvetica, sans-serif; color: #1e293b; line-height: 1.4; margin-top: 3px;">
+                  <div style="font-size: 10.5px; font-family: Arial, 'Helvetica Neue', Helvetica, sans-serif; color: #334155; line-height: 1.45; font-weight: 500;">
                     Jalan Wolter Monginsidi Nomor 224 Telukbetung, Bandar Lampung Kode Pos 35215<br>
                     Telepon: (0721) 486255 • Pos-el: bappeda@lampungprov.go.id • Laman: bappeda.lampungprov.go.id
                   </div>
                 </div>
+
+                <!-- Penyeimbang Simetris Sisi Kanan (width 82px) agar Teks Tengah 100% Presisi di Tengah Kertas -->
+                <div style="width: 82px; flex-shrink: 0;" aria-hidden="true"></div>
               </div>
 
-              <!-- GARIS PEMBATAS GANDA RESMI NASKAH DINAS (TEBAL-TIPIS) -->
-              <div style="margin-top: 6px; margin-bottom: 16px;">
-                <div style="border-top: 2.5px solid #000000; margin-bottom: 2px;"></div>
-                <div style="border-top: 1px solid #000000;"></div>
+              <!-- GARIS PEMBATAS GANDA RESMI NASKAH DINAS (TEBAL-TIPIS DENGAN WARNA NAVY KEDINASAN) -->
+              <div style="margin-top: 8px; margin-bottom: 18px;">
+                <div style="border-top: 3px solid #0b2545; margin-bottom: 2.5px;"></div>
+                <div style="border-top: 1px solid #0b2545;"></div>
               </div>
 
               <!-- Title -->
-              <div style="text-align: center; margin-bottom: 16px;">
-                <div style="font-size: 17px; font-weight: 800; color: #0b2545; letter-spacing: 1px; text-decoration: underline; margin-bottom: 2px; font-family: 'Times New Roman', Times, serif;">
+              <div style="text-align: center; margin-bottom: 18px;">
+                <div style="font-size: 17.5px; font-weight: 800; color: #0b2545; letter-spacing: 1.2px; text-decoration: underline; margin-bottom: 3px; font-family: 'Times New Roman', Times, serif;">
                   SURAT TANDA TAMAT PENDIDIKAN &amp; PELATIHAN
                 </div>
-                <div style="font-size: 11px; font-weight: 700; color: #b45309; letter-spacing: 1.5px; font-family: Arial, sans-serif;">( S T T P L )</div>
-                <div style="font-size: 11px; color: #334155; margin-top: 4px; font-family: monospace;">Nomor Registrasi: ${nomor}</div>
+                <div style="font-size: 11.5px; font-weight: 700; color: #b45309; letter-spacing: 2px; font-family: Arial, sans-serif;">( S T T P L )</div>
+                <div style="font-size: 11px; color: #475569; margin-top: 4px; font-family: monospace;">Nomor Registrasi: ${nomor}</div>
               </div>
 
               <!-- Body Statement -->
