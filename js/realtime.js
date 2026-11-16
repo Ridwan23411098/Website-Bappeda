@@ -62,7 +62,16 @@ const RealtimeService = {
     if (typeof supabaseClient !== 'undefined' && typeof supabaseClient.channel === 'function') {
       try {
         this.supabaseSubscription = supabaseClient
-          .channel('public:sip_realtime_channel')
+          .channel('public:sip_realtime_channel', {
+            config: {
+              broadcast: { self: false }
+            }
+          })
+          .on('broadcast', { event: 'sip_broadcast' }, (message) => {
+            if (message && message.payload) {
+              this.handleIncomingEvent(message.payload, 'supabase_cloud_broadcast');
+            }
+          })
           .on('postgres_changes', { event: '*', schema: 'public', table: 'idp_submissions' }, (payload) => {
             this.handleSupabaseChange('idp_submissions', payload);
           })
@@ -105,6 +114,19 @@ const RealtimeService = {
     try {
       localStorage.setItem('sip_realtime_event_bus', JSON.stringify(event));
     } catch(e) {}
+
+    // 3. Supabase Cloud WebSocket Broadcast (Sinkronisasi Lintas-Perangkat Smartphone <-> Laptop)
+    if (this.supabaseSubscription && typeof this.supabaseSubscription.send === 'function') {
+      try {
+        this.supabaseSubscription.send({
+          type: 'broadcast',
+          event: 'sip_broadcast',
+          payload: event
+        });
+      } catch (e) {
+        console.warn("Supabase cloud broadcast error:", e);
+      }
+    }
 
     this.lastSyncTime = new Date();
   },
@@ -197,6 +219,8 @@ const RealtimeService = {
       }
       if (typeof App !== 'undefined') {
         if (typeof App.renderIdpSummary === 'function') App.renderIdpSummary();
+        if (typeof App.renderIdpSaya === 'function' && Store.state.activePage === 'eidp') App.renderIdpSaya();
+        if (typeof App.renderEmployeeDashboard === 'function' && Store.state.activePage === 'edash') App.renderEmployeeDashboard();
         const icon = data.status === 'Disetujui' || data.status === 'Final' ? '✅' : '⚠️';
         App.toast(`${icon} Status IDP Anda telah diperbarui menjadi "${data.status}" oleh Tim Verifikator.`, data.status === 'Perlu Revisi' ? 'warning' : 'success', 6000);
       }
@@ -239,8 +263,20 @@ const RealtimeService = {
           if (typeof App !== 'undefined') {
             if (typeof App.renderVerificationsTable === 'function') App.renderVerificationsTable();
             if (typeof App.renderAdminDashboard === 'function') App.renderAdminDashboard();
+            if (typeof App.renderPimpinanDashboard === 'function') App.renderPimpinanDashboard();
           }
         });
+      }
+      const currentNip = (typeof Store !== 'undefined' && Store.state.user) ? Store.state.user.nip : null;
+      if (payload.new && currentNip && String(payload.new.nip).replace(/\s+/g, '') === String(currentNip).replace(/\s+/g, '')) {
+        if (typeof Store.loadUserIdp === 'function') {
+          Store.loadUserIdp(currentNip).then(() => {
+            if (typeof App !== 'undefined') {
+              if (Store.state.activePage === 'eidp' && typeof App.renderIdpSaya === 'function') App.renderIdpSaya();
+              if (Store.state.activePage === 'edash' && typeof App.renderEmployeeDashboard === 'function') App.renderEmployeeDashboard();
+            }
+          });
+        }
       }
     } else if (table === 'notifikasi' && payload.eventType === 'INSERT') {
       this.onNewNotification(payload.new);

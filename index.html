@@ -3465,6 +3465,39 @@
 
       </main>
     </div>
+
+    <!-- NATIVE MOBILE BOTTOM NAVIGATION BAR (KHUSUS SMARTPHONE) -->
+    <nav class="mobile-bottom-nav" id="mobileBottomNav" aria-label="Navigasi Bawah Mobile">
+      <button type="button" class="mobile-nav-btn active" id="mobNavHome" onclick="App.navigateFromMobileBottom('home')" title="Beranda">
+        <span class="mob-icon" data-icon="LayoutDashboard" data-icon-size="20"></span>
+        <span class="mob-label">Beranda</span>
+      </button>
+
+      <button type="button" class="mobile-nav-btn" id="mobNavIdp" onclick="App.navigateFromMobileBottom('idp')" title="IDP">
+        <span class="mob-icon" data-icon="ClipboardCheck" data-icon-size="20"></span>
+        <span class="mob-label">IDP</span>
+      </button>
+
+      <button type="button" class="mobile-nav-btn" id="mobNavAction" onclick="App.navigateFromMobileBottom('action')" title="Aksi Utama">
+        <div class="mob-action-bubble">
+          <span data-icon="Zap" data-icon-size="20"></span>
+        </div>
+        <span class="mob-label" id="mobNavActionLabel">Aksi</span>
+      </button>
+
+      <button type="button" class="mobile-nav-btn" id="mobNavNotif" onclick="App.toggleNotificationDropdown()" title="Notifikasi">
+        <div style="position: relative; display: inline-flex;">
+          <span class="mob-icon" data-icon="Bell" data-icon-size="20"></span>
+          <span class="mob-badge" id="mobNavNotifBadge" style="display: none;">0</span>
+        </div>
+        <span class="mob-label">Notif</span>
+      </button>
+
+      <button type="button" class="mobile-nav-btn" id="mobNavMenu" onclick="App.toggleMobileSidebar()" title="Menu Lengkap">
+        <span class="mob-icon" data-icon="Menu" data-icon-size="20"></span>
+        <span class="mob-label">Menu</span>
+      </button>
+    </nav>
   </div>
 
   <!-- ========================================================================
@@ -5525,15 +5558,15 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
   <script src="js/supabase.js?v=20261008_fix"></script>
-  <script src="js/realtime.js?v=20261116_realtime_v18"></script>
+  <script src="js/realtime.js?v=20261116_mobile_v19"></script>
   <script src="assets/lambang-lampung.js?v=20261116_kepalabappeda_v16"></script>
   <script src="assets/tte-service.js?v=20261116_kepalabappeda_v16"></script>
   <script src="js/icons.js?v=20261014_v16"></script>
   <script src="js/charts.js?v=20261008_fix"></script>
   <script src="js/bappeda_data.js?v=20261029_v56"></script>
-  <script src="js/store.js?v=20261116_realtime_v18"></script>
+  <script src="js/store.js?v=20261116_mobile_v19"></script>
   <script src="js/export.js?v=20261029_v56"></script>
-  <script src="js/app.js?v=20261116_realtime_v18"></script>
+  <script src="js/app.js?v=20261116_mobile_v19"></script>
 </body>
 
 </html>

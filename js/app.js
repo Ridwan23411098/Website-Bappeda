@@ -373,6 +373,14 @@ const App = {
       });
     }
 
+    if (role === 'admin' || role === 'pimpinan') {
+      Store.syncVerificationsFromSupabase().then(() => {
+        if (Store.state.activePage === 'averif') App.renderAdminVerification();
+        if (Store.state.activePage === 'adash') App.renderAdminDashboard();
+        if (Store.state.activePage === 'pdash') App.renderPimpinanDashboard();
+      });
+    }
+
     // Inisialisasi Real-time Notifikasi
     this.initRealtimeNotifications();
 
@@ -480,6 +488,9 @@ const App = {
     document.querySelectorAll('.nav-item').forEach(btn => {
       btn.classList.toggle('active', btn.getAttribute('data-nav') === pageId);
     });
+
+    // Update Mobile Bottom Navigation bar
+    this.updateMobileBottomNav(pageId);
 
     // Update Breadcrumb
     const pageTitles = {
@@ -7393,6 +7404,55 @@ const App = {
       consoleEl.scrollTop = consoleEl.scrollHeight;
     }
     this.toast('📡 Sinyal siaran notifikasi instan berhasil dikirim ke seluruh tab!', 'info', 3000);
+  },
+
+  updateMobileBottomNav(pageId) {
+    const role = Store.state?.user?.role || 'pegawai';
+    const homeBtn = document.getElementById('mobNavHome');
+    const idpBtn = document.getElementById('mobNavIdp');
+    const actionBtn = document.getElementById('mobNavAction');
+    const actionLabel = document.getElementById('mobNavActionLabel');
+
+    if (actionLabel) {
+      if (role === 'pegawai') actionLabel.textContent = 'Realisasi';
+      else if (role === 'admin') actionLabel.textContent = 'Verifikasi';
+      else actionLabel.textContent = 'Arahan';
+    }
+
+    [homeBtn, idpBtn, actionBtn].forEach(b => b?.classList.remove('active'));
+
+    if (['edash', 'adash', 'pdash'].includes(pageId)) {
+      if (homeBtn) homeBtn.classList.add('active');
+    } else if (['eidp', 'averif'].includes(pageId)) {
+      if (idpBtn) idpBtn.classList.add('active');
+    } else if (['epelaksanaan', 'apelaksanaan', 'pmonitoring', 'plaporan'].includes(pageId)) {
+      if (actionBtn) actionBtn.classList.add('active');
+    }
+  },
+
+  navigateFromMobileBottom(type) {
+    const role = Store.state?.user?.role || 'pegawai';
+    if (type === 'home') {
+      if (role === 'pegawai') this.navigate('edash');
+      else if (role === 'admin') this.navigate('adash');
+      else this.navigate('pdash');
+    } else if (type === 'idp') {
+      if (role === 'pegawai') this.navigate('eidp');
+      else this.navigate('averif');
+    } else if (type === 'action') {
+      if (role === 'pegawai') this.navigate('epelaksanaan');
+      else if (role === 'admin') this.navigate('averif');
+      else {
+        this.navigate('pdash');
+        setTimeout(() => {
+          const inp = document.getElementById('newDirectiveInput');
+          if (inp) {
+            inp.scrollIntoView({ behavior: 'smooth' });
+            inp.focus();
+          }
+        }, 300);
+      }
+    }
   }
 };
 

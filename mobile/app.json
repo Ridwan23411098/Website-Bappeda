@@ -1,0 +1,29 @@
+{
+  "expo": {
+    "name": "SIP-KOMPETENSI",
+    "slug": "sip-kompetensi-bappeda",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#0b2545"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "id.go.lampungprov.bappeda.sipkompetensi"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#0b2545"
+      },
+      "package": "id.go.lampungprov.bappeda.sipkompetensi"
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    }
+  }
+}
