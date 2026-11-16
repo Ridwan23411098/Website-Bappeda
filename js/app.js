@@ -4361,7 +4361,7 @@ const App = {
       const tanggal = metadata.tanggal || '15 November 2026';
       const nomor = metadata.nomor || '893.3/0481/BAPPEDA/2026';
 
-      const lampungSvg = typeof LambangLampung !== 'undefined' ? LambangLampung.getSvg(74) : '';
+      const lampungLogo = `<img src="assets/logo-lampung.png" alt="Lambang Daerah Provinsi Lampung" style="height: 78px; width: auto; max-width: 65px; object-fit: contain; flex-shrink: 0;" />`;
       const qrSvg = typeof TTEService !== 'undefined' && TTEService.generateQrSvg 
         ? TTEService.generateQrSvg(`https://bappeda.lampungprov.go.id/tte/verify?doc=${encodeURIComponent(nomor)}&nip=${encodeURIComponent(nip)}`, 62) 
         : '';
@@ -4375,16 +4375,16 @@ const App = {
             <div style="position: absolute; bottom: 6px; left: 6px; width: 22px; height: 22px; border-bottom: 3px solid #d97706; border-left: 3px solid #d97706;"></div>
             <div style="position: absolute; bottom: 6px; right: 6px; width: 22px; height: 22px; border-bottom: 3px solid #d97706; border-right: 3px solid #d97706;"></div>
 
-            <!-- Watermark -->
-            <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); opacity: 0.04; pointer-events: none; z-index: 1;">
-              ${typeof LambangLampung !== 'undefined' ? LambangLampung.getSvg(300) : ''}
+            <!-- Watermark Lambang Resmi Lampung -->
+            <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); opacity: 0.05; pointer-events: none; z-index: 1;">
+              <img src="assets/logo-lampung.png" alt="Watermark Lambang Lampung" style="width: 260px; height: auto; object-fit: contain;" />
             </div>
 
             <div style="position: relative; z-index: 2;">
               <!-- KOP SURAT RESMI PEMERINTAH PROVINSI LAMPUNG (STANDAR TATA NASKAH DINAS TAHUN 2026) -->
               <div style="display: flex; align-items: center; gap: 18px; padding-bottom: 6px;">
-                <div style="width: 74px; height: 74px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-                  ${lampungSvg}
+                <div style="width: 72px; min-width: 72px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                  ${lampungLogo}
                 </div>
                 <div style="flex: 1; text-align: center; color: #000000;">
                   <div style="font-size: 14px; font-weight: 700; letter-spacing: 0.8px; font-family: Arial, Helvetica, sans-serif; color: #000000; text-transform: uppercase;">
