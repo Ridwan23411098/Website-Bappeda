@@ -1146,30 +1146,144 @@ body {
   }
 }
 
-/* 2. Pimpinan Dashboard Polish (#page-pdash) */
+/* 2. Pimpinan Dashboard Polish (#page-pdash) — Sleek, Compact & Refined */
 .executive-banner {
-  border-radius: 14px !important;
-  box-shadow: 0 10px 25px -5px rgba(11, 37, 69, 0.35) !important;
+  background: linear-gradient(135deg, #0b2545 0%, #134074 55%, #002855 100%) !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(255, 255, 255, 0.16) !important;
+  box-shadow: 0 4px 16px rgba(11, 37, 69, 0.22) !important;
+  border-radius: 12px !important;
+  padding: 12px 18px !important;
+  margin-bottom: 20px !important;
+  box-sizing: border-box !important;
+  width: 100% !important;
+}
+
+.executive-banner .exec-avatar {
+  width: 38px !important;
+  height: 38px !important;
+  border-radius: 9px !important;
+  background: rgba(255, 255, 255, 0.14) !important;
+  border: 1.5px solid rgba(255, 255, 255, 0.25) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-size: 15px !important;
+  font-weight: 800 !important;
+  color: #ffdd59 !important;
+  flex-shrink: 0 !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12) !important;
+}
+
+.executive-banner .exec-title {
+  font-size: 14.5px !important;
+  font-weight: 700 !important;
+  margin: 0 !important;
+  color: #ffffff !important;
+  line-height: 1.25 !important;
+  display: inline-block !important;
+}
+
+.executive-banner .exec-role-badge {
+  background: rgba(255, 221, 89, 0.2) !important;
+  color: #ffdd59 !important;
+  border: 1px solid rgba(255, 221, 89, 0.4) !important;
+  font-size: 10px !important;
+  font-weight: 700 !important;
+  padding: 2px 7px !important;
+  border-radius: 4px !important;
+  line-height: 1.2 !important;
+  white-space: nowrap !important;
+}
+
+.executive-banner .exec-year-select,
+#pdashYearSelect {
+  width: auto !important;
+  min-width: 86px !important;
+  max-width: 100px !important;
+  height: 26px !important;
+  padding: 2px 20px 2px 8px !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  display: inline-block !important;
+  flex: 0 0 auto !important;
+  border-radius: 5px !important;
+  background-color: rgba(255, 255, 255, 0.18) !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(255, 255, 255, 0.35) !important;
+  cursor: pointer !important;
+  line-height: 1.2 !important;
+  margin: 0 !important;
+}
+
+.executive-banner .exec-year-select option,
+#pdashYearSelect option {
+  background: #0b2545 !important;
+  color: #ffffff !important;
+}
+
+.executive-banner .exec-subtitle {
+  margin: 2px 0 0 !important;
+  font-size: 11.5px !important;
+  color: rgba(255, 255, 255, 0.82) !important;
+  line-height: 1.35 !important;
+}
+
+.executive-banner .exec-btn-group {
+  display: flex !important;
+  gap: 6px !important;
+  flex-wrap: wrap !important;
+  align-items: center !important;
+}
+
+.executive-banner .exec-btn-primary {
+  background: #ffffff !important;
+  color: #0b2545 !important;
+  font-weight: 700 !important;
+  border: none !important;
+  font-size: 11px !important;
+  height: 28px !important;
+  padding: 0 11px !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15) !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 5px !important;
+  border-radius: 6px !important;
+  white-space: nowrap !important;
+}
+
+.executive-banner .exec-btn-outline {
+  background: rgba(255, 255, 255, 0.12) !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+  font-size: 11px !important;
+  height: 28px !important;
+  padding: 0 10px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 5px !important;
+  border-radius: 6px !important;
+  white-space: nowrap !important;
+}
+
+.executive-banner .exec-btn-outline:hover {
+  background: rgba(255, 255, 255, 0.22) !important;
 }
 
 @media (max-width: 768px) {
   .executive-banner {
-    padding: 16px 16px !important;
+    padding: 12px 14px !important;
   }
   .executive-banner > div {
     flex-direction: column !important;
     align-items: flex-start !important;
-    gap: 14px !important;
+    gap: 10px !important;
   }
-  .executive-banner > div > div:last-child {
+  .executive-banner .exec-btn-group {
     width: 100% !important;
-    display: flex !important;
-    flex-wrap: wrap !important;
-    gap: 8px !important;
   }
-  .executive-banner > div > div:last-child .btn {
+  .executive-banner .exec-btn-group .btn {
     flex: 1 1 auto !important;
-    min-width: 120px !important;
     justify-content: center !important;
   }
 }
