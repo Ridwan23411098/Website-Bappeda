@@ -719,6 +719,18 @@
 
       modal.style.display = 'flex';
       modal.classList.add('active');
+    },
+
+    /**
+     * Helper Shortcut untuk Verifikasi Dokumen Digital
+     */
+    verifyDocument(docRegNo = '893.3/0481/BAPPEDA/2026', signerName = 'Dr. ANANG RISGIYANTO, S.K.M., M.Kes.') {
+      this.openVerificationModal(
+        docRegNo,
+        'Surat Tanda Tamat Pendidikan & Pelatihan (STTPL)',
+        'Rizky Aditya Pratama, S.Kom., M.Si.',
+        signerName
+      );
     }
   };
 

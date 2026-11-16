@@ -4481,17 +4481,22 @@ const App = {
                   </div>
                 </div>
 
-                <!-- Right TTE Signer -->
-                <div style="text-align: center; width: 230px;">
-                  <div style="color: #64748b; margin-bottom: 2px;">Bandar Lampung, ${tanggal}</div>
-                  <div style="color: #64748b; margin-bottom: 3px;">Disahkan secara Elektronik:</div>
-                  <div style="font-weight: 700; color: #0b2545; font-size: 11.5px;">Kasubbag Umum &amp; Kepegawaian</div>
-                  <div style="margin: 4px auto; display: flex; justify-content: center; cursor: pointer;" onclick="TTEService.verifyDocument('${nomor}', 'CIK MARYA, S.E., M.M.')" title="Klik untuk Verifikasi Keaslian TTE BSrE">
+                <!-- Right TTE Signer: KEPALA BAPPEDA PROVINSI LAMPUNG -->
+                <div style="text-align: center; width: 250px;">
+                  <div style="color: #475569; margin-bottom: 2px;">Bandar Lampung, ${tanggal}</div>
+                  <div style="font-weight: 750; color: #0b2545; font-size: 11px; text-transform: uppercase;">KEPALA BAPPEDA PROVINSI LAMPUNG</div>
+                  <div style="font-size: 9px; color: #64748b; margin: 2px 0 4px;">Disahkan secara Elektronik (TTE):</div>
+                  <div style="margin: 4px auto; display: flex; justify-content: center; cursor: pointer;" onclick="TTEService.openVerificationModal('${nomor}', 'Surat Tanda Tamat Pendidikan &amp; Pelatihan (STTPL)', '${pegawai}', 'Dr. ANANG RISGIYANTO, S.K.M., M.Kes.')" title="Klik untuk Verifikasi Keaslian TTE BSrE BSSN">
                     ${qrSvg}
                   </div>
-                  <div style="font-weight: 700; color: #0b2545; border-bottom: 1px solid #94a3b8; display: inline-block; padding-bottom: 2px;">CIK MARYA, S.E., M.M.</div>
-                  <div style="color: #64748b; font-size: 10px; margin-top: 2px;">NIP. 198005122005012003</div>
-                  <div style="font-size: 9px; color: #059669; font-weight: 600; margin-top: 2px;">🔒 Sertifikat Elektronik BSrE BSSN</div>
+                  <div style="font-weight: 800; color: #0b2545; font-size: 11.5px; border-bottom: 1.5px solid #0b2545; display: inline-block; padding-bottom: 2px; text-decoration: underline;">
+                    Dr. ANANG RISGIYANTO, S.K.M., M.Kes.
+                  </div>
+                  <div style="color: #334155; font-size: 9.5px; font-weight: 650; margin-top: 2px;">Pembina Utama Madya (IV/d)</div>
+                  <div style="color: #475569; font-size: 9.5px; margin-top: 1px;">NIP. 197507312000031002</div>
+                  <div style="font-size: 8.5px; color: #059669; font-weight: 700; margin-top: 3px; display: flex; align-items: center; justify-content: center; gap: 4px;">
+                    <span>🔒</span> Sertifikat Elektronik Sah BSrE BSSN
+                  </div>
                 </div>
               </div>
             </div>
