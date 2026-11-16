@@ -4489,7 +4489,7 @@ const App = {
                   <div style="margin: 4px auto; display: flex; justify-content: center; cursor: pointer;" onclick="TTEService.openVerificationModal('${nomor}', 'Surat Tanda Tamat Pendidikan &amp; Pelatihan (STTPL)', '${pegawai}', 'Dr. ANANG RISGIYANTO, S.K.M., M.Kes.')" title="Klik untuk Verifikasi Keaslian TTE BSrE BSSN">
                     ${qrSvg}
                   </div>
-                  <div style="font-weight: 800; color: #0b2545; font-size: 11.5px; border-bottom: 1.5px solid #0b2545; display: inline-block; padding-bottom: 2px; text-decoration: underline;">
+                  <div style="font-weight: 800; color: #0b2545; font-size: 11.5px; border-bottom: 1.5px solid #0b2545; display: inline-block; padding-bottom: 2px;">
                     Dr. ANANG RISGIYANTO, S.K.M., M.Kes.
                   </div>
                   <div style="color: #334155; font-size: 9.5px; font-weight: 650; margin-top: 2px;">Pembina Utama Madya (IV/d)</div>
