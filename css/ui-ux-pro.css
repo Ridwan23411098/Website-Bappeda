@@ -669,14 +669,40 @@ body {
    BUTTONS (UI UX PRO)
    ========================================================================== */
 .btn {
-  border-radius: 10px !important;
-  font-weight: 650 !important;
+  border-radius: 8px !important;
+  font-weight: 600 !important;
   font-size: 13px !important;
   transition: all 180ms ease !important;
   display: inline-flex !important;
   align-items: center !important;
+  justify-content: center !important;
   gap: 7px !important;
   cursor: pointer !important;
+  white-space: nowrap !important;
+  text-decoration: none !important;
+}
+
+.btn-sm {
+  height: 30px !important;
+  padding: 4px 11px !important;
+  font-size: 11.5px !important;
+  border-radius: 6px !important;
+  gap: 5px !important;
+}
+
+.btn-xs {
+  height: 24px !important;
+  padding: 2px 8px !important;
+  font-size: 10.5px !important;
+  border-radius: 5px !important;
+  gap: 4px !important;
+}
+
+.btn-icon {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 0 !important;
 }
 
 .btn:hover {
@@ -785,7 +811,22 @@ body {
   font-size: 11px !important;
   font-weight: 700 !important;
   letter-spacing: 0.02em !important;
-  white-space: nowrap !important;
+  white-space: nowrap;
+  max-width: 100%;
+}
+
+.badge-wrap,
+.badge-multiline,
+.badge-readiness,
+.readiness-score-box .badge {
+  white-space: normal !important;
+  word-break: break-word !important;
+  text-align: center !important;
+  display: inline-block !important;
+  line-height: 1.35 !important;
+  max-width: 100% !important;
+  padding: 6px 12px !important;
+  box-sizing: border-box !important;
 }
 
 .badge-blue {
@@ -1050,3 +1091,127 @@ body {
     font-size: 13px !important;
   }
 }
+
+/* ==========================================================================
+   COMPREHENSIVE DASHBOARD POLISH: PEGAWAI, ADMIN & PIMPINAN
+   ========================================================================== */
+
+/* 1. Career Readiness & Succession Analysis (#page-ekarier) */
+.readiness-score-box {
+  background: #FFFFFF !important;
+  border: 1px solid var(--pro-slate-200) !important;
+  border-radius: 14px !important;
+  box-shadow: 0 2px 10px rgba(15, 30, 63, 0.04) !important;
+  overflow: hidden !important;
+  box-sizing: border-box !important;
+  max-width: 100% !important;
+}
+
+.readiness-checklist-item {
+  border: 1px solid var(--pro-slate-200) !important;
+  border-radius: 10px !important;
+  transition: all 140ms ease !important;
+  background: #FFFFFF !important;
+}
+
+.readiness-checklist-item:hover {
+  border-color: #93c5fd !important;
+  background: #f8fafc !important;
+}
+
+.readiness-step-flow {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)) !important;
+  gap: 14px !important;
+  margin-top: 14px !important;
+}
+
+.readiness-step-box {
+  background: #FFFFFF !important;
+  border: 1px solid var(--pro-slate-200) !important;
+  border-radius: 10px !important;
+  padding: 16px !important;
+  transition: all 150ms ease !important;
+}
+
+.readiness-step-box.active {
+  border-color: var(--pro-blue-600) !important;
+  box-shadow: 0 0 0 1px var(--pro-blue-600) !important;
+  background: #f0f7ff !important;
+}
+
+@media (max-width: 1150px) {
+  #careerReadinessGrid > div {
+    grid-column: span 12 / span 12 !important;
+  }
+}
+
+/* 2. Pimpinan Dashboard Polish (#page-pdash) */
+.executive-banner {
+  border-radius: 14px !important;
+  box-shadow: 0 10px 25px -5px rgba(11, 37, 69, 0.35) !important;
+}
+
+@media (max-width: 768px) {
+  .executive-banner {
+    padding: 16px 16px !important;
+  }
+  .executive-banner > div {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 14px !important;
+  }
+  .executive-banner > div > div:last-child {
+    width: 100% !important;
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+  }
+  .executive-banner > div > div:last-child .btn {
+    flex: 1 1 auto !important;
+    min-width: 120px !important;
+    justify-content: center !important;
+  }
+}
+
+@media (max-width: 640px) {
+  #page-pdash .card:has(#newDirectiveInput) div:has(> #newDirectiveInput) {
+    width: 100% !important;
+  }
+  #page-pdash button[onclick*="submitExecutiveDirective"] {
+    width: 100% !important;
+  }
+}
+
+/* 3. Global Card Headers & Button Wrapping */
+.card-header {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  flex-wrap: wrap !important;
+  gap: 10px !important;
+}
+
+.card-header > div:first-child {
+  flex: 1 1 auto !important;
+  min-width: 180px !important;
+}
+
+.card-header > div:last-child {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 8px !important;
+  align-items: center !important;
+}
+
+/* 4. Table Action Buttons Clean Alignment */
+.data-table td .btn-xs,
+.data-table td .btn-sm {
+  margin: 1px 2px !important;
+}
+
+/* 5. Stat Card Responsive Typography */
+.stat-card-value {
+  word-break: break-word !important;
+}
+

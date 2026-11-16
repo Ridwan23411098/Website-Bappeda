@@ -1244,7 +1244,7 @@ const App = {
       targetJenjang: val,
       targetLevel: 4,
       overallScore: 72,
-      kategori: 'KATEGORI II: SIAP DENGAN PENGEMBANGAN (READY WITH DEVELOPMENT)',
+      kategori: 'KATEGORI II: SIAP DENGAN PENGEMBANGAN',
       kategoriClass: 'text-warning',
       badgeClass: 'badge-warning',
       proyeksiWaktu: '1 — 2 Tahun',
@@ -1257,14 +1257,14 @@ const App = {
       const badgeCls = chk.isPassed ? 'badge-success' : 'badge-warning';
 
       return `
-        <div class="readiness-checklist-item">
+        <div class="readiness-checklist-item" style="min-width: 0;">
           <div style="color: ${iconColor}; flex-shrink: 0; margin-top: 2px;">${icon}</div>
-          <div style="flex: 1;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px; flex-wrap: wrap; gap: 6px;">
-              <div style="font-weight: 750; font-size: 13px; color: var(--color-text-primary);">${chk.param}</div>
-              <span class="badge ${badgeCls}" style="font-size: 10.5px;">${chk.status}</span>
+          <div style="flex: 1; min-width: 0;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 3px; flex-wrap: wrap; gap: 6px;">
+              <div style="font-weight: 750; font-size: 13px; color: var(--color-text-primary); min-width: 160px; flex: 1;">${chk.param}</div>
+              <span class="badge ${badgeCls}" style="font-size: 10.5px; flex-shrink: 0;">${chk.status}</span>
             </div>
-            <div style="font-size: 11.5px; color: var(--color-text-secondary); line-height: 1.4;">${chk.detail}</div>
+            <div style="font-size: 11.5px; color: var(--color-text-secondary); line-height: 1.4; word-break: break-word;">${chk.detail}</div>
           </div>
         </div>
       `;
@@ -1272,8 +1272,8 @@ const App = {
 
     simContainer.innerHTML = `
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 12px;">
-        <div>
-          <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 2px;">
+        <div style="flex: 1; min-width: 260px;">
+          <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px; flex-wrap: wrap;">
             <span style="font-size: 18px;">🎯</span>
             <h3 style="font-size: 15.5px; font-weight: 750; color: var(--color-text-primary); margin: 0;">Simulasi Kesiapan Jabatan Target ASN (Cita-Cita)</h3>
             <span class="badge badge-primary" style="font-size: 10.5px;">Merit System</span>
@@ -1289,23 +1289,25 @@ const App = {
         </div>
       </div>
 
-      <div class="grid grid-cols-12" style="gap: 18px; margin-bottom: 16px;">
+      <div class="grid grid-cols-12" id="careerReadinessGrid" style="gap: 18px; margin-bottom: 16px;">
         <!-- Skor Kesiapan Box -->
         <div class="col-span-4" style="display: flex; flex-direction: column;">
-          <div class="readiness-score-box" style="flex: 1; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 20px 14px;">
-            <div style="font-size: 12px; font-weight: 750; text-transform: uppercase; letter-spacing: 0.5px; color: var(--color-text-muted); margin-bottom: 8px;">
+          <div class="readiness-score-box" style="flex: 1; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 22px 16px; box-sizing: border-box; overflow: hidden; max-width: 100%;">
+            <div style="font-size: 11px; font-weight: 750; text-transform: uppercase; letter-spacing: 0.5px; color: var(--color-text-muted); margin-bottom: 8px;">
               Indeks Kesiapan Suksesi
             </div>
-            <div class="readiness-score-number" style="font-size: 48px; margin-bottom: 4px;">
+            <div class="readiness-score-number" style="font-size: 46px; margin-bottom: 6px; line-height: 1;">
               ${res.overallScore}%
             </div>
-            <div class="progress-track" style="width: 80%; height: 8px; margin-bottom: 12px;">
+            <div class="progress-track" style="width: 80%; max-width: 180px; height: 8px; margin: 0 auto 14px auto;">
               <div class="progress-fill ${res.overallScore >= 85 ? 'success' : (res.overallScore >= 65 ? 'warning' : 'danger')}" style="width: ${res.overallScore}%;"></div>
             </div>
-            <span class="badge ${res.badgeClass}" style="font-size: 10.5px; padding: 6px 10px; font-weight: 750; margin-bottom: 10px; white-space: normal; line-height: 1.35; text-align: center; display: inline-block; max-width: 100%;">
-              ${res.kategori}
-            </span>
-            <div style="font-size: 11.5px; color: var(--color-text-secondary); line-height: 1.45;">
+            <div style="width: 100%; display: flex; justify-content: center; margin-bottom: 12px;">
+              <span class="badge ${res.badgeClass} badge-readiness">
+                ${res.kategori}
+              </span>
+            </div>
+            <div style="font-size: 11.5px; color: var(--color-text-secondary); line-height: 1.45; text-align: center;">
               Estimasi Waktu Siap Promosi:<br><b style="color: var(--color-primary);">${res.proyeksiWaktu}</b>
             </div>
           </div>
