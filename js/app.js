@@ -3907,7 +3907,7 @@ const App = {
     App.toast('Mengirimkan pengajuan IDP ke Cloud Supabase...', 'info');
     await Store.submitIdp();
     App.toast('IDP Anda berhasil diajukan ke Atasan & Pengelola SDM!', 'success');
-    this.navigate('edash');
+    this.openIdpFilingReceiptModal();
   },
 
   renderEmployeeRealization() {
@@ -4814,6 +4814,49 @@ const App = {
       btnAtasan.onclick = () => App.approveVerification(item.id, 'Disetujui Atasan');
     }
     document.getElementById('btnRejectVerif').onclick = () => App.requestRevisionModal(item.id);
+
+    // Update Multi-Level Approval Stepper UI
+    const badgeEl = document.getElementById('reviewDrawerPipelineBadge');
+    const s1Box = document.getElementById('pipelineBoxStep1');
+    const s2Box = document.getElementById('pipelineBoxStep2');
+    const s3Box = document.getElementById('pipelineBoxStep3');
+    const s1Status = document.getElementById('pipelineStep1Status');
+    const s2Status = document.getElementById('pipelineStep2Status');
+    const s3Status = document.getElementById('pipelineStep3Status');
+
+    if (item.status === 'Final') {
+      if (badgeEl) { badgeEl.textContent = 'Tahap 3 Selesai (Sah TTE)'; badgeEl.className = 'badge badge-success'; }
+      if (s1Box) { s1Box.style.borderColor = '#16a34a'; s1Box.style.background = '#f0fdf4'; }
+      if (s1Status) { s1Status.textContent = '✓ Disetujui Atasan'; s1Status.style.color = '#16a34a'; }
+      if (s2Box) { s2Box.style.borderColor = '#16a34a'; s2Box.style.background = '#f0fdf4'; }
+      if (s2Status) { s2Status.textContent = '✓ Diverifikasi SDM'; s2Status.style.color = '#16a34a'; }
+      if (s3Box) { s3Box.style.borderColor = '#16a34a'; s3Box.style.background = '#f0fdf4'; }
+      if (s3Status) { s3Status.textContent = '✓ Disahkan TTE Kaban'; s3Status.style.color = '#16a34a'; }
+    } else if (item.status === 'Disetujui Atasan') {
+      if (badgeEl) { badgeEl.textContent = 'Tahap 2 dari 3 (Verifikasi SDM)'; badgeEl.className = 'badge badge-warning'; }
+      if (s1Box) { s1Box.style.borderColor = '#16a34a'; s1Box.style.background = '#f0fdf4'; }
+      if (s1Status) { s1Status.textContent = '✓ Disetujui Atasan'; s1Status.style.color = '#16a34a'; }
+      if (s2Box) { s2Box.style.borderColor = '#d97706'; s2Box.style.background = '#fffbeb'; }
+      if (s2Status) { s2Status.textContent = '⏳ Siap Verifikasi SDM'; s2Status.style.color = '#d97706'; }
+      if (s3Box) { s3Box.style.borderColor = 'var(--color-border)'; s3Box.style.background = 'var(--color-surface-subtle)'; }
+      if (s3Status) { s3Status.textContent = '○ Antrean Final'; s3Status.style.color = 'var(--color-text-muted)'; }
+    } else if (item.status === 'Perlu Revisi') {
+      if (badgeEl) { badgeEl.textContent = 'Perlu Revisi Pegawai'; badgeEl.className = 'badge badge-danger'; }
+      if (s1Box) { s1Box.style.borderColor = '#dc2626'; s1Box.style.background = '#fef2f2'; }
+      if (s1Status) { s1Status.textContent = '⚠️ Dikembalikan'; s1Status.style.color = '#dc2626'; }
+      if (s2Box) { s2Box.style.borderColor = 'var(--color-border)'; s2Box.style.background = 'var(--color-surface-subtle)'; }
+      if (s2Status) { s2Status.textContent = '○ Tertunda'; s2Status.style.color = 'var(--color-text-muted)'; }
+      if (s3Box) { s3Box.style.borderColor = 'var(--color-border)'; s3Box.style.background = 'var(--color-surface-subtle)'; }
+      if (s3Status) { s3Status.textContent = '○ Tertunda'; s3Status.style.color = 'var(--color-text-muted)'; }
+    } else {
+      if (badgeEl) { badgeEl.textContent = 'Tahap 1 dari 3 (Review Atasan)'; badgeEl.className = 'badge badge-primary'; }
+      if (s1Box) { s1Box.style.borderColor = '#2563eb'; s1Box.style.background = 'rgba(37,99,235,0.06)'; }
+      if (s1Status) { s1Status.textContent = '⏳ Menunggu Review Atasan'; s1Status.style.color = '#2563eb'; }
+      if (s2Box) { s2Box.style.borderColor = 'var(--color-border)'; s2Box.style.background = 'var(--color-surface-subtle)'; }
+      if (s2Status) { s2Status.textContent = '○ Menunggu Tahap 1'; s2Status.style.color = 'var(--color-text-muted)'; }
+      if (s3Box) { s3Box.style.borderColor = 'var(--color-border)'; s3Box.style.background = 'var(--color-surface-subtle)'; }
+      if (s3Status) { s3Status.textContent = '○ Antrean Final'; s3Status.style.color = 'var(--color-text-muted)'; }
+    }
 
     this.openDrawer('reviewDrawer');
   },
@@ -5850,7 +5893,7 @@ const App = {
   },
 
   switchMasterTab(tabName) {
-    const tabs = ['metode', 'rumpun', 'jenjang', 'backup', 'audit', 'spbe'];
+    const tabs = ['metode', 'rumpun', 'jenjang', 'backup', 'audit', 'spbe', 'efisiensi'];
     tabs.forEach(t => {
       const cap = t.charAt(0).toUpperCase() + t.slice(1);
       const btn = document.getElementById(`tabBtn${cap}`);
@@ -5866,6 +5909,9 @@ const App = {
     }
     if (tabName === 'spbe') {
       this.renderSpbeTab();
+    }
+    if (tabName === 'efisiensi') {
+      this.recalculateBudgetEfficiency(75);
     }
     renderAllIcons();
   },
@@ -7602,6 +7648,224 @@ const App = {
         }, 300);
       }
     }
+  },
+
+  // =========================================================================
+  // FITUR FUNGSIONAL 1: TANDA TERIMA PENDAFTARAN IDP RESMI (FILING RECEIPT)
+  // =========================================================================
+  openIdpFilingReceiptModal(customItem = null) {
+    const u = customItem || Store.state.user || {
+      name: 'Rizky Aditya Pratama, S.Kom., M.Si.',
+      nip: '198701012010011001',
+      unit: 'Bidang Perencanaan Makro & Evaluasi Pembangunan',
+      jabatan: 'Penata Muda Tk. I (III/b) • Analis Perencanaan'
+    };
+
+    const regNo = `REG-IDP/2026/BAPPEDA/${String(u.nip || '1001').slice(-6)}`;
+    const now = new Date();
+    const dateStr = `${now.getDate()} Nov ${now.getFullYear()}, ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')} WIB`;
+
+    const regEl = document.getElementById('receiptRegNo');
+    const timeEl = document.getElementById('receiptTimestamp');
+    const nameEl = document.getElementById('receiptPegawaiName');
+    const nipEl = document.getElementById('receiptPegawaiNip');
+    const unitEl = document.getElementById('receiptPegawaiUnit');
+    const karierEl = document.getElementById('receiptTargetKarier');
+    const jpEl = document.getElementById('receiptTotalJp');
+    const biayaEl = document.getElementById('receiptEstimasiBiaya');
+    const stageEl = document.getElementById('receiptStageBadge');
+    const shaEl = document.getElementById('receiptShaDigest');
+    const qrContainer = document.getElementById('receiptQrContainer');
+
+    if (regEl) regEl.textContent = regNo;
+    if (timeEl) timeEl.textContent = dateStr;
+    if (nameEl) nameEl.textContent = u.pegawai || u.name || 'Pegawai ASN Bappeda';
+    if (nipEl) nipEl.textContent = u.nip || '198701012010011001';
+    if (unitEl) unitEl.textContent = `${u.jabatan || 'Analis Perencanaan'} • ${u.unit || 'Bappeda Prov. Lampung'}`;
+    if (karierEl) karierEl.textContent = u.targetKarier || 'JFT Perencana Ahli Muda — Level 3';
+    if (jpEl) jpEl.textContent = `${u.totalJp || 32} Jam Pelajaran (JP) ✓ Memenuhi Syarat Minimal 20 JP`;
+    if (biayaEl) biayaEl.textContent = u.estimasiBiaya || 'Rp0 (Metode E-Learning / MOOC Mandiri)';
+
+    const status = customItem?.status || Store.state.idpState?.status || 'Diajukan';
+    if (stageEl) {
+      if (status === 'Final') {
+        stageEl.textContent = 'Tahap 3 Selesai (Sah TTE Kepala Badan)';
+        stageEl.className = 'badge badge-success';
+      } else if (status === 'Disetujui Atasan') {
+        stageEl.textContent = 'Tahap 2: Menunggu Verifikasi Pengelola SDM';
+        stageEl.className = 'badge badge-warning';
+      } else {
+        stageEl.textContent = 'Tahap 1: Menunggu Review Atasan Langsung';
+        stageEl.className = 'badge badge-primary';
+      }
+    }
+
+    if (shaEl) {
+      shaEl.textContent = `#sha256:${Math.random().toString(16).substring(2, 10)}${Math.random().toString(16).substring(2, 10)}bappeda2026`;
+    }
+
+    if (qrContainer && typeof TTEService !== 'undefined' && TTEService.generateQrSvg) {
+      const verifUrl = `https://website-bappeda.vercel.app/verif.html?reg=${encodeURIComponent(regNo)}&nip=${encodeURIComponent(u.nip || '')}`;
+      qrContainer.innerHTML = TTEService.generateQrSvg(verifUrl, 54);
+    }
+
+    this.openModal('idpFilingReceiptModal');
+    renderAllIcons();
+  },
+
+  openIdpFilingReceiptFromDrawer() {
+    if (this._currentReviewVerifItem) {
+      this.openIdpFilingReceiptModal(this._currentReviewVerifItem);
+    } else {
+      this.openIdpFilingReceiptModal();
+    }
+  },
+
+  printIdpFilingReceipt() {
+    const printArea = document.getElementById('idpFilingReceiptPrintArea');
+    if (!printArea) return;
+    const printWindow = window.open('', '_blank', 'width=700,height=600');
+    if (!printWindow) {
+      window.print();
+      return;
+    }
+    printWindow.document.write(`
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>Tanda Terima Elektronik IDP 2026 - Bappeda Provinsi Lampung</title>
+        <style>
+          body { font-family: system-ui, -apple-system, sans-serif; padding: 24px; color: #000; background: #fff; }
+          @media print { body { padding: 0; } }
+        </style>
+      </head>
+      <body>
+        <div style="text-align: center; margin-bottom: 14px; border-bottom: 2px solid #000; padding-bottom: 10px;">
+          <h3 style="margin: 0; font-size: 13px; text-transform: uppercase;">PEMERINTAH PROVINSI LAMPUNG</h3>
+          <h2 style="margin: 3px 0; font-size: 15px; text-transform: uppercase;">BADAN PERENCANAAN PEMBANGUNAN DAERAH</h2>
+          <div style="font-size: 10.5px;">Jl. Wolter Monginsidi No. 224 Telukbetung, Bandar Lampung</div>
+        </div>
+        ${printArea.innerHTML}
+        <div style="margin-top: 20px; font-size: 10px; color: #555; text-align: center; border-top: 1px dashed #ccc; padding-top: 8px;">
+          Dicetak otomatis oleh Sistem Informasi Perencanaan Kompetensi ASN (SIP-KOMPETENSI) Bappeda Provinsi Lampung pada ${new Date().toLocaleString('id-ID')}
+        </div>
+        <script>
+          setTimeout(() => { window.print(); window.close(); }, 300);
+        </script>
+      </body>
+      </html>
+    `);
+    printWindow.document.close();
+  },
+
+  // =========================================================================
+  // FITUR FUNGSIONAL 2: ONBOARDING GUIDED TOUR INTERAKTIF (4 LANGKAH)
+  // =========================================================================
+  currentTourStep: 1,
+
+  openOnboardingTour() {
+    this.setTourStep(1);
+    this.openModal('asnOnboardingTourModal');
+  },
+
+  setTourStep(step) {
+    this.currentTourStep = Math.max(1, Math.min(4, Number(step)));
+    for (let i = 1; i <= 4; i++) {
+      const slide = document.getElementById(`tourSlide${i}`);
+      const dot = document.getElementById(`tourStepDot${i}`);
+      if (slide) slide.style.display = (i === this.currentTourStep) ? 'block' : 'none';
+      if (dot) {
+        if (i === this.currentTourStep) {
+          dot.style.background = '#2563eb';
+          dot.style.color = '#ffffff';
+        } else if (i < this.currentTourStep) {
+          dot.style.background = '#16a34a';
+          dot.style.color = '#ffffff';
+        } else {
+          dot.style.background = '#e2e8f0';
+          dot.style.color = '#64748b';
+        }
+      }
+    }
+    const prevBtn = document.getElementById('btnTourPrev');
+    const nextBtn = document.getElementById('btnTourNext');
+    const finishBtn = document.getElementById('btnTourFinish');
+    if (prevBtn) prevBtn.style.display = (this.currentTourStep > 1) ? 'inline-block' : 'none';
+    if (nextBtn) nextBtn.style.display = (this.currentTourStep < 4) ? 'inline-block' : 'none';
+    if (finishBtn) finishBtn.style.display = (this.currentTourStep === 4) ? 'inline-block' : 'none';
+    renderAllIcons();
+  },
+
+  nextTourStep() {
+    if (this.currentTourStep < 4) {
+      this.setTourStep(this.currentTourStep + 1);
+    }
+  },
+
+  prevTourStep() {
+    if (this.currentTourStep > 1) {
+      this.setTourStep(this.currentTourStep - 1);
+    }
+  },
+
+  // =========================================================================
+  // FITUR FUNGSIONAL 3: KALKULATOR EFISIENSI ANGGARAN APBD (COST AVOIDANCE)
+  // =========================================================================
+  recalculateBudgetEfficiency(elearningRatio = 75) {
+    const ratio = Math.max(0, Math.min(100, Number(elearningRatio)));
+    const valEl = document.getElementById('sliderElearningVal');
+    if (valEl) valEl.textContent = `${ratio}%`;
+
+    const units = [
+      { name: 'Sekretariat Bappeda', count: 26 },
+      { name: 'Bidang Perencanaan Makro & Evaluasi Pembangunan', count: 9 },
+      { name: 'Bidang Perekonomian & Sumber Daya Alam', count: 19 },
+      { name: 'Bidang Infrastruktur & Kewilayahan', count: 9 },
+      { name: 'Bidang Pemerintahan & Pembangunan Manusia', count: 28 },
+      { name: 'UPTD Pusat Data & Informasi Pembangunan', count: 7 },
+      { name: 'Pimpinan Tinggi Pratama', count: 1 }
+    ];
+
+    const costPerAsn = 5000000; // Rp 5.000.000 (Klasikal luar daerah)
+    let totalKlasikal = 0;
+    let totalHybrid = 0;
+    let totalSavings = 0;
+
+    const rows = units.map(u => {
+      const klasikalFull = u.count * costPerAsn;
+      // Porsi e-learning gratis (Rp 0), porsi tatap muka sisanya
+      const tatapMukaCount = Math.round(u.count * (1 - ratio / 100));
+      const hybridCost = tatapMukaCount * costPerAsn;
+      const savings = klasikalFull - hybridCost;
+
+      totalKlasikal += klasikalFull;
+      totalHybrid += hybridCost;
+      totalSavings += savings;
+
+      return `
+        <tr>
+          <td style="font-weight: 650; color: var(--color-text-primary);">${u.name}</td>
+          <td style="text-align: center; font-weight: 700;">${u.count} ASN</td>
+          <td style="text-align: right; font-family: monospace;">Rp ${klasikalFull.toLocaleString('id-ID')}</td>
+          <td style="text-align: right; font-family: monospace; font-weight: 700; color: #1e3a8a;">Rp ${hybridCost.toLocaleString('id-ID')}</td>
+          <td style="text-align: right; font-family: monospace; font-weight: 800; color: #059669;">Rp ${savings.toLocaleString('id-ID')}</td>
+          <td style="text-align: center;">
+            <span class="badge badge-success" style="font-size: 10px;">${ratio}% MOOC</span>
+          </td>
+        </tr>
+      `;
+    }).join('');
+
+    const netSavingsEl = document.getElementById('calcNetSavingsText');
+    const netPctEl = document.getElementById('calcNetPctText');
+    const tbody = document.getElementById('budgetEfficiencyTableBody');
+
+    if (netSavingsEl) netSavingsEl.textContent = `Rp ${totalSavings.toLocaleString('id-ID')}`;
+    if (netPctEl) {
+      const pct = totalKlasikal > 0 ? ((totalSavings / totalKlasikal) * 100).toFixed(1) : 0;
+      netPctEl.textContent = `${pct}% Penghematan Anggaran Belanja`;
+    }
+    if (tbody) tbody.innerHTML = rows;
   }
 };
 

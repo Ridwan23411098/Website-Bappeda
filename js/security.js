@@ -235,3 +235,4 @@ const SecurityService = {
 if (typeof window !== 'undefined') {
   window.SecurityService = SecurityService;
 }
+
