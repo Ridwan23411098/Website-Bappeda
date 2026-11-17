@@ -6399,7 +6399,7 @@ const App = {
   },
 
   switchSopTab(tabName) {
-    const tabs = ['pegawai', 'admin', 'pimpinan', 'akun'];
+    const tabs = ['pegawai', 'admin', 'pimpinan', 'akun', 'se'];
     tabs.forEach(t => {
       const cap = t.charAt(0).toUpperCase() + t.slice(1);
       const btn = document.getElementById(`sopTab${cap}`);

@@ -5109,6 +5109,9 @@
         <button class="tab-btn" id="sopTabAkun" onclick="App.switchSopTab('akun')">
           <span data-icon="Key" data-icon-size="14"></span> 4. Kredensial Uji Coba
         </button>
+        <button class="tab-btn" id="sopTabSe" onclick="App.switchSopTab('se')">
+          <span data-icon="FileText" data-icon-size="14"></span> 5. Surat Edaran (SE Resmi)
+        </button>
       </div>
 
       <!-- Isi Panduan Berdasarkan Tab -->
@@ -5335,13 +5338,82 @@
           </div>
         </div>
 
+        <!-- PANE 5: SURAT EDARAN (SE) RESMI KEPALA BAPPEDA -->
+        <div id="sopPaneSe" style="display: none;">
+          <div style="background: #ffffff; color: #0f172a; border: 1px solid #cbd5e1; border-radius: 8px; padding: 24px; box-shadow: 0 4px 12px rgba(0,0,0,0.06); font-family: 'Times New Roman', Times, serif;">
+            <!-- Kop Mini SE -->
+            <div style="text-align: center; border-bottom: 2.5px double #0b2545; padding-bottom: 10px; margin-bottom: 16px;">
+              <div style="font-family: Arial, sans-serif; font-size: 13px; font-weight: 700; color: #0b2545; text-transform: uppercase;">PEMERINTAH PROVINSI LAMPUNG</div>
+              <div style="font-family: Arial, sans-serif; font-size: 16px; font-weight: 900; color: #0b2545; text-transform: uppercase;">BADAN PERENCANAAN PEMBANGUNAN DAERAH</div>
+              <div style="font-family: Arial, sans-serif; font-size: 9.5px; color: #475569; margin-top: 2px;">Jalan Wolter Monginsidi Nomor 224 Telukbetung, Bandar Lampung Kode Pos 35215</div>
+            </div>
+
+            <!-- Judul SE -->
+            <div style="text-align: center; margin-bottom: 16px;">
+              <h3 style="font-size: 14px; font-weight: 800; margin: 0; text-transform: uppercase; color: #0b2545; text-decoration: underline;">SURAT EDARAN</h3>
+              <div style="font-size: 11px; font-weight: 700; color: #334155; margin-top: 2px; font-family: Arial, sans-serif;">NOMOR: 800.1.1 / 0481 / VI.01 / BAPPEDA / 2026</div>
+              <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; margin-top: 6px; line-height: 1.4; color: #1e3a8a; font-family: Arial, sans-serif;">
+                TENTANG PENERAPAN SISTEM INFORMASI PERENCANAAN PENGEMBANGAN KOMPETENSI ASN (SIP-KOMPETENSI) DAN KEWAJIBAN PEMENUHAN MINIMAL 20 JAM PELAJARAN (JP) PENGEMBANGAN KOMPETENSI BAGI APARATUR SIPIL NEGARA DI LINGKUNGAN BAPPEDA PROVINSI LAMPUNG TA 2026
+              </div>
+            </div>
+
+            <!-- Ringkasan Diktum Inti -->
+            <div style="font-family: system-ui, sans-serif; font-size: 12px; line-height: 1.6; color: #1e293b; margin-bottom: 18px;">
+              <div style="background: #eff6ff; border-left: 4px solid #2563eb; padding: 10px 14px; border-radius: 4px; margin-bottom: 12px;">
+                <b>Diktum Wajib:</b> Setiap Pegawai ASN Bappeda Provinsi Lampung wajib menyusun rencana IDP minimal <b>20 Jam Pelajaran (JP)</b> untuk TA 2026 melalui aplikasi SIP-KOMPETENSI paling lambat <b>31 Maret 2026</b>.
+              </div>
+
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px;">
+                <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 10px 12px;">
+                  <b style="color: #1e3a8a; font-size: 11.5px;">1. Alur Persetujuan 3 Tingkat:</b>
+                  <ol style="margin: 4px 0 0 16px; padding: 0; font-size: 11px; color: #475569;">
+                    <li>Review Atasan Langsung (Kasubbag / Kabid) - SLA 3 Hari</li>
+                    <li>Validasi Subbag SDM (Kecukupan 20 JP & Akreditasi)</li>
+                    <li>Pengesahan TTE Kepala Badan (Dr. Anang Risgiyanto)</li>
+                  </ol>
+                </div>
+                <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 10px 12px;">
+                  <b style="color: #166534; font-size: 11.5px;">2. Bukti Sah & Keterkaitan SKP:</b>
+                  <ul style="margin: 4px 0 0 16px; padding: 0; font-size: 11px; color: #475569;">
+                    <li>Wajib menyimpan Resi Pendaftaran Elektronik ber-QR</li>
+                    <li>Pemanfaatan E-Learning MOOC (Efisiensi Belanja APBD)</li>
+                    <li>Komponen penilaian perilaku kerja & pola karier ASN</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            <!-- Tanda Tangan Digital Kepala Bappeda -->
+            <div style="display: flex; justify-content: flex-end; font-family: Arial, sans-serif;">
+              <div style="text-align: center; width: 260px;">
+                <div style="font-size: 11px; color: #475569;">Bandar Lampung, 17 November 2026</div>
+                <div style="font-weight: 750; color: #0b2545; font-size: 11px; text-transform: uppercase; margin-top: 2px;">KEPALA BAPPEDA PROVINSI LAMPUNG</div>
+                <div style="margin: 6px auto; padding: 4px; border: 1px solid #0b2545; border-radius: 6px; display: inline-block; background: #f8fafc;">
+                  <div style="font-size: 8px; color: #1e3a8a; font-weight: 700;">🔒 TTE TERSERTIFIKASI BSrE BSSN</div>
+                  <img src="https://api.qrserver.com/v1/create-qr-code/?size=90x90&data=TTE_BSRE_SE_KEPALA_BAPPEDA_800.1.1_0481_2026_ANANG_RISGIYANTO" alt="QR TTE" style="width: 58px; height: 58px; display: block; margin: 0 auto;">
+                </div>
+                <div style="font-weight: 800; color: #0b2545; font-size: 11.5px; border-bottom: 1.5px solid #0b2545; display: inline-block; padding-bottom: 2px; text-decoration: none !important;">
+                  Dr. ANANG RISGIYANTO, S.K.M., M.Kes.
+                </div>
+                <div style="color: #334155; font-size: 9.5px; font-weight: 650; margin-top: 2px;">Pembina Utama Madya (IV/d)</div>
+                <div style="color: #475569; font-size: 9.5px;">NIP. 19750731 200003 1 002</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
       </div>
 
       <!-- Modal Footer -->
-      <div class="modal-footer" style="display: flex; justify-content: space-between; align-items: center; padding: 14px 24px; border-top: 1px solid var(--color-border); background: var(--color-surface); flex-shrink: 0;">
-        <button class="btn btn-outline" onclick="ExportService.printOfficialSop()" title="Cetak Dokumen Resmi Format A4 Berkop Lambang Lampung">
-          <span data-icon="Printer" data-icon-size="15"></span> Cetak SOP Resmi Bappeda (A4 Berkop)
-        </button>
+      <div class="modal-footer" style="display: flex; justify-content: space-between; align-items: center; padding: 14px 24px; border-top: 1px solid var(--color-border); background: var(--color-surface); flex-shrink: 0; flex-wrap: wrap; gap: 8px;">
+        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+          <button class="btn btn-outline" onclick="ExportService.printSuratEdaran()" title="Cetak Surat Edaran Resmi Kepala Bappeda (A4 Berkop Lampung)" style="color: #0b2545; border-color: #0b2545; font-weight: 650;">
+            <span data-icon="FileText" data-icon-size="15"></span> Cetak Surat Edaran (SE Resmi)
+          </button>
+          <button class="btn btn-outline" onclick="ExportService.printOfficialSop()" title="Cetak Dokumen Resmi Format A4 Berkop Lambang Lampung">
+            <span data-icon="Printer" data-icon-size="15"></span> Cetak SOP Resmi Bappeda
+          </button>
+        </div>
         <button class="btn btn-primary" onclick="App.closeModal('sopGuideModal')">
           Tutup Panduan
         </button>
@@ -6424,9 +6496,9 @@
   <script src="js/icons.js?v=20261014_v16"></script>
   <script src="js/charts.js?v=20261008_fix"></script>
   <script src="js/bappeda_data.js?v=20261029_v56"></script>
-  <script src="js/store.js?v=20261117_feat_v22"></script>
-  <script src="js/export.js?v=20261029_v56"></script>
-  <script src="js/app.js?v=20261117_feat_v22"></script>
+  <script src="js/store.js?v=20261117_se_v23"></script>
+  <script src="js/export.js?v=20261117_se_v23"></script>
+  <script src="js/app.js?v=20261117_se_v23"></script>
 </body>
 
 </html>

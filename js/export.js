@@ -1572,6 +1572,128 @@ const ExportService = {
   },
 
   /**
+   * Cetak Naskah Dinas Resmi: Surat Edaran (SE) Kepala Bappeda Provinsi Lampung
+   * Nomor: 800.1.1/0481/VI.01/BAPPEDA/2026
+   */
+  printSuratEdaran() {
+    const kopHtml = typeof LambangLampung !== 'undefined' ? LambangLampung.getKopSuratHtml() : '';
+    const now = new Date();
+    const months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+    const tanggalSurat = `${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}`;
+    const docRegNo = `800.1.1/0481/VI.01/BAPPEDA/2026`;
+
+    let printContainer = document.getElementById('officialPrintContainer');
+    if (!printContainer) {
+      printContainer = document.createElement('div');
+      printContainer.id = 'officialPrintContainer';
+      document.body.appendChild(printContainer);
+    }
+
+    printContainer.innerHTML = `
+      <div class="official-print-paper" style="font-family: 'Times New Roman', Times, serif; color: #000; line-height: 1.45; font-size: 10pt; padding: 20px 28px;">
+        ${kopHtml}
+
+        <!-- JUDUL SURAT EDARAN -->
+        <div style="text-align: center; margin: 14px 0 16px;">
+          <h2 style="font-size: 12.5pt; font-weight: 750; text-transform: uppercase; margin: 0; text-decoration: underline; letter-spacing: 0.5px;">
+            SURAT EDARAN
+          </h2>
+          <div style="font-size: 10pt; font-weight: 700; margin-top: 3px; font-family: Arial, sans-serif;">
+            NOMOR: ${docRegNo}
+          </div>
+          <div style="font-size: 10pt; font-weight: 750; text-transform: uppercase; margin-top: 6px; line-height: 1.35; max-width: 90%; margin-left: auto; margin-right: auto; font-family: Arial, sans-serif;">
+            TENTANG PENERAPAN SISTEM INFORMASI PERENCANAAN PENGEMBANGAN KOMPETENSI ASN (SIP-KOMPETENSI) DAN KEWAJIBAN PEMENUHAN MINIMAL 20 JAM PELAJARAN (JP) PENGEMBANGAN KOMPETENSI BAGI APARATUR SIPIL NEGARA DI LINGKUNGAN BAPPEDA PROVINSI LAMPUNG TAHUN ANGGARAN 2026
+          </div>
+        </div>
+
+        <!-- A. LATAR BELAKANG -->
+        <div style="margin-bottom: 10px;">
+          <div style="font-weight: 750;">A. LATAR BELAKANG</div>
+          <div style="text-align: justify; padding-left: 18px; margin-top: 4px; font-size: 9.5pt;">
+            Berdasarkan Pasal 49 Undang-Undang Nomor 20 Tahun 2023 tentang Aparatur Sipil Negara, setiap Pegawai ASN memiliki hak dan kewajiban mengembangkan kompetensi paling sedikit 20 (dua puluh) Jam Pelajaran (JP) per tahun. Sejalan dengan Perpres No. 95 Tahun 2018 tentang SPBE dan PermenPAN-RB No. 6 Tahun 2022, Bappeda Provinsi Lampung menerapkan platform digital <b>SIP-KOMPETENSI</b> untuk memastikan tertib administrasi, transparansi, efisiensi belanja APBD, dan keselarasan IKU Renstra 2026.
+          </div>
+        </div>
+
+        <!-- B. MAKSUD DAN TUJUAN -->
+        <div style="margin-bottom: 10px;">
+          <div style="font-weight: 750;">B. MAKSUD DAN TUJUAN</div>
+          <div style="text-align: justify; padding-left: 18px; margin-top: 4px; font-size: 9.5pt;">
+            Menjadi pedoman yuridis operasional bagi seluruh 99 ASN Bappeda Provinsi Lampung dalam menyusun, mengajukan, dan memverifikasi Rencana Pengembangan Individu (IDP) guna mengeliminasi kesenjangan kompetensi dan mewujudkan sistem merit.
+          </div>
+        </div>
+
+        <!-- C. KETENTUAN PELAKSANAAN -->
+        <div style="margin-bottom: 10px;">
+          <div style="font-weight: 750;">C. KETENTUAN DAN INSTRUKSI PELAKSANAAN</div>
+          <ol style="margin: 4px 0 0 18px; padding-left: 14px; font-size: 9.5pt; text-align: justify;">
+            <li><b>Kewajiban Beban Belajar Minimal 20 JP</b>: Seluruh Pejabat Administrator, Pengawas, Fungsional, dan Pelaksana wajib menyusun rencana IDP minimal 20 JP untuk TA 2026 melalui aplikasi SIP-KOMPETENSI.</li>
+            <li><b>Alur Persetujuan Berjenjang 3 Tingkat</b>:
+              <ul style="margin: 2px 0; padding-left: 16px;">
+                <li><i>Tahap 1</i>: Atasan Langsung (Kasubbag / Kabid) menelaah keselarasan IKU Bidang (SLA maksimal 3 hari kerja).</li>
+                <li><i>Tahap 2</i>: Subbag Umum & Kepegawaian memvalidasi kelayakan JP, akreditasi, dan estimasi biaya APBD.</li>
+                <li><i>Tahap 3</i>: Kepala Bappeda mengesahkan secara institusional dengan Tanda Tangan Elektronik (TTE) BSrE BSSN.</li>
+              </ul>
+            </li>
+            <li><b>Bukti Registrasi Sah</b>: Setiap ASN wajib mengunduh atau mencetak Tanda Terima Pendaftaran IDP Elektronik ber-QR Code sah dan SHA-256 Digest.</li>
+            <li><b>Batas Waktu (*Deadline*)</b>: Penyerahan usulan IDP TA 2026 wajib diselesaikan paling lambat tanggal <b>31 Maret 2026 pukul 23.59 WIB</b>.</li>
+            <li><b>Keterkaitan Kinerja SKP</b>: Pemenuhan target IDP dan evaluasi Level 3 Kirkpatrick menjadi syarat rekomendasi kenaikan pangkat dan penempatan Talent Pool suksesi jabatan.</li>
+          </ol>
+        </div>
+
+        <!-- D. PENUTUP & TANDA TANGAN KEPALA BADAN -->
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-top: 20px; page-break-inside: avoid;">
+          <div style="width: 48%; font-size: 9pt;">
+            <div style="font-weight: 750;">Tembusan Yth:</div>
+            <ol style="margin: 2px 0 0 16px; padding: 0;">
+              <li>Gubernur Lampung (sebagai laporan);</li>
+              <li>Sekretaris Daerah Provinsi Lampung;</li>
+              <li>Inspektur Provinsi Lampung;</li>
+              <li>Kepala BKD Provinsi Lampung;</li>
+              <li>Kepala Dinas Kominfotik Provinsi Lampung;</li>
+              <li>Arsip.</li>
+            </ol>
+          </div>
+
+          <div style="width: 48%; text-align: center; font-size: 9.5pt;">
+            <div>Ditetapkan di Bandar Lampung</div>
+            <div>pada tanggal ${tanggalSurat}</div>
+            <div style="font-weight: 750; margin-top: 3px; text-transform: uppercase;">
+              KEPALA BADAN PERENCANAAN PEMBANGUNAN DAERAH<br>PROVINSI LAMPUNG
+            </div>
+            
+            <div style="margin: 8px auto; padding: 4px; border: 1.2px solid #0b2545; border-radius: 6px; display: inline-block; background: #f8fafc;">
+              <div style="font-size: 8px; color: #1e3a8a; font-weight: 750;">🔒 TTE TERSERTIFIKASI BSrE BSSN</div>
+              <img src="https://api.qrserver.com/v1/create-qr-code/?size=90x90&data=TTE_BSRE_SE_KEPALA_BAPPEDA_800.1.1_0481_2026_ANANG_RISGIYANTO" alt="QR TTE" style="width: 62px; height: 62px; display: block; margin: 0 auto;">
+              <div style="font-size: 7.5px; color: #64748b; margin-top: 2px;">Integritas Terjamin UU ITE</div>
+            </div>
+
+            <div style="font-weight: 800; font-size: 10.5pt; color: #0b2545; border-bottom: 1.5px solid #0b2545; display: inline-block; padding-bottom: 2px; text-decoration: none !important;">
+              Dr. ANANG RISGIYANTO, S.K.M., M.Kes.
+            </div>
+            <div style="font-size: 9pt; margin-top: 2px;">Pembina Utama Madya (IV/d)</div>
+            <div style="font-size: 9pt;">NIP. 19750731 200003 1 002</div>
+          </div>
+        </div>
+      </div>
+    `;
+
+    this.closePrintDialog();
+
+    let styleEl = document.getElementById('dynamicPrintStyle');
+    if (!styleEl) {
+      styleEl = document.createElement('style');
+      styleEl.id = 'dynamicPrintStyle';
+      document.head.appendChild(styleEl);
+    }
+    styleEl.textContent = `@media print { @page { size: portrait; margin: 10mm 12mm 12mm 12mm; } }`;
+
+    document.body.insertBefore(printContainer, document.body.firstChild);
+    setTimeout(() => {
+      window.print();
+    }, 150);
+  },
+
+  /**
    * =========================================================================
    * TAHAP 4: EKSPOR REKAP BUKU LOG PEMBINAAN & DIALOG KINERJA EXCEL
    * Sesuai regulasi PermenPAN-RB No. 6 Tahun 2022
