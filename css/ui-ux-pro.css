@@ -51,6 +51,9 @@
   --pro-shadow-card-hover: 0 12px 30px -4px rgba(15, 30, 63, 0.12), 0 4px 10px -2px rgba(15, 30, 63, 0.05);
   --pro-shadow-lg: 0 20px 40px -8px rgba(15, 30, 63, 0.18);
   --pro-shadow-login: 0 25px 60px -12px rgba(10, 30, 63, 0.22), 0 0 0 1px rgba(226, 232, 240, 0.8);
+
+  /* Radii */
+  --pro-radius-pill: 9999px;
 }
 
 /* ==========================================================================
@@ -806,8 +809,8 @@ body {
   display: inline-flex !important;
   align-items: center !important;
   gap: 5px !important;
-  padding: 4px 10px !important;
-  border-radius: var(--pro-radius-pill) !important;
+  padding: 4px 12px !important;
+  border-radius: var(--pro-radius-pill, 9999px) !important;
   font-size: 11px !important;
   font-weight: 700 !important;
   letter-spacing: 0.02em !important;
