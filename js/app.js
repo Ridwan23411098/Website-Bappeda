@@ -4567,21 +4567,37 @@ const App = {
       App.toast('Gagal membuka jendela cetak. Izinkan pop-up pada browser.', 'error');
       return;
     }
+    const baseHref = window.location.origin + window.location.pathname.replace(/[^/]*$/, '');
     printWindow.document.write(`
       <!DOCTYPE html>
       <html>
       <head>
+        <base href="${baseHref}">
         <title>${this.currentPdfDocData?.filename || 'Sertifikat_Bappeda'}</title>
         <style>
-          @page { size: A4 landscape; margin: 8mm; }
-          body { margin: 0; padding: 10px; font-family: 'Times New Roman', serif; background: white; }
-          .certificate-paper { max-width: 100% !important; box-shadow: none !important; border: 8px double #1e3a8a !important; }
+          @page { margin: 8mm; }
+          * { box-sizing: border-box; }
+          body { margin: 0; padding: 0; font-family: 'Times New Roman', serif; background: white; width: 100%; }
+          .certificate-paper {
+            width: 100% !important;
+            max-width: 100% !important;
+            min-width: 0 !important;
+            box-shadow: none !important;
+            border: 8px double #1e3a8a !important;
+            margin: 0 !important;
+          }
+          @media print and (orientation: portrait) {
+            .certificate-paper { padding: 22px 24px !important; }
+          }
+          @media print and (orientation: landscape) {
+            .certificate-paper { padding: 26px 40px !important; }
+          }
         </style>
       </head>
       <body>
         ${content.innerHTML}
         <script>
-          window.onload = function() { window.print(); window.close(); }
+          window.onload = function() { setTimeout(function() { window.print(); }, 250); }
         </script>
       </body>
       </html>
@@ -7724,33 +7740,49 @@ const App = {
   printIdpFilingReceipt() {
     const printArea = document.getElementById('idpFilingReceiptPrintArea');
     if (!printArea) return;
-    const printWindow = window.open('', '_blank', 'width=700,height=600');
+    const printWindow = window.open('', '_blank', 'width=850,height=700');
     if (!printWindow) {
+      if (typeof ExportService !== 'undefined' && ExportService.applyFlexiblePrintPageStyle) {
+        ExportService.applyFlexiblePrintPageStyle('10mm 12mm 12mm 12mm');
+      }
       window.print();
       return;
     }
+    const baseHref = window.location.origin + window.location.pathname.replace(/[^/]*$/, '');
+    const kopHtml = (typeof LambangLampung !== 'undefined' && LambangLampung.getKopSuratHtml)
+      ? LambangLampung.getKopSuratHtml()
+      : `
+        <div style="text-align: center; margin-bottom: 14px; border-bottom: 3px double #0b2545; padding-bottom: 10px;">
+          <h3 style="margin: 0; font-size: 13px; text-transform: uppercase; color: #0b2545;">PEMERINTAH PROVINSI LAMPUNG</h3>
+          <h2 style="margin: 3px 0; font-size: 15px; text-transform: uppercase; color: #0b2545;">BADAN PERENCANAAN PEMBANGUNAN DAERAH</h2>
+          <div style="font-size: 10.5px; color: #334155;">Jalan Wolter Monginsidi Nomor 224 Telukbetung, Bandar Lampung Kode Pos 35215</div>
+        </div>
+      `;
     printWindow.document.write(`
       <!DOCTYPE html>
       <html>
       <head>
+        <base href="${baseHref}">
         <title>Tanda Terima Elektronik IDP 2026 - Bappeda Provinsi Lampung</title>
         <style>
-          body { font-family: system-ui, -apple-system, sans-serif; padding: 24px; color: #000; background: #fff; }
-          @media print { body { padding: 0; } }
+          @page { margin: 10mm 12mm; }
+          * { box-sizing: border-box; }
+          body { font-family: system-ui, -apple-system, sans-serif; padding: 20px; color: #000; background: #fff; width: 100%; margin: 0; }
+          @media print { body { padding: 0; width: 100%; } }
         </style>
       </head>
       <body>
-        <div style="text-align: center; margin-bottom: 14px; border-bottom: 2px solid #000; padding-bottom: 10px;">
-          <h3 style="margin: 0; font-size: 13px; text-transform: uppercase;">PEMERINTAH PROVINSI LAMPUNG</h3>
-          <h2 style="margin: 3px 0; font-size: 15px; text-transform: uppercase;">BADAN PERENCANAAN PEMBANGUNAN DAERAH</h2>
-          <div style="font-size: 10.5px;">Jl. Wolter Monginsidi No. 224 Telukbetung, Bandar Lampung</div>
+        ${kopHtml}
+        <div style="text-align: center; margin-bottom: 14px;">
+          <h3 style="margin: 0; font-size: 14px; font-weight: 800; color: #0b2545; text-decoration: underline;">TANDA TERIMA ELEKTRONIK PENYERAHAN DOKUMEN IDP</h3>
+          <div style="font-size: 11px; color: #475569; margin-top: 2px;">Sistem Informasi Perencanaan Kompetensi ASN — Tahun Anggaran 2026</div>
         </div>
         ${printArea.innerHTML}
         <div style="margin-top: 20px; font-size: 10px; color: #555; text-align: center; border-top: 1px dashed #ccc; padding-top: 8px;">
           Dicetak otomatis oleh Sistem Informasi Perencanaan Kompetensi ASN (SIP-KOMPETENSI) Bappeda Provinsi Lampung pada ${new Date().toLocaleString('id-ID')}
         </div>
         <script>
-          setTimeout(() => { window.print(); window.close(); }, 300);
+          window.onload = function() { setTimeout(() => { window.print(); }, 300); };
         </script>
       </body>
       </html>

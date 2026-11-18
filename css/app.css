@@ -3084,13 +3084,60 @@ a {
     background: #FFFFFF !important;
     color: #000000 !important;
     font-family: 'Inter', Arial, sans-serif !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
     margin: 0 !important;
     padding: 0 !important;
   }
 
-  /* @page TANPA size — biarkan browser yang kontrol Potret/Lanskap */
+  .official-print-paper table {
+    width: 100% !important;
+    max-width: 100% !important;
+    border-collapse: collapse !important;
+  }
+
+  .official-print-paper .kop-surat-resmi {
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  /* @page TANPA size — biarkan browser (Potret / Lanskap) mengontrol orientasi secara penuh */
   @page {
-    margin: 15mm 15mm 20mm 15mm;
+    margin: 10mm 12mm 12mm 12mm;
+  }
+}
+
+/* Penyesuaian proporsi surat otomatis saat memilih POTRET pada dialog cetak */
+@media print and (orientation: portrait) {
+  .official-print-paper {
+    font-size: 9.5pt !important;
+  }
+  .official-print-paper .kop-prov {
+    font-size: 13px !important;
+  }
+  .official-print-paper .kop-dinas {
+    font-size: 16px !important;
+  }
+  .official-print-paper .kop-alamat {
+    font-size: 9.5px !important;
+  }
+}
+
+/* Penyesuaian proporsi surat otomatis saat memilih LANSKAP pada dialog cetak */
+@media print and (orientation: landscape) {
+  .official-print-paper {
+    font-size: 10.5pt !important;
+  }
+  .official-print-paper .kop-prov {
+    font-size: 15px !important;
+  }
+  .official-print-paper .kop-dinas {
+    font-size: 19px !important;
+  }
+  .official-print-paper .kop-alamat {
+    font-size: 10.5px !important;
   }
 }
 

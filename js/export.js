@@ -505,7 +505,7 @@ const ExportService = {
           </button>
         </div>
         <div style="font-size: 11.5px; color: var(--color-text-secondary); background: rgba(47, 128, 237, 0.08); border-left: 3px solid var(--color-primary); padding: 10px 14px; border-radius: 6px; margin-bottom: 20px; line-height: 1.45;">
-          💡 <b>Cara Simpan ke File PDF:</b> Pada jendela cetak browser yang muncul, ubah pilihan <b>Tujuan / Printer</b> menjadi <b>"Simpan sebagai PDF" (Save as PDF)</b> lalu klik <b>Simpan</b>.
+          💡 <b>Orientasi Fleksibel &amp; Simpan PDF:</b> Pada jendela cetak browser, Anda dapat langsung memilih <b>Tata letak: Potret / Lanskap</b> dan halaman surat akan otomatis menyesuaikan. Untuk menyimpan file PDF, pilih Printer <b>"Simpan sebagai PDF"</b>.
         </div>
         <div class="print-dialog-actions" style="display: flex; justify-content: flex-end; gap: 10px;">
           <button class="btn btn-outline" onclick="ExportService.closePrintDialog()">Batal</button>
@@ -537,6 +537,21 @@ const ExportService = {
   closePrintDialog() {
     const d = document.getElementById('printOrientDialog');
     if (d) d.remove();
+  },
+
+  /**
+   * Menerapkan margin cetak TANPA mengunci properti @page size (portrait/landscape),
+   * sehingga tombol Potret / Lanskap di jendela cetak browser (Chrome/Edge/Firefox)
+   * langsung mengubah orientasi seluruh surat secara instan & responsif.
+   */
+  applyFlexiblePrintPageStyle(marginSpec = '10mm 12mm 12mm 12mm') {
+    let styleEl = document.getElementById('dynamicPrintStyle');
+    if (!styleEl) {
+      styleEl = document.createElement('style');
+      styleEl.id = 'dynamicPrintStyle';
+      document.head.appendChild(styleEl);
+    }
+    styleEl.textContent = `@media print { @page { margin: ${marginSpec}; } }`;
   },
 
   /**
@@ -846,19 +861,7 @@ const ExportService = {
     this.closePrintDialog();
 
     // Inject style @page dinamis sesuai orientasi pilihan
-    const orient = ExportService._printOrientation || 'portrait';
-    let styleEl = document.getElementById('dynamicPrintStyle');
-    if (!styleEl) {
-      styleEl = document.createElement('style');
-      styleEl.id = 'dynamicPrintStyle';
-      document.head.appendChild(styleEl);
-    }
-
-    if (orient === 'landscape') {
-       styleEl.textContent = `@media print { @page { size: landscape; margin: 8mm 10mm 10mm 10mm; } }`;
-    } else {
-       styleEl.textContent = `@media print { @page { size: portrait; margin: 8mm 10mm 10mm 10mm; } }`;
-    }
+    this.applyFlexiblePrintPageStyle('8mm 10mm 10mm 10mm');
 
     // Pastikan print container adalah element pertama di body agar mulai dari halaman 1
     document.body.insertBefore(printContainer, document.body.firstChild);
@@ -1169,19 +1172,7 @@ const ExportService = {
     printContainer.innerHTML = this.getDiagnosticReportHtml();
     this.closePrintDialog();
 
-    const orient = ExportService._printOrientation || 'portrait';
-    let styleEl = document.getElementById('dynamicPrintStyle');
-    if (!styleEl) {
-      styleEl = document.createElement('style');
-      styleEl.id = 'dynamicPrintStyle';
-      document.head.appendChild(styleEl);
-    }
-
-    if (orient === 'landscape') {
-       styleEl.textContent = `@media print { @page { size: landscape; margin: 8mm 10mm 10mm 10mm; } }`;
-    } else {
-       styleEl.textContent = `@media print { @page { size: portrait; margin: 8mm 10mm 10mm 10mm; } }`;
-    }
+    this.applyFlexiblePrintPageStyle('8mm 10mm 10mm 10mm');
 
     document.body.insertBefore(printContainer, document.body.firstChild);
 
@@ -1375,16 +1366,7 @@ const ExportService = {
 
     this.closePrintDialog();
 
-    const orient = ExportService._printOrientation || 'portrait';
-    let styleEl = document.getElementById('dynamicPrintStyle');
-    if (!styleEl) {
-      styleEl = document.createElement('style');
-      styleEl.id = 'dynamicPrintStyle';
-      document.head.appendChild(styleEl);
-    }
-    styleEl.textContent = orient === 'landscape'
-      ? `@media print { @page { size: landscape; margin: 8mm 10mm 10mm 10mm; } }`
-      : `@media print { @page { size: portrait; margin: 8mm 10mm 10mm 10mm; } }`;
+    this.applyFlexiblePrintPageStyle('8mm 10mm 10mm 10mm');
 
     document.body.insertBefore(printContainer, document.body.firstChild);
     setTimeout(() => {
@@ -1557,13 +1539,7 @@ const ExportService = {
 
     this.closePrintDialog();
 
-    let styleEl = document.getElementById('dynamicPrintStyle');
-    if (!styleEl) {
-      styleEl = document.createElement('style');
-      styleEl.id = 'dynamicPrintStyle';
-      document.head.appendChild(styleEl);
-    }
-    styleEl.textContent = `@media print { @page { size: portrait; margin: 8mm 10mm 10mm 10mm; } }`;
+    this.applyFlexiblePrintPageStyle('8mm 10mm 10mm 10mm');
 
     document.body.insertBefore(printContainer, document.body.firstChild);
     setTimeout(() => {
@@ -1679,13 +1655,7 @@ const ExportService = {
 
     this.closePrintDialog();
 
-    let styleEl = document.getElementById('dynamicPrintStyle');
-    if (!styleEl) {
-      styleEl = document.createElement('style');
-      styleEl.id = 'dynamicPrintStyle';
-      document.head.appendChild(styleEl);
-    }
-    styleEl.textContent = `@media print { @page { size: portrait; margin: 10mm 12mm 12mm 12mm; } }`;
+    this.applyFlexiblePrintPageStyle('10mm 12mm 12mm 12mm');
 
     document.body.insertBefore(printContainer, document.body.firstChild);
     setTimeout(() => {
@@ -1954,13 +1924,7 @@ const ExportService = {
       </div>
     `;
 
-    let styleEl = document.getElementById('dynamicPrintStyle');
-    if (!styleEl) {
-      styleEl = document.createElement('style');
-      styleEl.id = 'dynamicPrintStyle';
-      document.head.appendChild(styleEl);
-    }
-    styleEl.textContent = `@media print { @page { size: portrait; margin: 10mm 12mm 12mm 12mm; } }`;
+    this.applyFlexiblePrintPageStyle('10mm 12mm 12mm 12mm');
 
     document.body.insertBefore(printContainer, document.body.firstChild);
     setTimeout(() => {
@@ -2300,13 +2264,7 @@ const ExportService = {
       </div>
     `;
 
-    let styleEl = document.getElementById('dynamicPrintStyle');
-    if (!styleEl) {
-      styleEl = document.createElement('style');
-      styleEl.id = 'dynamicPrintStyle';
-      document.head.appendChild(styleEl);
-    }
-    styleEl.textContent = `@media print { @page { size: portrait; margin: 10mm 12mm 12mm 12mm; } }`;
+    this.applyFlexiblePrintPageStyle('10mm 12mm 12mm 12mm');
 
     document.body.insertBefore(printContainer, document.body.firstChild);
     setTimeout(() => {
