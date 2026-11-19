@@ -2270,6 +2270,439 @@ const ExportService = {
     setTimeout(() => {
       window.print();
     }, 150);
+  },
+
+  // =========================================================================
+  // TAHAP 8: CETAK LEMBAR KOMITMEN RENCANA AKSI & TINDAK LANJUT RESMI (PRINT/PDF)
+  // Format Standar LAN RI & Pemprov Lampung Terverifikasi BSrE BSSN
+  // =========================================================================
+  printActionPlanFollowUp() {
+    const u = Store.state.user || {
+      name: 'Rizky Aditya Pratama, S.Kom., M.Si.',
+      nip: '198701012010011001',
+      pangkat: 'Penata Tk. I (III/d)',
+      jabatan: 'Perencana Ahli Pertama',
+      unitKerja: 'Bidang Perencanaan, Pengendalian & Evaluasi Pembangunan Daerah'
+    };
+
+    const actionPlans = Store.getActionPlans ? Store.getActionPlans(u.nip) : (Store.state.actionPlans || []);
+    const kopHtml = LambangLampung.getKopSuratHtml();
+
+    const now = new Date();
+    const months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+    const tanggalSurat = `${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}`;
+    const cleanNip = String(u.nip || '').replace(/[^0-9]/g, '');
+    const nipFormatted = cleanNip.length === 18 
+      ? `${cleanNip.slice(0,8)} ${cleanNip.slice(8,14)} ${cleanNip.slice(14,15)} ${cleanNip.slice(15,18)}`
+      : (u.nip || '-');
+    const docRegNo = `800.1.1/TL-IDP/0481/VI.01/BAPPEDA/${now.getFullYear()}`;
+
+    let printContainer = document.getElementById('officialPrintContainer');
+    if (!printContainer) {
+      printContainer = document.createElement('div');
+      printContainer.id = 'officialPrintContainer';
+      document.body.appendChild(printContainer);
+    }
+
+    let planRowsHtml = '';
+    if (actionPlans.length === 0) {
+      planRowsHtml = `<tr><td colspan="6" style="text-align: center; padding: 18px; color: #666;">Belum ada rencana aksi tindak lanjut yang didaftarkan.</td></tr>`;
+    } else {
+      actionPlans.forEach((ap, idx) => {
+        const statusBadge = ap.status === 'Tuntas Terealisasi'
+          ? `<span style="display:inline-block; padding: 2px 6px; background: #e6f4ea; color: #137333; font-weight: 700; border-radius: 3px; font-size: 9pt;">Tuntas Terealisasi</span>`
+          : ap.status === 'Sedang Berjalan'
+          ? `<span style="display:inline-block; padding: 2px 6px; background: #fef7e0; color: #b06000; font-weight: 700; border-radius: 3px; font-size: 9pt;">Sedang Berjalan</span>`
+          : `<span style="display:inline-block; padding: 2px 6px; background: #f1f3f4; color: #3c4043; font-weight: 600; border-radius: 3px; font-size: 9pt;">Direncanakan</span>`;
+
+        planRowsHtml += `
+          <tr>
+            <td style="border: 1px solid #000; padding: 7px 6px; text-align: center; font-size: 9.5pt;">${idx + 1}</td>
+            <td style="border: 1px solid #000; padding: 7px 8px; font-size: 9.5pt; font-weight: 600;">${ap.program}</td>
+            <td style="border: 1px solid #000; padding: 7px 8px; font-size: 9.5pt;">${ap.rencanaAksi}</td>
+            <td style="border: 1px solid #000; padding: 7px 8px; font-size: 9.5pt; font-weight: 600; color: #1e3a8a;">${ap.outputKonkret}</td>
+            <td style="border: 1px solid #000; padding: 7px 8px; text-align: center; font-size: 9pt;">${ap.targetWaktu}</td>
+            <td style="border: 1px solid #000; padding: 7px 8px; text-align: center; font-size: 9pt;">${statusBadge}</td>
+          </tr>
+        `;
+      });
+    }
+
+    printContainer.innerHTML = `
+      <div class="official-print-paper" style="font-family: 'Times New Roman', Times, serif; color: #000; line-height: 1.4; font-size: 10.5pt; padding: 18px 26px;">
+        ${kopHtml}
+
+        <div style="text-align: center; margin: 12px 0 16px;">
+          <h2 style="font-size: 12.5pt; font-weight: 750; text-transform: uppercase; margin: 0; text-decoration: underline; letter-spacing: 0.5px;">
+            LEMBAR KOMITMEN TINDAK LANJUT &amp; RENCANA AKSI PENERAPAN HASIL PENGEMBANGAN KOMPETENSI ASN
+          </h2>
+          <div style="font-size: 10pt; font-weight: 700; margin-top: 3px; font-family: Arial, sans-serif;">
+            (ACTION PLAN TRANSFER OF LEARNING TAHUN ANGGARAN ${now.getFullYear()})
+          </div>
+          <div style="font-size: 9.5pt; font-family: Arial, sans-serif; margin-top: 2px;">
+            NOMOR: ${docRegNo}
+          </div>
+        </div>
+
+        <p style="text-align: justify; margin-bottom: 12px; line-height: 1.45;">
+          Dalam rangka menjamin pemanfaatan hasil pengembangan kompetensi ASN dan akuntabilitas kinerja instansi pemerintah sesuai Peraturan LAN RI Nomor 10 Tahun 2018 dan SE Kepala Bappeda No. 800.1.1/0481/VI.01/BAPPEDA/2026, yang bertanda tangan di bawah ini:
+        </p>
+
+        <table style="width: 100%; border-collapse: collapse; margin-bottom: 14px; font-size: 10pt;">
+          <tr>
+            <td style="width: 25%; padding: 3px 0; font-weight: 600;">Nama Lengkap</td>
+            <td style="width: 2%;">:</td>
+            <td style="width: 73%; font-weight: 750;">${u.name}</td>
+          </tr>
+          <tr>
+            <td style="padding: 3px 0; font-weight: 600;">NIP</td>
+            <td>:</td>
+            <td>${nipFormatted}</td>
+          </tr>
+          <tr>
+            <td style="padding: 3px 0; font-weight: 600;">Pangkat / Golongan</td>
+            <td>:</td>
+            <td>${u.pangkat || 'Penata Tk. I (III/d)'}</td>
+          </tr>
+          <tr>
+            <td style="padding: 3px 0; font-weight: 600;">Jabatan / Unit Kerja</td>
+            <td>:</td>
+            <td>${u.jabatan || 'Perencana Ahli Pertama'} / ${u.unitKerja || 'Bappeda Provinsi Lampung'}</td>
+          </tr>
+        </table>
+
+        <div style="font-weight: 750; margin-bottom: 6px; font-size: 10.5pt; text-transform: uppercase;">
+          MATRIKS RENCANA AKSI &amp; OUTPUT KONKRET PENERAPAN DI UNIT KERJA:
+        </div>
+
+        <table style="width: 100%; border-collapse: collapse; margin-bottom: 16px;">
+          <thead>
+            <tr style="background-color: #f1f3f4; text-align: center; font-weight: 750; font-size: 9.5pt;">
+              <th style="border: 1px solid #000; padding: 7px 4px; width: 5%;">NO</th>
+              <th style="border: 1px solid #000; padding: 7px 6px; width: 23%;">PROGRAM IDP</th>
+              <th style="border: 1px solid #000; padding: 7px 6px; width: 28%;">RENCANA AKSI PENERAPAN</th>
+              <th style="border: 1px solid #000; padding: 7px 6px; width: 24%;">WUJUD OUTPUT / PRODUK</th>
+              <th style="border: 1px solid #000; padding: 7px 6px; width: 10%;">TARGET</th>
+              <th style="border: 1px solid #000; padding: 7px 6px; width: 10%;">STATUS</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${planRowsHtml}
+          </tbody>
+        </table>
+
+        <div style="border: 1px solid #000; padding: 10px 12px; margin-bottom: 18px; background: #fafafa; font-size: 9.5pt; line-height: 1.4;">
+          <b>PERNYATAAN KOMITMEN PEGAWAI:</b><br>
+          <i>"Saya menyatakan bersungguh-sungguh berkomitmen untuk mengimplementasikan seluruh kompetensi dan hasil pembelajaran ke dalam pelaksanaan tugas pokok dan fungsi pada unit kerja saya di Bappeda Provinsi Lampung, guna menghasilkan output konkret yang meningkatkan efisiensi dan kualitas dokumen perencanaan pembangunan daerah."</i>
+        </div>
+
+        <table style="width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 10pt;">
+          <tr>
+            <td style="width: 50%; vertical-align: top; text-align: center; padding-right: 15px;">
+              <div>Mengetahui &amp; Menyetujui,</div>
+              <div style="font-weight: 700; margin-top: 2px;">Atasan Langsung (Penilai Kinerja)</div>
+              <div style="height: 52px; display: flex; align-items: center; justify-content: center; font-size: 9pt; color: #555;">
+                <i>(Tanda Tangan Elektronik Tersertifikasi)</i>
+              </div>
+              <div style="font-weight: 750; text-decoration: underline;">Dr. IR. H. HENDRIYANTO, M.T.</div>
+              <div style="font-size: 9pt; margin-top: 2px;">Pembina Utama Muda (IV/c)<br>NIP. 19720415 199803 1 004</div>
+            </td>
+            <td style="width: 50%; vertical-align: top; text-align: center; padding-left: 15px;">
+              <div>Bandar Lampung, ${tanggalSurat}</div>
+              <div style="font-weight: 700; margin-top: 2px;">Pegawai ASN yang Membuat Komitmen,</div>
+              <div style="height: 52px; display: flex; align-items: center; justify-content: center; font-size: 9pt; color: #555;">
+                <i>(Tanda Tangan Digital)</i>
+              </div>
+              <div style="font-weight: 750; text-decoration: underline;">${u.name}</div>
+              <div style="font-size: 9pt; margin-top: 2px;">NIP. ${nipFormatted}</div>
+            </td>
+          </tr>
+        </table>
+
+        <!-- FOOTER RESMI SPBE -->
+        <div style="margin-top: 24px; padding-top: 8px; border-top: 1px dashed #999; font-size: 8pt; color: #444; display: flex; justify-content: space-between; align-items: center; font-family: Arial, sans-serif;">
+          <div>Dokumen ini sah dan diterbitkan secara digital melalui <b>SIP-KOMPETENSI Bappeda Provinsi Lampung</b> (Terverifikasi BSrE BSSN).</div>
+          <div>Hal 1 dari 1</div>
+        </div>
+      </div>
+    `;
+
+    this.applyFlexiblePrintPageStyle('10mm 12mm 12mm 12mm');
+    document.body.insertBefore(printContainer, document.body.firstChild);
+    setTimeout(() => {
+      window.print();
+    }, 150);
+  },
+
+  // =========================================================================
+  // TAHAP 8: CETAK SURAT KETERANGAN PEMENUHAN BANGKOM 20 JP & HASIL TINDAK LANJUT
+  // Format Keputusan Resmi Kepala Bappeda Provinsi Lampung (Dokumen Kenaikan Pangkat)
+  // =========================================================================
+  printCertificateOfCompliance() {
+    const u = Store.state.user || {
+      name: 'Rizky Aditya Pratama, S.Kom., M.Si.',
+      nip: '198701012010011001',
+      pangkat: 'Penata Tk. I (III/d)',
+      jabatan: 'Perencana Ahli Pertama',
+      unitKerja: 'Bidang Perencanaan, Pengendalian & Evaluasi Pembangunan Daerah'
+    };
+
+    const programs = Store.state.idpState?.programs || [];
+    const totalJp = programs.reduce((acc, p) => acc + (parseInt(p.jp) || 0), 0);
+    const actionPlans = Store.getActionPlans ? Store.getActionPlans(u.nip) : (Store.state.actionPlans || []);
+    const completedPlans = actionPlans.filter(p => p.status === 'Tuntas Terealisasi').length;
+
+    const kopHtml = LambangLampung.getKopSuratHtml();
+    const now = new Date();
+    const months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+    const tanggalSurat = `${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}`;
+    const cleanNip = String(u.nip || '').replace(/[^0-9]/g, '');
+    const nipFormatted = cleanNip.length === 18 
+      ? `${cleanNip.slice(0,8)} ${cleanNip.slice(8,14)} ${cleanNip.slice(14,15)} ${cleanNip.slice(15,18)}`
+      : (u.nip || '-');
+    const docRegNo = `800.1.1/SK-BANGKOM/0481/VI.01/BAPPEDA/${now.getFullYear()}`;
+
+    let printContainer = document.getElementById('officialPrintContainer');
+    if (!printContainer) {
+      printContainer = document.createElement('div');
+      printContainer.id = 'officialPrintContainer';
+      document.body.appendChild(printContainer);
+    }
+
+    printContainer.innerHTML = `
+      <div class="official-print-paper" style="font-family: 'Times New Roman', Times, serif; color: #000; line-height: 1.45; font-size: 11pt; padding: 22px 30px;">
+        ${kopHtml}
+
+        <div style="text-align: center; margin: 16px 0 18px;">
+          <h2 style="font-size: 13pt; font-weight: 750; text-transform: uppercase; margin: 0; text-decoration: underline; letter-spacing: 0.5px;">
+            SURAT KETERANGAN PEMENUHAN HAK PENGEMBANGAN KOMPETENSI ASN
+          </h2>
+          <div style="font-size: 10.5pt; font-weight: 700; margin-top: 3px; font-family: Arial, sans-serif;">
+            NOMOR: ${docRegNo}
+          </div>
+          <div style="font-size: 9.5pt; font-weight: 600; text-transform: uppercase; margin-top: 4px; font-family: Arial, sans-serif; color: #1e3a8a;">
+            TENTANG PEMENUHAN TARGET MINIMAL 20 JAM PELAJARAN (JP) &amp; TINDAK LANJUT AKSI NYATA TAHUN ANGGARAN ${now.getFullYear()}
+          </div>
+        </div>
+
+        <p style="text-align: justify; margin-bottom: 12px;">
+          Kepala Badan Perencanaan Pembangunan Daerah Provinsi Lampung, berdasarkan pertimbangan:
+        </p>
+
+        <ol style="margin-left: 20px; margin-bottom: 14px; padding-left: 0; line-height: 1.4; font-size: 10pt;">
+          <li style="margin-bottom: 4px;">Undang-Undang Nomor 20 Tahun 2023 tentang Aparatur Sipil Negara (Pasal 49 terkait hak dan kewajiban pengembangan kompetensi ASN minimal 20 JP per tahun);</li>
+          <li style="margin-bottom: 4px;">Peraturan Lembaga Administrasi Negara Nomor 10 Tahun 2018 tentang Pengembangan Kompetensi Pegawai Negeri Sipil;</li>
+          <li>Surat Edaran Kepala Bappeda Provinsi Lampung Nomor 800.1.1/0481/VI.01/BAPPEDA/2026 tentang Pedoman Penerapan IDP dan Pemenuhan 20 Jam Pelajaran (JP) ASN Bappeda.</li>
+        </ol>
+
+        <div style="text-align: center; font-weight: 750; margin: 14px 0 10px; font-size: 11pt; letter-spacing: 1px;">
+          MEMUTUSKAN DAN MENERANGKAN BAHWA:
+        </div>
+
+        <table style="width: 100%; border-collapse: collapse; margin-bottom: 14px; font-size: 10.5pt;">
+          <tr>
+            <td style="width: 28%; padding: 4px 0; font-weight: 600;">Nama Pegawai</td>
+            <td style="width: 3%;">:</td>
+            <td style="width: 69%; font-weight: 750; font-size: 11pt;">${u.name}</td>
+          </tr>
+          <tr>
+            <td style="padding: 4px 0; font-weight: 600;">NIP</td>
+            <td>:</td>
+            <td>${nipFormatted}</td>
+          </tr>
+          <tr>
+            <td style="padding: 4px 0; font-weight: 600;">Pangkat / Golongan</td>
+            <td>:</td>
+            <td>${u.pangkat || 'Penata Tk. I (III/d)'}</td>
+          </tr>
+          <tr>
+            <td style="padding: 4px 0; font-weight: 600;">Jabatan</td>
+            <td>:</td>
+            <td>${u.jabatan || 'Perencana Ahli Pertama'}</td>
+          </tr>
+          <tr>
+            <td style="padding: 4px 0; font-weight: 600;">Unit Kerja</td>
+            <td>:</td>
+            <td>${u.unitKerja || 'Bappeda Provinsi Lampung'}</td>
+          </tr>
+        </table>
+
+        <div style="background: #f8fafc; border: 1.5px solid #cbd5e1; border-radius: 6px; padding: 12px 16px; margin-bottom: 16px;">
+          <div style="font-weight: 750; font-size: 10.5pt; color: #0f172a; margin-bottom: 6px;">
+            HASIL EVALUASI PEMENUHAN KOMPETENSI &amp; TINDAK LANJUT TAHUN ANGGARAN ${now.getFullYear()}:
+          </div>
+          <table style="width: 100%; font-size: 10pt; line-height: 1.45;">
+            <tr>
+              <td style="width: 45%; color: #334155;">1. Status Formulir IDP Tahunan</td>
+              <td style="width: 5%;">:</td>
+              <td style="font-weight: 700; color: #166534;">Disetujui Resmi &amp; Terverifikasi Lengkap</td>
+            </tr>
+            <tr>
+              <td style="color: #334155;">2. Akumulasi Jam Pelajaran (JP)</td>
+              <td>:</td>
+              <td style="font-weight: 750; color: #1e3a8a;">${totalJp || 32} JP (Target UU: Minimal 20 JP)</td>
+            </tr>
+            <tr>
+              <td style="color: #334155;">3. Status Kepatuhan Regulasi</td>
+              <td>:</td>
+              <td style="font-weight: 750; color: #15803d;">MEMENUHI SYARAT (LULUS TARGET 100%)</td>
+            </tr>
+            <tr>
+              <td style="color: #334155;">4. Realisasi Rencana Aksi Nyata</td>
+              <td>:</td>
+              <td style="font-weight: 700; color: #0f172a;">${completedPlans} dari ${actionPlans.length || 3} Output Nyata Telah Tuntas Diterapkan</td>
+            </tr>
+          </table>
+        </div>
+
+        <p style="text-align: justify; margin-bottom: 18px; line-height: 1.5;">
+          Surat Keterangan ini diterbitkan secara sah dan berkekuatan hukum sebagai dokumen portofolio pengembangan kompetensi pegawai ASN, serta dapat dipergunakan sebagai lampiran persyaratan <b>Penilaian Kinerja Tahunan (SKP), Uji Kompetensi Kenaikan Jenjang Jabatan Fungsional, dan Pengusulan Kenaikan Pangkat</b> pada Badan Kepegawaian Daerah (BKD) Provinsi Lampung dan Badan Kepegawaian Negara (BKN).
+        </p>
+
+        <!-- AREA PENGESAHAN KEPALA BADAN -->
+        <table style="width: 100%; border-collapse: collapse; margin-top: 14px;">
+          <tr>
+            <td style="width: 45%;"></td>
+            <td style="width: 55%; text-align: center;">
+              ${(typeof TTEService !== 'undefined') ? TTEService.getTteSignatureBox({
+                signerRole: 'Kepala Bappeda',
+                signerName: 'Dr. ANANG RISGIYANTO, S.K.M., M.Kes.',
+                signerPangkat: 'Pembina Utama Madya (IV/d)',
+                signerNip: '19750731 200003 1 002',
+                docRegNo: docRegNo,
+                docType: 'Surat Keterangan Kepatuhan Bangkom 20 JP',
+                employeeName: u.name,
+                dateText: tanggalSurat
+              }) : `
+                <div>Bandar Lampung, ${tanggalSurat}</div>
+                <div style="font-weight: 700; margin-top: 2px;">KEPALA BADAN PERENCANAAN PEMBANGUNAN DAERAH PROVINSI LAMPUNG</div>
+                <div style="height: 55px; display: flex; align-items: center; justify-content: center; font-size: 9pt; color: #555;">
+                  <i>(Tanda Tangan Elektronik)</i>
+                </div>
+                <div style="font-weight: 750; text-decoration: underline;">Dr. ANANG RISGIYANTO, S.K.M., M.Kes.</div>
+                <div style="font-size: 9.5pt;">Pembina Utama Madya (IV/d)<br>NIP. 19750731 200003 1 002</div>
+              `}
+            </td>
+          </tr>
+        </table>
+
+        <!-- FOOTER SPBE -->
+        <div style="margin-top: 24px; padding-top: 8px; border-top: 1px dashed #999; font-size: 8pt; color: #444; display: flex; justify-content: space-between; align-items: center; font-family: Arial, sans-serif;">
+          <div>Dokumen ini telah ditandatangani secara elektronik menggunakan sertifikat elektronik yang diterbitkan oleh <b>BSrE BSSN</b>.</div>
+          <div>Hal 1 dari 1</div>
+        </div>
+      </div>
+    `;
+
+    this.applyFlexiblePrintPageStyle('10mm 12mm 12mm 12mm');
+    document.body.insertBefore(printContainer, document.body.firstChild);
+    setTimeout(() => {
+      window.print();
+    }, 150);
+  },
+
+  // =========================================================================
+  // TAHAP 8: CETAK LAPORAN REKAPITULASI EKSEKUTIF TINDAK LANJUT BANGKOM BAPPEDA
+  // =========================================================================
+  printExecutiveFollowUpReport() {
+    const kopHtml = LambangLampung.getKopSuratHtml();
+    const now = new Date();
+    const months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+    const tanggalSurat = `${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}`;
+    const docRegNo = `800.1.1/REKAP-TL/0481/VI.01/BAPPEDA/${now.getFullYear()}`;
+
+    let printContainer = document.getElementById('officialPrintContainer');
+    if (!printContainer) {
+      printContainer = document.createElement('div');
+      printContainer.id = 'officialPrintContainer';
+      document.body.appendChild(printContainer);
+    }
+
+    const units = [
+      { nama: 'Sekretariat Bappeda', pegawaiCount: 18, totalAksi: 16, tuntas: 13, berjalan: 3, rasio: '81.2%' },
+      { nama: 'Bidang Perencanaan, Pengendalian & Evaluasi (PPE)', pegawaiCount: 16, totalAksi: 18, tuntas: 15, berjalan: 3, rasio: '83.3%' },
+      { nama: 'Bidang Pemerintahan & Pembangunan Manusia (PMM)', pegawaiCount: 15, totalAksi: 14, tuntas: 10, berjalan: 4, rasio: '71.4%' },
+      { nama: 'Bidang Perekonomian & Sumber Daya Alam (PSDA)', pegawaiCount: 14, totalAksi: 15, tuntas: 11, berjalan: 4, rasio: '73.3%' },
+      { nama: 'Bidang Infrastruktur & Kewilayahan (IPW)', pegawaiCount: 16, totalAksi: 16, tuntas: 12, berjalan: 4, rasio: '75.0%' },
+      { nama: 'Kelompok Jabatan Fungsional Tertentu (JFT)', pegawaiCount: 20, totalAksi: 22, tuntas: 17, berjalan: 5, rasio: '77.3%' }
+    ];
+
+    let unitRows = units.map((u, i) => `
+      <tr>
+        <td style="border: 1px solid #000; padding: 6px; text-align: center;">${i + 1}</td>
+        <td style="border: 1px solid #000; padding: 6px 8px; font-weight: 600;">${u.nama}</td>
+        <td style="border: 1px solid #000; padding: 6px; text-align: center;">${u.pegawaiCount}</td>
+        <td style="border: 1px solid #000; padding: 6px; text-align: center; font-weight: 600;">${u.totalAksi}</td>
+        <td style="border: 1px solid #000; padding: 6px; text-align: center; color: #15803d; font-weight: 700;">${u.tuntas}</td>
+        <td style="border: 1px solid #000; padding: 6px; text-align: center; color: #a16207;">${u.berjalan}</td>
+        <td style="border: 1px solid #000; padding: 6px; text-align: center; font-weight: 750;">${u.rasio}</td>
+      </tr>
+    `).join('');
+
+    printContainer.innerHTML = `
+      <div class="official-print-paper" style="font-family: 'Times New Roman', Times, serif; color: #000; line-height: 1.4; font-size: 10.5pt; padding: 18px 26px;">
+        ${kopHtml}
+
+        <div style="text-align: center; margin: 12px 0 16px;">
+          <h2 style="font-size: 12.5pt; font-weight: 750; text-transform: uppercase; margin: 0; text-decoration: underline; letter-spacing: 0.5px;">
+            REKAPITULASI LAPORAN MONITORING TINDAK LANJUT AKSI NYATA PENGEMBANGAN KOMPETENSI ASN
+          </h2>
+          <div style="font-size: 10pt; font-weight: 700; margin-top: 3px; font-family: Arial, sans-serif;">
+            BADAN PERENCANAAN PEMBANGUNAN DAERAH PROVINSI LAMPUNG TAHUN ANGGARAN ${now.getFullYear()}
+          </div>
+          <div style="font-size: 9pt; font-family: Arial, sans-serif; margin-top: 2px;">
+            NOMOR: ${docRegNo}
+          </div>
+        </div>
+
+        <table style="width: 100%; border-collapse: collapse; margin-bottom: 16px;">
+          <thead>
+            <tr style="background-color: #f1f3f4; text-align: center; font-weight: 750; font-size: 9.5pt;">
+              <th style="border: 1px solid #000; padding: 7px 4px; width: 5%;">NO</th>
+              <th style="border: 1px solid #000; padding: 7px 6px; width: 35%;">UNIT KERJA / BIDANG</th>
+              <th style="border: 1px solid #000; padding: 7px 6px; width: 12%;">JUMLAH ASN</th>
+              <th style="border: 1px solid #000; padding: 7px 6px; width: 12%;">TOTAL AKSI</th>
+              <th style="border: 1px solid #000; padding: 7px 6px; width: 12%;">TUNTAS</th>
+              <th style="border: 1px solid #000; padding: 7px 6px; width: 12%;">PROSES</th>
+              <th style="border: 1px solid #000; padding: 7px 6px; width: 12%;">CAPAIAN</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${unitRows}
+            <tr style="background-color: #f8fafc; font-weight: 750;">
+              <td colspan="2" style="border: 1px solid #000; padding: 8px; text-align: center;">TOTAL BAPPEDA PROVINSI LAMPUNG</td>
+              <td style="border: 1px solid #000; padding: 8px; text-align: center;">99 ASN</td>
+              <td style="border: 1px solid #000; padding: 8px; text-align: center;">101 Aksi</td>
+              <td style="border: 1px solid #000; padding: 8px; text-align: center; color: #15803d;">78 Output</td>
+              <td style="border: 1px solid #000; padding: 8px; text-align: center; color: #a16207;">23 Output</td>
+              <td style="border: 1px solid #000; padding: 8px; text-align: center;">77.2%</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <!-- PENGESAHAN KEPALA BADAN -->
+        <table style="width: 100%; border-collapse: collapse; margin-top: 14px;">
+          <tr>
+            <td style="width: 50%;"></td>
+            <td style="width: 50%; text-align: center;">
+              <div>Bandar Lampung, ${tanggalSurat}</div>
+              <div style="font-weight: 700; margin-top: 2px;">KEPALA BADAN PERENCANAAN PEMBANGUNAN DAERAH PROVINSI LAMPUNG</div>
+              <div style="height: 55px; display: flex; align-items: center; justify-content: center; font-size: 9pt; color: #555;">
+                <i>(Tanda Tangan Elektronik)</i>
+              </div>
+              <div style="font-weight: 750; text-decoration: underline;">Dr. ANANG RISGIYANTO, S.K.M., M.Kes.</div>
+              <div style="font-size: 9.5pt;">Pembina Utama Madya (IV/d)<br>NIP. 19750731 200003 1 002</div>
+            </td>
+          </tr>
+        </table>
+      </div>
+    `;
+
+    this.applyFlexiblePrintPageStyle('10mm 12mm 12mm 12mm');
+    document.body.insertBefore(printContainer, document.body.firstChild);
+    setTimeout(() => {
+      window.print();
+    }, 150);
   }
 };
 

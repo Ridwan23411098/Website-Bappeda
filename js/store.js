@@ -469,6 +469,58 @@ const Store = {
       }
     ],
 
+    // Rencana Aksi & Tindak Lanjut Penerapan Hasil Bangkom (Transfer of Learning)
+    actionPlans: [
+      {
+        id: 1,
+        programId: 2,
+        nip: '198701012010011001',
+        pegawai: 'Rizky Aditya Pratama, S.Kom., M.Si.',
+        program: 'Pelatihan Analisis Data Perencanaan dengan Python & PowerBI',
+        kompetensi: 'Analisis Data Perencanaan',
+        rencanaAksi: 'Pembangunan Dashboard Interaktif Indikator Makro Ekonomi dan Evaluasi Renja Bappeda Lampung',
+        outputKonkret: 'Aplikasi Web Dashboard Visualisasi Data Makro & Dokumen Laporan Triwulan',
+        targetWaktu: 'Triwulan II 2026',
+        unitKerja: 'Bidang Perencanaan, Pengendalian & Evaluasi Pembangunan Daerah',
+        status: 'Tuntas Terealisasi',
+        tanggalSelesai: '18 November 2026',
+        buktiTindakLanjut: 'https://dashboard-evaluasi.lampungprov.go.id',
+        evaluasiAtasan: 'Sangat Baik. Dashboard berhasil memangkas waktu kompilasi data evaluasi dari 5 hari menjadi hitungan menit.'
+      },
+      {
+        id: 2,
+        programId: 1,
+        nip: '198701012010011001',
+        pegawai: 'Rizky Aditya Pratama, S.Kom., M.Si.',
+        program: 'Service Excellence dalam Perencanaan Pembangunan (Coaching)',
+        kompetensi: 'Pelayanan Publik & Komunikasi',
+        rencanaAksi: 'Penyusunan Standar Operasional Prosedur (SOP) Layanan Konsultasi Dokumen Perencanaan ke OPD',
+        outputKonkret: 'Dokumen SOP Layanan Desk Konsultasi Perencanaan & Buku Saku ASN',
+        targetWaktu: 'Triwulan IV 2026',
+        unitKerja: 'Bidang Perencanaan, Pengendalian & Evaluasi Pembangunan Daerah',
+        status: 'Sedang Berjalan',
+        tanggalSelesai: '-',
+        buktiTindakLanjut: 'Draft_SOP_Layanan_Konsultasi_v1.pdf',
+        evaluasiAtasan: 'Dalam proses harmonisasi dengan Subbag Perencanaan dan Kepegawaian.'
+      },
+      {
+        id: 3,
+        programId: 4,
+        nip: '198701012010011001',
+        pegawai: 'Rizky Aditya Pratama, S.Kom., M.Si.',
+        program: 'Workshop Strategic Decision Making Kebijakan Publik',
+        kompetensi: 'Pengambilan Keputusan Strategis',
+        rencanaAksi: 'Penyusunan Matriks Prioritas Usulan Musrenbang Terintegrasi Berbasis Skoring Dampak Sosial',
+        outputKonkret: 'Kertas Kerja Kebijakan & Formula Skoring Usulan Prioritas Pembangunan',
+        targetWaktu: 'Triwulan III 2026',
+        unitKerja: 'Bidang Perencanaan, Pengendalian & Evaluasi Pembangunan Daerah',
+        status: 'Direncanakan',
+        tanggalSelesai: '-',
+        buktiTindakLanjut: '-',
+        evaluasiAtasan: 'Siap diimplementasikan menjelang Musrenbang RKPD 2027.'
+      }
+    ],
+
     // Admin Verification List
     verifications: [
       {
@@ -639,6 +691,13 @@ const Store = {
         if (!this.state.coachingLogs || !Array.isArray(this.state.coachingLogs) || this.state.coachingLogs.length === 0) {
           this.state.coachingLogs = (typeof BAPPEDA_DATA !== 'undefined' && BAPPEDA_DATA.coachingLogs)
             ? JSON.parse(JSON.stringify(BAPPEDA_DATA.coachingLogs))
+            : [];
+        }
+
+        // Pastikan actionPlans (Rencana Aksi & Tindak Lanjut) terisi jika state kosong
+        if (!this.state.actionPlans || !Array.isArray(this.state.actionPlans) || this.state.actionPlans.length === 0) {
+          this.state.actionPlans = (this.defaultState && this.defaultState.actionPlans)
+            ? JSON.parse(JSON.stringify(this.defaultState.actionPlans))
             : [];
         }
         // Pastikan setiap data verifikasi memiliki identitas tahun anggaran (default 2026 untuk baseline)
@@ -2210,6 +2269,65 @@ const Store = {
         console.error("Gagal hapus program dari Supabase:", e);
       }
     }
+  },
+
+  // =========================================================================
+  // METODE PENGELOLAAN RENCANA AKSI & TINDAK LANJUT (TRANSFER OF LEARNING)
+  // =========================================================================
+  getActionPlans(targetNip = null) {
+    if (!Array.isArray(this.state.actionPlans)) {
+      this.state.actionPlans = (this.defaultState && this.defaultState.actionPlans)
+        ? JSON.parse(JSON.stringify(this.defaultState.actionPlans))
+        : [];
+    }
+    const myNip = String(targetNip || this.state.user?.nip || '').replace(/[^0-9]/g, '');
+    if (!myNip) return this.state.actionPlans;
+    return this.state.actionPlans.filter(ap => {
+      const apNip = String(ap.nip || '').replace(/[^0-9]/g, '');
+      return !apNip || apNip === myNip;
+    });
+  },
+
+  saveActionPlan(planData) {
+    if (!Array.isArray(this.state.actionPlans)) {
+      this.state.actionPlans = [];
+    }
+    const currentAsn = this.state.user || {
+      name: 'Rizky Aditya Pratama, S.Kom., M.Si.',
+      nip: '198701012010011001',
+      unitKerja: 'Bidang Perencanaan, Pengendalian & Evaluasi Pembangunan Daerah'
+    };
+
+    if (planData.id) {
+      const idx = this.state.actionPlans.findIndex(p => p.id === Number(planData.id));
+      if (idx !== -1) {
+        this.state.actionPlans[idx] = {
+          ...this.state.actionPlans[idx],
+          ...planData,
+          nip: this.state.actionPlans[idx].nip || currentAsn.nip,
+          pegawai: this.state.actionPlans[idx].pegawai || currentAsn.name,
+          updated_at: new Date().toISOString()
+        };
+      }
+    } else {
+      const newPlan = {
+        id: Date.now() + Math.floor(Math.random() * 1000),
+        nip: currentAsn.nip,
+        pegawai: currentAsn.name,
+        unitKerja: currentAsn.unitKerja || 'Bappeda Provinsi Lampung',
+        created_at: new Date().toISOString(),
+        ...planData
+      };
+      this.state.actionPlans.unshift(newPlan);
+    }
+    this.save();
+    return true;
+  },
+
+  deleteActionPlan(id) {
+    if (!Array.isArray(this.state.actionPlans)) return;
+    this.state.actionPlans = this.state.actionPlans.filter(p => p.id !== Number(id));
+    this.save();
   },
 
   async submitIdp() {

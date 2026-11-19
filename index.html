@@ -1793,6 +1793,75 @@
               </table>
             </div>
           </div>
+
+          <!-- CARD: MATRIKS TINDAK LANJUT & RENCANA AKSI PENERAPAN (TRANSFER OF LEARNING) -->
+          <div class="card" style="margin-top: 24px;">
+            <div class="card-header" style="flex-wrap: wrap; gap: 12px; align-items: flex-start;">
+              <div style="flex: 1; min-width: 260px;">
+                <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                  <h3 class="card-title" style="margin: 0;">Tindak Lanjut &amp; Rencana Aksi Penerapan (Action Plan)</h3>
+                  <span class="badge badge-success" style="font-weight: 700; background: rgba(34, 197, 94, 0.15); color: #15803d; border: 1px solid rgba(34, 197, 94, 0.3);">Output Nyata ASN</span>
+                </div>
+                <div style="font-size: 11.5px; color: var(--color-text-muted); margin-top: 4px; line-height: 1.4;">
+                  Komitmen transfer of learning &amp; bukti hasil konkret yang dihasilkan pegawai di unit kerja Bappeda Provinsi Lampung setelah mengikuti pelatihan
+                </div>
+              </div>
+              <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                <button class="btn btn-outline-primary btn-sm" onclick="ExportService.printActionPlanFollowUp()" style="border: 1.5px solid #1E3A5F; color: #1E3A5F; font-weight: 650; display: inline-flex; align-items: center; gap: 6px;" title="Cetak Berkas Komitmen Rencana Aksi Tindak Lanjut Resmi">
+                  <span data-icon="Printer" data-icon-size="14"></span> Cetak Lembar Rencana Aksi
+                </button>
+                <button class="btn btn-outline btn-sm" onclick="ExportService.printCertificateOfCompliance()" style="border-color: #0284c7; color: #0284c7; font-weight: 650; display: inline-flex; align-items: center; gap: 6px;" title="Cetak Surat Keterangan Kepatuhan Bangkom 20 JP &amp; Hasil Tindak Lanjut untuk Kenaikan Pangkat">
+                  <span data-icon="Award" data-icon-size="14"></span> Surat Keterangan Bangkom 20 JP
+                </button>
+                <button class="btn btn-primary btn-sm" onclick="App.openAddActionPlanModal()" style="display: inline-flex; align-items: center; gap: 5px;">
+                  <span data-icon="Plus" data-icon-size="14"></span> Tambah Rencana Aksi
+                </button>
+              </div>
+            </div>
+
+            <!-- Summary Bar Tindak Lanjut -->
+            <div class="grid grid-cols-3" style="gap: 12px; margin-bottom: 16px;">
+              <div style="padding: 12px 14px; background: rgba(34, 197, 94, 0.08); border: 1px solid rgba(34, 197, 94, 0.25); border-radius: 10px;">
+                <div style="font-size: 11px; color: #15803d; font-weight: 700; text-transform: uppercase;">Tuntas Terealisasi</div>
+                <div style="font-size: 18px; font-weight: 800; color: #15803d; margin-top: 2px;" id="actionPlanStatTuntas">1 Output</div>
+                <div style="font-size: 11px; color: var(--color-text-muted);">Aksi nyata telah diterapkan di kantor</div>
+              </div>
+              <div style="padding: 12px 14px; background: rgba(234, 179, 8, 0.08); border: 1px solid rgba(234, 179, 8, 0.25); border-radius: 10px;">
+                <div style="font-size: 11px; color: #a16207; font-weight: 700; text-transform: uppercase;">Sedang Berjalan</div>
+                <div style="font-size: 18px; font-weight: 800; color: #a16207; margin-top: 2px;" id="actionPlanStatBerjalan">1 Output</div>
+                <div style="font-size: 11px; color: var(--color-text-muted);">Proses penyusunan produk/SOP/data</div>
+              </div>
+              <div style="padding: 12px 14px; background: rgba(59, 130, 246, 0.08); border: 1px solid rgba(59, 130, 246, 0.25); border-radius: 10px;">
+                <div style="font-size: 11px; color: #1d4ed8; font-weight: 700; text-transform: uppercase;">Total Komitmen Aksi</div>
+                <div style="font-size: 18px; font-weight: 800; color: #1d4ed8; margin-top: 2px;" id="actionPlanStatTotal">3 Rencana Aksi</div>
+                <div style="font-size: 11px; color: var(--color-text-muted);">Komitmen kinerja tindak lanjut ASN</div>
+              </div>
+            </div>
+
+            <div class="table-responsive">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>No</th>
+                    <th>Program IDP Terkait</th>
+                    <th>Tindak Lanjut &amp; Aksi Nyata</th>
+                    <th>Wujud Output / Produk</th>
+                    <th>Target Waktu</th>
+                    <th>Unit Kerja Manfaat</th>
+                    <th>Status Tindak Lanjut</th>
+                    <th>Aksi</th>
+                  </tr>
+                </thead>
+                <tbody id="idpFollowUpTableBody">
+                  <tr>
+                    <td colspan="8" style="text-align: center; padding: 24px 16px; color: var(--color-text-muted);">
+                      Memuat data rencana aksi tindak lanjut...
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
         </section>
 
         <!-- 6. REVIEW &amp; SUBMIT IDP (ereview) -->
@@ -3850,15 +3919,22 @@
           <div class="card"
             style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px;">
             <div>
-              <h3 class="card-title">Laporan Tindak Lanjut Rencana Pengembangan</h3>
-              <p style="font-size: 12.5px; color: var(--color-text-secondary); margin-top: 3px;">
-                Pegawai yang telah menyelesaikan IDP diarahkan untuk menyusun Laporan Tindak Lanjut Rencana Pengembangan
-                Individu.
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <h3 class="card-title" style="margin: 0;">Laporan Tindak Lanjut &amp; Aksi Nyata Pengembangan ASN</h3>
+                <span class="badge badge-success" style="font-size: 11px;">Monitoring Transfer of Learning</span>
+              </div>
+              <p style="font-size: 12.5px; color: var(--color-text-secondary); margin-top: 4px; margin-bottom: 0;">
+                Monitoring komitmen output konkret dan implementasi aksi nyata yang dihasilkan seluruh pegawai Bappeda Provinsi Lampung pasca-pelatihan.
               </p>
             </div>
-            <button class="btn btn-outline" onclick="App.toast('Daftar Laporan Tindak Lanjut dibuka', 'info')">
-              Lihat Laporan Tindak Lanjut
-            </button>
+            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+              <button class="btn btn-outline" onclick="ExportService.printExecutiveFollowUpReport()" style="display: inline-flex; align-items: center; gap: 6px;" title="Cetak Rekapitulasi Eksekutif Tindak Lanjut Bappeda">
+                <span data-icon="Printer" data-icon-size="14"></span> Cetak PDF
+              </button>
+              <button class="btn btn-primary" onclick="App.openExecutiveFollowUpModal()" style="display: inline-flex; align-items: center; gap: 6px;">
+                <span data-icon="FileText" data-icon-size="14"></span> Buka Rekapitulasi Tindak Lanjut
+              </button>
+            </div>
           </div>
         </section>
 
@@ -3908,6 +3984,143 @@
 
   <!-- OFFICIAL PRINT CONTAINER (RENDERED NATIVELY FOR PRINT / PDF) -->
   <div id="officialPrintContainer" style="display: none;"></div>
+
+  <!-- MODAL: Tambah / Edit Rencana Aksi Tindak Lanjut (Transfer of Learning) -->
+  <div class="modal-overlay" id="actionPlanModal" style="display: none;">
+    <div class="modal-dialog" style="max-width: 680px;">
+      <div class="modal-header">
+        <div>
+          <h3 id="actionPlanModalTitle">Rencana Aksi &amp; Tindak Lanjut Penerapan</h3>
+          <p id="actionPlanModalSub">Rumuskan komitmen hasil konkret (transfer of learning) dari pelatihan yang direncanakan.</p>
+        </div>
+        <button class="btn-icon" onclick="App.closeModal('actionPlanModal')"><span data-icon="X" data-icon-size="18"></span></button>
+      </div>
+      <div class="modal-body">
+        <form id="actionPlanForm" onsubmit="event.preventDefault(); App.saveActionPlanForm();">
+          <input type="hidden" id="formActionPlanId">
+
+          <div class="form-group">
+            <label class="form-label">Program Pengembangan Terkait <span class="required">*</span></label>
+            <select id="actionPlanProgramSelect" class="form-select" required>
+              <!-- Dinamis diisi dari IDP Programs -->
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Rencana Aksi Penerapan di Tempat Kerja (Aksi Nyata) <span class="required">*</span></label>
+            <textarea id="actionPlanTitle" class="form-textarea" rows="2" placeholder="Contoh: Pembangunan Dashboard Interaktif Indikator Makro Ekonomi Bappeda..." required></textarea>
+            <div style="font-size: 11px; color: var(--color-text-muted); margin-top: 3px;">Uraikan bagaimana ilmu/keterampilan dari pelatihan akan dipraktikkan langsung di unit kerja Anda.</div>
+          </div>
+
+          <div class="grid grid-cols-2" style="gap: 14px;">
+            <div class="form-group">
+              <label class="form-label">Wujud Output / Dokumen Fisik/Digital <span class="required">*</span></label>
+              <input type="text" id="actionPlanOutput" class="form-input" placeholder="Contoh: Aplikasi Dashboard PowerBI & Dokumen SOP" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Target Waktu Penyelesaian <span class="required">*</span></label>
+              <input type="text" id="actionPlanTargetTime" class="form-input" placeholder="Contoh: Triwulan II 2026" required>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2" style="gap: 14px;">
+            <div class="form-group">
+              <label class="form-label">Unit Kerja Penerima Manfaat <span class="required">*</span></label>
+              <input type="text" id="actionPlanUnit" class="form-input" value="Bidang Perencanaan, Pengendalian &amp; Evaluasi Pembangunan Daerah" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Status Pelaksanaan <span class="required">*</span></label>
+              <select id="actionPlanStatus" class="form-select">
+                <option value="Direncanakan">Direncanakan</option>
+                <option value="Sedang Berjalan">Sedang Berjalan</option>
+                <option value="Tuntas Terealisasi">Tuntas Terealisasi</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Bukti Hasil / Tautan Output (Opsional)</label>
+            <input type="text" id="actionPlanEvidence" class="form-input" placeholder="Contoh: https://link-output atau nama file lampiran">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Catatan / Komitmen Atasan Langsung</label>
+            <textarea id="actionPlanSupervisorNote" class="form-textarea" rows="2" placeholder="Catatan dukungan atasan untuk penyediaan sarana/lingkungan penerapan..."></textarea>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline" onclick="App.closeModal('actionPlanModal')">Batal</button>
+        <button type="button" class="btn btn-primary" onclick="App.saveActionPlanForm()">Simpan Rencana Aksi</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: Rekapitulasi Laporan Monitoring Tindak Lanjut Eksekutif (Pimpinan) -->
+  <div class="modal-overlay" id="executiveFollowUpModal" style="display: none;">
+    <div class="modal-dialog" style="max-width: 900px; width: 95%;">
+      <div class="modal-header">
+        <div>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <h3 style="margin: 0; font-size: 16px; font-weight: 800;">Rekapitulasi Monitoring Tindak Lanjut &amp; Output Bangkom ASN</h3>
+            <span class="badge badge-success" style="font-size: 11px;">Pengendalian Pimpinan</span>
+          </div>
+          <p style="font-size: 12px; color: var(--color-text-muted); margin-top: 3px;">Pemantauan implementasi aksi nyata dan transfer of learning seluruh bidang di Bappeda Provinsi Lampung Tahun Anggaran 2026.</p>
+        </div>
+        <button class="btn-icon" onclick="App.closeModal('executiveFollowUpModal')"><span data-icon="X" data-icon-size="18"></span></button>
+      </div>
+      <div class="modal-body" style="max-height: 70vh; overflow-y: auto;">
+        <!-- Ringkasan Eksekutif -->
+        <div class="grid grid-cols-4" style="gap: 12px; margin-bottom: 20px;">
+          <div style="padding: 12px 14px; background: rgba(30, 58, 138, 0.08); border: 1px solid rgba(30, 58, 138, 0.2); border-radius: 10px;">
+            <div style="font-size: 10.5px; font-weight: 700; color: var(--color-primary); text-transform: uppercase;">Total Komitmen Aksi</div>
+            <div style="font-size: 20px; font-weight: 800; color: var(--color-primary); margin-top: 2px;">94 Aksi</div>
+            <div style="font-size: 11px; color: var(--color-text-muted);">Seluruh ASN Bappeda</div>
+          </div>
+          <div style="padding: 12px 14px; background: rgba(34, 197, 94, 0.08); border: 1px solid rgba(34, 197, 94, 0.25); border-radius: 10px;">
+            <div style="font-size: 10.5px; font-weight: 700; color: #15803d; text-transform: uppercase;">Tuntas Terealisasi</div>
+            <div style="font-size: 20px; font-weight: 800; color: #15803d; margin-top: 2px;">68 Output</div>
+            <div style="font-size: 11px; color: #15803d; font-weight: 600;">Tingkat Capaian: 72.3%</div>
+          </div>
+          <div style="padding: 12px 14px; background: rgba(234, 179, 8, 0.08); border: 1px solid rgba(234, 179, 8, 0.25); border-radius: 10px;">
+            <div style="font-size: 10.5px; font-weight: 700; color: #a16207; text-transform: uppercase;">Sedang Berjalan</div>
+            <div style="font-size: 20px; font-weight: 800; color: #a16207; margin-top: 2px;">19 Output</div>
+            <div style="font-size: 11px; color: var(--color-text-muted);">Dalam proses penyusunan</div>
+          </div>
+          <div style="padding: 12px 14px; background: rgba(239, 68, 68, 0.08); border: 1px solid rgba(239, 68, 68, 0.25); border-radius: 10px;">
+            <div style="font-size: 10.5px; font-weight: 700; color: #b91c1c; text-transform: uppercase;">Perlu Pembinaan</div>
+            <div style="font-size: 20px; font-weight: 800; color: #b91c1c; margin-top: 2px;">7 Pegawai</div>
+            <div style="font-size: 11px; color: #b91c1c; font-weight: 600;">Belum mulai aksi nyata</div>
+          </div>
+        </div>
+
+        <div class="table-responsive">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>No</th>
+                <th>Pegawai ASN &amp; NIP</th>
+                <th>Unit Kerja Bidang</th>
+                <th>Program Bangkom</th>
+                <th>Rencana Aksi &amp; Output Nyata</th>
+                <th>Target Waktu</th>
+                <th>Status Tindak Lanjut</th>
+              </tr>
+            </thead>
+            <tbody id="executiveFollowUpTableBody">
+              <!-- Dinamis dirender -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="modal-footer" style="display: flex; justify-content: space-between; align-items: center;">
+        <button type="button" class="btn btn-outline-primary" onclick="ExportService.printExecutiveFollowUpReport()" style="display: inline-flex; align-items: center; gap: 6px;">
+          <span data-icon="Printer" data-icon-size="14"></span> Cetak PDF Rekapitulasi Eksekutif
+        </button>
+        <button type="button" class="btn btn-outline" onclick="App.closeModal('executiveFollowUpModal')">Tutup</button>
+      </div>
+    </div>
+  </div>
 
   <!-- MODAL: Tambah / Edit Program Pengembangan (720px) with Conditional Forms -->
   <div class="modal-overlay" id="programModal" style="display: none;">
@@ -6597,9 +6810,9 @@
   <script src="js/icons.js?v=20261119_mobaction_v28"></script>
   <script src="js/charts.js?v=20261008_fix"></script>
   <script src="js/bappeda_data.js?v=20261029_v56"></script>
-  <script src="js/store.js?v=20261117_se_v23"></script>
-  <script src="js/export.js?v=20261118_printflex_v24"></script>
-  <script src="js/app.js?v=20261119_mobnotif_v29"></script>
+  <script src="js/store.js?v=20261119_tindaklanjut_v30"></script>
+  <script src="js/export.js?v=20261119_tindaklanjut_v30"></script>
+  <script src="js/app.js?v=20261119_tindaklanjut_v30"></script>
 </body>
 
 </html>

@@ -2083,6 +2083,224 @@ const App = {
         `;
       }).join('');
     }
+
+    // === MATRIKS TINDAK LANJUT & RENCANA AKSI (TRANSFER OF LEARNING) ===
+    this.renderActionPlans();
+  },
+
+  // =========================================================================
+  // FITUR TINDAK LANJUT RENCANA PENGEMBANGAN: RENCANA AKSI & TRANSFER OF LEARNING
+  // =========================================================================
+  renderActionPlans() {
+    const tbody = document.getElementById('idpFollowUpTableBody');
+    if (!tbody) return;
+
+    const currentNip = Store.state.user?.nip || '198701012010011001';
+    const plans = Store.getActionPlans ? Store.getActionPlans(currentNip) : (Store.state.actionPlans || []);
+
+    const tuntasCount = plans.filter(p => p.status === 'Tuntas Terealisasi').length;
+    const berjalanCount = plans.filter(p => p.status === 'Sedang Berjalan').length;
+    const totalCount = plans.length;
+
+    const elTuntas = document.getElementById('actionPlanStatTuntas');
+    const elBerjalan = document.getElementById('actionPlanStatBerjalan');
+    const elTotal = document.getElementById('actionPlanStatTotal');
+
+    if (elTuntas) elTuntas.textContent = `${tuntasCount} Output`;
+    if (elBerjalan) elBerjalan.textContent = `${berjalanCount} Output`;
+    if (elTotal) elTotal.textContent = `${totalCount} Rencana Aksi`;
+
+    if (plans.length === 0) {
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="8" style="text-align: center; padding: 32px 16px; color: var(--color-text-muted);">
+            <div style="margin-bottom: 8px;">${getIcon('FileCheck', 28)}</div>
+            <div style="font-weight: 600; margin-bottom: 4px;">Belum Ada Rencana Aksi Tindak Lanjut</div>
+            <p style="font-size: 12px; margin-bottom: 14px;">Rumuskan rencana aksi nyata (transfer of learning) dari program pengembangan yang Anda rencanakan.</p>
+            <button type="button" class="btn btn-primary btn-sm" onclick="App.openAddActionPlanModal()">+ Tambah Rencana Aksi</button>
+          </td>
+        </tr>
+      `;
+      return;
+    }
+
+    tbody.innerHTML = plans.map((p, idx) => {
+      const badgeCls = p.status === 'Tuntas Terealisasi'
+        ? 'badge-success'
+        : p.status === 'Sedang Berjalan'
+        ? 'badge-warning'
+        : 'badge-blue';
+
+      const evidenceHtml = p.buktiTindakLanjut && p.buktiTindakLanjut !== '-'
+        ? `<div style="margin-top: 4px; font-size: 10.5px; color: var(--color-primary); font-weight: 600; display: inline-flex; align-items: center; gap: 3px;">
+             ${getIcon('CheckCircle', 11)} ${p.buktiTindakLanjut.startsWith('http') ? `<a href="${p.buktiTindakLanjut}" target="_blank" style="color:var(--color-primary); text-decoration:underline;">Tautan Bukti</a>` : p.buktiTindakLanjut}
+           </div>`
+        : '';
+
+      return `
+        <tr>
+          <td>${idx + 1}</td>
+          <td style="font-weight: 600; max-width: 180px; white-space: normal;">${p.program}</td>
+          <td style="max-width: 240px; white-space: normal; line-height: 1.4;">
+            <div style="font-weight: 650; color: var(--color-text-primary);">${p.rencanaAksi}</div>
+            ${p.evaluasiAtasan ? `<div style="font-size: 11px; color: var(--color-text-muted); margin-top: 3px; font-style: italic;">Atasan: "${p.evaluasiAtasan}"</div>` : ''}
+          </td>
+          <td style="max-width: 180px; white-space: normal;">
+            <span style="font-weight: 700; color: var(--color-primary);">${p.outputKonkret}</span>
+            ${evidenceHtml}
+          </td>
+          <td style="text-align: center; white-space: nowrap;">${p.targetWaktu}</td>
+          <td style="font-size: 11.5px; max-width: 160px; white-space: normal; color: var(--color-text-secondary);">${p.unitKerja || 'Bappeda'}</td>
+          <td style="text-align: center;"><span class="badge ${badgeCls}">${p.status}</span></td>
+          <td style="text-align: center; white-space: nowrap;">
+            <div style="display: flex; gap: 6px; justify-content: center;">
+              <button type="button" class="btn btn-outline btn-sm" title="Edit Rencana Aksi" onclick="App.openAddActionPlanModal(${p.id})">
+                ${getIcon('Edit3', 13)}
+              </button>
+              <button type="button" class="btn btn-danger btn-sm" title="Hapus" onclick="App.deleteActionPlanItem(${p.id})">
+                ${getIcon('Trash2', 13)}
+              </button>
+            </div>
+          </td>
+        </tr>
+      `;
+    }).join('');
+  },
+
+  openAddActionPlanModal(planId = null) {
+    const sel = document.getElementById('actionPlanProgramSelect');
+    if (sel) {
+      const programs = Store.state.idpState?.programs || [];
+      if (programs.length === 0) {
+        sel.innerHTML = '<option value="">(Belum ada program IDP, silakan tambah program terlebih dahulu)</option>';
+      } else {
+        sel.innerHTML = programs.map(p => `
+          <option value="${p.id}">${p.topik} (${p.metode} — ${p.jp} JP)</option>
+        `).join('');
+      }
+    }
+
+    const formId = document.getElementById('formActionPlanId');
+    const titleInp = document.getElementById('actionPlanTitle');
+    const outInp = document.getElementById('actionPlanOutput');
+    const targetInp = document.getElementById('actionPlanTargetTime');
+    const unitInp = document.getElementById('actionPlanUnit');
+    const statusInp = document.getElementById('actionPlanStatus');
+    const evidenceInp = document.getElementById('actionPlanEvidence');
+    const noteInp = document.getElementById('actionPlanSupervisorNote');
+    const modalTitle = document.getElementById('actionPlanModalTitle');
+
+    if (planId) {
+      const plans = Store.getActionPlans ? Store.getActionPlans() : (Store.state.actionPlans || []);
+      const item = plans.find(p => p.id === Number(planId));
+      if (item) {
+        if (formId) formId.value = item.id;
+        if (sel && item.programId) sel.value = item.programId;
+        if (titleInp) titleInp.value = item.rencanaAksi || '';
+        if (outInp) outInp.value = item.outputKonkret || '';
+        if (targetInp) targetInp.value = item.targetWaktu || '';
+        if (unitInp) unitInp.value = item.unitKerja || '';
+        if (statusInp) statusInp.value = item.status || 'Direncanakan';
+        if (evidenceInp) evidenceInp.value = item.buktiTindakLanjut && item.buktiTindakLanjut !== '-' ? item.buktiTindakLanjut : '';
+        if (noteInp) noteInp.value = item.evaluasiAtasan || '';
+        if (modalTitle) modalTitle.textContent = 'Edit Rencana Aksi & Tindak Lanjut';
+      }
+    } else {
+      if (formId) formId.value = '';
+      if (titleInp) titleInp.value = '';
+      if (outInp) outInp.value = '';
+      if (targetInp) targetInp.value = 'Triwulan II 2026';
+      if (unitInp) unitInp.value = Store.state.user?.unitKerja || 'Bidang Perencanaan, Pengendalian & Evaluasi Pembangunan Daerah';
+      if (statusInp) statusInp.value = 'Sedang Berjalan';
+      if (evidenceInp) evidenceInp.value = '';
+      if (noteInp) noteInp.value = '';
+      if (modalTitle) modalTitle.textContent = 'Tambah Rencana Aksi & Tindak Lanjut';
+    }
+
+    this.openModal('actionPlanModal');
+  },
+
+  saveActionPlanForm() {
+    const sel = document.getElementById('actionPlanProgramSelect');
+    const titleInp = document.getElementById('actionPlanTitle');
+    const outInp = document.getElementById('actionPlanOutput');
+    const targetInp = document.getElementById('actionPlanTargetTime');
+    const unitInp = document.getElementById('actionPlanUnit');
+    const statusInp = document.getElementById('actionPlanStatus');
+    const evidenceInp = document.getElementById('actionPlanEvidence');
+    const noteInp = document.getElementById('actionPlanSupervisorNote');
+    const formId = document.getElementById('formActionPlanId');
+
+    const rencanaAksi = titleInp?.value?.trim();
+    const outputKonkret = outInp?.value?.trim();
+    if (!rencanaAksi || !outputKonkret) {
+      this.toast('Harap lengkapi uraian rencana aksi dan wujud output konkret!', 'warning');
+      return;
+    }
+
+    const programId = Number(sel?.value) || 1;
+    const progItem = (Store.state.idpState?.programs || []).find(p => p.id === programId);
+    const progTitle = progItem ? progItem.topik : (sel?.options[sel.selectedIndex]?.text || 'Pengembangan Kompetensi');
+    const kompetensiName = progItem ? progItem.kompetensi : 'Kompetensi Teknis';
+
+    const planPayload = {
+      id: formId?.value ? Number(formId.value) : null,
+      programId: programId,
+      program: progTitle,
+      kompetensi: kompetensiName,
+      rencanaAksi: rencanaAksi,
+      outputKonkret: outputKonkret,
+      targetWaktu: targetInp?.value?.trim() || 'Triwulan II 2026',
+      unitKerja: unitInp?.value?.trim() || 'Bappeda Provinsi Lampung',
+      status: statusInp?.value || 'Sedang Berjalan',
+      buktiTindakLanjut: evidenceInp?.value?.trim() || '-',
+      evaluasiAtasan: noteInp?.value?.trim() || 'Disetujui untuk diimplementasikan.'
+    };
+
+    Store.saveActionPlan(planPayload);
+    this.closeModal('actionPlanModal');
+    this.renderActionPlans();
+    this.toast('✅ Komitmen rencana aksi tindak lanjut berhasil disimpan!', 'success');
+  },
+
+  deleteActionPlanItem(id) {
+    if (!confirm('Apakah Anda yakin ingin menghapus rencana aksi tindak lanjut ini?')) return;
+    Store.deleteActionPlan(id);
+    this.renderActionPlans();
+    this.toast('Rencana aksi tindak lanjut telah dihapus.', 'info');
+  },
+
+  openExecutiveFollowUpModal() {
+    const tbody = document.getElementById('executiveFollowUpTableBody');
+    if (tbody) {
+      const sampleAsnFollowUps = [
+        { nama: 'Rizky Aditya Pratama, S.Kom., M.Si.', nip: '19870101 201001 1 001', bidang: 'PPE', program: 'Pelatihan Data Science & PowerBI', aksi: 'Pembangunan Dashboard Interaktif Indikator Makro Ekonomi Bappeda', target: 'Tw II 2026', status: 'Tuntas Terealisasi' },
+        { nama: 'Siti Rahma, S.E., M.E.', nip: '19890102 201101 2 002', bidang: 'PPE', program: 'Service Excellence dalam Perencanaan (Coaching)', aksi: 'Penyusunan SOP Desk Konsultasi Perencanaan Dokumen Renstra OPD', target: 'Tw IV 2026', status: 'Sedang Berjalan' },
+        { nama: 'Budi Santoso, S.T., M.Eng.', nip: '19850315 200902 1 003', bidang: 'IPW', program: 'GIS Spasial & Analisis Tata Ruang', aksi: 'Pemetaan WebGIS Infrastruktur Strategis Daerah Lampung Berbasis Cloud', target: 'Tw II 2026', status: 'Tuntas Terealisasi' },
+        { nama: 'Dra. Ratna Juwita, M.Si.', nip: '19780512 200212 2 001', bidang: 'PMM', program: 'Bimtek Penanggulangan Stunting & Kemiskinan Ekstrem', aksi: 'Penyusunan Matriks Monitoring Intervensi Terpadu Stunting Lintas Perangkat Daerah', target: 'Tw I 2026', status: 'Tuntas Terealisasi' },
+        { nama: 'Ahmad Fauzi, S.E., Ak.', nip: '19900820 201403 1 002', bidang: 'Sekretariat', program: 'Pelatihan Pengelolaan Keuangan & Aset SPBE', aksi: 'Digitalisasi Pengarsipan SPJ & Register Aset Kantor Berbasis Barcode', target: 'Tw III 2026', status: 'Sedang Berjalan' },
+        { nama: 'Ir. Hendra Wijaya, M.M.', nip: '19791104 200501 1 008', bidang: 'PSDA', program: 'Analisis Rantai Pasok Pangan & Inflasi Daerah', aksi: 'Sistem Informasi Pemantauan Neraca Komoditas Pangan Pokok Provinsi Lampung', target: 'Tw II 2026', status: 'Tuntas Terealisasi' }
+      ];
+
+      tbody.innerHTML = sampleAsnFollowUps.map((item, i) => `
+        <tr>
+          <td>${i + 1}</td>
+          <td>
+            <div style="font-weight: 700; color: var(--color-text-primary);">${item.nama}</div>
+            <div style="font-size: 11px; color: var(--color-text-muted);">NIP. ${item.nip}</div>
+          </td>
+          <td><span class="badge badge-blue">${item.bidang}</span></td>
+          <td style="max-width: 180px; white-space: normal; font-size: 12px;">${item.program}</td>
+          <td style="max-width: 220px; white-space: normal; font-size: 12px; font-weight: 600; color: #1e3a8a;">${item.aksi}</td>
+          <td style="text-align: center; white-space: nowrap; font-size: 11.5px;">${item.target}</td>
+          <td style="text-align: center;">
+            <span class="badge ${item.status === 'Tuntas Terealisasi' ? 'badge-success' : 'badge-warning'}">${item.status}</span>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    this.openModal('executiveFollowUpModal');
   },
 
   // =========================================================================
