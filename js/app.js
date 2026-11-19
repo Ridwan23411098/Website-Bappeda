@@ -6704,15 +6704,18 @@ const App = {
     const notifs = Store.state.notifications || [];
     const unreadCount = notifs.filter(n => !n.dibaca).length;
 
-    // Update Badge
-    if (badgeEl) {
+    // Update Badge (Desktop & Mobile)
+    const updateBadge = (el) => {
+      if (!el) return;
       if (unreadCount > 0) {
-        badgeEl.textContent = unreadCount > 9 ? '9+' : unreadCount;
-        badgeEl.style.display = 'flex';
+        el.textContent = unreadCount > 9 ? '9+' : unreadCount;
+        el.style.display = 'flex';
       } else {
-        badgeEl.style.display = 'none';
+        el.style.display = 'none';
       }
-    }
+    };
+    updateBadge(badgeEl);
+    updateBadge(document.getElementById('mobNavNotifBadge'));
 
     // Update Header Text
     if (countEl) {
@@ -6773,8 +6776,7 @@ const App = {
 
   async handleNotificationClick(id) {
     // 1. Tutup dropdown notifikasi agar layar langsung fokus ke halaman yang dituju
-    const dd = document.getElementById('notificationDropdown');
-    if (dd) dd.classList.remove('show');
+    this.closeNotificationDropdown();
 
     // 2. Tandai notifikasi sebagai sudah dibaca
     await Store.markNotificationAsRead(id);
@@ -7180,13 +7182,53 @@ const App = {
     return new Date(dateString).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' });
   },
 
-  toggleNotificationDropdown() {
+  toggleNotificationDropdown(e) {
+    if (e) {
+      if (typeof e.stopPropagation === 'function') e.stopPropagation();
+      if (typeof e.preventDefault === 'function') e.preventDefault();
+    }
     const dd = document.getElementById('notificationDropdown');
-    if (dd) {
-      dd.classList.toggle('show');
-      if (dd.classList.contains('show')) {
-        this.renderNotifications();
-      }
+    if (!dd) return;
+    if (dd.classList.contains('show')) {
+      this.closeNotificationDropdown();
+    } else {
+      this.openNotificationDropdown();
+    }
+  },
+
+  openNotificationDropdown() {
+    const dd = document.getElementById('notificationDropdown');
+    const mobBtn = document.getElementById('mobNavNotif');
+    if (!dd) return;
+
+    this.closeUserDropdown();
+    this.closeGlobalSearch();
+
+    dd.classList.add('show');
+    document.body.classList.add('notif-open');
+    if (mobBtn) mobBtn.classList.add('active');
+
+    this.renderNotifications();
+
+    const backdrop = document.getElementById('mobileNotifBackdrop');
+    if (backdrop && window.innerWidth <= 768) {
+      backdrop.classList.add('active');
+    }
+  },
+
+  closeNotificationDropdown() {
+    const dd = document.getElementById('notificationDropdown');
+    const mobBtn = document.getElementById('mobNavNotif');
+    if (dd) dd.classList.remove('show');
+    document.body.classList.remove('notif-open');
+    if (mobBtn) {
+      mobBtn.classList.remove('active');
+      this.updateMobileBottomNav(Store.state?.activePage || 'edash');
+    }
+
+    const backdrop = document.getElementById('mobileNotifBackdrop');
+    if (backdrop) {
+      backdrop.classList.remove('active');
     }
   },
 
@@ -7256,6 +7298,7 @@ const App = {
   },
 
   toggleMobileSidebar() {
+    this.closeNotificationDropdown();
     const sb = document.getElementById('appSidebar');
     const bd = document.getElementById('sidebarBackdrop');
     if (sb) {
@@ -7509,8 +7552,7 @@ const App = {
           m.style.display = 'none';
         });
         document.querySelectorAll('.drawer-overlay.active').forEach(d => d.classList.remove('active'));
-        const dd = document.getElementById('notificationDropdown');
-        if (dd) dd.classList.remove('show');
+        this.closeNotificationDropdown();
       }
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
         e.preventDefault();
@@ -7535,9 +7577,13 @@ const App = {
       }
 
       const notifBtn = document.getElementById('notificationBtn');
+      const mobNotifBtn = document.getElementById('mobNavNotif');
       const notifDd = document.getElementById('notificationDropdown');
-      if (notifDd && notifBtn && !notifBtn.contains(e.target) && !notifDd.contains(e.target)) {
-        notifDd.classList.remove('show');
+      const isClickInsideNotif = (notifDd && notifDd.contains(e.target)) ||
+                                 (notifBtn && notifBtn.contains(e.target)) ||
+                                 (mobNotifBtn && mobNotifBtn.contains(e.target));
+      if (notifDd && notifDd.classList.contains('show') && !isClickInsideNotif) {
+        this.closeNotificationDropdown();
       }
 
       const userMenuCont = document.getElementById('topbarUserMenuContainer');
@@ -7651,7 +7697,14 @@ const App = {
       }
     }
 
-    [homeBtn, idpBtn, actionBtn].forEach(b => b?.classList.remove('active'));
+    const notifBtn = document.getElementById('mobNavNotif');
+    [homeBtn, idpBtn, actionBtn, notifBtn].forEach(b => b?.classList.remove('active'));
+
+    const dd = document.getElementById('notificationDropdown');
+    if (dd && dd.classList.contains('show')) {
+      if (notifBtn) notifBtn.classList.add('active');
+      return;
+    }
 
     if (['edash', 'adash', 'pdash'].includes(pageId)) {
       if (homeBtn) homeBtn.classList.add('active');
@@ -7662,7 +7715,13 @@ const App = {
     }
   },
 
-  navigateFromMobileBottom(type) {
+  navigateFromMobileBottom(type, event) {
+    if (type === 'notif') {
+      this.toggleNotificationDropdown(event);
+      return;
+    }
+    this.closeNotificationDropdown();
+
     const role = Store.state?.user?.role || 'pegawai';
     const activePage = Store.state?.activePage || this.currentPage;
 

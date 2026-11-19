@@ -44,7 +44,7 @@
     rel="stylesheet">
 
   <!-- Core Stylesheet -->
-  <link rel="stylesheet" href="css/app.css?v=20261119_mobaction_v28">
+  <link rel="stylesheet" href="css/app.css?v=20261119_mobnotif_v29">
 
   <!-- Critical Inlined CSS (Ensures 100% Instant & Flawless Mobile / PWA Rendering) -->
   <style>
@@ -612,6 +612,9 @@
                     <span class="notification-unread-count" id="notificationUnreadCount">0 baru</span>
                     <button type="button" onclick="App.markAllNotificationsRead()" title="Tandai semua telah dibaca" style="background: none; border: none; cursor: pointer; color: var(--color-primary); font-size: 11px; font-weight: 600; padding: 2px 4px;">
                       Baca Semua
+                    </button>
+                    <button type="button" class="btn-icon notif-close-btn" onclick="App.closeNotificationDropdown()" title="Tutup Notifikasi" style="width: 26px; height: 26px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--color-border); background: var(--color-surface-soft); border-radius: 50%; cursor: pointer; margin-left: 2px;">
+                      <span data-icon="X" data-icon-size="14"></span>
                     </button>
                   </div>
                 </div>
@@ -3881,7 +3884,7 @@
         <span class="mob-label" id="mobNavActionLabel">Realisasi</span>
       </button>
 
-      <button type="button" class="mobile-nav-btn" id="mobNavNotif" onclick="App.toggleNotificationDropdown()" title="Notifikasi">
+      <button type="button" class="mobile-nav-btn" id="mobNavNotif" onclick="App.navigateFromMobileBottom('notif', event)" title="Notifikasi">
         <div style="position: relative; display: inline-flex;">
           <span class="mob-icon" data-icon="Bell" data-icon-size="20"></span>
           <span class="mob-badge" id="mobNavNotifBadge" style="display: none;">0</span>
@@ -3894,6 +3897,9 @@
         <span class="mob-label">Menu</span>
       </button>
     </nav>
+
+    <!-- BACKDROP NOTIFIKASI MOBILE (KLIK DILUAR UNTUK MENUTUP) -->
+    <div class="mobile-notif-backdrop" id="mobileNotifBackdrop" onclick="App.closeNotificationDropdown()"></div>
   </div>
 
   <!-- ========================================================================
@@ -6593,7 +6599,7 @@
   <script src="js/bappeda_data.js?v=20261029_v56"></script>
   <script src="js/store.js?v=20261117_se_v23"></script>
   <script src="js/export.js?v=20261118_printflex_v24"></script>
-  <script src="js/app.js?v=20261119_mobaction_v28"></script>
+  <script src="js/app.js?v=20261119_mobnotif_v29"></script>
 </body>
 
 </html>
