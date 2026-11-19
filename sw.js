@@ -1,7 +1,7 @@
 // SIP-KOMPETENSI — Bappeda Provinsi Lampung
 // Service Worker for PWA & Background Push Notifications
 
-const CACHE_NAME = 'sip-bappeda-cleanbar-v26';
+const CACHE_NAME = 'sip-bappeda-mobaction-v28';
 
 self.addEventListener('install', event => {
   self.skipWaiting();

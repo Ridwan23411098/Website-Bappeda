@@ -44,7 +44,7 @@
     rel="stylesheet">
 
   <!-- Core Stylesheet -->
-  <link rel="stylesheet" href="css/app.css?v=20261118_printflex_v24">
+  <link rel="stylesheet" href="css/app.css?v=20261119_mobaction_v28">
 
   <!-- Critical Inlined CSS (Ensures 100% Instant & Flawless Mobile / PWA Rendering) -->
   <style>
@@ -366,7 +366,7 @@
   </style>
 
   <!-- STYLESHEET STANDAR KEDINASAN RESMI BAPPEDA -->
-  <link rel="stylesheet" href="css/ui-ux-pro.css?v=20261118_ovalbadge_v25">
+  <link rel="stylesheet" href="css/ui-ux-pro.css?v=20261119_mobaction_v28">
 </head>
 
 <body>
@@ -3874,11 +3874,11 @@
         <span class="mob-label">IDP</span>
       </button>
 
-      <button type="button" class="mobile-nav-btn" id="mobNavAction" onclick="App.navigateFromMobileBottom('action')" title="Aksi Utama">
-        <div class="mob-action-bubble">
-          <span data-icon="Zap" data-icon-size="20"></span>
-        </div>
-        <span class="mob-label" id="mobNavActionLabel">Aksi</span>
+      <button type="button" class="mobile-nav-btn" id="mobNavAction" onclick="App.navigateFromMobileBottom('action')" title="Aksi Realisasi & Bangkom">
+        <span class="mob-action-bubble" id="mobActionBubble">
+          <span data-icon="Plus" data-icon-size="22"></span>
+        </span>
+        <span class="mob-label" id="mobNavActionLabel">Realisasi</span>
       </button>
 
       <button type="button" class="mobile-nav-btn" id="mobNavNotif" onclick="App.toggleNotificationDropdown()" title="Notifikasi">
@@ -4290,6 +4290,107 @@
             Mulai Isi IDP Sekarang
           </button>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: Menu Aksi Cepat Mobile (Smart Action Sheet) -->
+  <div class="modal-overlay" id="mobileActionSheetModal" style="display: none; z-index: 10050;" onclick="if(event.target === this) App.closeMobileActionSheet();">
+    <div class="modal-dialog" style="max-width: 480px; width: 94%; border-radius: 20px; overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.35);">
+      <div class="modal-header" style="background: linear-gradient(135deg, #0b2545 0%, #1e3a8a 100%); color: #ffffff; padding: 16px 20px;">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <div style="width: 36px; height: 36px; border-radius: 50%; background: rgba(255,255,255,0.15); display: flex; align-items: center; justify-content: center;">
+            <span data-icon="Sparkles" data-icon-size="20"></span>
+          </div>
+          <div>
+            <h3 style="font-size: 15px; font-weight: 800; margin: 0; color: #ffffff;">Menu Aksi Cepat ASN</h3>
+            <div style="font-size: 11px; color: #93c5fd; margin-top: 1px;">Pintasan aksi utama Bappeda Provinsi Lampung</div>
+          </div>
+        </div>
+        <button class="btn-icon" onclick="App.closeMobileActionSheet()" title="Tutup" style="color: #ffffff; background: rgba(255,255,255,0.15); border: none;">
+          <span data-icon="X" data-icon-size="16"></span>
+        </button>
+      </div>
+      <div class="modal-body" style="padding: 16px; background: var(--color-surface, #ffffff);">
+        <div style="display: flex; flex-direction: column; gap: 10px;">
+          <!-- Aksi 1: Catat Realisasi & Unggah Sertifikat -->
+          <button type="button" class="btn btn-outline" onclick="App.handleActionSheetOption('realization')"
+            style="display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; text-align: left; border-radius: 12px; border: 1.5px solid #2563eb; background: rgba(37,99,235,0.05); cursor: pointer;">
+            <div style="display: flex; align-items: center; gap: 12px;">
+              <div style="width: 40px; height: 40px; border-radius: 10px; background: #2563eb; color: #fff; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                <span data-icon="Award" data-icon-size="20"></span>
+              </div>
+              <div>
+                <div style="font-weight: 750; font-size: 13.5px; color: var(--color-text-primary);">+ Input Realisasi Kegiatan</div>
+                <div style="font-size: 11.5px; color: var(--color-text-muted);">Unggah bukti sertifikat &amp; catat JP diklat terlaksana</div>
+              </div>
+            </div>
+            <span data-icon="ChevronRight" data-icon-size="18" style="color: #2563eb;"></span>
+          </button>
+
+          <!-- Aksi 2: Tambah Program IDP -->
+          <button type="button" class="btn btn-outline" onclick="App.handleActionSheetOption('addProgram')"
+            style="display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; text-align: left; border-radius: 12px; border: 1.5px solid var(--color-border); background: var(--color-surface-subtle); cursor: pointer;">
+            <div style="display: flex; align-items: center; gap: 12px;">
+              <div style="width: 40px; height: 40px; border-radius: 10px; background: #10b981; color: #fff; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                <span data-icon="Plus" data-icon-size="20"></span>
+              </div>
+              <div>
+                <div style="font-weight: 700; font-size: 13.5px; color: var(--color-text-primary);">+ Tambah Usulan Program IDP</div>
+                <div style="font-size: 11.5px; color: var(--color-text-muted);">Pilih diklat dari kalender atau mandiri (min. 20 JP)</div>
+              </div>
+            </div>
+            <span data-icon="ChevronRight" data-icon-size="18" style="color: var(--color-text-muted);"></span>
+          </button>
+
+          <!-- Aksi 3: Tanda Terima Elektronik Resmi -->
+          <button type="button" class="btn btn-outline" onclick="App.handleActionSheetOption('receipt')"
+            style="display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; text-align: left; border-radius: 12px; border: 1.5px solid var(--color-border); background: var(--color-surface-subtle); cursor: pointer;">
+            <div style="display: flex; align-items: center; gap: 12px;">
+              <div style="width: 40px; height: 40px; border-radius: 10px; background: #0284c7; color: #fff; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                <span data-icon="FileCheck" data-icon-size="20"></span>
+              </div>
+              <div>
+                <div style="font-weight: 700; font-size: 13.5px; color: var(--color-text-primary);">Tanda Terima IDP (Resi QR)</div>
+                <div style="font-size: 11.5px; color: var(--color-text-muted);">Lihat &amp; cetak bukti penyerahan IDP resmi</div>
+              </div>
+            </div>
+            <span data-icon="ChevronRight" data-icon-size="18" style="color: var(--color-text-muted);"></span>
+          </button>
+
+          <!-- Aksi 4: Panduan Cepat & Tour Edukasi -->
+          <button type="button" class="btn btn-outline" onclick="App.handleActionSheetOption('tour')"
+            style="display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; text-align: left; border-radius: 12px; border: 1.5px solid var(--color-border); background: var(--color-surface-subtle); cursor: pointer;">
+            <div style="display: flex; align-items: center; gap: 12px;">
+              <div style="width: 40px; height: 40px; border-radius: 10px; background: #6366f1; color: #fff; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                <span data-icon="HelpCircle" data-icon-size="20"></span>
+              </div>
+              <div>
+                <div style="font-weight: 700; font-size: 13.5px; color: var(--color-text-primary);">Panduan Ringkas Penggunaan</div>
+                <div style="font-size: 11.5px; color: var(--color-text-muted);">Simulasi alur sistem &amp; langkah pengisian IDP</div>
+              </div>
+            </div>
+            <span data-icon="ChevronRight" data-icon-size="18" style="color: var(--color-text-muted);"></span>
+          </button>
+
+          <!-- Aksi 5: Dokumen Surat Edaran -->
+          <button type="button" class="btn btn-outline" onclick="App.handleActionSheetOption('se')"
+            style="display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; text-align: left; border-radius: 12px; border: 1.5px solid var(--color-border); background: var(--color-surface-subtle); cursor: pointer;">
+            <div style="display: flex; align-items: center; gap: 12px;">
+              <div style="width: 40px; height: 40px; border-radius: 10px; background: #d97706; color: #fff; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                <span data-icon="FileText" data-icon-size="20"></span>
+              </div>
+              <div>
+                <div style="font-weight: 700; font-size: 13.5px; color: var(--color-text-primary);">Surat Edaran Kepala Bappeda</div>
+                <div style="font-size: 11.5px; color: var(--color-text-muted);">SE No. 800.1.1/0481/VI.01/BAPPEDA/2026</div>
+              </div>
+            </div>
+            <span data-icon="ChevronRight" data-icon-size="18" style="color: var(--color-text-muted);"></span>
+          </button>
+        </div>
+      </div>
+      <div class="modal-footer" style="padding: 12px 16px; background: #f8fafc; border-top: 1px solid #e2e8f0; display: flex; justify-content: center;">
+        <button type="button" class="btn btn-outline" onclick="App.closeMobileActionSheet()" style="width: 100%;">Tutup Menu</button>
       </div>
     </div>
   </div>
@@ -6487,12 +6588,12 @@
   <script src="js/realtime.js?v=20261116_sec_v20"></script>
   <script src="assets/lambang-lampung.js?v=20261116_kepalabappeda_v16"></script>
   <script src="assets/tte-service.js?v=20261116_kepalabappeda_v16"></script>
-  <script src="js/icons.js?v=20261014_v16"></script>
+  <script src="js/icons.js?v=20261119_mobaction_v28"></script>
   <script src="js/charts.js?v=20261008_fix"></script>
   <script src="js/bappeda_data.js?v=20261029_v56"></script>
   <script src="js/store.js?v=20261117_se_v23"></script>
   <script src="js/export.js?v=20261118_printflex_v24"></script>
-  <script src="js/app.js?v=20261118_printflex_v24"></script>
+  <script src="js/app.js?v=20261119_mobaction_v28"></script>
 </body>
 
 </html>

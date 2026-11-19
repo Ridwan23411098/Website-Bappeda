@@ -7623,11 +7623,32 @@ const App = {
     const idpBtn = document.getElementById('mobNavIdp');
     const actionBtn = document.getElementById('mobNavAction');
     const actionLabel = document.getElementById('mobNavActionLabel');
+    const actionBubble = document.getElementById('mobActionBubble');
 
     if (actionLabel) {
-      if (role === 'pegawai') actionLabel.textContent = 'Realisasi';
-      else if (role === 'admin') actionLabel.textContent = 'Verifikasi';
-      else actionLabel.textContent = 'Arahan';
+      if (role === 'pegawai') {
+        if (pageId === 'epelaksanaan') {
+          actionLabel.textContent = 'Input Realisasi';
+          if (actionBubble && typeof getIcon === 'function') {
+            actionBubble.innerHTML = getIcon('Plus', 22);
+          }
+        } else {
+          actionLabel.textContent = 'Realisasi';
+          if (actionBubble && typeof getIcon === 'function') {
+            actionBubble.innerHTML = getIcon('Plus', 22);
+          }
+        }
+      } else if (role === 'admin') {
+        actionLabel.textContent = 'Verifikasi';
+        if (actionBubble && typeof getIcon === 'function') {
+          actionBubble.innerHTML = getIcon('ClipboardCheck', 22);
+        }
+      } else {
+        actionLabel.textContent = 'Arahan';
+        if (actionBubble && typeof getIcon === 'function') {
+          actionBubble.innerHTML = getIcon('Sparkles', 22);
+        }
+      }
     }
 
     [homeBtn, idpBtn, actionBtn].forEach(b => b?.classList.remove('active'));
@@ -7643,27 +7664,92 @@ const App = {
 
   navigateFromMobileBottom(type) {
     const role = Store.state?.user?.role || 'pegawai';
+    const activePage = Store.state?.activePage || this.currentPage;
+
     if (type === 'home') {
       if (role === 'pegawai') this.navigate('edash');
       else if (role === 'admin') this.navigate('adash');
       else this.navigate('pdash');
     } else if (type === 'idp') {
-      if (role === 'pegawai') this.navigate('eidp');
-      else this.navigate('averif');
+      if (role === 'pegawai') {
+        if (activePage === 'eidp') {
+          // Jika sudah di formulir IDP, klik lagi langsung membuka form Tambah Program
+          this.openAddProgramModal();
+          this.toast('Membuka formulir usulan program IDP...', 'info', 2000);
+        } else {
+          this.navigate('eidp');
+        }
+      } else {
+        this.navigate('averif');
+      }
     } else if (type === 'action') {
-      if (role === 'pegawai') this.navigate('epelaksanaan');
-      else if (role === 'admin') this.navigate('averif');
-      else {
-        this.navigate('pdash');
-        setTimeout(() => {
+      if (role === 'pegawai') {
+        if (activePage === 'epelaksanaan') {
+          // JIKA SUDAH BERADA DI HALAMAN REALISASI -> BUKA DRAWER INPUT REALISASI LANGSUNG!
+          this.openInputRealizationDrawer();
+          this.toast('Membuka Formulir Catat Realisasi & Unggah Sertifikat...', 'info', 2500);
+        } else {
+          // Jika belum di halaman pelaksanaan, buka halaman pelaksanaan dan beri panduan
+          this.navigate('epelaksanaan');
+          this.toast('Halaman Pelaksanaan SDM dibuka. Ketuk "+" lagi untuk mencatat realisasi.', 'info', 3000);
+        }
+      } else if (role === 'admin') {
+        if (activePage === 'averif') {
+          this.toast('Menampilkan antrean verifikasi berkas usulan IDP ASN', 'info', 2000);
+        } else {
+          this.navigate('averif');
+        }
+      } else {
+        if (activePage === 'pdash') {
           const inp = document.getElementById('newDirectiveInput');
           if (inp) {
             inp.scrollIntoView({ behavior: 'smooth' });
             inp.focus();
+            this.toast('Siap menambahkan arahan pimpinan baru', 'info', 2000);
           }
-        }, 300);
+        } else {
+          this.navigate('pdash');
+          setTimeout(() => {
+            const inp = document.getElementById('newDirectiveInput');
+            if (inp) {
+              inp.scrollIntoView({ behavior: 'smooth' });
+              inp.focus();
+            }
+          }, 300);
+        }
       }
     }
+  },
+
+  openMobileActionSheet() {
+    this.openModal('mobileActionSheetModal');
+  },
+
+  closeMobileActionSheet() {
+    this.closeModal('mobileActionSheetModal');
+  },
+
+  handleActionSheetOption(action) {
+    this.closeMobileActionSheet();
+    setTimeout(() => {
+      if (action === 'realization') {
+        if (Store.state.activePage !== 'epelaksanaan') {
+          this.navigate('epelaksanaan');
+        }
+        setTimeout(() => this.openInputRealizationDrawer(), 150);
+      } else if (action === 'addProgram') {
+        if (Store.state.activePage !== 'eidp') {
+          this.navigate('eidp');
+        }
+        setTimeout(() => this.openAddProgramModal(), 150);
+      } else if (action === 'receipt') {
+        this.openIdpFilingReceiptModal();
+      } else if (action === 'tour') {
+        this.openOnboardingTour();
+      } else if (action === 'se') {
+        this.openSopGuide();
+      }
+    }, 120);
   },
 
   // =========================================================================
