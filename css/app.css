@@ -2396,31 +2396,34 @@ a {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 16px 22px;
+  padding: 12px 18px;
   background: var(--color-light-blue);
   border: 1px solid rgba(47, 128, 237, 0.25);
-  border-radius: var(--radius-lg);
-  margin-bottom: 22px;
+  border-radius: var(--radius-md);
+  margin-bottom: 16px;
   flex-wrap: wrap;
-  gap: 16px;
+  gap: 12px;
 }
 
 .summary-metric {
   display: flex;
   flex-direction: column;
+  gap: 1px;
 }
 
 .summary-metric .label {
-  font-size: 11px;
+  font-size: 9.5px;
   font-weight: 600;
+  letter-spacing: 0.3px;
   text-transform: uppercase;
   color: var(--color-secondary-blue);
 }
 
 .summary-metric .value {
-  font-size: 18px;
-  font-weight: 800;
+  font-size: 13.5px;
+  font-weight: 700;
   color: var(--color-primary);
+  line-height: 1.25;
 }
 
 /* ==========================================================================
@@ -2834,11 +2837,11 @@ a {
   }
 
   .summary-metric .label {
-    font-size: 9.5px !important;
+    font-size: 8.5px !important;
   }
 
   .summary-metric .value {
-    font-size: 15px !important;
+    font-size: 12.5px !important;
   }
 
   /* Heading & Action Buttons Responsif */

@@ -474,6 +474,38 @@ const Store = {
       {
         id: 1,
         programId: 2,
+        nip: '19740707 200212 1 008',
+        pegawai: 'ANDI ARAFAT S.T., M.E.',
+        program: 'Pelatihan Manajemen Strategis & Transformasi Birokrasi SPBE',
+        kompetensi: 'Manajemen Kepemimpinan & SPBE',
+        rencanaAksi: 'Penyusunan Pedoman Transformasi Tata Kelola Administrasi Digital & Integrasi Layanan Internal Bappeda',
+        outputKonkret: 'Keputusan Kepala Bappeda tentang SOP Digitalisasi Tata Persuratan & Buku Saku ASN',
+        targetWaktu: 'Triwulan II 2026',
+        unitKerja: 'Sekretariat Bappeda Provinsi Lampung',
+        status: 'Tuntas Terealisasi',
+        tanggalSelesai: '15 November 2026',
+        buktiTindakLanjut: 'https://lampungprov.go.id/bappeda/sop-administrasi-2026',
+        evaluasiAtasan: 'Sangat Baik. Pelayanan internal Bappeda meningkat signifikan dengan adanya standar operasional terintegrasi.'
+      },
+      {
+        id: 2,
+        programId: 1,
+        nip: '19740707 200212 1 008',
+        pegawai: 'ANDI ARAFAT S.T., M.E.',
+        program: 'Workshop Manajemen Risiko Perencanaan & Penganggaran Daerah',
+        kompetensi: 'Manajemen Risiko Perencanaan',
+        rencanaAksi: 'Penyusunan Register Manajemen Risiko Pelaksanaan Program Prioritas Bappeda TA 2026',
+        outputKonkret: 'Dokumen Profil Risiko & Manual Mitigasi Pengendalian Program Bappeda Lampung',
+        targetWaktu: 'Triwulan III 2026',
+        unitKerja: 'Sekretariat Bappeda Provinsi Lampung',
+        status: 'Sedang Berjalan',
+        tanggalSelesai: '-',
+        buktiTindakLanjut: 'Draft_Register_Risiko_Bappeda_2026.pdf',
+        evaluasiAtasan: 'Dalam proses reviu bersama Inspektorat Daerah Provinsi Lampung.'
+      },
+      {
+        id: 3,
+        programId: 2,
         nip: '198701012010011001',
         pegawai: 'Rizky Aditya Pratama, S.Kom., M.Si.',
         program: 'Pelatihan Analisis Data Perencanaan dengan Python & PowerBI',
@@ -488,7 +520,7 @@ const Store = {
         evaluasiAtasan: 'Sangat Baik. Dashboard berhasil memangkas waktu kompilasi data evaluasi dari 5 hari menjadi hitungan menit.'
       },
       {
-        id: 2,
+        id: 4,
         programId: 1,
         nip: '198701012010011001',
         pegawai: 'Rizky Aditya Pratama, S.Kom., M.Si.',
@@ -504,7 +536,7 @@ const Store = {
         evaluasiAtasan: 'Dalam proses harmonisasi dengan Subbag Perencanaan dan Kepegawaian.'
       },
       {
-        id: 3,
+        id: 5,
         programId: 4,
         nip: '198701012010011001',
         pegawai: 'Rizky Aditya Pratama, S.Kom., M.Si.',
@@ -2275,17 +2307,18 @@ const Store = {
   // METODE PENGELOLAAN RENCANA AKSI & TINDAK LANJUT (TRANSFER OF LEARNING)
   // =========================================================================
   getActionPlans(targetNip = null) {
-    if (!Array.isArray(this.state.actionPlans)) {
+    if (!Array.isArray(this.state.actionPlans) || this.state.actionPlans.length === 0) {
       this.state.actionPlans = (this.defaultState && this.defaultState.actionPlans)
         ? JSON.parse(JSON.stringify(this.defaultState.actionPlans))
         : [];
     }
     const myNip = String(targetNip || this.state.user?.nip || '').replace(/[^0-9]/g, '');
     if (!myNip) return this.state.actionPlans;
-    return this.state.actionPlans.filter(ap => {
+    const filtered = this.state.actionPlans.filter(ap => {
       const apNip = String(ap.nip || '').replace(/[^0-9]/g, '');
       return !apNip || apNip === myNip;
     });
+    return filtered.length > 0 ? filtered : this.state.actionPlans;
   },
 
   saveActionPlan(planData) {

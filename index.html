@@ -44,7 +44,7 @@
     rel="stylesheet">
 
   <!-- Core Stylesheet -->
-  <link rel="stylesheet" href="css/app.css?v=20261119_mobnotif_v29">
+  <link rel="stylesheet" href="css/app.css?v=20261119_typo_v31">
 
   <!-- Critical Inlined CSS (Ensures 100% Instant & Flawless Mobile / PWA Rendering) -->
   <style>
@@ -1705,21 +1705,20 @@
 
           <!-- Program Table Card -->
           <div class="card">
-            <div class="card-header">
+            <div class="card-header" style="flex-wrap: wrap; gap: 10px; align-items: flex-start; padding: 12px 16px;">
               <div>
-                <h3 class="card-title">Program Pengembangan Prioritas Tahun <span class="dynamic-year">2026</span></h3>
-                <div style="font-size: 11.5px; color: var(--color-text-muted);">Daftar rencana kegiatan diklat,
-                  bimbingan, maupun non-klasikal</div>
+                <h3 class="card-title" style="margin: 0; font-size: 13.5px; font-weight: 700;">Program Pengembangan Prioritas Tahun <span class="dynamic-year">2026</span></h3>
+                <div style="font-size: 11px; color: var(--color-text-muted); margin-top: 3px;">Daftar rencana kegiatan diklat, bimbingan, maupun non-klasikal</div>
               </div>
-              <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-                <button class="btn btn-outline-primary btn-sm" onclick="App.navigate('ekalender')" title="Pilih &amp; daftarkan dari jadwal resmi BPSDMD &amp; Bappenas">
-                  <span data-icon="Calendar" data-icon-size="14"></span> Kalender Diklat BPSDMD
+              <div style="display: flex; gap: 6px; flex-wrap: wrap; align-items: center;">
+                <button class="btn btn-outline-primary btn-sm" onclick="App.navigate('ekalender')" style="font-size: 11px; padding: 5px 10px; font-weight: 600;" title="Pilih &amp; daftarkan dari jadwal resmi BPSDMD &amp; Bappenas">
+                  <span data-icon="Calendar" data-icon-size="13"></span> Kalender Diklat BPSDMD
                 </button>
-                <button class="btn btn-outline btn-sm" onclick="App.openInputRealizationDrawer()" style="border-color: #16a34a; color: #16a34a;">
-                  <span data-icon="Upload" data-icon-size="14"></span> Upload Bukti Realisasi
+                <button class="btn btn-outline btn-sm" onclick="App.openInputRealizationDrawer()" style="border-color: #16a34a; color: #16a34a; font-size: 11px; padding: 5px 10px; font-weight: 600;">
+                  <span data-icon="Upload" data-icon-size="13"></span> Upload Bukti Realisasi
                 </button>
-                <button class="btn btn-primary btn-sm" onclick="App.openAddProgramModal()">
-                  <span data-icon="Plus" data-icon-size="14"></span> Tambah Program
+                <button class="btn btn-primary btn-sm" onclick="App.openAddProgramModal()" style="font-size: 11px; padding: 5px 10px; font-weight: 600;">
+                  <span data-icon="Plus" data-icon-size="13"></span> Tambah Program
                 </button>
               </div>
             </div>
@@ -1795,66 +1794,66 @@
           </div>
 
           <!-- CARD: MATRIKS TINDAK LANJUT & RENCANA AKSI PENERAPAN (TRANSFER OF LEARNING) -->
-          <div class="card" style="margin-top: 24px;">
-            <div class="card-header" style="flex-wrap: wrap; gap: 12px; align-items: flex-start;">
-              <div style="flex: 1; min-width: 260px;">
-                <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
-                  <h3 class="card-title" style="margin: 0;">Tindak Lanjut &amp; Rencana Aksi Penerapan (Action Plan)</h3>
-                  <span class="badge badge-success" style="font-weight: 700; background: rgba(34, 197, 94, 0.15); color: #15803d; border: 1px solid rgba(34, 197, 94, 0.3);">Output Nyata ASN</span>
+          <div class="card" style="margin-top: 20px;">
+            <div class="card-header" style="flex-wrap: wrap; gap: 10px; align-items: flex-start; padding: 12px 16px;">
+              <div style="flex: 1; min-width: 250px;">
+                <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
+                  <h3 class="card-title" style="margin: 0; font-size: 13.5px; font-weight: 700;">Tindak Lanjut &amp; Rencana Aksi Penerapan (Action Plan)</h3>
+                  <span class="badge badge-success" style="font-weight: 600; font-size: 10px; padding: 2px 7px; background: rgba(34, 197, 94, 0.12); color: #15803d; border: 1px solid rgba(34, 197, 94, 0.25);">Output Nyata ASN</span>
                 </div>
-                <div style="font-size: 11.5px; color: var(--color-text-muted); margin-top: 4px; line-height: 1.4;">
+                <div style="font-size: 11px; color: var(--color-text-muted); margin-top: 3px; line-height: 1.35;">
                   Komitmen transfer of learning &amp; bukti hasil konkret yang dihasilkan pegawai di unit kerja Bappeda Provinsi Lampung setelah mengikuti pelatihan
                 </div>
               </div>
-              <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-                <button class="btn btn-outline-primary btn-sm" onclick="ExportService.printActionPlanFollowUp()" style="border: 1.5px solid #1E3A5F; color: #1E3A5F; font-weight: 650; display: inline-flex; align-items: center; gap: 6px;" title="Cetak Berkas Komitmen Rencana Aksi Tindak Lanjut Resmi">
-                  <span data-icon="Printer" data-icon-size="14"></span> Cetak Lembar Rencana Aksi
+              <div style="display: flex; gap: 6px; flex-wrap: wrap; align-items: center;">
+                <button class="btn btn-outline-primary btn-sm" onclick="ExportService.printActionPlanFollowUp()" style="border: 1px solid #1E3A5F; color: #1E3A5F; font-size: 11px; padding: 5px 10px; font-weight: 600; display: inline-flex; align-items: center; gap: 5px;" title="Cetak Berkas Komitmen Rencana Aksi Tindak Lanjut Resmi">
+                  <span data-icon="Printer" data-icon-size="13"></span> Cetak Lembar Rencana Aksi
                 </button>
-                <button class="btn btn-outline btn-sm" onclick="ExportService.printCertificateOfCompliance()" style="border-color: #0284c7; color: #0284c7; font-weight: 650; display: inline-flex; align-items: center; gap: 6px;" title="Cetak Surat Keterangan Kepatuhan Bangkom 20 JP &amp; Hasil Tindak Lanjut untuk Kenaikan Pangkat">
-                  <span data-icon="Award" data-icon-size="14"></span> Surat Keterangan Bangkom 20 JP
+                <button class="btn btn-outline btn-sm" onclick="ExportService.printCertificateOfCompliance()" style="border-color: #0284c7; color: #0284c7; font-size: 11px; padding: 5px 10px; font-weight: 600; display: inline-flex; align-items: center; gap: 5px;" title="Cetak Surat Keterangan Kepatuhan Bangkom 20 JP &amp; Hasil Tindak Lanjut untuk Kenaikan Pangkat">
+                  <span data-icon="Award" data-icon-size="13"></span> Surat Keterangan Bangkom 20 JP
                 </button>
-                <button class="btn btn-primary btn-sm" onclick="App.openAddActionPlanModal()" style="display: inline-flex; align-items: center; gap: 5px;">
-                  <span data-icon="Plus" data-icon-size="14"></span> Tambah Rencana Aksi
+                <button class="btn btn-primary btn-sm" onclick="App.openAddActionPlanModal()" style="font-size: 11px; padding: 5px 10px; font-weight: 600; display: inline-flex; align-items: center; gap: 4px;">
+                  <span data-icon="Plus" data-icon-size="13"></span> Tambah Rencana Aksi
                 </button>
               </div>
             </div>
 
             <!-- Summary Bar Tindak Lanjut -->
-            <div class="grid grid-cols-3" style="gap: 12px; margin-bottom: 16px;">
-              <div style="padding: 12px 14px; background: rgba(34, 197, 94, 0.08); border: 1px solid rgba(34, 197, 94, 0.25); border-radius: 10px;">
-                <div style="font-size: 11px; color: #15803d; font-weight: 700; text-transform: uppercase;">Tuntas Terealisasi</div>
-                <div style="font-size: 18px; font-weight: 800; color: #15803d; margin-top: 2px;" id="actionPlanStatTuntas">1 Output</div>
-                <div style="font-size: 11px; color: var(--color-text-muted);">Aksi nyata telah diterapkan di kantor</div>
+            <div class="grid grid-cols-3" style="gap: 10px; margin-bottom: 14px; padding: 0 16px;">
+              <div style="padding: 10px 12px; background: rgba(34, 197, 94, 0.06); border: 1px solid rgba(34, 197, 94, 0.2); border-radius: 8px;">
+                <div style="font-size: 9.5px; color: #15803d; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px;">Tuntas Terealisasi</div>
+                <div style="font-size: 13.5px; font-weight: 700; color: #15803d; margin: 2px 0 1px 0;" id="actionPlanStatTuntas">0 Output</div>
+                <div style="font-size: 10px; color: var(--color-text-muted); line-height: 1.3;">Aksi nyata telah diterapkan di kantor</div>
               </div>
-              <div style="padding: 12px 14px; background: rgba(234, 179, 8, 0.08); border: 1px solid rgba(234, 179, 8, 0.25); border-radius: 10px;">
-                <div style="font-size: 11px; color: #a16207; font-weight: 700; text-transform: uppercase;">Sedang Berjalan</div>
-                <div style="font-size: 18px; font-weight: 800; color: #a16207; margin-top: 2px;" id="actionPlanStatBerjalan">1 Output</div>
-                <div style="font-size: 11px; color: var(--color-text-muted);">Proses penyusunan produk/SOP/data</div>
+              <div style="padding: 10px 12px; background: rgba(234, 179, 8, 0.06); border: 1px solid rgba(234, 179, 8, 0.2); border-radius: 8px;">
+                <div style="font-size: 9.5px; color: #a16207; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px;">Sedang Berjalan</div>
+                <div style="font-size: 13.5px; font-weight: 700; color: #a16207; margin: 2px 0 1px 0;" id="actionPlanStatBerjalan">0 Output</div>
+                <div style="font-size: 10px; color: var(--color-text-muted); line-height: 1.3;">Proses penyusunan produk/SOP/data</div>
               </div>
-              <div style="padding: 12px 14px; background: rgba(59, 130, 246, 0.08); border: 1px solid rgba(59, 130, 246, 0.25); border-radius: 10px;">
-                <div style="font-size: 11px; color: #1d4ed8; font-weight: 700; text-transform: uppercase;">Total Komitmen Aksi</div>
-                <div style="font-size: 18px; font-weight: 800; color: #1d4ed8; margin-top: 2px;" id="actionPlanStatTotal">3 Rencana Aksi</div>
-                <div style="font-size: 11px; color: var(--color-text-muted);">Komitmen kinerja tindak lanjut ASN</div>
+              <div style="padding: 10px 12px; background: rgba(59, 130, 246, 0.06); border: 1px solid rgba(59, 130, 246, 0.2); border-radius: 8px;">
+                <div style="font-size: 9.5px; color: #1d4ed8; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px;">Total Komitmen Aksi</div>
+                <div style="font-size: 13.5px; font-weight: 700; color: #1d4ed8; margin: 2px 0 1px 0;" id="actionPlanStatTotal">0 Rencana Aksi</div>
+                <div style="font-size: 10px; color: var(--color-text-muted); line-height: 1.3;">Komitmen kinerja tindak lanjut ASN</div>
               </div>
             </div>
 
             <div class="table-responsive">
               <table class="data-table">
                 <thead>
-                  <tr>
-                    <th>No</th>
-                    <th>Program IDP Terkait</th>
-                    <th>Tindak Lanjut &amp; Aksi Nyata</th>
-                    <th>Wujud Output / Produk</th>
-                    <th>Target Waktu</th>
-                    <th>Unit Kerja Manfaat</th>
-                    <th>Status Tindak Lanjut</th>
-                    <th>Aksi</th>
+                  <tr style="font-size: 10.5px;">
+                    <th style="padding: 8px 10px; text-align: center; width: 45px;">No</th>
+                    <th style="padding: 8px 10px;">Program IDP Terkait</th>
+                    <th style="padding: 8px 10px;">Tindak Lanjut &amp; Aksi Nyata</th>
+                    <th style="padding: 8px 10px;">Wujud Output / Produk</th>
+                    <th style="padding: 8px 10px; text-align: center;">Target Waktu</th>
+                    <th style="padding: 8px 10px;">Unit Kerja Manfaat</th>
+                    <th style="padding: 8px 10px; text-align: center;">Status</th>
+                    <th style="padding: 8px 10px; text-align: center;">Aksi</th>
                   </tr>
                 </thead>
                 <tbody id="idpFollowUpTableBody">
                   <tr>
-                    <td colspan="8" style="text-align: center; padding: 24px 16px; color: var(--color-text-muted);">
+                    <td colspan="8" style="text-align: center; padding: 20px 16px; color: var(--color-text-muted); font-size: 11.5px;">
                       Memuat data rencana aksi tindak lanjut...
                     </td>
                   </tr>
@@ -4071,26 +4070,26 @@
       </div>
       <div class="modal-body" style="max-height: 70vh; overflow-y: auto;">
         <!-- Ringkasan Eksekutif -->
-        <div class="grid grid-cols-4" style="gap: 12px; margin-bottom: 20px;">
-          <div style="padding: 12px 14px; background: rgba(30, 58, 138, 0.08); border: 1px solid rgba(30, 58, 138, 0.2); border-radius: 10px;">
-            <div style="font-size: 10.5px; font-weight: 700; color: var(--color-primary); text-transform: uppercase;">Total Komitmen Aksi</div>
-            <div style="font-size: 20px; font-weight: 800; color: var(--color-primary); margin-top: 2px;">94 Aksi</div>
-            <div style="font-size: 11px; color: var(--color-text-muted);">Seluruh ASN Bappeda</div>
+        <div class="grid grid-cols-4" style="gap: 10px; margin-bottom: 16px;">
+          <div style="padding: 10px 12px; background: rgba(30, 58, 138, 0.06); border: 1px solid rgba(30, 58, 138, 0.2); border-radius: 8px;">
+            <div style="font-size: 9.5px; font-weight: 700; color: var(--color-primary); text-transform: uppercase; letter-spacing: 0.3px;">Total Komitmen Aksi</div>
+            <div style="font-size: 14px; font-weight: 700; color: var(--color-primary); margin: 2px 0 1px 0;">94 Aksi</div>
+            <div style="font-size: 10px; color: var(--color-text-muted);">Seluruh ASN Bappeda</div>
           </div>
-          <div style="padding: 12px 14px; background: rgba(34, 197, 94, 0.08); border: 1px solid rgba(34, 197, 94, 0.25); border-radius: 10px;">
-            <div style="font-size: 10.5px; font-weight: 700; color: #15803d; text-transform: uppercase;">Tuntas Terealisasi</div>
-            <div style="font-size: 20px; font-weight: 800; color: #15803d; margin-top: 2px;">68 Output</div>
-            <div style="font-size: 11px; color: #15803d; font-weight: 600;">Tingkat Capaian: 72.3%</div>
+          <div style="padding: 10px 12px; background: rgba(34, 197, 94, 0.06); border: 1px solid rgba(34, 197, 94, 0.2); border-radius: 8px;">
+            <div style="font-size: 9.5px; font-weight: 700; color: #15803d; text-transform: uppercase; letter-spacing: 0.3px;">Tuntas Terealisasi</div>
+            <div style="font-size: 14px; font-weight: 700; color: #15803d; margin: 2px 0 1px 0;">68 Output</div>
+            <div style="font-size: 10px; color: #15803d; font-weight: 600;">Capaian: 72.3%</div>
           </div>
-          <div style="padding: 12px 14px; background: rgba(234, 179, 8, 0.08); border: 1px solid rgba(234, 179, 8, 0.25); border-radius: 10px;">
-            <div style="font-size: 10.5px; font-weight: 700; color: #a16207; text-transform: uppercase;">Sedang Berjalan</div>
-            <div style="font-size: 20px; font-weight: 800; color: #a16207; margin-top: 2px;">19 Output</div>
-            <div style="font-size: 11px; color: var(--color-text-muted);">Dalam proses penyusunan</div>
+          <div style="padding: 10px 12px; background: rgba(234, 179, 8, 0.06); border: 1px solid rgba(234, 179, 8, 0.2); border-radius: 8px;">
+            <div style="font-size: 9.5px; font-weight: 700; color: #a16207; text-transform: uppercase; letter-spacing: 0.3px;">Sedang Berjalan</div>
+            <div style="font-size: 14px; font-weight: 700; color: #a16207; margin: 2px 0 1px 0;">19 Output</div>
+            <div style="font-size: 10px; color: var(--color-text-muted);">Proses penyusunan</div>
           </div>
-          <div style="padding: 12px 14px; background: rgba(239, 68, 68, 0.08); border: 1px solid rgba(239, 68, 68, 0.25); border-radius: 10px;">
-            <div style="font-size: 10.5px; font-weight: 700; color: #b91c1c; text-transform: uppercase;">Perlu Pembinaan</div>
-            <div style="font-size: 20px; font-weight: 800; color: #b91c1c; margin-top: 2px;">7 Pegawai</div>
-            <div style="font-size: 11px; color: #b91c1c; font-weight: 600;">Belum mulai aksi nyata</div>
+          <div style="padding: 10px 12px; background: rgba(239, 68, 68, 0.06); border: 1px solid rgba(239, 68, 68, 0.2); border-radius: 8px;">
+            <div style="font-size: 9.5px; font-weight: 700; color: #b91c1c; text-transform: uppercase; letter-spacing: 0.3px;">Perlu Pembinaan</div>
+            <div style="font-size: 14px; font-weight: 700; color: #b91c1c; margin: 2px 0 1px 0;">7 Pegawai</div>
+            <div style="font-size: 10px; color: #b91c1c; font-weight: 600;">Belum mulai aksi</div>
           </div>
         </div>
 
@@ -6810,9 +6809,9 @@
   <script src="js/icons.js?v=20261119_mobaction_v28"></script>
   <script src="js/charts.js?v=20261008_fix"></script>
   <script src="js/bappeda_data.js?v=20261029_v56"></script>
-  <script src="js/store.js?v=20261119_tindaklanjut_v30"></script>
-  <script src="js/export.js?v=20261119_tindaklanjut_v30"></script>
-  <script src="js/app.js?v=20261119_tindaklanjut_v30"></script>
+  <script src="js/store.js?v=20261119_typo_v31"></script>
+  <script src="js/export.js?v=20261119_typo_v31"></script>
+  <script src="js/app.js?v=20261119_typo_v31"></script>
 </body>
 
 </html>

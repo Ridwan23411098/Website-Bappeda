@@ -1942,19 +1942,19 @@ const App = {
       const isMet = summary.totalJp >= 20;
       if (isMet) {
         compBannerEl.innerHTML = `
-          <div style="background: rgba(22, 163, 74, 0.08); border: 1.5px solid rgba(22, 163, 74, 0.35); border-radius: 8px; padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;">
-            <div style="display: flex; align-items: center; gap: 10px;">
-              <span style="font-size: 22px;">🛡️</span>
+          <div style="background: rgba(22, 163, 74, 0.07); border: 1px solid rgba(22, 163, 74, 0.3); border-radius: 8px; padding: 10px 14px; display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span style="font-size: 16px;">🛡️</span>
               <div>
-                <div style="font-size: 13px; font-weight: 750; color: #166534;">
+                <div style="font-size: 12px; font-weight: 700; color: #166534;">
                   Standar Hak Belajar ASN Terpenuhi (UU No. 20/2023 Pasal 49)
                 </div>
-                <div style="font-size: 11.5px; color: #15803d;">
+                <div style="font-size: 11px; color: #15803d; line-height: 1.35;">
                   Total rencana pengembangan: <b>${summary.totalJp} JP</b> (Melampaui syarat minimal 20 JP per tahun). Dokumen sah dan siap diajukan.
                 </div>
               </div>
             </div>
-            <span class="badge badge-success" style="font-weight: 700; padding: 6px 12px; font-size: 11px;">
+            <span class="badge badge-success" style="font-weight: 600; padding: 4px 10px; font-size: 10px;">
               ✓ 100% Kepatuhan Regulasi
             </span>
           </div>
@@ -1962,19 +1962,19 @@ const App = {
       } else {
         const kurang = 20 - summary.totalJp;
         compBannerEl.innerHTML = `
-          <div style="background: rgba(217, 119, 6, 0.08); border: 1.5px solid rgba(217, 119, 6, 0.35); border-radius: 8px; padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;">
-            <div style="display: flex; align-items: center; gap: 10px;">
-              <span style="font-size: 22px;">⚠️</span>
+          <div style="background: rgba(217, 119, 6, 0.07); border: 1px solid rgba(217, 119, 6, 0.28); border-radius: 8px; padding: 10px 14px; display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span style="font-size: 16px;">⚠️</span>
               <div>
-                <div style="font-size: 13px; font-weight: 750; color: #9a3412;">
+                <div style="font-size: 12px; font-weight: 700; color: #9a3412;">
                   Belum Memenuhi Syarat Minimal 20 JP (UU No. 20/2023 Pasal 49)
                 </div>
-                <div style="font-size: 11.5px; color: #b45309;">
+                <div style="font-size: 11px; color: #b45309; line-height: 1.35;">
                   Total saat ini: <b>${summary.totalJp} JP</b> (Masih kurang <b>${kurang} JP</b> lagi untuk memenuhi standar hak belajar tahunan ASN).
                 </div>
               </div>
             </div>
-            <button class="btn btn-warning btn-sm" onclick="App.openAddProgramModal()" style="font-size: 11.5px; font-weight: 700;">
+            <button class="btn btn-warning btn-sm" onclick="App.openAddProgramModal()" style="font-size: 11px; padding: 4px 10px; font-weight: 600;">
               + Tambah ${kurang} JP Pelatihan
             </button>
           </div>
@@ -2113,11 +2113,11 @@ const App = {
     if (plans.length === 0) {
       tbody.innerHTML = `
         <tr>
-          <td colspan="8" style="text-align: center; padding: 32px 16px; color: var(--color-text-muted);">
-            <div style="margin-bottom: 8px;">${getIcon('FileCheck', 28)}</div>
-            <div style="font-weight: 600; margin-bottom: 4px;">Belum Ada Rencana Aksi Tindak Lanjut</div>
-            <p style="font-size: 12px; margin-bottom: 14px;">Rumuskan rencana aksi nyata (transfer of learning) dari program pengembangan yang Anda rencanakan.</p>
-            <button type="button" class="btn btn-primary btn-sm" onclick="App.openAddActionPlanModal()">+ Tambah Rencana Aksi</button>
+          <td colspan="8" style="text-align: center; padding: 22px 16px; color: var(--color-text-muted);">
+            <div style="margin-bottom: 6px;">${getIcon('FileCheck', 22)}</div>
+            <div style="font-size: 12px; font-weight: 650; color: var(--color-text-primary); margin-bottom: 2px;">Belum Ada Rencana Aksi Tindak Lanjut</div>
+            <p style="font-size: 11px; margin-bottom: 10px; max-width: 440px; margin-left: auto; margin-right: auto; line-height: 1.35;">Rumuskan rencana aksi nyata (transfer of learning) dari program pengembangan yang Anda rencanakan.</p>
+            <button type="button" class="btn btn-primary btn-sm" onclick="App.openAddActionPlanModal()" style="font-size: 11px; padding: 4px 10px; font-weight: 600;">+ Tambah Rencana Aksi</button>
           </td>
         </tr>
       `;
@@ -2132,33 +2132,33 @@ const App = {
         : 'badge-blue';
 
       const evidenceHtml = p.buktiTindakLanjut && p.buktiTindakLanjut !== '-'
-        ? `<div style="margin-top: 4px; font-size: 10.5px; color: var(--color-primary); font-weight: 600; display: inline-flex; align-items: center; gap: 3px;">
+        ? `<div style="margin-top: 3px; font-size: 10px; color: var(--color-primary); font-weight: 600; display: inline-flex; align-items: center; gap: 3px;">
              ${getIcon('CheckCircle', 11)} ${p.buktiTindakLanjut.startsWith('http') ? `<a href="${p.buktiTindakLanjut}" target="_blank" style="color:var(--color-primary); text-decoration:underline;">Tautan Bukti</a>` : p.buktiTindakLanjut}
            </div>`
         : '';
 
       return `
-        <tr>
-          <td>${idx + 1}</td>
-          <td style="font-weight: 600; max-width: 180px; white-space: normal;">${p.program}</td>
-          <td style="max-width: 240px; white-space: normal; line-height: 1.4;">
-            <div style="font-weight: 650; color: var(--color-text-primary);">${p.rencanaAksi}</div>
-            ${p.evaluasiAtasan ? `<div style="font-size: 11px; color: var(--color-text-muted); margin-top: 3px; font-style: italic;">Atasan: "${p.evaluasiAtasan}"</div>` : ''}
+        <tr style="font-size: 11px;">
+          <td style="text-align: center; font-size: 11px;">${idx + 1}</td>
+          <td style="font-weight: 600; max-width: 170px; white-space: normal; line-height: 1.35; font-size: 11px;">${p.program}</td>
+          <td style="max-width: 220px; white-space: normal; line-height: 1.35; font-size: 11px;">
+            <div style="font-weight: 650; color: var(--color-text-primary); font-size: 11px;">${p.rencanaAksi}</div>
+            ${p.evaluasiAtasan ? `<div style="font-size: 10.5px; color: var(--color-text-muted); margin-top: 2px; font-style: italic;">Atasan: "${p.evaluasiAtasan}"</div>` : ''}
           </td>
-          <td style="max-width: 180px; white-space: normal;">
-            <span style="font-weight: 700; color: var(--color-primary);">${p.outputKonkret}</span>
+          <td style="max-width: 170px; white-space: normal; font-size: 11px; line-height: 1.35;">
+            <span style="font-weight: 650; color: var(--color-primary);">${p.outputKonkret}</span>
             ${evidenceHtml}
           </td>
-          <td style="text-align: center; white-space: nowrap;">${p.targetWaktu}</td>
-          <td style="font-size: 11.5px; max-width: 160px; white-space: normal; color: var(--color-text-secondary);">${p.unitKerja || 'Bappeda'}</td>
-          <td style="text-align: center;"><span class="badge ${badgeCls}">${p.status}</span></td>
+          <td style="text-align: center; white-space: nowrap; font-size: 11px;">${p.targetWaktu}</td>
+          <td style="font-size: 11px; max-width: 150px; white-space: normal; color: var(--color-text-secondary); line-height: 1.3;">${p.unitKerja || 'Bappeda'}</td>
+          <td style="text-align: center;"><span class="badge ${badgeCls}" style="font-size: 10px; padding: 2px 7px;">${p.status}</span></td>
           <td style="text-align: center; white-space: nowrap;">
-            <div style="display: flex; gap: 6px; justify-content: center;">
-              <button type="button" class="btn btn-outline btn-sm" title="Edit Rencana Aksi" onclick="App.openAddActionPlanModal(${p.id})">
-                ${getIcon('Edit3', 13)}
+            <div style="display: flex; gap: 4px; justify-content: center;">
+              <button type="button" class="btn btn-outline btn-sm" style="padding: 3px 6px; font-size: 10.5px;" title="Edit Rencana Aksi" onclick="App.openAddActionPlanModal(${p.id})">
+                ${getIcon('Edit3', 12)}
               </button>
-              <button type="button" class="btn btn-danger btn-sm" title="Hapus" onclick="App.deleteActionPlanItem(${p.id})">
-                ${getIcon('Trash2', 13)}
+              <button type="button" class="btn btn-danger btn-sm" style="padding: 3px 6px; font-size: 10.5px;" title="Hapus" onclick="App.deleteActionPlanItem(${p.id})">
+                ${getIcon('Trash2', 12)}
               </button>
             </div>
           </td>
