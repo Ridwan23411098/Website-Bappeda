@@ -2106,8 +2106,8 @@ const App = {
     const elBerjalan = document.getElementById('actionPlanStatBerjalan');
     const elTotal = document.getElementById('actionPlanStatTotal');
 
-    if (elTuntas) elTuntas.textContent = `${tuntasCount} Output`;
-    if (elBerjalan) elBerjalan.textContent = `${berjalanCount} Output`;
+    if (elTuntas) elTuntas.textContent = `${tuntasCount} Hasil Selesai`;
+    if (elBerjalan) elBerjalan.textContent = `${berjalanCount} Dalam Proses`;
     if (elTotal) elTotal.textContent = `${totalCount} Rencana Aksi`;
 
     if (plans.length === 0) {
