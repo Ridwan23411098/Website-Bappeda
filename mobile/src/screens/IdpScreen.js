@@ -115,6 +115,31 @@ export default function IdpScreen({ user }) {
     Alert.alert('📄 Berkas Portofolio Resmi', `Menyiapkan unduhan ${docTitle} berformat PDF resmi terverifikasi.`);
   };
 
+  const handleViewOrUploadEvidence = (ap) => {
+    if (ap.status === 'Selesai') {
+      Alert.alert(
+        '📄 Bukti Fisik Hasil Kerja',
+        `Rencana Aksi: "${ap.rencanaAksi}"\n\nWujud Hasil: ${ap.outputKonkret}\nStatus: Disahkan Atasan Langsung (Kirkpatrick L4: 5/5)\n\nBukti telah terverifikasi dan masuk portofolio SIASN BKN.`,
+        [{ text: 'Tutup', style: 'cancel' }]
+      );
+    } else {
+      Alert.alert(
+        '📤 Unggah Bukti Hasil Kerja',
+        `Pilih berkas bukti (PDF/Laporan) atau tautan sistem untuk: "${ap.outputKonkret}".`,
+        [
+          { text: 'Batal', style: 'cancel' },
+          {
+            text: 'Simpan Bukti & Selesaikan',
+            onPress: () => {
+              setActionPlans(prev => prev.map(p => p.id === ap.id ? { ...p, status: 'Selesai' } : p));
+              Alert.alert('✅ Bukti Diunggah', 'Bukti fisik berhasil diunggah dan diajukan ke Atasan Langsung untuk pengesahan resmi.');
+            }
+          }
+        ]
+      );
+    }
+  };
+
   const handleSubmitIdp = async () => {
     setSubmitting(true);
     try {
@@ -288,6 +313,25 @@ export default function IdpScreen({ user }) {
               <View style={{ alignItems: 'flex-end' }}>
                 <Text style={{ fontSize: 9.5, color: '#64748b' }}>Target:</Text>
                 <Text style={{ fontSize: 11, fontWeight: '600', color: '#334155' }}>{ap.targetWaktu}</Text>
+              </View>
+            </View>
+
+            {/* Evidence & Validation Loop Bar */}
+            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 8, paddingTop: 6, borderTopWidth: 1, borderTopColor: '#f1f5f9' }}>
+              <TouchableOpacity
+                style={{ flexDirection: 'row', alignItems: 'center', gap: 4, paddingVertical: 4, paddingHorizontal: 8, backgroundColor: ap.status === 'Selesai' ? '#f0f9ff' : '#eff6ff', borderRadius: 6, borderWidth: 1, borderColor: ap.status === 'Selesai' ? '#bae6fd' : '#bfdbfe' }}
+                onPress={() => handleViewOrUploadEvidence(ap)}
+                activeOpacity={0.7}
+              >
+                <Text style={{ fontSize: 10.5, fontWeight: '750', color: '#0369a1' }}>
+                  {ap.status === 'Selesai' ? '📄 Lihat Bukti Fisik' : '📤 + Unggah Bukti'}
+                </Text>
+              </TouchableOpacity>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                <Text style={{ fontSize: 9.5, color: '#64748b' }}>Pengesahan:</Text>
+                <Text style={{ fontSize: 10, fontWeight: '800', color: ap.status === 'Selesai' ? '#16a34a' : '#d97706' }}>
+                  {ap.status === 'Selesai' ? '✓ Disahkan Atasan' : '⏳ Menunggu'}
+                </Text>
               </View>
             </View>
 

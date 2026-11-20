@@ -483,7 +483,13 @@ const Store = {
         targetWaktu: 'Triwulan II 2026',
         unitKerja: 'Sekretariat Bappeda Provinsi Lampung',
         status: 'Tuntas Terealisasi',
+        statusPengesahan: 'Disahkan Atasan',
+        nilaiDampak: 5,
+        namaVerifikator: 'Dr. ANANG RISGIYANTO, S.K.M., M.Kes.',
+        tanggalPengesahan: '16 November 2026',
         tanggalSelesai: '15 November 2026',
+        tipeBukti: 'link',
+        keteranganBukti: 'SOP telah ditandatangani dan diberlakukan di seluruh unit kerja Bappeda Provinsi Lampung.',
         buktiTindakLanjut: 'https://lampungprov.go.id/bappeda/sop-administrasi-2026',
         evaluasiAtasan: 'Sangat Baik. Pelayanan internal Bappeda meningkat signifikan dengan adanya standar operasional terintegrasi.'
       },
@@ -499,7 +505,10 @@ const Store = {
         targetWaktu: 'Triwulan III 2026',
         unitKerja: 'Sekretariat Bappeda Provinsi Lampung',
         status: 'Sedang Berjalan',
+        statusPengesahan: 'Menunggu Pengesahan Atasan',
         tanggalSelesai: '-',
+        tipeBukti: 'file',
+        keteranganBukti: 'Draft register risiko sedang tahap finalisasi reviu bersama tim teknis Inspektorat.',
         buktiTindakLanjut: 'Draft_Register_Risiko_Bappeda_2026.pdf',
         evaluasiAtasan: 'Dalam proses reviu bersama Inspektorat Daerah Provinsi Lampung.'
       },
@@ -515,7 +524,13 @@ const Store = {
         targetWaktu: 'Triwulan II 2026',
         unitKerja: 'Bidang Perencanaan, Pengendalian & Evaluasi Pembangunan Daerah',
         status: 'Tuntas Terealisasi',
+        statusPengesahan: 'Disahkan Atasan',
+        nilaiDampak: 5,
+        namaVerifikator: 'ANDI ARAFAT S.T., M.E.',
+        tanggalPengesahan: '19 November 2026',
         tanggalSelesai: '18 November 2026',
+        tipeBukti: 'link',
+        keteranganBukti: 'Dashboard evaluasi makro telah terintegrasi di jaringan intranet dan dapat diakses tim bidang evaluasi.',
         buktiTindakLanjut: 'https://dashboard-evaluasi.lampungprov.go.id',
         evaluasiAtasan: 'Sangat Baik. Dashboard berhasil memangkas waktu kompilasi data evaluasi dari 5 hari menjadi hitungan menit.'
       },
@@ -531,7 +546,10 @@ const Store = {
         targetWaktu: 'Triwulan IV 2026',
         unitKerja: 'Bidang Perencanaan, Pengendalian & Evaluasi Pembangunan Daerah',
         status: 'Sedang Berjalan',
+        statusPengesahan: 'Menunggu Pengesahan Atasan',
         tanggalSelesai: '-',
+        tipeBukti: 'file',
+        keteranganBukti: 'Draft SOP layanan konsultasi perencanaan dalam proses penyelarasan format hukum.',
         buktiTindakLanjut: 'Draft_SOP_Layanan_Konsultasi_v1.pdf',
         evaluasiAtasan: 'Dalam proses harmonisasi dengan Subbag Perencanaan dan Kepegawaian.'
       },
@@ -2348,6 +2366,7 @@ const Store = {
         nip: currentAsn.nip,
         pegawai: currentAsn.name,
         unitKerja: currentAsn.unitKerja || 'Bappeda Provinsi Lampung',
+        statusPengesahan: 'Menunggu Pengesahan Atasan',
         created_at: new Date().toISOString(),
         ...planData
       };
@@ -2355,6 +2374,80 @@ const Store = {
     }
     this.save();
     return true;
+  },
+
+  saveActionPlanEvidence(planId, evidenceData) {
+    if (!Array.isArray(this.state.actionPlans)) return false;
+    const idx = this.state.actionPlans.findIndex(p => p.id === Number(planId));
+    if (idx === -1) return false;
+
+    const currentPlan = this.state.actionPlans[idx];
+    const now = new Date();
+    const months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+    const formattedDate = `${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}`;
+
+    this.state.actionPlans[idx] = {
+      ...currentPlan,
+      buktiTindakLanjut: evidenceData.buktiTindakLanjut || evidenceData.namaFileBukti || evidenceData.url || currentPlan.buktiTindakLanjut,
+      tipeBukti: evidenceData.tipeBukti || 'file',
+      namaFileBukti: evidenceData.namaFileBukti || null,
+      keteranganBukti: evidenceData.keteranganBukti || '',
+      tanggalUnggah: `${formattedDate}, ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')} WIB`,
+      status: evidenceData.status || 'Tuntas Terealisasi',
+      statusPengesahan: 'Menunggu Pengesahan Atasan',
+      tanggalSelesai: formattedDate,
+      updated_at: now.toISOString()
+    };
+
+    // Tambah notifikasi pengunggahan bukti untuk atasan/admin
+    if (typeof this.addNotification === 'function') {
+      this.addNotification({
+        title: 'Bukti Hasil Kerja Diunggah',
+        message: `${currentPlan.pegawai || 'Pegawai'} telah mengunggah bukti hasil nyata untuk rencana aksi "${currentPlan.rencanaAksi}".`,
+        type: 'info',
+        time: 'Baru saja'
+      });
+    }
+
+    this.save();
+    return this.state.actionPlans[idx];
+  },
+
+  validateActionPlanBySupervisor(planId, validationData) {
+    if (!Array.isArray(this.state.actionPlans)) return false;
+    const idx = this.state.actionPlans.findIndex(p => p.id === Number(planId));
+    if (idx === -1) return false;
+
+    const currentPlan = this.state.actionPlans[idx];
+    const now = new Date();
+    const months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+    const formattedDate = `${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}`;
+
+    const verifierName = validationData.namaVerifikator || (this.state.user?.name || 'Dr. ANANG RISGIYANTO, S.K.M., M.Kes.');
+    const statusPengesahan = validationData.statusPengesahan || 'Disahkan Atasan';
+
+    this.state.actionPlans[idx] = {
+      ...currentPlan,
+      statusPengesahan: statusPengesahan,
+      evaluasiAtasan: validationData.evaluasiAtasan || (statusPengesahan === 'Disahkan Atasan' ? 'Disahkan. Hasil kerja nyata terbukti memberikan dampak positif bagi efisiensi unit kerja.' : 'Perlu penyempurnaan bukti hasil kerja.'),
+      nilaiDampak: Number(validationData.nilaiDampak) || 5,
+      namaVerifikator: verifierName,
+      jabatanVerifikator: validationData.jabatanVerifikator || 'Atasan Langsung',
+      tanggalPengesahan: formattedDate,
+      updated_at: now.toISOString()
+    };
+
+    if (typeof this.addNotification === 'function') {
+      this.addNotification({
+        title: statusPengesahan === 'Disahkan Atasan' ? '✅ Hasil Kerja Disahkan Atasan' : '⚠️ Bukti Hasil Perlu Perbaikan',
+        message: `Rencana aksi "${currentPlan.rencanaAksi}" telah dievaluasi oleh ${verifierName}: ${this.state.actionPlans[idx].evaluasiAtasan}`,
+        type: statusPengesahan === 'Disahkan Atasan' ? 'success' : 'warning',
+        time: 'Baru saja'
+      });
+    }
+
+    this.save();
+    return this.state.actionPlans[idx];
   },
 
   deleteActionPlan(id) {

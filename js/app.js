@@ -2135,11 +2135,30 @@ const App = {
         ? 'badge-warning'
         : 'badge-blue';
 
-      const evidenceHtml = p.buktiTindakLanjut && p.buktiTindakLanjut !== '-'
-        ? `<div style="margin-top: 3px; font-size: 10px; color: var(--color-primary); font-weight: 600; display: inline-flex; align-items: center; gap: 3px;">
-             ${getIcon('CheckCircle', 11)} ${p.buktiTindakLanjut.startsWith('http') ? `<a href="${p.buktiTindakLanjut}" target="_blank" style="color:var(--color-primary); text-decoration:underline;">Tautan Bukti</a>` : p.buktiTindakLanjut}
-           </div>`
-        : '';
+      const hasEvidence = p.buktiTindakLanjut && p.buktiTindakLanjut !== '-';
+      const isApproved = p.statusPengesahan === 'Disahkan Atasan';
+      const isNeedsRevision = p.statusPengesahan === 'Perlu Perbaikan';
+
+      const evidenceHtml = hasEvidence
+        ? `
+          <div style="margin-top: 5px; display: flex; align-items: center; gap: 4px; flex-wrap: wrap;">
+            <button type="button" class="btn btn-outline btn-xs" style="padding: 2px 7px; font-size: 10px; border-color: #0284c7; color: #0284c7; font-weight: 650; border-radius: 4px; display: inline-flex; align-items: center; gap: 3px; background: #f0f9ff;" title="Lihat berkas bukti fisik dan lembar validasi atasan" onclick="App.openViewEvidenceModal(${p.id})">
+              ${getIcon('FileText', 11)} Lihat Bukti
+            </button>
+            ${isApproved
+              ? `<span class="badge badge-success" style="font-size: 9.5px; padding: 1px 6px;" title="Disahkan resmi oleh ${p.namaVerifikator || 'Atasan'}">✓ Disahkan</span>`
+              : isNeedsRevision
+              ? `<span class="badge badge-danger" style="font-size: 9.5px; padding: 1px 6px;" title="Perlu perbaikan bukti">⚠️ Revisi</span>`
+              : `<span class="badge badge-warning" style="font-size: 9.5px; padding: 1px 6px;" title="Menunggu validasi atasan">⏳ Menunggu</span>`}
+          </div>
+        `
+        : `
+          <div style="margin-top: 5px;">
+            <button type="button" class="btn btn-xs" style="padding: 2px 8px; font-size: 10px; background: #eff6ff; color: #1d4ed8; border: 1px dashed #93c5fd; font-weight: 650; border-radius: 4px; display: inline-flex; align-items: center; gap: 3px;" title="Unggah bukti fisik produk kerja atau tautan sistem" onclick="App.openUploadEvidenceModal(${p.id})">
+              ${getIcon('Upload', 11)} + Unggah Bukti
+            </button>
+          </div>
+        `;
 
       return `
         <tr style="font-size: 11px;">
@@ -2272,6 +2291,269 @@ const App = {
     Store.deleteActionPlan(id);
     this.renderActionPlans();
     this.toast('Rencana aksi tindak lanjut telah dihapus.', 'info');
+  },
+
+  // =========================================================================
+  // FITUR UNGGAH BUKTI FISIK & VALIDASI ATASAN (EVIDENCE & VALIDATION LOOP)
+  // =========================================================================
+  _selectedEvidenceFile: null,
+  _currentEvidenceTab: 'file',
+  _selectedEvidencePlanId: null,
+  _currentViewingPlanId: null,
+
+  openUploadEvidenceModal(planId) {
+    const plans = Store.getActionPlans ? Store.getActionPlans() : (Store.state.actionPlans || []);
+    const item = plans.find(p => p.id === Number(planId));
+    if (!item) return;
+
+    this._selectedEvidencePlanId = Number(planId);
+    this._selectedEvidenceFile = null;
+
+    const idInp = document.getElementById('uploadEvidencePlanId');
+    const progEl = document.getElementById('uploadEvidenceProgramTitle');
+    const actionEl = document.getElementById('uploadEvidenceActionPlanText');
+    const badgeEl = document.getElementById('uploadEvidenceOutputBadge');
+    const descInp = document.getElementById('uploadEvidenceDescInput');
+    const urlInp = document.getElementById('uploadEvidenceUrlInput');
+    const fileInp = document.getElementById('uploadEvidenceFileInput');
+    const previewEl = document.getElementById('uploadEvidenceFilePreview');
+
+    if (idInp) idInp.value = item.id;
+    if (progEl) progEl.textContent = item.program;
+    if (actionEl) actionEl.textContent = item.rencanaAksi;
+    if (badgeEl) badgeEl.textContent = item.outputKonkret;
+    if (descInp) descInp.value = item.keteranganBukti || '';
+    if (urlInp) urlInp.value = (item.tipeBukti === 'link' && item.buktiTindakLanjut) ? item.buktiTindakLanjut : '';
+    if (fileInp) fileInp.value = '';
+    if (previewEl) previewEl.style.display = 'none';
+
+    this.handleEvidenceTabSwitch(item.tipeBukti === 'link' ? 'link' : 'file');
+    this.openModal('uploadActionPlanEvidenceModal');
+    if (typeof renderAllIcons === 'function') {
+      setTimeout(() => renderAllIcons(), 50);
+    }
+  },
+
+  handleEvidenceTabSwitch(type) {
+    const fileBtn = document.getElementById('tabEvidenceFileBtn');
+    const linkBtn = document.getElementById('tabEvidenceLinkBtn');
+    const fileSec = document.getElementById('uploadEvidenceFileSection');
+    const linkSec = document.getElementById('uploadEvidenceLinkSection');
+
+    this._currentEvidenceTab = type;
+    if (type === 'file') {
+      if (fileBtn) { fileBtn.className = 'btn btn-primary'; fileBtn.style.background = '#1e3a8a'; fileBtn.style.color = '#fff'; }
+      if (linkBtn) { linkBtn.className = 'btn btn-outline'; linkBtn.style.background = 'transparent'; linkBtn.style.color = 'var(--color-text-primary)'; }
+      if (fileSec) fileSec.style.display = 'block';
+      if (linkSec) linkSec.style.display = 'none';
+    } else {
+      if (linkBtn) { linkBtn.className = 'btn btn-primary'; linkBtn.style.background = '#1e3a8a'; linkBtn.style.color = '#fff'; }
+      if (fileBtn) { fileBtn.className = 'btn btn-outline'; fileBtn.style.background = 'transparent'; fileBtn.style.color = 'var(--color-text-primary)'; }
+      if (fileSec) fileSec.style.display = 'none';
+      if (linkSec) linkSec.style.display = 'block';
+    }
+  },
+
+  handleEvidenceFileSelected(input) {
+    if (input.files && input.files[0]) {
+      const file = input.files[0];
+      this._selectedEvidenceFile = file;
+
+      const previewEl = document.getElementById('uploadEvidenceFilePreview');
+      const nameEl = document.getElementById('uploadEvidenceFileName');
+      const sizeEl = document.getElementById('uploadEvidenceFileSize');
+
+      if (nameEl) nameEl.textContent = file.name;
+      if (sizeEl) {
+        const kb = Math.round(file.size / 1024);
+        sizeEl.textContent = kb > 1024 ? `${(kb / 1024).toFixed(1)} MB` : `${kb} KB`;
+      }
+      if (previewEl) previewEl.style.display = 'flex';
+      if (typeof renderAllIcons === 'function') renderAllIcons();
+    }
+  },
+
+  clearEvidenceFileSelected() {
+    this._selectedEvidenceFile = null;
+    const fileInp = document.getElementById('uploadEvidenceFileInput');
+    if (fileInp) fileInp.value = '';
+    const previewEl = document.getElementById('uploadEvidenceFilePreview');
+    if (previewEl) previewEl.style.display = 'none';
+  },
+
+  submitActionPlanEvidence() {
+    const planId = this._selectedEvidencePlanId || Number(document.getElementById('uploadEvidencePlanId')?.value);
+    if (!planId) return;
+
+    const descInp = document.getElementById('uploadEvidenceDescInput');
+    const urlInp = document.getElementById('uploadEvidenceUrlInput');
+    const markCompleteChk = document.getElementById('uploadEvidenceMarkComplete');
+
+    const desc = descInp?.value?.trim() || '';
+    let buktiValue = '';
+    let tipeBukti = this._currentEvidenceTab || 'file';
+    let namaFile = null;
+
+    if (tipeBukti === 'link') {
+      const url = urlInp?.value?.trim();
+      if (!url) {
+        this.toast('Harap masukkan tautan / URL produk kerja!', 'warning');
+        return;
+      }
+      buktiValue = url;
+    } else {
+      if (this._selectedEvidenceFile) {
+        buktiValue = this._selectedEvidenceFile.name;
+        namaFile = this._selectedEvidenceFile.name;
+      } else {
+        buktiValue = 'Laporan_Bukti_Hasil_Kerja_Bappeda_2026.pdf';
+        namaFile = 'Laporan_Bukti_Hasil_Kerja_Bappeda_2026.pdf';
+      }
+    }
+
+    Store.saveActionPlanEvidence(planId, {
+      buktiTindakLanjut: buktiValue,
+      namaFileBukti: namaFile,
+      tipeBukti: tipeBukti,
+      keteranganBukti: desc || 'Bukti implementasi hasil pelatihan telah diunggah dan siap diverifikasi atasan.',
+      status: (markCompleteChk && markCompleteChk.checked) ? 'Tuntas Terealisasi' : 'Sedang Berjalan'
+    });
+
+    this.closeModal('uploadActionPlanEvidenceModal');
+    this.renderActionPlans();
+    if (typeof this.renderReviewPage === 'function') this.renderReviewPage();
+    this.toast('✅ Bukti fisik berhasil diunggah! Status: Menunggu Pengesahan Atasan.', 'success');
+  },
+
+  openViewEvidenceModal(planId) {
+    const plans = Store.getActionPlans ? Store.getActionPlans() : (Store.state.actionPlans || []);
+    const item = plans.find(p => p.id === Number(planId));
+    if (!item) return;
+
+    this._currentViewingPlanId = item.id;
+    const planIdInp = document.getElementById('viewEvidencePlanId');
+    if (planIdInp) planIdInp.value = item.id;
+
+    const empNameEl = document.getElementById('viewEvidenceEmployeeName');
+    const empNipEl = document.getElementById('viewEvidenceEmployeeNip');
+    const empUnitEl = document.getElementById('viewEvidenceEmployeeUnit');
+    const actTextEl = document.getElementById('viewEvidenceActionPlanText');
+    const outTextEl = document.getElementById('viewEvidenceOutputText');
+    const targetEl = document.getElementById('viewEvidenceTargetTime');
+    const descTextEl = document.getElementById('viewEvidenceDescText');
+
+    if (empNameEl) empNameEl.textContent = item.pegawai || Store.state.user?.name || 'Pegawai ASN Bappeda';
+    if (empNipEl) empNipEl.textContent = `NIP: ${item.nip || Store.state.user?.nip || '-'}`;
+    if (empUnitEl) empUnitEl.textContent = item.unitKerja || 'Bappeda Provinsi Lampung';
+    if (actTextEl) actTextEl.textContent = item.rencanaAksi;
+    if (outTextEl) outTextEl.textContent = item.outputKonkret;
+    if (targetEl) targetEl.textContent = item.targetWaktu || '2026';
+    if (descTextEl) descTextEl.textContent = item.keteranganBukti || item.evaluasiAtasan || 'Implementasi wujud produk nyata di tempat kerja.';
+
+    const statusBadgeTop = document.getElementById('viewEvidenceStatusBadgeTop');
+    if (statusBadgeTop) {
+      if (item.statusPengesahan === 'Disahkan Atasan') {
+        statusBadgeTop.className = 'badge badge-success';
+        statusBadgeTop.textContent = '✓ Disahkan Atasan';
+      } else if (item.statusPengesahan === 'Perlu Perbaikan') {
+        statusBadgeTop.className = 'badge badge-danger';
+        statusBadgeTop.textContent = '⚠️ Perlu Perbaikan';
+      } else {
+        statusBadgeTop.className = 'badge badge-warning';
+        statusBadgeTop.textContent = '⏳ Menunggu Pengesahan Atasan';
+      }
+    }
+
+    const cardContent = document.getElementById('viewEvidenceCardContent');
+    if (cardContent) {
+      const isLink = item.tipeBukti === 'link' || (item.buktiTindakLanjut && item.buktiTindakLanjut.startsWith('http'));
+      if (isLink) {
+        cardContent.innerHTML = `
+          <div style="padding: 14px; background: #f0f9ff; border: 1.5px solid #bae6fd; border-radius: 8px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <div style="width: 40px; height: 40px; border-radius: 8px; background: #0284c7; color: white; display: grid; place-items: center;">
+                ${getIcon('ExternalLink', 20)}
+              </div>
+              <div>
+                <b style="font-size: 13px; color: #0369a1;">Tautan / Web Portal Produk Kerja</b>
+                <div style="font-size: 11px; color: #0284c7; word-break: break-all; margin-top: 2px;">${item.buktiTindakLanjut}</div>
+              </div>
+            </div>
+            <a href="${item.buktiTindakLanjut}" target="_blank" class="btn btn-primary btn-sm" style="background: #0284c7; border-color: #0284c7; font-weight: 700; font-size: 11px; padding: 6px 14px; text-decoration: none; display: inline-flex; align-items: center; gap: 5px;">
+              Buka Produk Kerja ➔
+            </a>
+          </div>
+        `;
+      } else {
+        const fileName = item.namaFileBukti || item.buktiTindakLanjut || 'Dokumen_Hasil_Kerja_2026.pdf';
+        cardContent.innerHTML = `
+          <div style="padding: 14px; background: #f8fafc; border: 1.5px solid #cbd5e1; border-radius: 8px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <div style="width: 40px; height: 40px; border-radius: 8px; background: #dc2626; color: white; display: grid; place-items: center;">
+                ${getIcon('FileText', 20)}
+              </div>
+              <div>
+                <b style="font-size: 12.5px; color: #1e293b;">${fileName}</b>
+                <div style="font-size: 10.5px; color: #64748b; margin-top: 2px;">Dokumen Bukti Fisik • Terverifikasi Arsip Bappeda</div>
+              </div>
+            </div>
+            <button type="button" class="btn btn-outline btn-sm" style="font-weight: 700; font-size: 11px; padding: 6px 14px; display: inline-flex; align-items: center; gap: 5px;" onclick="App.toast('Membuka pratinjau dokumen ${fileName}...', 'info')">
+              ${getIcon('Eye', 13)} Unduh / Lihat Berkas
+            </button>
+          </div>
+        `;
+      }
+    }
+
+    const notesInp = document.getElementById('evidenceSupervisorNotesInput');
+    const ratingSel = document.getElementById('evidenceImpactRatingSelect');
+    if (notesInp) notesInp.value = item.evaluasiAtasan || '';
+    if (ratingSel) ratingSel.value = String(item.nilaiDampak || 5);
+
+    const radioButtons = document.getElementsByName('evidenceValidationStatusRadio');
+    for (const r of radioButtons) {
+      if (item.statusPengesahan === 'Perlu Perbaikan') {
+        r.checked = (r.value === 'Perlu Perbaikan');
+      } else {
+        r.checked = (r.value === 'Disahkan Atasan');
+      }
+    }
+
+    this.openModal('viewActionPlanEvidenceModal');
+    if (typeof renderAllIcons === 'function') {
+      setTimeout(() => renderAllIcons(), 50);
+    }
+  },
+
+  submitEvidenceValidation() {
+    const planId = this._currentViewingPlanId || Number(document.getElementById('viewEvidencePlanId')?.value);
+    if (!planId) return;
+
+    let selectedStatus = 'Disahkan Atasan';
+    const radioButtons = document.getElementsByName('evidenceValidationStatusRadio');
+    for (const r of radioButtons) {
+      if (r.checked) {
+        selectedStatus = r.value;
+        break;
+      }
+    }
+
+    const ratingSel = document.getElementById('evidenceImpactRatingSelect');
+    const notesInp = document.getElementById('evidenceSupervisorNotesInput');
+
+    const payload = {
+      statusPengesahan: selectedStatus,
+      nilaiDampak: Number(ratingSel?.value) || 5,
+      evaluasiAtasan: notesInp?.value?.trim() || (selectedStatus === 'Disahkan Atasan' ? 'Disahkan. Hasil kerja nyata terbukti relevan dan meningkatkan mutu pelayanan kedinasan.' : 'Perlu penyesuaian bukti fisik.'),
+      namaVerifikator: Store.state.user?.name || 'Dr. ANANG RISGIYANTO, S.K.M., M.Kes.',
+      jabatanVerifikator: 'Kepala Bappeda / Atasan Langsung'
+    };
+
+    Store.validateActionPlanBySupervisor(planId, payload);
+    this.closeModal('viewActionPlanEvidenceModal');
+    this.renderActionPlans();
+    if (typeof this.renderReviewPage === 'function') this.renderReviewPage();
+    this.toast(`✅ Status pengesahan berhasil disimpan: ${selectedStatus}!`, 'success');
   },
 
   openExecutiveFollowUpModal() {
@@ -4053,6 +4335,25 @@ const App = {
       targetSummaryEl.textContent = `Target: ${cp.jenjangTarget} • ${cp.rumpunTarget ? cp.rumpunTarget.length : 0} Rumpun Terpilih`;
     }
 
+    // Render Checklist Tindak Lanjut & Bukti Hasil Nyata
+    const myPlans = Store.getActionPlans ? Store.getActionPlans() : (Store.state.actionPlans || []);
+    const completedCount = myPlans.filter(p => p.status === 'Tuntas Terealisasi').length;
+    const approvedCount = myPlans.filter(p => p.statusPengesahan === 'Disahkan Atasan').length;
+    const revActionPlanText = document.getElementById('reviewActionPlanSummaryText');
+    const revActionPlanBadge = document.getElementById('reviewActionPlanBadge');
+    if (revActionPlanText) {
+      revActionPlanText.textContent = `${myPlans.length} Komitmen Aksi (${completedCount} Selesai, ${approvedCount} Disahkan Atasan)`;
+    }
+    if (revActionPlanBadge) {
+      if (approvedCount > 0) {
+        revActionPlanBadge.className = 'badge badge-success';
+        revActionPlanBadge.textContent = `${approvedCount} Disahkan Atasan`;
+      } else {
+        revActionPlanBadge.className = 'badge badge-primary';
+        revActionPlanBadge.textContent = `${myPlans.length} Komitmen Aksi`;
+      }
+    }
+
     // Render Review Compliance Banner
     const revBannerEl = document.getElementById('reviewComplianceBanner');
     if (revBannerEl) {
@@ -5127,6 +5428,57 @@ const App = {
       if (s2Status) { s2Status.textContent = '○ Menunggu Tahap 1'; s2Status.style.color = 'var(--color-text-muted)'; }
       if (s3Box) { s3Box.style.borderColor = 'var(--color-border)'; s3Box.style.background = 'var(--color-surface-subtle)'; }
       if (s3Status) { s3Status.textContent = '○ Antrean Final'; s3Status.style.color = 'var(--color-text-muted)'; }
+    }
+
+    // Render Komitmen Tindak Lanjut & Bukti Fisik Hasil Kerja di Drawer
+    const planCountEl = document.getElementById('reviewDrawerActionPlanCount');
+    const planContainer = document.getElementById('reviewDrawerActionPlanContainer');
+    if (planContainer) {
+      const allPlans = Store.state.actionPlans || [];
+      const cleanTargetNip = String(item.nip || '').replace(/[^0-9]/g, '');
+      const empPlans = allPlans.filter(ap => {
+        const pNip = String(ap.nip || '').replace(/[^0-9]/g, '');
+        return pNip === cleanTargetNip || (!cleanTargetNip && ap.pegawai === item.pegawai);
+      });
+
+      const displayPlans = empPlans.length > 0 ? empPlans : allPlans.slice(0, 2);
+      if (planCountEl) planCountEl.textContent = `${displayPlans.length} Komitmen Aksi`;
+
+      if (displayPlans.length === 0) {
+        planContainer.innerHTML = '<div style="font-size: 11px; color: var(--color-text-muted); padding: 8px 0;">Belum ada rencana aksi tindak lanjut yang diinput pegawai.</div>';
+      } else {
+        planContainer.innerHTML = displayPlans.map(ap => {
+          const isAppr = ap.statusPengesahan === 'Disahkan Atasan';
+          const badgeClass = isAppr ? 'badge-success' : 'badge-warning';
+          const badgeLabel = isAppr ? '✓ Disahkan Atasan' : '⏳ Menunggu Pengesahan';
+
+          return `
+            <div style="padding: 10px 12px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; margin-bottom: 8px;">
+              <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px;">
+                <div style="flex: 1;">
+                  <div style="font-size: 11.5px; font-weight: 750; color: #0b2545;">${ap.rencanaAksi}</div>
+                  <div style="font-size: 10.5px; color: #64748b; margin-top: 3px;">
+                    <b>Wujud Produk:</b> <span style="color: #1e3a8a; font-weight: 650;">${ap.outputKonkret}</span> • Target: ${ap.targetWaktu || '2026'}
+                  </div>
+                  ${ap.buktiTindakLanjut && ap.buktiTindakLanjut !== '-' ? `
+                    <div style="font-size: 10.5px; color: #0284c7; margin-top: 4px; display: flex; align-items: center; gap: 4px;">
+                      📄 Bukti Fisik: <b>${ap.namaFileBukti || ap.buktiTindakLanjut}</b>
+                    </div>
+                  ` : ''}
+                </div>
+                <div style="text-align: right; flex-shrink: 0;">
+                  <span class="badge ${badgeClass}" style="font-size: 9.5px; margin-bottom: 4px; display: inline-block;">${badgeLabel}</span>
+                  <div>
+                    <button type="button" class="btn btn-outline btn-xs" style="padding: 3px 8px; font-size: 10px; border-color: #0284c7; color: #0284c7; font-weight: 700;" onclick="App.openViewEvidenceModal(${ap.id})">
+                      Review &amp; Sahkan ➔
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
     }
 
     this.openDrawer('reviewDrawer');

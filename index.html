@@ -44,7 +44,7 @@
     rel="stylesheet">
 
   <!-- Core Stylesheet -->
-  <link rel="stylesheet" href="css/app.css?v=20261120_btnfix_v36">
+  <link rel="stylesheet" href="css/app.css?v=20261120_evidence_v37">
 
   <!-- Critical Inlined CSS (Ensures 100% Instant & Flawless Mobile / PWA Rendering) -->
   <style>
@@ -1953,6 +1953,19 @@
                     </div>
                   </div>
                   <span class="badge badge-success">4 Program</span>
+                </div>
+
+                <div
+                  style="display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; background: rgba(30, 58, 138, 0.05); border: 1px solid rgba(30, 58, 138, 0.2); border-radius: var(--radius-md);">
+                  <div style="display: flex; align-items: center; gap: 12px;">
+                    <div style="color: var(--color-primary);"><span data-icon="ShieldCheck" data-icon-size="20"></span>
+                    </div>
+                    <div>
+                      <b style="font-size: 13px; color: var(--color-primary);">TINDAK LANJUT &amp; BUKTI HASIL NYATA</b>
+                      <div id="reviewActionPlanSummaryText" style="font-size: 11.5px; color: var(--color-text-secondary);">Komitmen transfer of learning &amp; bukti fisik produk kerja</div>
+                    </div>
+                  </div>
+                  <span id="reviewActionPlanBadge" class="badge badge-primary">Siap Diperiksa</span>
                 </div>
               </div>
             </div>
@@ -4242,6 +4255,215 @@
     </div>
   </div>
 
+  <!-- MODAL: Unggah Bukti Fisik Hasil Kerja (Evidence Attachment) -->
+  <div class="modal-overlay" id="uploadActionPlanEvidenceModal" style="display: none;">
+    <div class="modal-dialog" style="max-width: 600px; width: 95%;">
+      <div class="modal-header">
+        <div>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <h3 style="margin: 0; font-size: 15px; font-weight: 750; color: var(--color-primary);">Unggah Bukti Fisik Hasil Kerja Nyata</h3>
+            <span class="badge badge-primary" style="font-size: 10px;">Transfer of Learning</span>
+          </div>
+          <p style="font-size: 11.5px; color: var(--color-text-muted); margin-top: 3px;">
+            Lampirkan berkas bukti implementasi (SOP/Laporan/Karya/Link) dari pelatihan yang telah diselesaikan.
+          </p>
+        </div>
+        <button class="btn-icon" onclick="App.closeModal('uploadActionPlanEvidenceModal')"><span data-icon="X" data-icon-size="18"></span></button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="uploadEvidencePlanId">
+
+        <!-- Info Program & Rencana Aksi -->
+        <div style="padding: 12px 14px; background: rgba(30, 58, 138, 0.04); border: 1px solid rgba(30, 58, 138, 0.15); border-radius: 8px; margin-bottom: 16px;">
+          <div style="font-size: 10px; font-weight: 700; color: #64748b; text-transform: uppercase;">Program Pelatihan:</div>
+          <div id="uploadEvidenceProgramTitle" style="font-size: 12px; font-weight: 700; color: var(--color-primary); margin-top: 2px;">-</div>
+          <div style="margin-top: 8px; padding-top: 8px; border-top: 1px dashed rgba(30, 58, 138, 0.15); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px;">
+            <div>
+              <div style="font-size: 10px; color: #64748b;">Rencana Aksi:</div>
+              <div id="uploadEvidenceActionPlanText" style="font-size: 11.5px; font-weight: 650; color: #1e293b;">-</div>
+            </div>
+            <div>
+              <span id="uploadEvidenceOutputBadge" class="badge badge-success" style="font-size: 10px;">-</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Pilihan Tipe Bukti -->
+        <div style="margin-bottom: 14px;">
+          <label class="form-label" style="font-size: 11.5px; font-weight: 700;">Bentuk Bukti Hasil Kerja <span class="required">*</span></label>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+            <button type="button" id="tabEvidenceFileBtn" class="btn" style="background: #1e3a8a; color: white; border: 1px solid #1e3a8a; font-size: 11.5px; font-weight: 650; padding: 8px 12px; border-radius: 6px; display: flex; align-items: center; justify-content: center; gap: 6px;" onclick="App.handleEvidenceTabSwitch('file')">
+              <span data-icon="FileText" data-icon-size="14"></span> Berkas Dokumen (PDF/DOCX)
+            </button>
+            <button type="button" id="tabEvidenceLinkBtn" class="btn btn-outline" style="border: 1px solid var(--color-border); font-size: 11.5px; font-weight: 650; padding: 8px 12px; border-radius: 6px; display: flex; align-items: center; justify-content: center; gap: 6px;" onclick="App.handleEvidenceTabSwitch('link')">
+              <span data-icon="ExternalLink" data-icon-size="14"></span> Tautan Sistem / Web Link
+            </button>
+          </div>
+        </div>
+
+        <!-- Section 1: Upload File -->
+        <div id="uploadEvidenceFileSection">
+          <div id="evidenceDropzone" style="border: 2px dashed #93c5fd; background: #f8fafc; border-radius: 8px; padding: 22px 16px; text-align: center; cursor: pointer; transition: all 0.2s ease;" onclick="document.getElementById('uploadEvidenceFileInput').click()">
+            <div style="width: 44px; height: 44px; border-radius: 50%; background: #eff6ff; color: #1d4ed8; display: grid; place-items: center; margin: 0 auto 10px;">
+              <span data-icon="Upload" data-icon-size="22"></span>
+            </div>
+            <div style="font-size: 12.5px; font-weight: 700; color: #0b2545;">Klik atau Seret Berkas Bukti ke Sini</div>
+            <div style="font-size: 11px; color: #64748b; margin-top: 4px;">Format yang didukung: PDF, DOCX, XLSX, JPG, PNG (Maksimal 25MB)</div>
+          </div>
+          <input type="file" id="uploadEvidenceFileInput" accept=".pdf,.docx,.doc,.xlsx,.xls,.jpg,.jpeg,.png" style="display: none;" onchange="App.handleEvidenceFileSelected(this)">
+          <div id="uploadEvidenceFilePreview" style="display: none; margin-top: 10px; padding: 10px 14px; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 6px; display: flex; align-items: center; justify-content: space-between;">
+            <div style="display: flex; align-items: center; gap: 8px; flex: 1;">
+              <span data-icon="CheckCircle" data-icon-size="18" style="color: #16a34a;"></span>
+              <div>
+                <b id="uploadEvidenceFileName" style="font-size: 12px; color: #166534;">-</b>
+                <div id="uploadEvidenceFileSize" style="font-size: 10.5px; color: #64748b;">-</div>
+              </div>
+            </div>
+            <button type="button" class="btn btn-outline btn-xs" style="color: #dc2626; border-color: #fca5a5;" onclick="App.clearEvidenceFileSelected()">Hapus</button>
+          </div>
+        </div>
+
+        <!-- Section 2: Input URL Link -->
+        <div id="uploadEvidenceLinkSection" style="display: none;">
+          <div class="form-group">
+            <label class="form-label">Tautan / URL Produk Kerja (Google Drive, Portal, Aplikasi) <span class="required">*</span></label>
+            <input type="url" id="uploadEvidenceUrlInput" class="form-input" placeholder="https://drive.google.com/... atau https://dashboard.lampungprov.go.id">
+            <div style="font-size: 11px; color: var(--color-text-muted); margin-top: 3px;">
+              Pastikan tautan bersifat publik atau dapat dibuka oleh Atasan Langsung &amp; Admin SDM Bappeda.
+            </div>
+          </div>
+        </div>
+
+        <!-- Keterangan / Deskripsi Hasil -->
+        <div class="form-group" style="margin-top: 14px;">
+          <label class="form-label">Keterangan Ringkas Hasil Implementasi <span class="required">*</span></label>
+          <textarea id="uploadEvidenceDescInput" class="form-textarea" rows="2" placeholder="Contoh: Dokumen SOP telah difinalisasi, disahkan oleh Kepala Bidang, dan mulai diterapkan untuk seluruh pegawai..."></textarea>
+        </div>
+
+        <!-- Checkbox Status -->
+        <div style="padding: 10px 12px; background: var(--color-surface-subtle); border-radius: 6px; border: 1px solid var(--color-border);">
+          <label class="custom-checkbox" style="font-size: 12px; font-weight: 600; color: #1e293b; display: flex; align-items: center; gap: 8px;">
+            <input type="checkbox" id="uploadEvidenceMarkComplete" checked>
+            <span>Tandai status rencana aksi menjadi <b style="color: #16a34a;">"Tuntas Terealisasi"</b> &amp; Ajukan Pengesahan ke Atasan Langsung</span>
+          </label>
+        </div>
+      </div>
+      <div class="modal-footer" style="display: flex; justify-content: space-between; align-items: center;">
+        <button type="button" class="btn btn-outline" onclick="App.closeModal('uploadActionPlanEvidenceModal')">Batal</button>
+        <button type="button" class="btn btn-primary" onclick="App.submitActionPlanEvidence()" style="display: inline-flex; align-items: center; gap: 5px; font-weight: 700;">
+          <span data-icon="Send" data-icon-size="14"></span> Simpan &amp; Ajukan Pengesahan
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: Pratinjau Bukti Fisik & Lembar Pengesahan Atasan (Evidence & Validation Loop) -->
+  <div class="modal-overlay" id="viewActionPlanEvidenceModal" style="display: none;">
+    <div class="modal-dialog" style="max-width: 700px; width: 95%;">
+      <div class="modal-header">
+        <div>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <h3 style="margin: 0; font-size: 15px; font-weight: 750; color: var(--color-primary);">Pratinjau Bukti Hasil &amp; Lembar Pengesahan Atasan</h3>
+            <span id="viewEvidenceStatusBadgeTop" class="badge badge-success" style="font-size: 10px;">-</span>
+          </div>
+          <p style="font-size: 11.5px; color: var(--color-text-muted); margin-top: 3px;">
+            Validasi akuntabilitas kinerja nyata (Transfer of Learning) &amp; Pengesahan resmi Kepala Bidang / Kasubbag.
+          </p>
+        </div>
+        <button class="btn-icon" onclick="App.closeModal('viewActionPlanEvidenceModal')"><span data-icon="X" data-icon-size="18"></span></button>
+      </div>
+      <div class="modal-body" style="max-height: 75vh; overflow-y: auto;">
+        <input type="hidden" id="viewEvidencePlanId">
+
+        <!-- Identitas Pegawai & Program -->
+        <div style="padding: 12px 14px; background: #ffffff; border: 1px solid var(--color-border); border-radius: 8px; margin-bottom: 16px;">
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 8px;">
+            <div>
+              <div style="font-size: 10px; font-weight: 700; color: #64748b; text-transform: uppercase;">Pegawai Pengusul:</div>
+              <div id="viewEvidenceEmployeeName" style="font-size: 13px; font-weight: 750; color: var(--color-primary);">-</div>
+              <div id="viewEvidenceEmployeeNip" style="font-size: 11px; color: var(--color-text-muted);">-</div>
+            </div>
+            <div style="text-align: right;">
+              <div style="font-size: 10px; font-weight: 700; color: #64748b; text-transform: uppercase;">Unit Kerja:</div>
+              <div id="viewEvidenceEmployeeUnit" style="font-size: 11.5px; font-weight: 600; color: var(--color-text-secondary);">-</div>
+            </div>
+          </div>
+          <div style="margin-top: 10px; padding-top: 8px; border-top: 1px dashed var(--color-border);">
+            <div style="font-size: 10px; font-weight: 700; color: #64748b; text-transform: uppercase;">Kegiatan Diklat &amp; Aksi Nyata:</div>
+            <div id="viewEvidenceActionPlanText" style="font-size: 12px; font-weight: 700; color: #0b2545; margin-top: 2px;">-</div>
+            <div style="display: flex; align-items: center; gap: 8px; margin-top: 6px; font-size: 11px;">
+              <span class="text-muted">Wujud Hasil:</span>
+              <b id="viewEvidenceOutputText" style="color: #1e3a8a;">-</b>
+              <span class="text-muted">• Target:</span>
+              <b id="viewEvidenceTargetTime">-</b>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tampilan Berkas Bukti -->
+        <div style="margin-bottom: 16px;">
+          <h4 style="font-size: 12.5px; font-weight: 750; margin-bottom: 8px; color: #1e293b;">Dokumen / Bukti Implementasi:</h4>
+          <div id="viewEvidenceCardContent">
+            <!-- Dinamis dirender -->
+          </div>
+          <div id="viewEvidenceDescBox" style="margin-top: 8px; padding: 10px 12px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; font-size: 11.5px; color: #334155;">
+            <b>Catatan Pelaksana:</b> <span id="viewEvidenceDescText">-</span>
+          </div>
+        </div>
+
+        <!-- AREA PENGESAHAN ATASAN LANGSUNG (KIRKPATRICK L3 & L4) -->
+        <div style="padding: 14px; background: #fffbeb; border: 1.5px solid #fde68a; border-radius: 8px; margin-top: 16px;">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
+            <div style="display: flex; align-items: center; gap: 6px;">
+              <span data-icon="ShieldCheck" data-icon-size="18" style="color: #b45309;"></span>
+              <h4 style="font-size: 13px; font-weight: 800; color: #92400e; margin: 0;">Pengesahan &amp; Penilaian Dampak Kinerja (Atasan Langsung)</h4>
+            </div>
+            <span class="badge badge-warning" style="font-size: 9.5px;">Kirkpatrick L4</span>
+          </div>
+
+          <!-- Status Pengesahan -->
+          <div class="form-group" style="margin-bottom: 10px;">
+            <label class="form-label" style="font-size: 11.5px; font-weight: 700;">Status Keputusan Atasan <span class="required">*</span></label>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+              <label style="display: flex; align-items: center; gap: 6px; padding: 8px 12px; background: #ffffff; border: 1px solid #86efac; border-radius: 6px; cursor: pointer;">
+                <input type="radio" name="evidenceValidationStatusRadio" value="Disahkan Atasan" checked>
+                <span style="font-size: 11.5px; font-weight: 700; color: #166534;">✓ Sahkan Bukti Hasil</span>
+              </label>
+              <label style="display: flex; align-items: center; gap: 6px; padding: 8px 12px; background: #ffffff; border: 1px solid #fca5a5; border-radius: 6px; cursor: pointer;">
+                <input type="radio" name="evidenceValidationStatusRadio" value="Perlu Perbaikan">
+                <span style="font-size: 11.5px; font-weight: 700; color: #b91c1c;">⚠️ Minta Perbaikan Bukti</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Rating Dampak Kinerja (Kirkpatrick L4) -->
+          <div class="form-group" style="margin-bottom: 10px;">
+            <label class="form-label" style="font-size: 11.5px; font-weight: 700;">Penilaian Dampak Kinerja Organisasi (Kirkpatrick Level 4) <span class="required">*</span></label>
+            <select id="evidenceImpactRatingSelect" class="form-select" style="background: #ffffff; font-weight: 650; font-size: 11.5px;">
+              <option value="5" selected>⭐⭐⭐⭐⭐ Level 5: Sangat Signifikan (Terobosan Inovasi Bappeda)</option>
+              <option value="4">⭐⭐⭐⭐ Level 4: Tinggi (Mempercepat Layanan &amp; Kerapian Dokumen)</option>
+              <option value="3">⭐⭐⭐ Level 3: Baik (Sesuai Standar Operasional)</option>
+              <option value="2">⭐⭐ Level 2: Cukup (Dampak Belum Optimal)</option>
+              <option value="1">⭐ Level 1: Kurang Berdampak</option>
+            </select>
+          </div>
+
+          <!-- Catatan / Evaluasi Atasan -->
+          <div class="form-group" style="margin-bottom: 0;">
+            <label class="form-label" style="font-size: 11.5px; font-weight: 700;">Catatan Rekomendasi / Evaluasi Atasan Langsung <span class="required">*</span></label>
+            <textarea id="evidenceSupervisorNotesInput" class="form-textarea" rows="2" placeholder="Tuliskan catatan apresiasi, evaluasi, atau perbaikan..."></textarea>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer" style="display: flex; justify-content: space-between; align-items: center;">
+        <button type="button" class="btn btn-outline" onclick="App.closeModal('viewActionPlanEvidenceModal')">Tutup</button>
+        <button type="button" class="btn btn-success" onclick="App.submitEvidenceValidation()" style="display: inline-flex; align-items: center; gap: 5px; font-weight: 700;">
+          <span data-icon="CheckCircle" data-icon-size="15"></span> Simpan Pengesahan Atasan
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- MODAL: PUSAT OUTPUT RESMI & PORTOFOLIO BANGKOM ASN SISTEM -->
   <div class="modal-overlay" id="officialOutputHubModal" style="display: none;">
     <div class="modal-dialog" style="max-width: 820px; width: 95%;">
@@ -5512,6 +5734,20 @@
               id="reviewDrawerTotalJp" style="color: var(--color-primary);">32 JP</b></div>
           <div><span style="font-size: 11px; color: var(--color-text-muted);">Estimasi Biaya:</span> <b
               id="reviewDrawerEstimasiBiaya" style="color: var(--color-primary);">Rp2.250.000</b></div>
+        </div>
+
+        <!-- Rencana Aksi & Bukti Fisik Hasil Kerja (Evidence & Validation Loop) -->
+        <div style="margin-bottom: 22px; padding: 14px; background: #ffffff; border: 1px solid var(--color-border); border-radius: 10px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+            <div>
+              <h4 style="font-size: 13.5px; font-weight: 750; margin: 0; color: #0b2545;">Komitmen Tindak Lanjut &amp; Bukti Hasil Nyata</h4>
+              <div style="font-size: 11px; color: var(--color-text-muted); margin-top: 2px;">Evaluasi bukti implementasi (Transfer of Learning) &amp; Pengesahan Atasan Langsung</div>
+            </div>
+            <span id="reviewDrawerActionPlanCount" class="badge badge-primary" style="font-size: 10px;">0 Aksi</span>
+          </div>
+          <div id="reviewDrawerActionPlanContainer">
+            <!-- Dinamis dirender daftar rencana aksi pegawai -->
+          </div>
         </div>
 
         <h4 style="font-size: 14px; font-weight: 700; margin-bottom: 8px;">Keputusan Verifikator Pengelola SDM</h4>
@@ -7077,12 +7313,12 @@
   <script src="js/realtime.js?v=20261116_sec_v20"></script>
   <script src="assets/lambang-lampung.js?v=20261116_kepalabappeda_v16"></script>
   <script src="assets/tte-service.js?v=20261116_kepalabappeda_v16"></script>
-  <script src="js/icons.js?v=20261120_btnfix_v36"></script>
+  <script src="js/icons.js?v=20261120_evidence_v37"></script>
   <script src="js/charts.js?v=20261008_fix"></script>
   <script src="js/bappeda_data.js?v=20261029_v56"></script>
-  <script src="js/store.js?v=20261120_btnfix_v36"></script>
-  <script src="js/export.js?v=20261120_btnfix_v36"></script>
-  <script src="js/app.js?v=20261120_btnfix_v36"></script>
+  <script src="js/store.js?v=20261120_evidence_v37"></script>
+  <script src="js/export.js?v=20261120_evidence_v37"></script>
+  <script src="js/app.js?v=20261120_evidence_v37"></script>
 </body>
 
 </html>
