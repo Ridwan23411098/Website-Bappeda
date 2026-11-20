@@ -1550,3 +1550,451 @@ body {
   }
 }
 
+/* ==========================================================================
+   ADVANCED EXECUTIVE DARK MODE (UI UX PRO)
+   Harmonized Deep Slate Palette for supreme eye comfort & executive clarity
+   ========================================================================== */
+
+[data-theme="dark"] body {
+  background-color: #0b1120 !important;
+  color: #f8fafc !important;
+}
+
+/* 1. TOPBAR & APP SHELL */
+[data-theme="dark"] .topbar,
+[data-theme="dark"] header.topbar {
+  background: rgba(15, 23, 42, 0.94) !important;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.16) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35) !important;
+}
+
+[data-theme="dark"] .breadcrumb-nav .brand-name {
+  color: #f8fafc !important;
+}
+
+[data-theme="dark"] .breadcrumb-nav .separator {
+  color: #64748b !important;
+}
+
+[data-theme="dark"] .breadcrumb-nav .current-page {
+  background: rgba(56, 189, 248, 0.14) !important;
+  color: #38bdf8 !important;
+  border: 1px solid rgba(56, 189, 248, 0.3) !important;
+}
+
+[data-theme="dark"] .topbar-search input {
+  background: #0f172a !important;
+  border: 1.5px solid rgba(148, 163, 184, 0.22) !important;
+  color: #f8fafc !important;
+}
+
+[data-theme="dark"] .topbar-search input:focus {
+  background: #1e293b !important;
+  border-color: #38bdf8 !important;
+  box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.18) !important;
+}
+
+[data-theme="dark"] .topbar-search .shortcut-badge {
+  background: #0f172a !important;
+  border: 1px solid rgba(148, 163, 184, 0.2) !important;
+  color: #94a3b8 !important;
+}
+
+[data-theme="dark"] .topbar-actions .btn-icon {
+  background: rgba(255, 255, 255, 0.05) !important;
+  border: 1px solid rgba(148, 163, 184, 0.18) !important;
+  color: #cbd5e1 !important;
+}
+
+[data-theme="dark"] .topbar-actions .btn-icon:hover {
+  background: rgba(56, 189, 248, 0.15) !important;
+  border-color: #38bdf8 !important;
+  color: #38bdf8 !important;
+}
+
+[data-theme="dark"] .topbar-user-badge {
+  background: #0f172a !important;
+  border: 1px solid rgba(148, 163, 184, 0.22) !important;
+  color: #f8fafc !important;
+}
+
+[data-theme="dark"] .realtime-status-pill {
+  background: rgba(34, 197, 94, 0.15) !important;
+  border: 1px solid rgba(34, 197, 94, 0.35) !important;
+  color: #4ade80 !important;
+}
+
+/* 2. STAT CARDS (KPIS) - SOFT EYE-FRIENDLY CONTRAST */
+[data-theme="dark"] .stat-card {
+  background: #1e293b !important;
+  border: 1px solid rgba(148, 163, 184, 0.16) !important;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25) !important;
+}
+
+[data-theme="dark"] .stat-card:hover {
+  border-color: rgba(56, 189, 248, 0.4) !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35) !important;
+}
+
+[data-theme="dark"] .stat-card-label {
+  color: #94a3b8 !important;
+}
+
+[data-theme="dark"] .stat-card-value {
+  color: #f8fafc !important;
+}
+
+[data-theme="dark"] .grid-cols-5 .stat-card-value {
+  color: #f8fafc !important;
+}
+
+[data-theme="dark"] .stat-card-value .unit {
+  color: #cbd5e1 !important;
+}
+
+[data-theme="dark"] .stat-card-desc {
+  color: #cbd5e1 !important;
+}
+
+[data-theme="dark"] .stat-card-icon {
+  background: rgba(56, 189, 248, 0.12) !important;
+  color: #38bdf8 !important;
+  border: 1px solid rgba(56, 189, 248, 0.22) !important;
+}
+
+[data-theme="dark"] .stat-card.success .stat-card-icon {
+  background: rgba(52, 211, 153, 0.14) !important;
+  color: #34d399 !important;
+  border: 1px solid rgba(52, 211, 153, 0.25) !important;
+}
+
+[data-theme="dark"] .stat-card.warning .stat-card-icon {
+  background: rgba(251, 191, 36, 0.14) !important;
+  color: #fbbf24 !important;
+  border: 1px solid rgba(251, 191, 36, 0.25) !important;
+}
+
+[data-theme="dark"] .stat-card.danger .stat-card-icon {
+  background: rgba(248, 113, 113, 0.14) !important;
+  color: #f87171 !important;
+  border: 1px solid rgba(248, 113, 113, 0.25) !important;
+}
+
+[data-theme="dark"] .stat-card-mini-progress {
+  background: rgba(255, 255, 255, 0.08) !important;
+}
+
+[data-theme="dark"] .stat-card-mini-progress .fill {
+  background: linear-gradient(90deg, #38bdf8, #2563eb) !important;
+}
+
+/* 3. BUTTONS (COMFORTABLE CONTRAST - NO SOLID WHITE BOXES) */
+[data-theme="dark"] .btn-outline {
+  border: 1.5px solid rgba(148, 163, 184, 0.25) !important;
+  background: rgba(255, 255, 255, 0.05) !important;
+  color: #f8fafc !important;
+}
+
+[data-theme="dark"] .btn-outline:hover {
+  border-color: rgba(148, 163, 184, 0.45) !important;
+  background: rgba(255, 255, 255, 0.12) !important;
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .btn-outline-primary {
+  border: 1.5px solid #38bdf8 !important;
+  background: rgba(56, 189, 248, 0.12) !important;
+  color: #38bdf8 !important;
+}
+
+[data-theme="dark"] .btn-outline-primary:hover {
+  background: rgba(56, 189, 248, 0.24) !important;
+  border-color: #7dd3fc !important;
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .btn-primary {
+  background: linear-gradient(135deg, #0284c7 0%, #0369a1 50%, #1d4ed8 100%) !important;
+  color: #ffffff !important;
+  border: none !important;
+  box-shadow: 0 4px 14px rgba(2, 132, 199, 0.35) !important;
+}
+
+[data-theme="dark"] .btn-action-edit {
+  background: rgba(56, 189, 248, 0.12) !important;
+  color: #38bdf8 !important;
+  border: 1px solid rgba(56, 189, 248, 0.3) !important;
+}
+
+[data-theme="dark"] .btn-action-edit:hover {
+  background: rgba(56, 189, 248, 0.22) !important;
+  border-color: #38bdf8 !important;
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .btn-action-delete {
+  background: rgba(248, 113, 113, 0.12) !important;
+  color: #f87171 !important;
+  border: 1px solid rgba(248, 113, 113, 0.3) !important;
+}
+
+[data-theme="dark"] .btn-action-delete:hover {
+  background: rgba(248, 113, 113, 0.22) !important;
+  border-color: #f87171 !important;
+  color: #ffffff !important;
+}
+
+/* 4. CARDS, DIALOGS, MODALS, DRAWERS */
+[data-theme="dark"] .card {
+  background: #1e293b !important;
+  border: 1px solid rgba(148, 163, 184, 0.16) !important;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25) !important;
+  color: #f8fafc !important;
+}
+
+[data-theme="dark"] .card:hover {
+  border-color: rgba(148, 163, 184, 0.3) !important;
+}
+
+[data-theme="dark"] .card-title {
+  color: #f8fafc !important;
+}
+
+[data-theme="dark"] .modal-card,
+[data-theme="dark"] .modal-dialog,
+[data-theme="dark"] .drawer {
+  background: #1e293b !important;
+  border: 1px solid rgba(148, 163, 184, 0.2) !important;
+  color: #f8fafc !important;
+}
+
+[data-theme="dark"] .modal-header,
+[data-theme="dark"] .drawer-header {
+  background: #0f172a !important;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.16) !important;
+}
+
+[data-theme="dark"] .modal-footer,
+[data-theme="dark"] .drawer-footer {
+  background: #0f172a !important;
+  border-top: 1px solid rgba(148, 163, 184, 0.16) !important;
+}
+
+[data-theme="dark"] .modal-overlay {
+  background: rgba(3, 7, 18, 0.8) !important;
+}
+
+/* 5. DATA TABLES & FORMS */
+[data-theme="dark"] .table-responsive {
+  background: #1e293b !important;
+  border-color: rgba(148, 163, 184, 0.16) !important;
+}
+
+[data-theme="dark"] .data-table th {
+  background: #0f172a !important;
+  color: #94a3b8 !important;
+  border-bottom: 1.5px solid rgba(148, 163, 184, 0.2) !important;
+  border-top: 1px solid rgba(148, 163, 184, 0.16) !important;
+}
+
+[data-theme="dark"] .data-table td {
+  border-bottom: 1px solid rgba(148, 163, 184, 0.12) !important;
+  color: #e2e8f0 !important;
+}
+
+[data-theme="dark"] .data-table tbody tr:hover {
+  background: rgba(56, 189, 248, 0.08) !important;
+}
+
+[data-theme="dark"] .form-control,
+[data-theme="dark"] .form-select,
+[data-theme="dark"] input:not([type="checkbox"]):not([type="radio"]),
+[data-theme="dark"] select,
+[data-theme="dark"] textarea {
+  background: #0f172a !important;
+  border: 1.5px solid rgba(148, 163, 184, 0.22) !important;
+  color: #f8fafc !important;
+}
+
+[data-theme="dark"] .form-control:focus,
+[data-theme="dark"] .form-select:focus,
+[data-theme="dark"] input:focus,
+[data-theme="dark"] select:focus,
+[data-theme="dark"] textarea:focus {
+  border-color: #38bdf8 !important;
+  box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.18) !important;
+}
+
+/* 6. BADGES & PILLS */
+[data-theme="dark"] .badge-neutral {
+  background: rgba(148, 163, 184, 0.12) !important;
+  color: #cbd5e1 !important;
+  border: 1px solid rgba(148, 163, 184, 0.2) !important;
+}
+
+[data-theme="dark"] .badge-blue {
+  background: rgba(56, 189, 248, 0.14) !important;
+  color: #38bdf8 !important;
+  border: 1px solid rgba(56, 189, 248, 0.3) !important;
+}
+
+[data-theme="dark"] .badge-success {
+  background: rgba(52, 211, 153, 0.14) !important;
+  color: #34d399 !important;
+  border: 1px solid rgba(52, 211, 153, 0.3) !important;
+}
+
+[data-theme="dark"] .badge-warning {
+  background: rgba(251, 191, 36, 0.14) !important;
+  color: #fbbf24 !important;
+  border: 1px solid rgba(251, 191, 36, 0.3) !important;
+}
+
+[data-theme="dark"] .badge-danger {
+  background: rgba(248, 113, 113, 0.14) !important;
+  color: #f87171 !important;
+  border: 1px solid rgba(248, 113, 113, 0.3) !important;
+}
+
+/* 7. EXECUTIVE DIRECTIVE CARD */
+[data-theme="dark"] .executive-directive-card {
+  background: linear-gradient(135deg, rgba(30, 41, 59, 0.95) 0%, rgba(15, 23, 42, 0.95) 100%) !important;
+  border: 1px solid rgba(56, 189, 248, 0.3) !important;
+  border-left: 5px solid #38bdf8 !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3) !important;
+}
+
+[data-theme="dark"] .executive-directive-card .directive-quote {
+  color: #e2e8f0 !important;
+}
+
+[data-theme="dark"] .executive-directive-card .directive-footer {
+  border-top: 1px dashed rgba(148, 163, 184, 0.2) !important;
+  color: #94a3b8 !important;
+}
+
+/* 8. ACTION REQUIRED PRIORITY CARDS */
+[data-theme="dark"] .action-card-item {
+  border: 1px solid rgba(148, 163, 184, 0.16) !important;
+}
+
+[data-theme="dark"] .action-card-item.warning {
+  background: rgba(251, 191, 36, 0.08) !important;
+  border-color: rgba(251, 191, 36, 0.28) !important;
+}
+
+[data-theme="dark"] .action-card-item.warning .action-card-title {
+  color: #fde68a !important;
+}
+
+[data-theme="dark"] .action-card-item.warning .action-card-subtitle {
+  color: #fcd34d !important;
+}
+
+[data-theme="dark"] .action-card-item.success {
+  background: rgba(52, 211, 153, 0.08) !important;
+  border-color: rgba(52, 211, 153, 0.28) !important;
+}
+
+[data-theme="dark"] .action-card-item.success .action-card-title {
+  color: #a7f3d0 !important;
+}
+
+[data-theme="dark"] .action-card-item.success .action-card-subtitle {
+  color: #6ee7b7 !important;
+}
+
+[data-theme="dark"] .action-card-item.neutral {
+  background: rgba(148, 163, 184, 0.08) !important;
+  border-color: rgba(148, 163, 184, 0.22) !important;
+}
+
+[data-theme="dark"] .action-card-item.neutral .action-card-title {
+  color: #f8fafc !important;
+}
+
+[data-theme="dark"] .action-card-item.neutral .action-card-subtitle {
+  color: #cbd5e1 !important;
+}
+
+/* 9. CAREER READINESS & STEP FLOW */
+[data-theme="dark"] .readiness-score-box,
+[data-theme="dark"] .readiness-checklist-item,
+[data-theme="dark"] .readiness-step-box {
+  background: #1e293b !important;
+  border: 1px solid rgba(148, 163, 184, 0.16) !important;
+  color: #f8fafc !important;
+}
+
+[data-theme="dark"] .readiness-checklist-item:hover {
+  background: #24344d !important;
+  border-color: #38bdf8 !important;
+}
+
+[data-theme="dark"] .readiness-step-box.active {
+  border-color: #38bdf8 !important;
+  box-shadow: 0 0 0 1px #38bdf8 !important;
+  background: rgba(56, 189, 248, 0.12) !important;
+}
+
+/* 10. EXECUTIVE PIMPINAN BANNER */
+[data-theme="dark"] .executive-banner {
+  background: linear-gradient(135deg, #0b1120 0%, #1e293b 55%, #0f172a 100%) !important;
+  border: 1px solid rgba(56, 189, 248, 0.25) !important;
+}
+
+/* 11. MOBILE BOTTOM BAR */
+[data-theme="dark"] .mobile-bottom-nav {
+  background: rgba(15, 23, 42, 0.95) !important;
+  border-top: 1px solid rgba(148, 163, 184, 0.16) !important;
+}
+
+[data-theme="dark"] .mobile-nav-btn {
+  color: #94a3b8 !important;
+}
+
+[data-theme="dark"] .mobile-nav-btn.active {
+  color: #38bdf8 !important;
+}
+
+[data-theme="dark"] .mob-action-bubble {
+  background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%) !important;
+  border: 3.5px solid #0f172a !important;
+}
+
+/* 12. COMPETENCY PROGRESS HEADERS */
+[data-theme="dark"] .competency-progress-title {
+  color: #f8fafc !important;
+}
+
+[data-theme="dark"] .progress-bar-container {
+  background: rgba(255, 255, 255, 0.08) !important;
+}
+
+/* 13. DROPDOWNS & FLOATING MENUS */
+[data-theme="dark"] .search-results-dropdown,
+[data-theme="dark"] .notification-dropdown,
+[data-theme="dark"] .user-dropdown-card {
+  background: #1e293b !important;
+  border: 1px solid rgba(148, 163, 184, 0.2) !important;
+  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.6) !important;
+}
+
+[data-theme="dark"] .user-dropdown-header,
+[data-theme="dark"] .notification-header,
+[data-theme="dark"] .notification-footer {
+  background: #0f172a !important;
+  border-color: rgba(148, 163, 184, 0.16) !important;
+}
+
+/* 14. CUSTOM SCROLLBAR (DARK MODE) */
+[data-theme="dark"] ::-webkit-scrollbar-thumb {
+  background: #334155;
+}
+
+[data-theme="dark"] ::-webkit-scrollbar-thumb:hover {
+  background: #475569;
+}
+

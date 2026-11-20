@@ -57,7 +57,7 @@
   --transition-slow: 300ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Dark Mode Overrides (High-Contrast Professional Palette) */
+/* Dark Mode Overrides (Executive Slate Palette - Soft, Comfortable & High Contrast) */
 [data-theme="dark"] {
   --color-primary: #38BDF8;
   --color-dark-navy: #081220;
@@ -75,15 +75,15 @@
   --color-info: #38BDF8;
   --color-info-light: rgba(56, 189, 248, 0.15);
 
-  --color-bg: #0B132B;
-  --color-surface: #111D35;
-  --color-surface-subtle: #172644;
+  --color-bg: #0b1120;
+  --color-surface: #1e293b;
+  --color-surface-subtle: #0f172a;
   --color-text-primary: #F8FAFC;
   --color-text-secondary: #CBD5E1;
   --color-text-muted: #94A3B8;
-  --color-border: #233554;
-  --color-border-subtle: #1C2D4A;
-  --color-hover: #1E3258;
+  --color-border: rgba(148, 163, 184, 0.16);
+  --color-border-subtle: rgba(148, 163, 184, 0.10);
+  --color-hover: rgba(56, 189, 248, 0.12);
 
   --shadow-xs: 0 1px 3px rgba(0, 0, 0, 0.4);
   --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.5);
@@ -3427,14 +3427,50 @@ button[onclick*="quickLogin"]:hover {
   color: var(--color-text-primary);
 }
 
-[data-theme="dark"] .topbar {
-  background: var(--color-surface);
-  border-bottom-color: var(--color-border);
+[data-theme="dark"] .topbar,
+[data-theme="dark"] header.topbar {
+  background: rgba(15, 23, 42, 0.94) !important;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.16) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35) !important;
+}
+
+[data-theme="dark"] .breadcrumb-nav .brand-name {
+  color: #f8fafc !important;
+}
+
+[data-theme="dark"] .breadcrumb-nav .separator {
+  color: #64748b !important;
+}
+
+[data-theme="dark"] .breadcrumb-nav .current-page {
+  background: rgba(56, 189, 248, 0.14) !important;
+  color: #38bdf8 !important;
+  border: 1px solid rgba(56, 189, 248, 0.3) !important;
+}
+
+[data-theme="dark"] .topbar-actions .btn-icon {
+  background: rgba(255, 255, 255, 0.05) !important;
+  border: 1px solid rgba(148, 163, 184, 0.18) !important;
+  color: #cbd5e1 !important;
+}
+
+[data-theme="dark"] .topbar-actions .btn-icon:hover {
+  background: rgba(56, 189, 248, 0.15) !important;
+  border-color: #38bdf8 !important;
+  color: #38bdf8 !important;
+}
+
+[data-theme="dark"] .topbar-user-badge {
+  background: #0f172a !important;
+  border: 1px solid rgba(148, 163, 184, 0.22) !important;
+  color: #f8fafc !important;
 }
 
 [data-theme="dark"] .sidebar {
   background: #081220;
-  border-right-color: var(--color-border);
+  border-right-color: rgba(148, 163, 184, 0.16);
 }
 
 [data-theme="dark"] .card,
@@ -3443,8 +3479,56 @@ button[onclick*="quickLogin"]:hover {
 [data-theme="dark"] .modal-dialog,
 [data-theme="dark"] .drawer {
   background: var(--color-surface) !important;
-  border-color: var(--color-border) !important;
+  border-color: rgba(148, 163, 184, 0.16) !important;
   color: var(--color-text-primary) !important;
+}
+
+[data-theme="dark"] .stat-card-label {
+  color: #94a3b8 !important;
+}
+
+[data-theme="dark"] .stat-card-value {
+  color: #f8fafc !important;
+}
+
+[data-theme="dark"] .stat-card-value .unit {
+  color: #cbd5e1 !important;
+}
+
+[data-theme="dark"] .stat-card-desc {
+  color: #cbd5e1 !important;
+}
+
+[data-theme="dark"] .stat-card-icon {
+  background: rgba(56, 189, 248, 0.12) !important;
+  color: #38bdf8 !important;
+  border: 1px solid rgba(56, 189, 248, 0.22) !important;
+}
+
+[data-theme="dark"] .stat-card.success .stat-card-icon {
+  background: rgba(52, 211, 153, 0.14) !important;
+  color: #34d399 !important;
+  border: 1px solid rgba(52, 211, 153, 0.25) !important;
+}
+
+[data-theme="dark"] .stat-card.warning .stat-card-icon {
+  background: rgba(251, 191, 36, 0.14) !important;
+  color: #fbbf24 !important;
+  border: 1px solid rgba(251, 191, 36, 0.25) !important;
+}
+
+[data-theme="dark"] .stat-card.danger .stat-card-icon {
+  background: rgba(248, 113, 113, 0.14) !important;
+  color: #f87171 !important;
+  border: 1px solid rgba(248, 113, 113, 0.25) !important;
+}
+
+[data-theme="dark"] .stat-card-mini-progress {
+  background: rgba(255, 255, 255, 0.08) !important;
+}
+
+[data-theme="dark"] .stat-card-mini-progress .fill {
+  background: linear-gradient(90deg, #38bdf8, #2563eb) !important;
 }
 
 [data-theme="dark"] .modal-overlay {
