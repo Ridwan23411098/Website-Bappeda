@@ -29,7 +29,7 @@ const IDBHelper = {
           };
           req.onsuccess = e => resolve(e.target.result);
           req.onerror = () => resolve(null);
-        } catch(e) {
+        } catch (e) {
           resolve(null);
         }
       });
@@ -47,7 +47,7 @@ const IDBHelper = {
         tx.oncomplete = () => resolve(true);
         tx.onerror = () => resolve(false);
       });
-    } catch(e) {
+    } catch (e) {
       return false;
     }
   },
@@ -62,7 +62,7 @@ const IDBHelper = {
         req.onsuccess = () => resolve(req.result ? req.result.data : null);
         req.onerror = () => resolve(null);
       });
-    } catch(e) {
+    } catch (e) {
       return null;
     }
   },
@@ -77,7 +77,7 @@ const IDBHelper = {
         tx.oncomplete = () => resolve(true);
         tx.onerror = () => resolve(false);
       });
-    } catch(e) {
+    } catch (e) {
       return false;
     }
   },
@@ -92,7 +92,7 @@ const IDBHelper = {
         req.onsuccess = () => resolve(req.result ? req.result.val : null);
         req.onerror = () => resolve(null);
       });
-    } catch(e) {
+    } catch (e) {
       return null;
     }
   }
@@ -737,7 +737,7 @@ const Store = {
           if (!v.tahun) v.tahun = 2026;
           if (!v.pegawai || v.pegawai === 'undefined') {
             const cleanNip = String(v.nip || '').replace(/\s+/g, '');
-            const emp = (typeof BAPPEDA_DATA !== 'undefined' && BAPPEDA_DATA.employees) 
+            const emp = (typeof BAPPEDA_DATA !== 'undefined' && BAPPEDA_DATA.employees)
               ? BAPPEDA_DATA.employees.find(e => String(e.nip).replace(/\s+/g, '') === cleanNip)
               : null;
             if (emp) {
@@ -796,7 +796,7 @@ const Store = {
               }
             }
           }
-        }).catch(() => {});
+        }).catch(() => { });
       }
 
       // Pastikan idpState dan programs selalu ada
@@ -865,7 +865,7 @@ const Store = {
         } else if (localStorage.getItem('sip_remember_session') === 'true') {
           activeSess = localStorage.getItem(SESSION_KEY);
         }
-      } catch (e) {}
+      } catch (e) { }
 
       if (activeSess) {
         try {
@@ -876,7 +876,7 @@ const Store = {
           if (this.state.currentSession.jabatan) {
             this.state.currentSession.jabatan = this.state.currentSession.jabatan.replace(/PPEPD/g, 'PMPE');
           }
-        } catch(e) {
+        } catch (e) {
           this.state.currentSession = null;
         }
       } else {
@@ -901,22 +901,22 @@ const Store = {
 
       // Inisialisasi Katalog Kalender Diklat Terpadu 2026
       if (!this.state.kalenderDiklat || !Array.isArray(this.state.kalenderDiklat) || this.state.kalenderDiklat.length === 0) {
-        this.state.kalenderDiklat = (typeof BAPPEDA_DATA !== 'undefined' && BAPPEDA_DATA.kalenderDiklat) 
-          ? JSON.parse(JSON.stringify(BAPPEDA_DATA.kalenderDiklat)) 
+        this.state.kalenderDiklat = (typeof BAPPEDA_DATA !== 'undefined' && BAPPEDA_DATA.kalenderDiklat)
+          ? JSON.parse(JSON.stringify(BAPPEDA_DATA.kalenderDiklat))
           : [];
       }
 
       // Inisialisasi Buku Log Dialog Kinerja & Coaching/Mentoring (Tahap 4)
       if (!this.state.coachingLogs || !Array.isArray(this.state.coachingLogs) || this.state.coachingLogs.length === 0) {
-        this.state.coachingLogs = (typeof BAPPEDA_DATA !== 'undefined' && BAPPEDA_DATA.coachingLogs) 
-          ? JSON.parse(JSON.stringify(BAPPEDA_DATA.coachingLogs)) 
+        this.state.coachingLogs = (typeof BAPPEDA_DATA !== 'undefined' && BAPPEDA_DATA.coachingLogs)
+          ? JSON.parse(JSON.stringify(BAPPEDA_DATA.coachingLogs))
           : [];
       }
 
       // Inisialisasi Evaluasi Dampak Pasca-Pelatihan Level 3 (Tahap 5)
       if (!this.state.postTrainingEvaluations || !Array.isArray(this.state.postTrainingEvaluations) || this.state.postTrainingEvaluations.length === 0) {
-        this.state.postTrainingEvaluations = (typeof BAPPEDA_DATA !== 'undefined' && BAPPEDA_DATA.postTrainingEvaluations) 
-          ? JSON.parse(JSON.stringify(BAPPEDA_DATA.postTrainingEvaluations)) 
+        this.state.postTrainingEvaluations = (typeof BAPPEDA_DATA !== 'undefined' && BAPPEDA_DATA.postTrainingEvaluations)
+          ? JSON.parse(JSON.stringify(BAPPEDA_DATA.postTrainingEvaluations))
           : [];
       }
 
@@ -994,7 +994,7 @@ const Store = {
       }));
       localStorage.setItem(USER_REALIZATIONS_KEY, JSON.stringify(cleanUserRels));
       if (typeof IDBHelper !== 'undefined') {
-        IDBHelper.setData('user_realizations', cleanUserRels).catch(() => {});
+        IDBHelper.setData('user_realizations', cleanUserRels).catch(() => { });
       }
     } catch (e) {
       console.warn("Gagal menyimpan ke dedicated realization key:", e);
@@ -1113,13 +1113,13 @@ const Store = {
       try {
         const saved = localStorage.getItem('sip_broadcast_logs');
         if (saved) this.state.broadcastLogs = JSON.parse(saved);
-      } catch (e) {}
+      } catch (e) { }
     }
     if (!this.state.broadcastLogs || this.state.broadcastLogs.length === 0) {
       this.state.broadcastLogs = this.getDefaultBroadcastLogs();
       try {
         localStorage.setItem('sip_broadcast_logs', JSON.stringify(this.state.broadcastLogs));
-      } catch (e) {}
+      } catch (e) { }
     }
 
     // 2. Reminder Rules
@@ -1127,13 +1127,13 @@ const Store = {
       try {
         const saved = localStorage.getItem('sip_reminder_rules');
         if (saved) this.state.reminderRules = JSON.parse(saved);
-      } catch (e) {}
+      } catch (e) { }
     }
     if (!this.state.reminderRules || this.state.reminderRules.length === 0) {
       this.state.reminderRules = this.getDefaultReminderRules();
       try {
         localStorage.setItem('sip_reminder_rules', JSON.stringify(this.state.reminderRules));
-      } catch (e) {}
+      } catch (e) { }
     }
 
     // 3. WhatsApp Gateway Config
@@ -1141,13 +1141,13 @@ const Store = {
       try {
         const saved = localStorage.getItem('sip_wa_gateway_config');
         if (saved) this.state.waGatewayConfig = JSON.parse(saved);
-      } catch (e) {}
+      } catch (e) { }
     }
     if (!this.state.waGatewayConfig) {
       this.state.waGatewayConfig = this.getDefaultGatewayConfig();
       try {
         localStorage.setItem('sip_wa_gateway_config', JSON.stringify(this.state.waGatewayConfig));
-      } catch (e) {}
+      } catch (e) { }
     }
   },
 
@@ -1296,21 +1296,21 @@ const Store = {
     this.state.broadcastLogs.unshift(entry);
     try {
       localStorage.setItem('sip_broadcast_logs', JSON.stringify(this.state.broadcastLogs));
-    } catch (e) {}
+    } catch (e) { }
   },
 
   saveReminderRules(rules) {
     this.state.reminderRules = rules;
     try {
       localStorage.setItem('sip_reminder_rules', JSON.stringify(rules));
-    } catch (e) {}
+    } catch (e) { }
   },
 
   saveWaGatewayConfig(config) {
     this.state.waGatewayConfig = config;
     try {
       localStorage.setItem('sip_wa_gateway_config', JSON.stringify(config));
-    } catch (e) {}
+    } catch (e) { }
   },
 
   /**
@@ -1351,8 +1351,8 @@ const Store = {
         // Cek apakah ada pengajuan di verifications untuk tahun ini
         const currentAsn = this.state.user || this.state.currentSession || {};
         const cleanNip = String(currentAsn.nip || '').replace(/\s+/g, '');
-        const verif = (this.state.verifications || []).find(v => 
-          String(v.nip || '').replace(/\s+/g, '') === cleanNip && 
+        const verif = (this.state.verifications || []).find(v =>
+          String(v.nip || '').replace(/\s+/g, '') === cleanNip &&
           Number(v.tahun || 2026) === y
         );
 
@@ -1379,7 +1379,7 @@ const Store = {
       // 3. Coba sinkronisasi data user dari Supabase untuk tahun tersebut
       const currentAsn = this.state.user || this.state.currentSession || {};
       if (currentAsn.nip && typeof this.loadUserIdp === 'function') {
-        this.loadUserIdp(currentAsn.nip).catch(() => {});
+        this.loadUserIdp(currentAsn.nip).catch(() => { });
       }
 
       return y;
@@ -1495,11 +1495,11 @@ const Store = {
       ...sessionUser
     };
     this.state.currentSession = sessionUser;
-    
+
     // Simpan ke sessionStorage (sesi otomatis berakhir saat browser/aplikasi ditutup)
     try {
       sessionStorage.setItem(SESSION_KEY, JSON.stringify(sessionUser));
-    } catch(e) {}
+    } catch (e) { }
 
     // Simpan ke localStorage HANYA jika opsi 'Ingat sesi' dicentang
     const rememberBox = typeof document !== 'undefined' ? document.getElementById('rememberSession') : null;
@@ -1596,11 +1596,11 @@ const Store = {
       console.error("Supabase Error:", error);
       throw new Error(`Database Error: ${error.message || error.details || 'Gagal terhubung ke Supabase'}`);
     }
-    
+
     if (!matchedRows || matchedRows.length === 0) {
       throw new Error('NIP tidak terdaftar dalam basis data Supabase.');
     }
-    
+
     const matched = matchedRows[0];
     const defaultRolePassword = 'password';
     const storedPass = matched.password || defaultRolePassword;
@@ -1717,7 +1717,7 @@ const Store = {
         currentDbPass = r.password || 'password';
         isChanged = Boolean(r.is_password_changed);
       }
-    } catch(e) {
+    } catch (e) {
       console.warn("Gagal fetch pass dari Supabase:", e);
     }
 
@@ -1779,7 +1779,7 @@ const Store = {
       sessionStorage.removeItem(SESSION_KEY);
       localStorage.removeItem(SESSION_KEY);
       localStorage.removeItem('sip_remember_session');
-    } catch(e) {}
+    } catch (e) { }
     this.save();
   },
 
@@ -1851,7 +1851,7 @@ const Store = {
 
         // Pertahankan program buatan user lokal yang belum ada di Supabase
         const existingRemoteTopiks = new Set(remotePrograms.map(p => String(p.topik || '').toLowerCase()));
-        const localOnlyPrograms = (this.state.idpState?.programs || []).filter(p => 
+        const localOnlyPrograms = (this.state.idpState?.programs || []).filter(p =>
           p.isUserInput && !existingRemoteTopiks.has(String(p.topik || '').toLowerCase())
         );
 
@@ -1874,7 +1874,7 @@ const Store = {
     const totalCost = programs.reduce((acc, p) => acc + (parseInt(p.estimasi) || 0), 0);
     const completed = programs.filter(p => p.status === 'Terlaksana').length;
     const progressPct = totalProgram > 0 ? Math.round((completed / totalProgram) * 100) : 0;
-    
+
     return { totalProgram, totalJp, totalCost, completed, progressPct };
   },
 
@@ -2047,15 +2047,15 @@ const Store = {
 
     // Jika tahun 2026, gunakan baseline data resmi 2026
     if (Number(activeYear) === 2026) {
-      const memenuhi20Jp = employees.length > 0 
-        ? employees.filter(e => (e.jp || 0) >= 20).length 
+      const memenuhi20Jp = employees.length > 0
+        ? employees.filter(e => (e.jp || 0) >= 20).length
         : 60;
       const persenKepatuhan = Math.round((memenuhi20Jp / totalPegawai) * 100);
-      const idpDisetujui = employees.length > 0 
-        ? employees.filter(e => e.statusIdp === 'Disetujui' || e.statusIdp === 'Final').length 
+      const idpDisetujui = employees.length > 0
+        ? employees.filter(e => e.statusIdp === 'Disetujui' || e.statusIdp === 'Final').length
         : 60;
-      const totalJp = employees.length > 0 
-        ? employees.reduce((sum, e) => sum + (e.jp || 0), 0) 
+      const totalJp = employees.length > 0
+        ? employees.reduce((sum, e) => sum + (e.jp || 0), 0)
         : 1862;
       const avgJp = totalPegawai > 0 ? (totalJp / totalPegawai).toFixed(1) : '18.8';
       const totalEstimasiAnggaran = totalJp * 165000;
@@ -2369,8 +2369,8 @@ const Store = {
     const rawNip = this.state.user?.nip;
     const cleanUserNip = String(rawNip || '').replace(/\s+/g, '');
     const activeYr = this.getActiveYear();
-    let v = this.state.verifications.find(x => 
-      String(x.nip).replace(/\s+/g, '') === cleanUserNip && 
+    let v = this.state.verifications.find(x =>
+      String(x.nip).replace(/\s+/g, '') === cleanUserNip &&
       Number(x.tahun || 2026) === Number(activeYr)
     );
     if (v) {
@@ -2496,12 +2496,12 @@ const Store = {
           const totalCost = progs.reduce((acc, curr) => acc + (parseInt(curr.estimasi) || 0), 0);
 
           const subTahun = Number(sub.tahun) || 2026;
-          let v = this.state.verifications.find(x => 
+          let v = this.state.verifications.find(x =>
             String(x.nip).replace(/\s+/g, '') === cleanSubNip &&
             Number(x.tahun || 2026) === subTahun
           );
-          
-          const emp = (typeof BAPPEDA_DATA !== 'undefined' && BAPPEDA_DATA.employees) 
+
+          const emp = (typeof BAPPEDA_DATA !== 'undefined' && BAPPEDA_DATA.employees)
             ? BAPPEDA_DATA.employees.find(e => String(e.nip).replace(/\s+/g, '') === cleanSubNip)
             : (this.state.employees ? this.state.employees.find(e => String(e.nip).replace(/\s+/g, '') === cleanSubNip) : null);
 
@@ -2579,7 +2579,7 @@ const Store = {
               verified_by: this.state.user?.name || 'Kasubbag Kepegawaian',
               updated_at: new Date().toISOString()
             });
-        } catch(e) {
+        } catch (e) {
           console.error("Gagal approve IDP di Supabase:", e);
         }
       }
@@ -2628,7 +2628,7 @@ const Store = {
               verified_by: this.state.user?.name || 'Kasubbag Kepegawaian',
               updated_at: new Date().toISOString()
             });
-        } catch(e) {
+        } catch (e) {
           console.error("Gagal reject IDP di Supabase:", e);
         }
       }
@@ -2694,14 +2694,14 @@ const Store = {
             reader.onerror = () => resolve('');
             reader.readAsDataURL(file);
           });
-        } catch(e) {}
+        } catch (e) { }
       }
 
       // Simpan file ke IndexedDB agar tidak hilang setelah reload dan tidak membebani localStorage quota
       if (fileUrl && fileUrl.startsWith('data:')) {
         try {
           await IDBHelper.setFile(newId, fileUrl);
-        } catch(e) {}
+        } catch (e) { }
       }
     }
 
@@ -2801,7 +2801,7 @@ const Store = {
             status: 'Terlaksana'
           }).then();
         }
-      } catch(e) {}
+      } catch (e) { }
     }
 
     this.updateUserStats();
@@ -2815,7 +2815,7 @@ const Store = {
         pesan: `${entryPegawai} telah mengunggah bukti realisasi untuk kegiatan "${realizationData.program}" (${realizationData.jp} JP).`,
         tipe: 'success'
       });
-    } catch(e) {}
+    } catch (e) { }
 
     // Siarkan ke kanal real-time
     if (typeof RealtimeService !== 'undefined') {
@@ -3011,7 +3011,7 @@ const Store = {
     if (!this.state.idpState || !Array.isArray(this.state.idpState.programs)) return false;
     const t = this.getTrainingById(trainingId);
     if (!t) return false;
-    return this.state.idpState.programs.some(p => 
+    return this.state.idpState.programs.some(p =>
       p.idKalender === t.id ||
       (p.topik && p.topik.trim().toLowerCase() === t.judul.trim().toLowerCase())
     );
@@ -3157,7 +3157,7 @@ const Store = {
     // Filter Search
     if (filters.search && filters.search.trim()) {
       const q = filters.search.toLowerCase().trim();
-      logs = logs.filter(l => 
+      logs = logs.filter(l =>
         (l.pegawaiNama && l.pegawaiNama.toLowerCase().includes(q)) ||
         (l.pegawaiNip && l.pegawaiNip.toLowerCase().includes(q)) ||
         (l.mentorNama && l.mentorNama.toLowerCase().includes(q)) ||
@@ -3178,7 +3178,7 @@ const Store = {
 
   addCoachingLog(data) {
     if (!this.state.coachingLogs) this.state.coachingLogs = [];
-    
+
     const count = this.state.coachingLogs.length + 1;
     const year = data.tahun || (this.state.activeYear || 2026);
     const newId = `CM-${year}-${String(count).padStart(3, '0')}`;
@@ -3217,7 +3217,7 @@ const Store = {
         judul: 'Sesi Pembinaan Dicatat',
         pesan: `Sesi ${newLog.tipe} untuk ${newLog.pegawaiNama} (${newLog.triwulan} ${newLog.tahun}) berhasil didaftarkan.`,
         tipe: 'info'
-      }).catch?.(() => {});
+      }).catch?.(() => { });
     }
 
     return newLog;
@@ -3257,7 +3257,7 @@ const Store = {
         judul: 'Pembinaan Disetujui',
         pesan: `Hasil sesi ${item.tipe} (${item.id}) telah disetujui resmi oleh ${item.mentorNama}.`,
         tipe: 'success'
-      }).catch?.(() => {});
+      }).catch?.(() => { });
     }
 
     return item;
@@ -3470,7 +3470,7 @@ const Store = {
         judul: 'Evaluasi Dampak Pasca-Diklat Selesai',
         pesan: `Evaluasi pasca-diklat "${newEval.diklatNama}" telah diterbitkan dengan skor ${newEval.skorRataRata} (${newEval.kategoriDampak}).`,
         tipe: 'success'
-      }).catch?.(() => {});
+      }).catch?.(() => { });
     }
 
     return newEval;
@@ -3540,7 +3540,7 @@ const Store = {
         judul: 'Evaluasi Dampak Pasca-Diklat Terverifikasi',
         pesan: `Lembar evaluasi pasca-diklat "${item.diklatNama}" telah diverifikasi resmi dengan TTE BSrE oleh ${item.evaluatorNama}.`,
         tipe: 'success'
-      }).catch?.(() => {});
+      }).catch?.(() => { });
     }
 
     return item;
@@ -3616,7 +3616,7 @@ const Store = {
       sessionStorage.removeItem(SESSION_KEY);
       localStorage.removeItem(SESSION_KEY);
       localStorage.removeItem('sip_active_year');
-    } catch(e) {}
+    } catch (e) { }
 
     const fresh = JSON.parse(JSON.stringify(this.defaultState));
     if (typeof BAPPEDA_DATA !== 'undefined') {

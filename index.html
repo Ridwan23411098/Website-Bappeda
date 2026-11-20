@@ -1861,6 +1861,34 @@
               </table>
             </div>
           </div>
+
+          <!-- KARTU TAHAP SELANJUTNYA & OUTPUT AKHIR SISTEM -->
+          <div class="card" style="margin-top: 18px; border: 1.5px solid rgba(30, 58, 138, 0.22); background: linear-gradient(135deg, rgba(30, 58, 138, 0.03) 0%, rgba(2, 132, 199, 0.07) 100%);">
+            <div style="padding: 16px 20px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px;">
+              <div style="display: flex; align-items: center; gap: 14px; min-width: 280px; flex: 1;">
+                <div style="width: 44px; height: 44px; border-radius: 10px; background: var(--color-primary); color: white; display: grid; place-items: center; flex-shrink: 0; box-shadow: 0 4px 10px rgba(30, 58, 138, 0.25);">
+                  <span data-icon="ArrowRightCircle" data-icon-size="22"></span>
+                </div>
+                <div>
+                  <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                    <h3 style="margin: 0; font-size: 13.5px; font-weight: 750; color: var(--color-primary);">Tahap Selanjutnya: Pengesahan &amp; Penerbitan Dokumen Output Akhir</h3>
+                    <span class="badge badge-success" style="font-size: 9.5px; font-weight: 700; padding: 2px 7px;">Langkah Terakhir</span>
+                  </div>
+                  <div style="font-size: 11px; color: var(--color-text-secondary); margin-top: 3px; line-height: 1.4;">
+                    Rencana IDP dan komitmen aksi nyata Anda telah siap diproses ke tahap akhir: pengajuan pengesahan ke atasan langsung dan penerbitan <b>Paket Dokumen Portofolio Resmi ASN</b> (Syarat Mutlak Kenaikan Pangkat di SIASN BKN).
+                  </div>
+                </div>
+              </div>
+              <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
+                <button type="button" class="btn btn-outline-primary btn-sm" onclick="App.openOfficialOutputHubModal()" style="font-size: 11px; padding: 6px 12px; font-weight: 650; display: inline-flex; align-items: center; gap: 6px; border: 1.5px solid var(--color-primary);" title="Buka Pusat Berkas &amp; Portofolio Output Resmi Sistem">
+                  <span data-icon="FolderCheck" data-icon-size="14"></span> Lihat Paket Dokumen Output
+                </button>
+                <button type="button" class="btn btn-primary btn-sm" onclick="App.navigate('ereview')" style="font-size: 11px; padding: 6px 14px; font-weight: 700; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 2px 6px rgba(30, 58, 138, 0.25);">
+                  Lanjut ke Review &amp; Ajukan IDP <span data-icon="ArrowRight" data-icon-size="14"></span>
+                </button>
+              </div>
+            </div>
+          </div>
         </section>
 
         <!-- 6. REVIEW &amp; SUBMIT IDP (ereview) -->
@@ -1979,6 +2007,102 @@
               <button type="button" class="btn btn-outline" style="width: 100%; margin-top: 10px; display: inline-flex; align-items: center; justify-content: center; gap: 6px; font-weight: 600; font-size: 12px;" onclick="App.openIdpFilingReceiptModal()">
                 <span data-icon="FileCheck" data-icon-size="14"></span> Lihat Tanda Terima Pendaftaran (Resi Elektronik)
               </button>
+            </div>
+          </div>
+
+          <!-- KARTU OUTPUT RESMI YANG DIHASILKAN SISTEM (OUTPUT DELIVERABLES) -->
+          <div class="card" style="margin-bottom: 24px;">
+            <div class="card-header" style="flex-wrap: wrap; gap: 10px; align-items: flex-start; padding: 12px 18px;">
+              <div>
+                <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                  <h3 class="card-title" style="margin: 0; font-size: 13.5px; font-weight: 750;">Paket Dokumen Output Resmi yang Dihasilkan Sistem</h3>
+                  <span class="badge badge-success" style="font-weight: 700; font-size: 9.5px; padding: 2px 7px;">Output Nyata ASN Bappeda</span>
+                </div>
+                <div style="font-size: 11px; color: var(--color-text-muted); margin-top: 3px;">
+                  Dokumen hukum dan portofolio resmi yang diterbitkan sistem setelah rencana IDP diajukan dan disahkan
+                </div>
+              </div>
+              <button class="btn btn-outline-primary btn-sm" onclick="App.openOfficialOutputHubModal()" style="font-size: 11px; font-weight: 650; display: inline-flex; align-items: center; gap: 5px;">
+                <span data-icon="ExternalLink" data-icon-size="13"></span> Buka Pusat Dokumen Output
+              </button>
+            </div>
+            
+            <div style="padding: 14px 18px; display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px;">
+              <!-- 1. SK Kepatuhan 20 JP -->
+              <div style="padding: 12px 14px; border: 1px solid rgba(2, 132, 199, 0.25); background: rgba(2, 132, 199, 0.04); border-radius: 8px; display: flex; flex-direction: column; justify-content: space-between;">
+                <div>
+                  <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px;">
+                    <div style="display: flex; align-items: center; gap: 7px;">
+                      <span data-icon="Award" data-icon-size="16" style="color: #0284c7;"></span>
+                      <b style="font-size: 12px; color: var(--color-text-primary);">Surat Keterangan Bangkom 20 JP</b>
+                    </div>
+                    <span class="badge badge-success" style="font-size: 9px; padding: 1px 6px;">TTE BSrE BSSN</span>
+                  </div>
+                  <p style="font-size: 10.5px; color: var(--color-text-secondary); line-height: 1.35; margin: 0 0 10px 0;">
+                    SK resmi bertanda tangan Kepala Bappeda Provinsi Lampung sebagai bukti kepatuhan UU No. 20/2023 Pasal 49 untuk syarat kenaikan pangkat.
+                  </p>
+                </div>
+                <button class="btn btn-outline btn-sm" onclick="ExportService.printCertificateOfCompliance()" style="width: 100%; font-size: 11px; padding: 4px 8px; border-color: #0284c7; color: #0284c7; font-weight: 650;">
+                  <span data-icon="Printer" data-icon-size="13"></span> Cetak Surat Keterangan
+                </button>
+              </div>
+
+              <!-- 2. Lembar Rencana Aksi -->
+              <div style="padding: 12px 14px; border: 1px solid rgba(22, 163, 74, 0.25); background: rgba(22, 163, 74, 0.04); border-radius: 8px; display: flex; flex-direction: column; justify-content: space-between;">
+                <div>
+                  <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px;">
+                    <div style="display: flex; align-items: center; gap: 7px;">
+                      <span data-icon="FileCheck" data-icon-size="16" style="color: #16a34a;"></span>
+                      <b style="font-size: 12px; color: var(--color-text-primary);">Lembar Rencana Aksi Tindak Lanjut</b>
+                    </div>
+                    <span class="badge badge-success" style="font-size: 9px; padding: 1px 6px;">Transfer of Learning</span>
+                  </div>
+                  <p style="font-size: 10.5px; color: var(--color-text-secondary); line-height: 1.35; margin: 0 0 10px 0;">
+                    Dokumen KOP Pemprov Lampung memuat komitmen output nyata (SOP/Dashboard/Risiko) yang dihasilkan pegawai di kantor Bappeda.
+                  </p>
+                </div>
+                <button class="btn btn-outline btn-sm" onclick="ExportService.printActionPlanFollowUp()" style="width: 100%; font-size: 11px; padding: 4px 8px; border-color: #16a34a; color: #16a34a; font-weight: 650;">
+                  <span data-icon="Printer" data-icon-size="13"></span> Cetak Lembar Rencana Aksi
+                </button>
+              </div>
+
+              <!-- 3. Formulir IDP Kedinasan -->
+              <div style="padding: 12px 14px; border: 1px solid rgba(30, 58, 138, 0.25); background: rgba(30, 58, 138, 0.04); border-radius: 8px; display: flex; flex-direction: column; justify-content: space-between;">
+                <div>
+                  <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px;">
+                    <div style="display: flex; align-items: center; gap: 7px;">
+                      <span data-icon="FileText" data-icon-size="16" style="color: #1e3a8a;"></span>
+                      <b style="font-size: 12px; color: var(--color-text-primary);">Formulir IDP Kedinasan 2026</b>
+                    </div>
+                    <span class="badge badge-blue" style="font-size: 9px; padding: 1px 6px;">Standar LAN RI</span>
+                  </div>
+                  <p style="font-size: 10.5px; color: var(--color-text-secondary); line-height: 1.35; margin: 0 0 10px 0;">
+                    Formulir lengkap rencana pengembangan kompetensi individu tahun 2026 yang ditandatangani pegawai dan atasan penilai.
+                  </p>
+                </div>
+                <button class="btn btn-outline-primary btn-sm" onclick="ExportService.showPrintDialog()" style="width: 100%; font-size: 11px; padding: 4px 8px; font-weight: 650;">
+                  <span data-icon="Printer" data-icon-size="13"></span> Cetak Formulir IDP
+                </button>
+              </div>
+
+              <!-- 4. Ekspor SIASN BKN -->
+              <div style="padding: 12px 14px; border: 1px solid rgba(217, 119, 6, 0.25); background: rgba(217, 119, 6, 0.04); border-radius: 8px; display: flex; flex-direction: column; justify-content: space-between;">
+                <div>
+                  <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px;">
+                    <div style="display: flex; align-items: center; gap: 7px;">
+                      <span data-icon="Database" data-icon-size="16" style="color: #d97706;"></span>
+                      <b style="font-size: 12px; color: var(--color-text-primary);">Berkas Sinkronisasi SIASN BKN</b>
+                    </div>
+                    <span class="badge badge-warning" style="font-size: 9px; padding: 1px 6px;">Database Nasional</span>
+                  </div>
+                  <p style="font-size: 10.5px; color: var(--color-text-secondary); line-height: 1.35; margin: 0 0 10px 0;">
+                    Ekspor tabel Excel riwayat bangkom berformat resmi BKN untuk sinkronisasi portofolio kenaikan pangkat di aplikasi SIASN.
+                  </p>
+                </div>
+                <button class="btn btn-outline btn-sm" onclick="ExportService.exportSiasnBknRecap('xlsx')" style="width: 100%; font-size: 11px; padding: 4px 8px; border-color: #d97706; color: #b45309; font-weight: 650;">
+                  <span data-icon="Download" data-icon-size="13"></span> Unduh Template SIASN (.xlsx)
+                </button>
+              </div>
             </div>
           </div>
         </section>
@@ -4117,6 +4241,156 @@
           <span data-icon="Printer" data-icon-size="14"></span> Cetak PDF Rekapitulasi Eksekutif
         </button>
         <button type="button" class="btn btn-outline" onclick="App.closeModal('executiveFollowUpModal')">Tutup</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: PUSAT OUTPUT RESMI & PORTOFOLIO BANGKOM ASN SISTEM -->
+  <div class="modal-overlay" id="officialOutputHubModal" style="display: none;">
+    <div class="modal-dialog" style="max-width: 820px; width: 95%;">
+      <div class="modal-header">
+        <div>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <h3 style="margin: 0; font-size: 15px; font-weight: 750; color: var(--color-primary);">Pusat Output Resmi &amp; Portofolio Bangkom ASN</h3>
+            <span class="badge badge-success" style="font-size: 10px; font-weight: 700;">Dokumen Sah Bappeda</span>
+          </div>
+          <p style="font-size: 11.5px; color: var(--color-text-muted); margin-top: 3px;">
+            Daftar berkas hukum &amp; dokumen portofolio yang diterbitkan sistem untuk persyaratan kenaikan pangkat di SIASN BKN dan pertanggungjawaban kinerja.
+          </p>
+        </div>
+        <button class="btn-icon" onclick="App.closeModal('officialOutputHubModal')"><span data-icon="X" data-icon-size="18"></span></button>
+      </div>
+
+      <div class="modal-body" style="max-height: 72vh; overflow-y: auto; padding: 16px 20px;">
+        <!-- Profil ASN & Status Kepatuhan -->
+        <div style="padding: 12px 16px; background: rgba(30, 58, 138, 0.05); border: 1px solid rgba(30, 58, 138, 0.2); border-radius: 8px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+          <div>
+            <div style="font-size: 13px; font-weight: 750; color: var(--color-text-primary);" id="outputHubAsnName">ANDI ARAFAT S.T., M.E.</div>
+            <div style="font-size: 11px; color: var(--color-text-secondary); margin-top: 2px;" id="outputHubAsnNip">NIP. 19740707 200212 1 008 • Sekretaris Bappeda Provinsi Lampung</div>
+          </div>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <div style="text-align: right;">
+              <div style="font-size: 9.5px; font-weight: 600; color: var(--color-text-muted); text-transform: uppercase;">Total Hak Belajar</div>
+              <div style="font-size: 13.5px; font-weight: 750; color: var(--color-primary);" id="outputHubTotalJp">20 JP</div>
+            </div>
+            <span id="outputHubComplianceBadge" class="badge badge-success" style="font-size: 10px; font-weight: 700; padding: 4px 8px;">✓ Memenuhi UU No. 20/2023</span>
+          </div>
+        </div>
+
+        <!-- Daftar 5 Output Deliverables -->
+        <div style="display: flex; flex-direction: column; gap: 10px;">
+          <!-- 1. SK Kepatuhan 20 JP -->
+          <div style="padding: 12px 14px; border: 1px solid rgba(2, 132, 199, 0.25); background: rgba(2, 132, 199, 0.03); border-radius: 8px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;">
+            <div style="display: flex; align-items: center; gap: 10px; flex: 1; min-width: 260px;">
+              <div style="width: 36px; height: 36px; border-radius: 8px; background: rgba(2, 132, 199, 0.12); color: #0284c7; display: grid; place-items: center; flex-shrink: 0;">
+                <span data-icon="Award" data-icon-size="18"></span>
+              </div>
+              <div>
+                <div style="display: flex; align-items: center; gap: 6px;">
+                  <b style="font-size: 12.5px; color: var(--color-text-primary);">Surat Keterangan Kepatuhan Bangkom 20 JP</b>
+                  <span class="badge badge-success" style="font-size: 9px; padding: 1px 6px;">TTE BSrE BSSN</span>
+                </div>
+                <div style="font-size: 11px; color: var(--color-text-secondary); margin-top: 2px;">
+                  SK resmi bertanda tangan Kepala Bappeda (Dr. ANANG RISGIYANTO, S.K.M., M.Kes.) sebagai bukti pemenuhan UU No. 20/2023 untuk kenaikan pangkat.
+                </div>
+              </div>
+            </div>
+            <button class="btn btn-outline btn-sm" onclick="ExportService.printCertificateOfCompliance()" style="border-color: #0284c7; color: #0284c7; font-weight: 650; font-size: 11px; padding: 5px 12px;">
+              <span data-icon="Printer" data-icon-size="13"></span> Cetak Surat Keterangan
+            </button>
+          </div>
+
+          <!-- 2. Lembar Rencana Aksi Tindak Lanjut -->
+          <div style="padding: 12px 14px; border: 1px solid rgba(22, 163, 74, 0.25); background: rgba(22, 163, 74, 0.03); border-radius: 8px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;">
+            <div style="display: flex; align-items: center; gap: 10px; flex: 1; min-width: 260px;">
+              <div style="width: 36px; height: 36px; border-radius: 8px; background: rgba(22, 163, 74, 0.12); color: #16a34a; display: grid; place-items: center; flex-shrink: 0;">
+                <span data-icon="FileCheck" data-icon-size="18"></span>
+              </div>
+              <div>
+                <div style="display: flex; align-items: center; gap: 6px;">
+                  <b style="font-size: 12.5px; color: var(--color-text-primary);">Lembar Rencana Aksi Tindak Lanjut (Action Plan)</b>
+                  <span class="badge badge-success" style="font-size: 9px; padding: 1px 6px;">Transfer of Learning</span>
+                </div>
+                <div style="font-size: 11px; color: var(--color-text-secondary); margin-top: 2px;">
+                  Matriks resmi KOP Pemprov Lampung memuat komitmen wujud output/produk nyata (SOP/Dashboard/Risiko) yang diterapkan di Bappeda.
+                </div>
+              </div>
+            </div>
+            <button class="btn btn-outline btn-sm" onclick="ExportService.printActionPlanFollowUp()" style="border-color: #16a34a; color: #16a34a; font-weight: 650; font-size: 11px; padding: 5px 12px;">
+              <span data-icon="Printer" data-icon-size="13"></span> Cetak Lembar Rencana Aksi
+            </button>
+          </div>
+
+          <!-- 3. Formulir IDP Kedinasan 2026 -->
+          <div style="padding: 12px 14px; border: 1px solid rgba(30, 58, 138, 0.25); background: rgba(30, 58, 138, 0.03); border-radius: 8px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;">
+            <div style="display: flex; align-items: center; gap: 10px; flex: 1; min-width: 260px;">
+              <div style="width: 36px; height: 36px; border-radius: 8px; background: rgba(30, 58, 138, 0.12); color: #1e3a8a; display: grid; place-items: center; flex-shrink: 0;">
+                <span data-icon="FileText" data-icon-size="18"></span>
+              </div>
+              <div>
+                <div style="display: flex; align-items: center; gap: 6px;">
+                  <b style="font-size: 12.5px; color: var(--color-text-primary);">Formulir Rencana Pengembangan Individu (IDP) 2026</b>
+                  <span class="badge badge-blue" style="font-size: 9px; padding: 1px 6px;">Standar LAN RI</span>
+                </div>
+                <div style="font-size: 11px; color: var(--color-text-secondary); margin-top: 2px;">
+                  Dokumen formulir IDP komprehensif memuat 9-Box Grid, pemetaan kompetensi, program diklat prioritas, dan lembar pengesahan atasan.
+                </div>
+              </div>
+            </div>
+            <button class="btn btn-outline-primary btn-sm" onclick="ExportService.showPrintDialog()" style="font-weight: 650; font-size: 11px; padding: 5px 12px;">
+              <span data-icon="Printer" data-icon-size="13"></span> Cetak Formulir IDP
+            </button>
+          </div>
+
+          <!-- 4. Resi Tanda Terima Pendaftaran -->
+          <div style="padding: 12px 14px; border: 1px solid rgba(100, 116, 139, 0.25); background: rgba(100, 116, 139, 0.03); border-radius: 8px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;">
+            <div style="display: flex; align-items: center; gap: 10px; flex: 1; min-width: 260px;">
+              <div style="width: 36px; height: 36px; border-radius: 8px; background: rgba(100, 116, 139, 0.12); color: #475569; display: grid; place-items: center; flex-shrink: 0;">
+                <span data-icon="ShieldCheck" data-icon-size="18"></span>
+              </div>
+              <div>
+                <div style="display: flex; align-items: center; gap: 6px;">
+                  <b style="font-size: 12.5px; color: var(--color-text-primary);">Resi Tanda Terima Pendaftaran Elektronik</b>
+                  <span class="badge badge-neutral" style="font-size: 9px; padding: 1px 6px;">Resi Sah</span>
+                </div>
+                <div style="font-size: 11px; color: var(--color-text-secondary); margin-top: 2px;">
+                  Bukti sah pendaftaran elektronik bersertifikasi digital dengan stempel resmi dan nomor registrasi arsip kepegawaian.
+                </div>
+              </div>
+            </div>
+            <button class="btn btn-outline btn-sm" onclick="App.openIdpFilingReceiptModal()" style="font-weight: 650; font-size: 11px; padding: 5px 12px;">
+              <span data-icon="FileCheck" data-icon-size="13"></span> Buka Resi Elektronik
+            </button>
+          </div>
+
+          <!-- 5. Berkas Sinkronisasi SIASN BKN -->
+          <div style="padding: 12px 14px; border: 1px solid rgba(217, 119, 6, 0.25); background: rgba(217, 119, 6, 0.03); border-radius: 8px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;">
+            <div style="display: flex; align-items: center; gap: 10px; flex: 1; min-width: 260px;">
+              <div style="width: 36px; height: 36px; border-radius: 8px; background: rgba(217, 119, 6, 0.12); color: #d97706; display: grid; place-items: center; flex-shrink: 0;">
+                <span data-icon="Database" data-icon-size="18"></span>
+              </div>
+              <div>
+                <div style="display: flex; align-items: center; gap: 6px;">
+                  <b style="font-size: 12.5px; color: var(--color-text-primary);">Berkas Riwayat Bangkom SIASN BKN (.XLSX)</b>
+                  <span class="badge badge-warning" style="font-size: 9px; padding: 1px 6px;">Format BKN Pusat</span>
+                </div>
+                <div style="font-size: 11px; color: var(--color-text-secondary); margin-top: 2px;">
+                  Tabel Excel standar modul riwayat pengembangan kompetensi SIASN BKN untuk sinkronisasi portofolio kenaikan pangkat.
+                </div>
+              </div>
+            </div>
+            <button class="btn btn-outline btn-sm" onclick="ExportService.exportSiasnBknRecap('xlsx')" style="border-color: #d97706; color: #b45309; font-weight: 650; font-size: 11px; padding: 5px 12px;">
+              <span data-icon="Download" data-icon-size="13"></span> Unduh Template SIASN (.xlsx)
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer" style="display: flex; justify-content: space-between; align-items: center; padding: 12px 20px;">
+        <div style="font-size: 11px; color: var(--color-text-muted); display: flex; align-items: center; gap: 5px;">
+          <span data-icon="Info" data-icon-size="13"></span> Dokumen sah menggunakan format baku Pemprov Lampung, LAN RI, dan BKN RI.
+        </div>
+        <button type="button" class="btn btn-primary btn-sm" onclick="App.closeModal('officialOutputHubModal')" style="padding: 5px 14px; font-size: 11.5px;">Tutup</button>
       </div>
     </div>
   </div>
@@ -6809,9 +7083,9 @@
   <script src="js/icons.js?v=20261119_mobaction_v28"></script>
   <script src="js/charts.js?v=20261008_fix"></script>
   <script src="js/bappeda_data.js?v=20261029_v56"></script>
-  <script src="js/store.js?v=20261119_typo_v31"></script>
-  <script src="js/export.js?v=20261119_typo_v31"></script>
-  <script src="js/app.js?v=20261119_typo_v31"></script>
+  <script src="js/store.js?v=20261120_outputhub_v32"></script>
+  <script src="js/export.js?v=20261120_outputhub_v32"></script>
+  <script src="js/app.js?v=20261120_outputhub_v32"></script>
 </body>
 
 </html>

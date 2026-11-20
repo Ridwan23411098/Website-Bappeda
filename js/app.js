@@ -2303,6 +2303,39 @@ const App = {
     this.openModal('executiveFollowUpModal');
   },
 
+  openOfficialOutputHubModal() {
+    const summary = (typeof Store !== 'undefined' && Store.getIdpSummary)
+      ? Store.getIdpSummary()
+      : { totalJp: 20, totalProgram: 4, totalCost: 0 };
+    const user = (typeof Store !== 'undefined' && Store.state && Store.state.user)
+      ? Store.state.user
+      : { name: 'ANDI ARAFAT S.T., M.E.', nip: '19740707 200212 1 008', jabatan: 'Sekretaris Bappeda Provinsi Lampung' };
+
+    const elName = document.getElementById('outputHubAsnName');
+    const elNip = document.getElementById('outputHubAsnNip');
+    const elJp = document.getElementById('outputHubTotalJp');
+    const elBadge = document.getElementById('outputHubComplianceBadge');
+
+    if (elName) elName.textContent = user.name;
+    if (elNip) elNip.textContent = `NIP. ${user.nip} • ${user.jabatan || 'Sekretaris Bappeda Provinsi Lampung'}`;
+    if (elJp) elJp.textContent = `${summary.totalJp} JP`;
+    if (elBadge) {
+      if (summary.totalJp >= 20) {
+        elBadge.className = 'badge badge-success';
+        elBadge.innerHTML = '✓ Memenuhi Standar 20 JP (UU No. 20/2023)';
+      } else {
+        const kurang = 20 - summary.totalJp;
+        elBadge.className = 'badge badge-warning';
+        elBadge.innerHTML = `⚠️ Belum 20 JP (Kurang ${kurang} JP)`;
+      }
+    }
+
+    this.openModal('officialOutputHubModal');
+    if (typeof renderAllIcons === 'function') {
+      setTimeout(() => renderAllIcons(), 50);
+    }
+  },
+
   // =========================================================================
   // TAHAP 3: KALENDER TERPADU DIKLAT & PELATIHAN ASN (BPSDMD & BAPPENAS)
   // =========================================================================
