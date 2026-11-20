@@ -44,12 +44,76 @@ const DEFAULT_PROGRAMS = [
   }
 ];
 
+const DEFAULT_ACTION_PLANS = [
+  {
+    id: 1,
+    program: 'Pelatihan Analisis Data Perencanaan dengan Python & PowerBI',
+    rencanaAksi: 'Membangun Dashboard Real-time Monitoring IKU Bappeda Provinsi Lampung TA 2026',
+    outputKonkret: 'Aplikasi Dashboard PowerBI',
+    targetWaktu: 'April 2026',
+    status: 'Selesai'
+  },
+  {
+    id: 2,
+    program: 'Penyusunan Kajian Naskah Akademik Dokumen RKPD & RPJMD',
+    rencanaAksi: 'Menyusun Bab IV Analisis Proyeksi Pendapatan & Belanja Daerah RKPD 2027',
+    outputKonkret: 'Draft Bab IV RKPD',
+    targetWaktu: 'Juli 2026',
+    status: 'Sedang Berjalan'
+  }
+];
+
 export default function IdpScreen({ user }) {
   const [programs, setPrograms] = useState(DEFAULT_PROGRAMS);
+  const [actionPlans, setActionPlans] = useState(DEFAULT_ACTION_PLANS);
   const [submitting, setSubmitting] = useState(false);
   const [idpStatus, setIdpStatus] = useState('Diajukan ke Atasan');
 
   const totalJp = programs.reduce((acc, p) => acc + (p.jp || 0), 0);
+  const tuntasCount = actionPlans.filter(p => p.status === 'Selesai').length;
+  const berjalanCount = actionPlans.filter(p => p.status === 'Sedang Berjalan').length;
+
+  const handleEditProgram = (item) => {
+    Alert.alert('Edit Program', `Ubah usulan program: "${item.kompetensi}"`, [
+      { text: 'Tutup', style: 'cancel' }
+    ]);
+  };
+
+  const handleDeleteProgram = (id) => {
+    Alert.alert('Hapus Program', 'Apakah Anda yakin ingin menghapus program ini dari rencana IDP?', [
+      { text: 'Batal', style: 'cancel' },
+      {
+        text: 'Hapus',
+        style: 'destructive',
+        onPress: () => {
+          setPrograms(prev => prev.filter(p => p.id !== id));
+        }
+      }
+    ]);
+  };
+
+  const handleEditActionPlan = (item) => {
+    Alert.alert('Edit Rencana Aksi', `Ubah rencana aksi: "${item.rencanaAksi}"`, [
+      { text: 'Tutup', style: 'cancel' }
+    ]);
+  };
+
+  const handleDeleteActionPlan = (id) => {
+    Alert.alert('Hapus Rencana Aksi', 'Apakah Anda yakin ingin menghapus komitmen tindak lanjut ini?', [
+      { text: 'Batal', style: 'cancel' },
+      {
+        text: 'Hapus',
+        style: 'destructive',
+        onPress: () => {
+          setActionPlans(prev => prev.filter(p => p.id !== id));
+        }
+      }
+    ]);
+  };
+
+  const handleDownloadDoc = (docTitle) => {
+    Alert.alert('📄 Berkas Portofolio Resmi', `Menyiapkan unduhan ${docTitle} berformat PDF resmi terverifikasi.`);
+  };
 
   const handleSubmitIdp = async () => {
     setSubmitting(true);
@@ -117,13 +181,16 @@ export default function IdpScreen({ user }) {
           Dokumen Rencana Pengembangan Kompetensi Individu Pegawai Bappeda Lampung
         </Text>
         <View style={styles.summaryBar}>
-          <Text style={styles.summaryItem}>📌 <b>{programs.length}</b> Program Terdaftar</Text>
-          <Text style={styles.summaryItem}>⏱️ <b>{totalJp}</b> Total JP</Text>
+          <Text style={styles.summaryItem}>📌 <Text style={{ fontWeight: '700' }}>{programs.length}</Text> Program Terdaftar</Text>
+          <Text style={styles.summaryItem}>⏱️ <Text style={{ fontWeight: '700' }}>{totalJp}</Text> Total JP</Text>
         </View>
       </View>
 
       {/* Program Items */}
-      <Text style={styles.listSectionTitle}>Daftar Usulan Kegiatan Diklat</Text>
+      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+        <Text style={styles.listSectionTitle}>Daftar Usulan Kegiatan Diklat</Text>
+        <Text style={{ fontSize: 11, color: '#64748b' }}>{programs.length} Kegiatan</Text>
+      </View>
 
       {programs.map((item, index) => (
         <View key={item.id} style={styles.programCard}>
@@ -146,8 +213,130 @@ export default function IdpScreen({ user }) {
             <Text style={styles.programPenyelenggara}>🏛️ {item.penyelenggara}</Text>
             <Text style={styles.programPeriode}>📅 {item.periode}</Text>
           </View>
+
+          {/* Action Row */}
+          <View style={styles.cardActions}>
+            <TouchableOpacity
+              style={styles.btnActionEdit}
+              onPress={() => handleEditProgram(item)}
+              activeOpacity={0.75}
+            >
+              <Text style={styles.btnActionEditText}>✏️ Edit</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.btnActionDelete}
+              onPress={() => handleDeleteProgram(item.id)}
+              activeOpacity={0.75}
+            >
+              <Text style={styles.btnActionDeleteText}>🗑️ Hapus</Text>
+            </TouchableOpacity>
+          </View>
         </View>
       ))}
+
+      {/* Tindak Lanjut & Rencana Aksi (Action Plan) */}
+      <View style={{ marginTop: 14, marginBottom: 8 }}>
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+          <Text style={styles.listSectionTitle}>Tindak Lanjut & Rencana Aksi</Text>
+          <View style={styles.outputTag}>
+            <Text style={styles.outputTagText}>Hasil Nyata ASN</Text>
+          </View>
+        </View>
+        <Text style={{ fontSize: 11, color: '#64748b', marginTop: 2, marginBottom: 10 }}>
+          Bukti hasil konkret & transfer of learning yang dihasilkan di unit kerja Bappeda
+        </Text>
+
+        {/* Action Plan Stats */}
+        <View style={styles.actionStatsRow}>
+          <View style={[styles.statBox, { backgroundColor: '#f0fdf4', borderColor: '#bbf7d0' }]}>
+            <Text style={{ fontSize: 9.5, fontWeight: '750', color: '#15803d' }}>TUNTAS</Text>
+            <Text style={{ fontSize: 13.5, fontWeight: '800', color: '#166534', marginVertical: 1 }}>{tuntasCount} Hasil</Text>
+            <Text style={{ fontSize: 9, color: '#15803d' }}>Selesai diterapkan</Text>
+          </View>
+          <View style={[styles.statBox, { backgroundColor: '#fffbeb', borderColor: '#fde68a' }]}>
+            <Text style={{ fontSize: 9.5, fontWeight: '750', color: '#b45309' }}>BERJALAN</Text>
+            <Text style={{ fontSize: 13.5, fontWeight: '800', color: '#92400e', marginVertical: 1 }}>{berjalanCount} Proses</Text>
+            <Text style={{ fontSize: 9, color: '#b45309' }}>Penyusunan produk</Text>
+          </View>
+          <View style={[styles.statBox, { backgroundColor: '#f8fafc', borderColor: '#e2e8f0' }]}>
+            <Text style={{ fontSize: 9.5, fontWeight: '750', color: '#475569' }}>TOTAL AKSI</Text>
+            <Text style={{ fontSize: 13.5, fontWeight: '800', color: '#1e293b', marginVertical: 1 }}>{actionPlans.length} Rencana</Text>
+            <Text style={{ fontSize: 9, color: '#64748b' }}>Komitmen ASN</Text>
+          </View>
+        </View>
+
+        {/* Action Plan Cards */}
+        {actionPlans.map((ap, idx) => (
+          <View key={ap.id} style={styles.actionPlanCard}>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+              <View style={{ flex: 1, paddingRight: 6 }}>
+                <Text style={{ fontSize: 10.5, color: '#64748b', fontWeight: '600' }}>#{idx + 1} • {ap.program}</Text>
+                <Text style={{ fontSize: 12, fontWeight: '750', color: '#0f172a', marginTop: 2 }}>{ap.rencanaAksi}</Text>
+              </View>
+              <View style={[styles.statusBadge, ap.status === 'Selesai' ? styles.badgeSuccess : styles.badgeWarning]}>
+                <Text style={[styles.statusBadgeText, ap.status === 'Selesai' ? styles.badgeSuccessText : styles.badgeWarningText]}>
+                  {ap.status}
+                </Text>
+              </View>
+            </View>
+
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 8, paddingTop: 6, borderTopWidth: 1, borderTopColor: '#f1f5f9' }}>
+              <View>
+                <Text style={{ fontSize: 9.5, color: '#64748b' }}>Wujud Hasil / Produk:</Text>
+                <Text style={{ fontSize: 11, fontWeight: '700', color: '#1e3a8a' }}>{ap.outputKonkret}</Text>
+              </View>
+              <View style={{ alignItems: 'flex-end' }}>
+                <Text style={{ fontSize: 9.5, color: '#64748b' }}>Target:</Text>
+                <Text style={{ fontSize: 11, fontWeight: '600', color: '#334155' }}>{ap.targetWaktu}</Text>
+              </View>
+            </View>
+
+            {/* Action Buttons */}
+            <View style={[styles.cardActions, { marginTop: 8 }]}>
+              <TouchableOpacity
+                style={styles.btnActionEdit}
+                onPress={() => handleEditActionPlan(ap)}
+                activeOpacity={0.75}
+              >
+                <Text style={styles.btnActionEditText}>✏️ Edit</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.btnActionDelete}
+                onPress={() => handleDeleteActionPlan(ap.id)}
+                activeOpacity={0.75}
+              >
+                <Text style={styles.btnActionDeleteText}>🗑️ Hapus</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        ))}
+      </View>
+
+      {/* Paket Dokumen Output Akhir */}
+      <View style={styles.docHubCard}>
+        <Text style={{ fontSize: 13, fontWeight: '800', color: '#0b2545' }}>Paket Berkas Portofolio Resmi ASN</Text>
+        <Text style={{ fontSize: 10.5, color: '#64748b', marginTop: 2, marginBottom: 10 }}>
+          Dokumen resmi yang diterbitkan sistem untuk kenaikan pangkat SIASN BKN & BPSDMD
+        </Text>
+        <View style={{ gap: 6 }}>
+          {[
+            'Surat Keterangan Pemenuhan 20 JP',
+            'Lembar Komitmen Rencana Aksi (Action Plan)',
+            'Formulir Rekap Usulan IDP Tahunan',
+            'Paket Portofolio Kenaikan Pangkat SIASN'
+          ].map((docName, i) => (
+            <TouchableOpacity
+              key={i}
+              style={styles.docRowBtn}
+              onPress={() => handleDownloadDoc(docName)}
+              activeOpacity={0.7}
+            >
+              <Text style={{ fontSize: 11, fontWeight: '600', color: '#1e293b', flex: 1 }}>📑 {docName}</Text>
+              <Text style={{ fontSize: 10.5, fontWeight: '700', color: '#1e3a8a' }}>Unduh ➔</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+      </View>
 
       {/* Submit Button */}
       <TouchableOpacity
@@ -161,7 +350,7 @@ export default function IdpScreen({ user }) {
         ) : (
           <>
             <Text style={styles.submitBtnText}>Ajukan IDP ke Verifikator SDM</Text>
-            <Text style={styles.submitBtnSub}>Siarkan langsung secara Real-Time ke Portal Web</Text>
+            <Text style={styles.submitBtnSub}>Siarkan langsung secara Real-Time ke Portal Web & Pimpinan</Text>
           </>
         )}
       </TouchableOpacity>
@@ -330,6 +519,122 @@ const styles = StyleSheet.create({
     color: '#93c5fd',
     fontSize: 10.5,
     marginTop: 2
+  },
+  cardActions: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    gap: 8,
+    marginTop: 10,
+    paddingTop: 8,
+    borderTopWidth: 1,
+    borderTopColor: '#f1f5f9'
+  },
+  btnActionEdit: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 6,
+    backgroundColor: '#ffffff',
+    borderWidth: 1,
+    borderColor: '#cbd5e1'
+  },
+  btnActionEditText: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#1e3a8a'
+  },
+  btnActionDelete: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 6,
+    backgroundColor: '#fef2f2',
+    borderWidth: 1,
+    borderColor: '#fca5a5'
+  },
+  btnActionDeleteText: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#dc2626'
+  },
+  outputTag: {
+    backgroundColor: '#ecfdf5',
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#a7f3d0'
+  },
+  outputTagText: {
+    fontSize: 10,
+    fontWeight: '750',
+    color: '#059669'
+  },
+  actionStatsRow: {
+    flexDirection: 'row',
+    gap: 8,
+    marginBottom: 12
+  },
+  statBox: {
+    flex: 1,
+    padding: 10,
+    borderRadius: 10,
+    borderWidth: 1,
+    alignItems: 'center'
+  },
+  actionPlanCard: {
+    backgroundColor: '#ffffff',
+    borderRadius: 12,
+    padding: 12,
+    marginBottom: 10,
+    borderWidth: 1,
+    borderColor: '#e2e8f0'
+  },
+  statusBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 8,
+    borderWidth: 1
+  },
+  badgeSuccess: {
+    backgroundColor: '#f0fdf4',
+    borderColor: '#86efac'
+  },
+  badgeSuccessText: {
+    fontSize: 10,
+    fontWeight: '800',
+    color: '#16a34a'
+  },
+  badgeWarning: {
+    backgroundColor: '#fffbeb',
+    borderColor: '#fde68a'
+  },
+  badgeWarningText: {
+    fontSize: 10,
+    fontWeight: '800',
+    color: '#d97706'
+  },
+  docHubCard: {
+    backgroundColor: '#ffffff',
+    borderRadius: 14,
+    padding: 14,
+    marginTop: 10,
+    marginBottom: 14,
+    borderWidth: 1,
+    borderColor: '#e2e8f0'
+  },
+  docRowBtn: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: '#f8fafc',
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#e2e8f0'
   }
 });
 
