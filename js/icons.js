@@ -73,7 +73,7 @@ const LUCIDE_ICONS = {
 function getIcon(name, size = 18, className = '') {
   const rawSvg = LUCIDE_ICONS[name] || LUCIDE_ICONS.HelpCircle;
   return rawSvg
-    .replace('width="24"', `width="${size}"`)
+    .replace('width="24"', `width="${size}" style="width:${size}px;min-width:${size}px;height:${size}px;min-height:${size}px;display:inline-block;vertical-align:middle;flex-shrink:0;"`)
     .replace('height="24"', `height="${size}"`)
     .replace('<svg', `<svg class="${className}"`);
 }

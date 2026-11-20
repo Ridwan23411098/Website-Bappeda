@@ -2018,8 +2018,12 @@ const App = {
                 ` : `
                   <span class="badge badge-success" style="font-size: 11px;">✓ Terlaksana</span>
                 `}
-                <button class="btn btn-outline btn-sm" title="Edit" onclick="App.openEditProgramModal(${p.id})">${getIcon('Edit3', 14)}</button>
-                <button class="btn btn-danger btn-sm" title="Hapus" onclick="App.confirmDeleteProgram(${p.id})">${getIcon('Trash2', 14)}</button>
+                <button type="button" class="btn-action-edit" title="Edit Rencana Program" onclick="App.openEditProgramModal(${p.id})">
+                  ${getIcon('Edit3', 12)} Edit
+                </button>
+                <button type="button" class="btn-action-delete" title="Hapus Program" onclick="App.confirmDeleteProgram(${p.id})">
+                  ${getIcon('Trash2', 12)} Hapus
+                </button>
               </div>
             </td>
           </tr>
@@ -2153,12 +2157,12 @@ const App = {
           <td style="font-size: 11px; max-width: 150px; white-space: normal; color: var(--color-text-secondary); line-height: 1.3;">${p.unitKerja || 'Bappeda'}</td>
           <td style="text-align: center;"><span class="badge ${badgeCls}" style="font-size: 10px; padding: 2px 7px;">${p.status}</span></td>
           <td style="text-align: center; white-space: nowrap;">
-            <div style="display: flex; gap: 4px; justify-content: center;">
-              <button type="button" class="btn btn-outline btn-sm" style="padding: 3px 6px; font-size: 10.5px;" title="Edit Rencana Aksi" onclick="App.openAddActionPlanModal(${p.id})">
-                ${getIcon('Edit3', 12)}
+            <div style="display: flex; gap: 5px; justify-content: center; align-items: center;">
+              <button type="button" class="btn-action-edit" title="Edit Rencana Aksi" onclick="App.openAddActionPlanModal(${p.id})">
+                ${getIcon('Edit3', 12)} Edit
               </button>
-              <button type="button" class="btn btn-danger btn-sm" style="padding: 3px 6px; font-size: 10.5px;" title="Hapus" onclick="App.deleteActionPlanItem(${p.id})">
-                ${getIcon('Trash2', 12)}
+              <button type="button" class="btn-action-delete" title="Hapus Rencana Aksi" onclick="App.deleteActionPlanItem(${p.id})">
+                ${getIcon('Trash2', 12)} Hapus
               </button>
             </div>
           </td>
@@ -6108,8 +6112,8 @@ const App = {
           <td class="text-secondary">${x.deskripsi}</td>
           <td>
             <div style="display: flex; gap: 6px;">
-              <button class="btn btn-outline btn-sm" onclick="App.toast('Edit data ${x.name}', 'info')">${getIcon('Edit3', 14)}</button>
-              <button class="btn btn-danger btn-sm" onclick="App.confirmDeleteMasterItem('metode', ${x.id})">${getIcon('Trash2', 14)}</button>
+              <button type="button" class="btn-action-edit" onclick="App.toast('Edit data ${x.name}', 'info')">${getIcon('Edit3', 12)} Edit</button>
+              <button type="button" class="btn-action-delete" onclick="App.confirmDeleteMasterItem('metode', ${x.id})">${getIcon('Trash2', 12)} Hapus</button>
             </div>
           </td>
         </tr>
@@ -6123,7 +6127,7 @@ const App = {
           <td style="text-align: center;"><b>${x.kode}</b></td>
           <td class="font-semibold">${x.nama}</td>
           <td style="text-align: center;">
-            <button class="btn btn-outline btn-sm" onclick="App.toast('Edit rumpun ${x.nama}', 'info')">${getIcon('Edit3', 14)}</button>
+            <button type="button" class="btn-action-edit" onclick="App.toast('Edit rumpun ${x.nama}', 'info')">${getIcon('Edit3', 12)} Edit</button>
           </td>
         </tr>
       `).join('');
